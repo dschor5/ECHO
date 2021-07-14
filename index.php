@@ -41,7 +41,7 @@ class Main
         $this->readCookie();
         $this->checkLogin();
 
-        if($this->user != null)
+        if($this->user != null) 
         {
             if($this->user->isAdmin())
             {
