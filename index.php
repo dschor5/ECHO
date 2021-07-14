@@ -40,7 +40,6 @@ class Main
         // Read cookie and check if the user is logged in.
         $this->readCookie();
         $this->checkLogin();
-        $this->checkLogin();
 
         if($this->user != null)
         {
@@ -63,16 +62,13 @@ class Main
         {
             $module_name = $_GET['action'];
         }
-        var_dump($this->user);
-        var_dump($valid_modules);
-        echo ($module_name);
-
+        
         require_once($config['modules_dir'].'/'.$module_name.'.php');
         $module_class_name = $module_name.'Module';
         $module = new $module_class_name($this, $this->user);
 
         $replace = array(
-            '/%title%/' => $this->user->getUsername(),
+            '/%title%/' => $module->getPageTitle(),
             '/%content%/' => $module->compile(),
             '/%css_file%/' =>$module->getCss(),
             '/%js_file%/' =>$module->getJavascript(),

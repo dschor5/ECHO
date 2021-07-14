@@ -30,7 +30,7 @@ class Delay
 
     public function getDelayString(): string
     {
-        return ''.$this
+        return ''.$this;
     }
 }
 
