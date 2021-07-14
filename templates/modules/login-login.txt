@@ -1,0 +1,15 @@
+<div id="loginform">
+    <div id="container">
+        <form action="http://%site_url%/login" method="post">
+            <div>MSG: %message%</div>
+
+            <label for "user">Username</label>
+            <input type="text" placeholder="Enter Username" name="user" required>
+
+            <label for "pass">Password</label>
+            <input type="password" placeholder="Enter Password" name="pass" required>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</div>

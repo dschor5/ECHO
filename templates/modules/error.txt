@@ -1,0 +1,5 @@
+<div id="content_wrap" style="height: 300px;">
+    <h1>ERROR</h1>
+    <p>The file you requested does not exist.<br/>
+    Contact the webmaster at <a href="mailto:webmaster@gajemusical.com?subject=URINETOWN">webmaster@gajemusical.com</a>.</p>
+</div>

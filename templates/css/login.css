@@ -1,0 +1,48 @@
+#loginform
+{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -120px;
+    margin-left: -150px;
+    width: 300px;
+    background: red;
+    border-radius: 20px;
+}
+
+#loginform #container
+{
+    padding: 20px;
+}
+
+#loginform #container label
+{
+    width: 100%;
+    padding: 0px;
+    display: inline-block;
+    margin: 0px;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+#loginform #container input
+{
+    width: 100%;
+    padding: 12px 20px;
+    display: inline-block;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+#loginform #container button
+{
+    background-color: #04AA6D;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}

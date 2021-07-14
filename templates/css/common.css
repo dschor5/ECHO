@@ -1,0 +1,32 @@
+body
+{
+    background: #FFFFFF;
+    color: #000000;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: 0px;
+    padding: 0px;
+}
+
+a
+{
+    text-decoration: none;
+    color: #000000;
+    background: #FFFFFF;
+}
+
+a:hover
+{
+    text-decoration: underline;
+    color: #000000;
+    background: #FFFFFF;
+}
+
+#canvas
+{
+    position: relative;
+    background: #FFFFFF;
+    color: #000000;
+    height: 100%;
+    text-align: left;
+}

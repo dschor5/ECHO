@@ -1,0 +1,203 @@
+#canvas #header
+{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 40px;
+    background: #FF0000;
+}
+
+#canvas #navigation
+{
+    position: fixed;
+    top: 40px;
+    bottom: 0px;
+    left: 0px;
+    width: 250px;
+    background: #00FF00;
+    overflow-y: auto;
+}
+
+#canvas #copyright
+{
+    position: fixed;
+    bottom: 10px;
+    height: 15px;
+    width: 250px;
+    background: #FFFF00;
+    padding: 5px 0px 5px 0px;
+    text-align: center;
+}
+
+#canvas #content
+{
+    position: fixed;
+    top: 40px;
+    left: 250px;
+    right: 0px;
+    bottom: 100px;
+    background: yellow;
+    padding: 10px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+#canvas #content #msgs
+{
+
+}
+
+#canvas #content #newmsg
+{
+    position: fixed;
+    bottom: 0px;
+    left: 250px;
+    right: 0px;
+    height: 100px;
+    background: blue;
+}
+
+#newmsg div
+{
+    height: 80px;
+    position: relative;
+    top: 10px;
+    left: 10px;
+    right: 100px;
+
+}
+
+#newmsg textarea
+{
+    width: 80%;
+    height: 100%;
+    resize: none;
+    border-radius: 10px;
+}
+
+/* Chat containers */
+.container {
+  border: 2px solid #dedede;
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px 0;
+  width: 90%;
+    float: left;
+}
+
+/* Darker chat container */
+.darker {
+  border-color: #ccc;
+  background-color: #ddd;
+  float: right;
+    resize: horizontal;
+}
+
+/* Clear floats */
+.container::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+#msgs::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+/* Style images */
+.container img {
+  float: left;
+  max-width: 60px;
+  width: 100%;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+/* Style the right image */
+.container img.right {
+  float: right;
+  margin-left: 20px;
+  margin-right:0;
+}
+
+/* Style time text */
+.time-right {
+  float: right;
+  color: #aaa;
+}
+
+/* Style time text */
+.time-left {
+  float: left;
+  color: #999;
+}
+
+#header div
+{
+    padding: 0px;
+    margin: 0px;
+
+}
+
+/* Style The Dropdown Button */
+.dropbtn {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+    height: 40px;
+  line-height: 40px;
+ padding: 0px 10px;
+}
+
+.dropbtn img {
+float: right;
+  max-width: 30px;
+  width: 100%;
+  border-radius: 50%;
+  margin-top: 5px;
+  margin-left: 15px;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+    right: 0px;
+  background-color: #f9f9f9;
+  min-width: 140px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+  background-color: #3e8e41;
+}

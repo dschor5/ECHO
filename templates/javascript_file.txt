@@ -1,0 +1,1 @@
+    <script type="text/javascript" src="http://%site_url%/%templates_dir%/javascript/%filename%.js"></script>

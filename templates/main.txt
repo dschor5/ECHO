@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <title>%title%</title>
+    <meta charset="UTF-8" />
+    <meta name="keywords" content="human spaceflight, analog mission, communication delay" />
+    <meta name="description" content="Emulator for Interplanetary Human Spaceflight" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="http://%site_url%/%templates_dir%/css/common.css?r=%random%" />
+    %css_file%
+    %js_file%
+</head>
+
+<body>
+%debug%
+<center>
+<div id="canvas">
+    %content%
+</div>
+</center>
+
+</body>
+</html>
