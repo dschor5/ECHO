@@ -1,6 +1,6 @@
 <div id="loginform">
     <div id="container">
-        <form action="http://%site_url%/login" method="post">
+        <form action="%http%%site_url%/login" method="post">
             <div>MSG: %message%</div>
 
             <label for "user">Username</label>
