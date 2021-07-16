@@ -1,61 +1,181 @@
-#canvas #header
+body
+{
+    background: #FFFFFF;
+    color: #000000;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: 0px;
+    padding: 0px;
+}
+
+a
+{
+    text-decoration: none;
+}
+
+a:hover
+{
+    text-decoration: underline;
+}
+
+#canvas
+{
+    position: relative;
+    background: #acacac;
+    color: #000000;
+    height: 100%;
+    text-align: left;
+}
+
+
+#header
 {
     position: fixed;
     top: 0px;
     left: 0px;
     width: 100%;
     height: 40px;
-    background: #FF0000;
+    background: #222222;
+    color: #DDDDDD;
 }
 
-#canvas #navigation
+#header-title
+{
+  position: fixed;
+  left: 10px;
+  font-size: 16px;
+  
+  height: 40px;
+  line-height: 40px;
+  padding: 0px 10px;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+#navigation
 {
     position: fixed;
     top: 40px;
     bottom: 0px;
     left: 0px;
     width: 250px;
-    background: #00FF00;
+    background: #26308b;
     overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
 }
 
-#canvas #copyright
+#room-container
+{
+  position: absolute;
+  top: 10px;
+  bottom: 230px;
+  width: 206px;
+  overflow-y: auto;
+  border-radius: 5px;
+  border: 2px solid #353f99;
+  padding: 10px;
+}
+
+#room-container a {
+  position: relative;
+  line-height: 30px;
+  list-style-type: none;
+  padding: 5xp;
+  margin: 5px;
+  width: 200px;
+  text-align: center;
+  background: yellow;
+  display: block;
+  border: 1px solid red;
+  border-radius: 5px;
+}
+
+#room-container a:hover {
+  background: green;
+}
+
+
+#room-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+#room-container::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background: #CCC; 
+}
+ 
+/* Handle */
+#room-container::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background: #888; 
+}
+
+/* Handle on hover */
+#room-container::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+#current-delay-container
+{
+  position: fixed;
+  width: 206px;
+  bottom: 50px;
+  border-radius: 5px;
+  border: 2px solid #353f99;
+  padding: 10px;
+}
+
+.sim-param-label
+{
+  color: #8e9be7;
+}
+
+.sim-param-value
+{
+  font-weight: bold;
+  color: #cecece;
+  text-align: right;
+  padding-bottom: 5px;
+}
+
+#copyright
 {
     position: fixed;
     bottom: 10px;
     height: 15px;
     width: 250px;
-    background: #FFFF00;
-    padding: 5px 0px 5px 0px;
+    color: #7a7bb9;
     text-align: center;
 }
 
-#canvas #content
+#copyright a
+{
+  color: #7a7bb9;
+}
+
+#content
 {
     position: fixed;
     top: 40px;
     left: 250px;
     right: 0px;
     bottom: 100px;
-    background: yellow;
+    background: #c7c7c7;
     padding: 10px;
     overflow-y: scroll;
     overflow-x: hidden;
 }
 
-#canvas #content #msgs
-{
-
-}
-
-#canvas #content #newmsg
+#newmsg
 {
     position: fixed;
     bottom: 0px;
     left: 250px;
     right: 0px;
     height: 100px;
-    background: blue;
+    background: #26308b;
 }
 
 #newmsg div
@@ -77,51 +197,52 @@
 }
 
 /* Chat containers */
-.container {
+#msg-container
+{
+
+}
+
+.msg {
   border: 2px solid #dedede;
   background-color: #f1f1f1;
   border-radius: 10px;
   padding: 10px;
   margin: 10px 0;
   width: 90%;
-    float: left;
+  float: left;
 }
 
 /* Darker chat container */
-.darker {
-  border-color: #ccc;
-  background-color: #ddd;
+.response {
+  border-color: rgb(55, 56, 128);
+  background-color: rgb(174, 179, 252);
   float: right;
-    resize: horizontal;
+  resize: horizontal;
+}
+
+.msg-from {
+
+}
+
+.msg-content {
+
+}
+
+.msg-time {
+
 }
 
 /* Clear floats */
-.container::after {
+.msg::after {
   content: "";
   clear: both;
   display: table;
 }
 
-#msgs::after {
+#msg-container::after {
   content: "";
   clear: both;
   display: table;
-}
-
-/* Style images */
-.container img {
-  float: left;
-  max-width: 60px;
-  width: 100%;
-  margin-right: 20px;
-  border-radius: 50%;
-}
-
-/* Style the right image */
-.container img.right {
-  float: right;
-  margin-left: 20px;
-  margin-right:0;
 }
 
 /* Style time text */

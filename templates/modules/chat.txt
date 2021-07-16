@@ -1,7 +1,42 @@
-    <div id="navigation">
-        NAVIGATION
-        <div id="delay">
-            %delay%
+<div id="navigation">
+        <div id="room-container">
+            Users
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+            <a href="#">Room #1</a>
+        </div>
+        <div id="current-delay-container">
+            <div id="distance-label" class="sim-param-label">Distance to %delay_dest%:</div>
+            <div id="distance-value" class="sim-param-value">%delay_distance%</div>
+
+            <div id="owlt-label" class="sim-param-label">One-way-light-time delay:</div>
+            <div id="owlt-value" class="sim-param-value">%delay_time%</div>
+
+            <div id="time-mcc-label" class="sim-param-label">Earth time:</div>
+            <div id="time-mcc-value" class="sim-param-value">%mcc_time%</div>
+
+            <div id="time-hab-label" class="sim-param-label">Habitat time:</div>
+            <div id="time-hab-value" class="sim-param-value">%hab_time%</div>
         </div>
     </div>
 
@@ -10,67 +45,32 @@
     </div>
 
     <div id="content">
-        %content%
-        %username%
-        <div id="msgs">
-            <div class="container">
-              <img src="http://%site_url%/%templates_dir%/images/dario.jpg" alt="Avatar">
-              <p>Hello. How are you today?</p>
-              <span class="time-right">11:00</span>
+        <div id="msg-container">
+            <div class="msg">
+              <div class="msg-from">User1</div>
+              <div class="msg-content">Hello. How are you?</div>
+              <div class="msg-time">Delivered</div>
             </div>
 
-            <div class="container darker">
-              <p>Hey! I'm fine. Thanks for asking!</p>
-              <span class="time-left">11:01</span>
+            <div class="msg response">
+                <div class="msg-from">User1</div>
+                <div class="msg-content">Hello. How are you?</div>
+                <div class="msg-time">Delivered</div>
             </div>
 
-            <div class="container">
-              <img src="http://%site_url%/%templates_dir%/images/dario.jpg" alt="Avatar">
-              <p>Sweet! So, what do you wanna do today?</p>
-              <span class="time-right">11:02</span>
+            <div class="msg">
+                <div class="msg-from">User1</div>
+                <div class="msg-content">Hello. How are you?</div>
+                <div class="msg-time">Delivered</div>
             </div>
 
-            <div class="container darker">
-              <p>Testing</p>
-
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ipsum nisl, condimentum sit amet leo nec, condimentum rutrum ipsum. Donec quis lacinia tellus. Integer dui eros, sollicitudin a lectus non, ultricies mattis lorem. Quisque efficitur ut purus eu dignissim. Vestibulum auctor molestie tincidunt. Nunc feugiat et lectus non commodo. Donec hendrerit efficitur ipsum, eget porta felis gravida eget. Ut in fermentum ipsum, quis viverra metus. Pellentesque elementum auctor neque et sollicitudin.</p>
-              <p>Praesent quis varius sem, ac varius ipsum. Phasellus mollis nunc et elit hendrerit, nec iaculis nunc venenatis. Integer dictum, nibh nec pulvinar volutpat, augue mauris porttitor urna, vel viverra ligula urna feugiat ipsum. Vestibulum elit diam, sollicitudin non mauris nec, cursus viverra mauris. Sed tempus blandit nulla eu aliquam. Mauris sed arcu purus. Fusce tempus eget massa a vehicula. Mauris laoreet consectetur ligula in rutrum. Maecenas quis risus in est volutpat tempor id ut lorem. Nullam faucibus dignissim turpis, lacinia convallis eros semper vitae.</p>
-              <p>Pellentesque tristique mattis nunc, sed aliquam tortor porttitor euismod. Nullam vel dui lectus. Vestibulum iaculis sapien pulvinar, vestibulum purus quis, aliquam velit. Donec non mi tristique, semper felis quis, scelerisque nibh. Aliquam sapien nisl, pulvinar non velit at, ultricies laoreet lectus. In est ex, consequat vel nisi sit amet, ornare placerat magna. Nunc tempus, dolor a maximus aliquet, turpis enim elementum tellus, sit amet dignissim odio ligula cursus nunc.</p>
-              <p>In mattis at enim ut mattis. Vivamus in pellentesque justo. Pellentesque sit amet orci ut justo condimentum gravida ut eu magna. Morbi pretium nunc lacus, id iaculis ante consectetur nec. Etiam auctor risus eu aliquam sodales. Donec ultrices sodales ipsum, quis vestibulum metus sollicitudin sit amet. Ut imperdiet orci quis est ultricies pharetra. Etiam tempor magna quis dui aliquet vestibulum. Phasellus vel lectus elementum purus gravida consequat sed quis lorem. Integer vehicula nibh mi, sit amet gravida lacus pulvinar sit amet. Vestibulum sollicitudin congue metus, ut cursus nisi dignissim a. Ut sit amet urna augue. Nam neque dolor, sollicitudin vitae dui eget, consectetur lacinia velit. In nisl justo, tristique sed pretium sed, volutpat ac augue.</p>
-              <p>Praesent ut neque sed purus rhoncus mattis a commodo lorem. Duis accumsan, dui sit amet rutrum blandit, massa diam varius augue, non molestie lacus tellus sit amet diam. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Mauris quis nibh non risus vestibulum interdum at placerat dolor. Donec iaculis mi leo, pulvinar porta lacus imperdiet vestibulum. Duis sit amet lorem viverra leo aliquet malesuada. Sed lorem orci, pellentesque sit amet velit a, lacinia malesuada tellus. Vestibulum suscipit bibendum lorem, nec tempor mi egestas sit amet. Nullam cursus varius lacus, ut varius odio tincidunt nec. Nunc in elit pharetra, pharetra metus non, gravida nunc. Etiam condimentum purus eros, venenatis dictum lorem posuere eget. Mauris id molestie nisi. Maecenas maximus nulla sed dui condimentum tempor. Nam cursus leo mollis lorem tincidunt dictum.</p>
-
-              <span class="time-left">11:05</span>
-            </div>
-            <div class="container">
-              <img src="http://%site_url%/%templates_dir%/images/dario.jpg" alt="Avatar">
-              <p>Sweet! So, what do you wanna do today?</p>
-              <span class="time-right">11:02</span>
+            <div class="msg response">
+                <div class="msg-from">User1</div>
+                <div class="msg-content">Hello. How are you?</div>
+                <div class="msg-time">11:00</div>
+                <div class="msg-status">Transmitting</div>
             </div>
 
-            <div class="container darker">
-              <p>Nah, I dunno. Play soccer.. or learn more coding perhaps?</p>
-              <span class="time-left">11:05</span>
-            </div>
-            <div class="container">
-              <img src="http://%site_url%/%templates_dir%/images/dario.jpg" alt="Avatar">
-              <p>Sweet! So, what do you wanna do today?</p>
-              <span class="time-right">11:02</span>
-            </div>
-
-            <div class="container darker">
-              <p>Nah, I dunno. Play soccer.. or learn more coding perhaps?</p>
-              <span class="time-left">11:05</span>
-            </div>
-            <div class="container">
-              <img src="http://%site_url%/%templates_dir%/images/dario.jpg" alt="Avatar">
-              <p>Sweet! So, what do you wanna do today?</p>
-              <span class="time-right">11:02</span>
-            </div>
-
-            <div class="container darker">
-              <p>Nah, I dunno. Play soccer.. or learn more coding perhaps?</p>
-              <span class="time-left">11:05</span>
-            </div>
         </div>
 
         <div id="newmsg">
@@ -83,12 +83,12 @@
     </div>
 
     <div id="header">
-        <div style="float: left;">
-            HEADER asdadas dsa dsad asd asdas da das
+        <div id="header-title">
+            %mission_name% Comms - %delay_src%
         </div>
         <div style="float: right; margin-right: 20px;">
             <div class="dropdown">
-              <button class="dropbtn">dschor <img src="http://%site_url%/%templates_dir%/images/dario.jpg" alt="Avatar"></button>
+              <button class="dropbtn">dschor </button>
               <div class="dropdown-content">
                 <a href="%http%%site_url%/settings">User Settings</a>
                 <a href="%http%%site_url%/logout">Logout</a>
