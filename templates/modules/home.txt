@@ -1,22 +1,44 @@
-<button onclick="document.getElementById('id01').style.display='block'">Login</button>
+<h1>Communication Delay Simulator for Analog Missions</h1>
 
-<div id="id01" class="modal">
-    <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+<div id="current-delay" style="background-image: url(%http%%site_url%/%templates_dir%/images/background-home.jpg)" >
+    <div id="current-delay-container">
+        <div id="distance-label" class="sim-param-label">distance between planets</div>
+        <div id="distance-value" class="sim-param-value">%delay_distance%</div>
+        <div id="owlt-label" class="sim-param-label">one-way-light-time</div>
+        <div id="owlt-value" class="sim-param-value">%delay_time%</div>
+    </div>
 
-    <form class="modal-content animate" action="%http%%site_url%/login" method="POST">
+    <p>asdajdha sdhg ajkdb akjdb akjdb akjdb askjdb akjdb akjsdb askjfb skjbs kvjbsd kjvbs kjsbd ckjasb fkajsbdf ksdjbf aksdjbv askjvb askdjvb askjbv akjdv asdkjvba kdjvb asdkvjb as</p>
+
+<button id="loginbutton" onclick="document.getElementById('loginform').style.display='block'">Login</button>
+
+</div>
+
+
+
+<p><a href="https://www.nasa.gov/image-feature/goddard/2021/summer-solstice-in-the-northern-hemisphere">Earth Image Credits: NASA/DSCOVR EPIC</a></p>
+<p><a href="https://mars.nasa.gov/resources/6453/valles-marineris-hemisphere-enhanced/">Mars Image Credits: NASA/JPL-Caltech</a></p>
+
+<div id="loginform" class="modal">
+
+
+    <span onclick="document.getElementById('loginform').style.display='none'" class="login_close" title="Close Modal">&times;</span>
+
+    <form class="modal-content animate" method="POST">
         <div class="container">
             <label for="uname"><b>Username</b></label>
-            <input type="text" placeholder="Enter Username" name="uname" required>
+            <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
 
-            <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="psw" required>
+            <label for="upass"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="upass" id="upass" required>
 
-            <button type="submit">Login</button>
-        
+            <input type="button" id="butlogin">Login</input>
+            <p id="response"></p>
         </div>
 
         <div class="container" style="background-color:#f1f1f1">
-            <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+            <button type="button" onclick="document.getElementById('loginform').style.display='none'" class="cancelbtn">Cancel</button>
         </div>
     </form>
 </div>
+

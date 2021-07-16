@@ -8,10 +8,10 @@
     <meta name="keywords" content="human spaceflight, analog mission, communication delay" />
     <meta name="description" content="Emulator for Interplanetary Human Spaceflight" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="http://%site_url%/%templates_dir%/css/common.css?r=%random%" />
-    %css_file%
-    %js_file%
-</head>
+    <script type="text/javascript">
+        var base_url = '%http%%site_url%';
+    </script>
+%css_file%%js_file%</head>
 
 <body>
 %debug%

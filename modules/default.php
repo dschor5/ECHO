@@ -34,8 +34,8 @@ abstract class DefaultModule
         $content = '';
         foreach($this->cssFiles as $file)
         {
-            $content .= Main::loadTemplate('css_file.txt', 
-                array('/%filename%/'=>$file));
+            $content .= "\t".Main::loadTemplate('css_file.txt', 
+                array('/%filename%/'=>$file))."\n";
         }
         return $content;
     }
@@ -50,8 +50,8 @@ abstract class DefaultModule
         $content = '';
         foreach($this->jsFiles as $file)
         {
-            $content .= Main::loadTemplate('javascript_file.txt', 
-                array('/%filename%/'=>$file));
+            $content .= "\t".Main::loadTemplate('javascript_file.txt', 
+                array('/%filename%/'=>$file))."\n";
         }
         return $content;
     }

@@ -9,7 +9,17 @@ class HomeModule extends DefaultModule
     {
         $content = '';
 
+        if(isset($_GET['subaction']) && $_GET['subaction'] == 'login')
+        {
+            $this->login();
+        }
+
         $this->addCss('login');
+        $this->addJavascript('jquery-3.6.0.min');
+        $this->addJavascript('login');
+        
+        
+
 
         $subaction = (isset($_GET['subaction'])) ? $_GET['subaction'] : 'home';
 
@@ -24,31 +34,31 @@ class HomeModule extends DefaultModule
 
     }
 
-    private function login() : string
+    private function login()
     {
         global $config;
         $message = '';
 
-        if(isset($_POST['user']) && isset($_POST['pass']))
+        if(isset($_POST['uname']) && isset($_POST['upass']))
         {
             $usersDao = UsersDao::getInstance();
-            $user = $usersDao->getByUsername($_POST['user']);
+            $user = $usersDao->getByUsername($_POST['uname']);
 
-            if($user != null && $user->isValidPassword($_POST['pass']))
+            if($user != null && $user->isValidPassword($_POST['upass']))
             {
                 $this->user = $user;
                 $sessionId = $user->createNewSession();
-                $this->main->setCookie(array('sessionId'=>$sessionId,'username'=>$_POST['user']));
-                header('Location: http://'.$config['site_url'].'/chat');
+                $this->main->setCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
+                //header('Location: http://'.$config['site_url'].'/chat');
+                header('HTTP/1.1 200 OK');
+                exit();
             }
             else
             {
-            
-                $message = 'ERROR';
+                header('HTTP/1.1 201 Created');
+                exit();
             }
         }
-
-        return $this->main->loadTemplate('modules/login-login.txt', array('/%message%/'=>$message));
     }
 
     private function logout() : string
