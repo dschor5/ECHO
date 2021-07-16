@@ -14,7 +14,7 @@ class ErrorModule extends DefaultModule
 
     public function compile()
      {
-         return $this->main->loadTemplate('modules/error.txt', array(),array());
+         return $this->main->loadTemplate('modules/error.txt', array());
      }
 }
 
