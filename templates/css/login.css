@@ -1,52 +1,132 @@
-#loginform
+body
 {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -120px;
-    margin-left: -150px;
-    width: 300px;
-    background: red;
-    border-radius: 20px;
-}
-
-#loginform #container
-{
-    padding: 20px;
-}
-
-#loginform #container label
-{
-    width: 100%;
-    padding: 0px;
-    display: inline-block;
+    background: #000000;
+    color: #FFFFFF;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
     margin: 0px;
-    display: inline-block;
-    box-sizing: border-box;
+    padding: 0px;
 }
 
-#loginform #container input
+a
 {
+    text-decoration: none;
+    color: #000000;
+    background: #FFFFFF;
+}
+
+a:hover
+{
+    text-decoration: underline;
+    color: #000000;
+    background: #FFFFFF;
+}
+
+#canvas
+{
+    position: relative;
+    background: #000000;
+    color: #FFFFFF;
+    height: 100%;
+    text-align: left;
+}
+
+#page-content
+{
+    margin: auto;
+    min-width: 400px;
+    max-width: 800px;
+    border: 1px solid black;
+}
+
+h1
+{
+    text-align: center;
+    margin: 50px 0px;
+}
+
+#current-delay
+{
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+    height: 400px;
+}
+
+#current-delay-container
+{
+    min-width: 400px;
+    max-width: 800px;
+    height: 400px;
+    margin: auto;
+    text-align: center;
+}
+
+#distance-label
+{
+    padding-top: 120px;
+}
+
+#owlt-label
+{
+    padding-top: 20px;
+}
+
+.sim-param-label
+{
+    color: #A6A6A6;
+}
+
+.sim-param-value
+{
+    color: #FFC000;
+    font-size: 30px;
+}
+
+/* Set a style for all buttons */
+#show-login-form {
+    background-color: #04AA6D;
+    color: white;
+    padding: 14px 20px;
+    margin: auto;
+    border: none;
+    cursor: pointer;
+    width: 200px;
+
+}
+
+/* Full-width input fields */
+input[type=text], input[type=password] {
     width: 100%;
     padding: 12px 20px;
-    display: inline-block;
     margin: 8px 0;
     display: inline-block;
     border: 1px solid #ccc;
     box-sizing: border-box;
-}
-
-#loginform #container button
-{
-    background-color: #04AA6D;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-}
-
+  }
+  
+  
+  
+  button:hover {
+    opacity: 0.8;
+  }
+  
+  /* Extra styles for the cancel button */
+  .cancelbtn {
+    width: auto;
+    padding: 10px 18px;
+    background-color: #f44336;
+  }
+  
+  .container {
+    padding: 16px;
+  }
+  
+  span.psw {
+    float: right;
+    padding-top: 16px;
+  }
+  
 /* The Modal (background) */
 .modal {
     display: none; /* Hidden by default */
@@ -60,19 +140,19 @@
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
     padding-top: 60px;
-  }
+}
   
-  /* Modal Content/Box */
-  .modal-content {
+/* Modal Content/Box */
+.modal-content {
     background-color: #fefefe;
-    margin: 5px auto; /* 15% from the top and centered */
+    margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-  }
+    min-width: 200px;
+    max-width: 400px;
+}
   
-  /* The Close Button */
-  .close {
-    /* Position it in the top right corner outside of the modal */
+  /* The Close Button (x) */
+  .login_close {
     position: absolute;
     right: 25px;
     top: 0;
@@ -81,25 +161,24 @@
     font-weight: bold;
   }
   
-  /* Close button on hover */
-  .close:hover,
-  .close:focus {
+  .login_close:hover,
+  .login_close:focus {
     color: red;
     cursor: pointer;
   }
   
   /* Add Zoom Animation */
-  .animate {
+  .animate_login {
     -webkit-animation: animatezoom 0.6s;
     animation: animatezoom 0.6s
   }
   
   @-webkit-keyframes animatezoom {
-    from {-webkit-transform: scale(0)}
+    from {-webkit-transform: scale(0)} 
     to {-webkit-transform: scale(1)}
   }
-  
+    
   @keyframes animatezoom {
-    from {transform: scale(0)}
+    from {transform: scale(0)} 
     to {transform: scale(1)}
   }
