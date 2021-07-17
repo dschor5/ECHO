@@ -36,6 +36,7 @@ class Main
     private function __construct()
     {
         global $config;
+        global $mission;
 
         // Read cookie and check if the user is logged in.
         $this->readCookie();
@@ -67,12 +68,17 @@ class Main
         $module_class_name = $module_name.'Module';
         $module = new $module_class_name($this, $this->user);
 
+        $commDelay = Delay::getInstance();
+
         $replace = array(
             '/%title%/' => $module->getPageTitle(),
             '/%content%/' => $module->compile(),
             '/%css_file%/' =>$module->getCss(),
             '/%js_file%/' =>$module->getJavascript(),
             '/%debug%/' =>'',
+            '/%delay_distance%/' => $commDelay->getDistanceStr(),
+            '/%delay_time%/' => $commDelay->getDelayStr(),
+            '/%mission_name%/' => $mission['name'],
             '/%year%/' => date('Y'),
             '/%random%/' => rand(1, 100000),
         );

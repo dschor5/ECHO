@@ -8,7 +8,11 @@ window.onclick = function(event) {
     }
 }
 
+
+
 $(document).ready(function() {
+    $('#loginform')
+
     $('#butlogin').on('click', function() {
 		var username = $('#uname').val();
 		var password = $('#upass').val();

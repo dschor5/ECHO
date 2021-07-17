@@ -65,71 +65,97 @@ a:hover
     padding: 10px;
 }
 
+.navigation-title
+{
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 5px 0px;
+  text-align: center;
+  line-height: 20px;
+  background:rgb(174, 179, 252);
+  font-weight: bold;
+  font-size: 14px;
+}
+
 #room-container
 {
   position: absolute;
   top: 10px;
-  bottom: 230px;
+  bottom: 250px;
   width: 206px;
-  overflow-y: auto;
-  border-radius: 5px;
+  border-radius: 10px;
   border: 2px solid #353f99;
-  padding: 10px;
+  overflow-y: hidden;
 }
 
-#room-container a {
+#rooms
+{
+    position: absolute;
+    width: 100%;
+    top: 30px;
+    bottom: 0px;
+    padding-bottom: 10px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#rooms a {
   position: relative;
-  line-height: 30px;
   list-style-type: none;
   padding: 5xp;
-  margin: 5px;
-  width: 200px;
+  margin-top: 10px;
+  width: 90%;
+  margin-left: 10px;
+  float: left;
   text-align: center;
   background: yellow;
+  padding-top: 5px;
+  padding-bottom: 5px;
   display: block;
   border: 1px solid red;
   border-radius: 5px;
 }
 
-#room-container a:hover {
+#rooms a:hover {
   background: green;
 }
 
 
-#room-container::-webkit-scrollbar {
+#rooms::-webkit-scrollbar {
   width: 10px;
 }
 
 /* Track */
-#room-container::-webkit-scrollbar-track {
+#rooms::-webkit-scrollbar-track {
   border-radius: 5px;
   background: #CCC; 
 }
  
 /* Handle */
-#room-container::-webkit-scrollbar-thumb {
+#rooms::-webkit-scrollbar-thumb {
   border-radius: 5px;
   background: #888; 
 }
 
 /* Handle on hover */
-#room-container::-webkit-scrollbar-thumb:hover {
+#rooms::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
 
 #current-delay-container
 {
-  position: fixed;
+  position: absolute;
   width: 206px;
   bottom: 50px;
-  border-radius: 5px;
+  border-radius: 10px;
   border: 2px solid #353f99;
-  padding: 10px;
 }
 
 .sim-param-label
 {
   color: #8e9be7;
+  padding-left: 10px;
+  padding-top: 5px;
 }
 
 .sim-param-value
@@ -138,6 +164,7 @@ a:hover
   color: #cecece;
   text-align: right;
   padding-bottom: 5px;
+  padding-right: 10px;
 }
 
 #copyright

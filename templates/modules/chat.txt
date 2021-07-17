@@ -1,31 +1,33 @@
 <div id="navigation">
-        <div id="room-container">
-            Users
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
-            <a href="#">Room #1</a>
+        <div id="room-container" class="navigation-container">
+            <div class="navigation-title">
+                Chat Rooms
+            </div>
+            <div id="rooms">
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1 with some long name</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1 with yet another long name</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">Room #1</a>
+                <a href="#">LAST ROOM</a>
+            </div>
         </div>
-        <div id="current-delay-container">
+        <div id="current-delay-container" class="navigation-container">
+            <div class="navigation-title">
+                Mission Parameters
+            </div>
+
             <div id="distance-label" class="sim-param-label">Distance to %delay_dest%:</div>
             <div id="distance-value" class="sim-param-value">%delay_distance%</div>
 
