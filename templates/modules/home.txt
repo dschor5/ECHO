@@ -1,23 +1,21 @@
-<h1>Communication Delay Simulator for Analog Missions</h1>
+<h1>Communication Delay Simulator</h1>
+<h2>Mission: %mission_name%</h2>
 
-<div id="current-delay" style="background-image: url(%http%%site_url%/%templates_dir%/images/background-home.jpg)" >
+<div id="current-delay">
     <div id="current-delay-container">
         <div id="distance-label" class="sim-param-label">distance between planets</div>
         <div id="distance-value" class="sim-param-value">%delay_distance%</div>
         <div id="owlt-label" class="sim-param-label">one-way-light-time</div>
         <div id="owlt-value" class="sim-param-value">%delay_time%</div>
+
+        <button type="button" id="current-delay-login" onclick="document.getElementById('loginform').style.display='block'">Login</button>
     </div>
-
-    <p>asdajdha sdhg ajkdb akjdb akjdb akjdb askjdb akjdb akjsdb askjfb skjbs kvjbsd kjvbs kjsbd ckjasb fkajsbdf ksdjbf aksdjbv askjvb askdjvb askjbv akjdv asdkjvba kdjvb asdkvjb as</p>
-
-<button id="loginbutton" onclick="document.getElementById('loginform').style.display='block'">Login</button>
-
 </div>
 
-
-
-<p><a href="https://www.nasa.gov/image-feature/goddard/2021/summer-solstice-in-the-northern-hemisphere">Earth Image Credits: NASA/DSCOVR EPIC</a></p>
-<p><a href="https://mars.nasa.gov/resources/6453/valles-marineris-hemisphere-enhanced/">Mars Image Credits: NASA/JPL-Caltech</a></p>
+<div id="credits">
+<p>Image credits: (a) <a href="https://www.nasa.gov/image-feature/goddard/2021/summer-solstice-in-the-northern-hemisphere">Earth Image courtesy of NASA/DSCOVR EPIC</a>, 
+(b) <a href="https://mars.nasa.gov/resources/6453/valles-marineris-hemisphere-enhanced/">Mars Image Credits courtesy of NASA/JPL-Caltech</a>.</p>
+</div>
 
 <div id="loginform" class="modal">
 

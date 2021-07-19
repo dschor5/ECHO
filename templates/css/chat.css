@@ -1,5 +1,4 @@
-body
-{
+body {
     background: #FFFFFF;
     color: #000000;
     font-family: Verdana, Arial, Helvetica, sans-serif;
@@ -8,18 +7,15 @@ body
     padding: 0px;
 }
 
-a
-{
+a {
     text-decoration: none;
 }
 
-a:hover
-{
+a:hover {
     text-decoration: underline;
 }
 
-#canvas
-{
+#canvas {
     position: relative;
     background: #acacac;
     color: #000000;
@@ -27,9 +23,7 @@ a:hover
     text-align: left;
 }
 
-
-#header
-{
+#header {
     position: fixed;
     top: 0px;
     left: 0px;
@@ -39,21 +33,18 @@ a:hover
     color: #DDDDDD;
 }
 
-#header-title
-{
-  position: fixed;
-  left: 10px;
-  font-size: 16px;
-  
-  height: 40px;
-  line-height: 40px;
-  padding: 0px 10px;
-  margin-left: 10px;
-  font-weight: bold;
+#header-title {
+    position: fixed;
+    left: 10px;
+    font-size: 16px;
+    height: 40px;
+    line-height: 40px;
+    padding: 0px 10px;
+    margin-left: 10px;
+    font-weight: bold;
 }
 
-#navigation
-{
+#navigation {
     position: fixed;
     top: 40px;
     bottom: 0px;
@@ -65,110 +56,107 @@ a:hover
     padding: 10px;
 }
 
-.navigation-title
-{
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  padding: 5px 0px;
-  text-align: center;
-  line-height: 20px;
-  background:rgb(174, 179, 252);
-  font-weight: bold;
-  font-size: 14px;
+.navigation-title {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 5px 0px;
+    text-align: center;
+    line-height: 20px;
+    background: rgb(174, 179, 252);
+    font-weight: bold;
+    font-size: 14px;
 }
 
-#room-container
-{
-  position: absolute;
-  top: 10px;
-  bottom: 250px;
-  width: 206px;
-  border-radius: 10px;
-  border: 2px solid #353f99;
-  overflow-y: hidden;
+#room-container {
+    position: absolute;
+    top: 10px;
+    bottom: 250px;
+    width: 228px;
+    border-radius: 10px;
+    border: 2px solid #353f99;
+    overflow-y: hidden;
 }
 
-#rooms
-{
+#rooms {
     position: absolute;
     width: 100%;
     top: 30px;
     bottom: 0px;
     padding-bottom: 10px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #rooms a {
-  position: relative;
-  list-style-type: none;
-  padding: 5xp;
-  margin-top: 10px;
-  width: 90%;
-  margin-left: 10px;
-  float: left;
-  text-align: center;
-  background: yellow;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  display: block;
-  border: 1px solid red;
-  border-radius: 5px;
+    position: relative;
+    list-style-type: none;
+    padding: 5xp;
+    margin-top: 10px;
+    width: 90%;
+    margin-left: 10px;
+    float: left;
+    text-align: center;
+    background: yellow;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    display: block;
+    border: 1px solid red;
+    border-radius: 5px;
 }
 
 #rooms a:hover {
-  background: green;
+    background: green;
 }
 
-
 #rooms::-webkit-scrollbar {
-  width: 10px;
+    width: 10px;
 }
 
 /* Track */
+
 #rooms::-webkit-scrollbar-track {
-  border-radius: 5px;
-  background: #CCC; 
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background: #CCC;
 }
- 
+
 /* Handle */
+
 #rooms::-webkit-scrollbar-thumb {
-  border-radius: 5px;
-  background: #888; 
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background: #888;
 }
 
 /* Handle on hover */
+
 #rooms::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+    background: #555;
 }
 
-#current-delay-container
-{
-  position: absolute;
-  width: 206px;
-  bottom: 50px;
-  border-radius: 10px;
-  border: 2px solid #353f99;
+#current-delay-container {
+    position: absolute;
+    width: 228px;
+    bottom: 50px;
+    border-radius: 10px;
+    border: 2px solid #353f99;
 }
 
-.sim-param-label
-{
-  color: #8e9be7;
-  padding-left: 10px;
-  padding-top: 5px;
+.sim-param-label {
+    color: #8e9be7;
+    padding-left: 10px;
+    padding-top: 5px;
 }
 
-.sim-param-value
-{
-  font-weight: bold;
-  color: #cecece;
-  text-align: right;
-  padding-bottom: 5px;
-  padding-right: 10px;
+.sim-param-value {
+    font-weight: bold;
+    color: #cecece;
+    text-align: right;
+    padding-bottom: 5px;
+    padding-right: 10px;
 }
 
-#copyright
-{
+#copyright {
     position: fixed;
     bottom: 10px;
     height: 15px;
@@ -177,13 +165,11 @@ a:hover
     text-align: center;
 }
 
-#copyright a
-{
-  color: #7a7bb9;
+#copyright a {
+    color: #7a7bb9;
 }
 
-#content
-{
+#content {
     position: fixed;
     top: 40px;
     left: 250px;
@@ -195,8 +181,7 @@ a:hover
     overflow-x: hidden;
 }
 
-#newmsg
-{
+#newmsg {
     position: fixed;
     bottom: 0px;
     left: 250px;
@@ -205,18 +190,16 @@ a:hover
     background: #26308b;
 }
 
-#newmsg div
-{
+#newmsg div {
     height: 80px;
-    position: relative;
+    position: absolute;
     top: 10px;
     left: 10px;
     right: 100px;
-
 }
 
-#newmsg textarea
-{
+#newmsg textarea {
+    position: relative;
     width: 80%;
     height: 100%;
     resize: none;
@@ -224,128 +207,135 @@ a:hover
 }
 
 /* Chat containers */
-#msg-container
-{
 
-}
+#msg-container {}
 
 .msg {
-  border: 2px solid #dedede;
-  background-color: #f1f1f1;
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px 0;
-  width: 90%;
-  float: left;
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px 0;
+    width: 90%;
+    float: left;
+}
+
+.msg img{
+
 }
 
 /* Darker chat container */
+
 .response {
-  border-color: rgb(55, 56, 128);
-  background-color: rgb(174, 179, 252);
-  float: right;
-  resize: horizontal;
+    border-color: rgb(55, 56, 128);
+    background-color: rgb(174, 179, 252);
+    float: right;
+    resize: horizontal;
 }
 
-.msg-from {
+.msg-from {}
 
-}
+.msg-content {}
 
-.msg-content {
-
-}
-
-.msg-time {
-
-}
+.msg-time {}
 
 /* Clear floats */
+
 .msg::after {
-  content: "";
-  clear: both;
-  display: table;
+    content: "";
+    clear: both;
+    display: table;
 }
 
 #msg-container::after {
-  content: "";
-  clear: both;
-  display: table;
+    content: "";
+    clear: both;
+    display: table;
 }
 
 /* Style time text */
+
 .time-right {
-  float: right;
-  color: #aaa;
+    float: right;
+    color: #aaa;
 }
 
 /* Style time text */
+
 .time-left {
-  float: left;
-  color: #999;
+    float: left;
+    color: #999;
 }
 
-#header div
-{
+#header div {
     padding: 0px;
     margin: 0px;
-
 }
 
 /* Style The Dropdown Button */
+
 .dropbtn {
-  background-color: #4CAF50;
-  color: white;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
     height: 40px;
-  line-height: 40px;
- padding: 0px 10px;
+    line-height: 40px;
+    padding: 0px 10px;
 }
 
 .dropbtn img {
-float: right;
-  max-width: 30px;
-  width: 100%;
-  border-radius: 50%;
-  margin-top: 5px;
-  margin-left: 15px;
+    float: right;
+    max-width: 30px;
+    width: 100%;
+    border-radius: 50%;
+    margin-top: 5px;
+    margin-left: 15px;
 }
 
 /* The container <div> - needed to position the dropdown content */
+
 .dropdown {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 /* Dropdown Content (Hidden by Default) */
+
 .dropdown-content {
-  display: none;
-  position: absolute;
+    display: none;
+    position: absolute;
     right: 0px;
-  background-color: #f9f9f9;
-  min-width: 140px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+    background-color: #f9f9f9;
+    min-width: 140px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
 }
 
 /* Links inside the dropdown */
+
 .dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #f1f1f1}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1
+}
 
 /* Show the dropdown menu on hover */
+
 .dropdown:hover .dropdown-content {
-  display: block;
+    display: block;
 }
 
 /* Change the background color of the dropdown button when the dropdown content is shown */
+
 .dropdown:hover .dropbtn {
-  background-color: #3e8e41;
+    background-color: #3e8e41;
 }

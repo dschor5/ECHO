@@ -1,1 +1,1 @@
-<link rel="stylesheet" type="text/css" href="%http%%site_url%/%templates_dir%/css/%filename%.css" />
+<link rel="stylesheet" type="text/css" href="%http%%site_url%/css/%filename%.css" />

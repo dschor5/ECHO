@@ -1,5 +1,4 @@
-body
-{
+body {
     background: #FFFFFF;
     color: #000000;
     font-family: Verdana, Arial, Helvetica, sans-serif;
@@ -8,22 +7,19 @@ body
     padding: 0px;
 }
 
-a
-{
+a {
     text-decoration: none;
     color: #000000;
     background: #FFFFFF;
 }
 
-a:hover
-{
+a:hover {
     text-decoration: underline;
     color: #000000;
     background: #FFFFFF;
 }
 
-#canvas
-{
+#canvas {
     position: relative;
     background: #FFFFFF;
     color: #000000;

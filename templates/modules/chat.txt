@@ -4,13 +4,7 @@
                 Chat Rooms
             </div>
             <div id="rooms">
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
+                
                 <a href="#">Room #1</a>
                 <a href="#">Room #1 with some long name</a>
                 <a href="#">Room #1</a>
@@ -28,7 +22,7 @@
                 Mission Parameters
             </div>
 
-            <div id="distance-label" class="sim-param-label">Distance to %delay_dest%:</div>
+            <div id="distance-label" class="sim-param-label">Distance to %away_planet%:</div>
             <div id="distance-value" class="sim-param-value">%delay_distance%</div>
 
             <div id="owlt-label" class="sim-param-label">One-way-light-time delay:</div>
@@ -43,7 +37,7 @@
     </div>
 
     <div id="copyright">
-        &copy; 2020-%year% <a href="http://www.darioschor.com">Dario Schor</a>
+        &copy; 2020-%year% <a href="http://www.darioschor.com" target="_blank">Dario Schor</a>
     </div>
 
     <div id="content">
@@ -77,8 +71,8 @@
 
         <div id="newmsg">
             <div>
-                <textarea id="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ipsum nisl, condimentum sit amet leo nec, condimentum rutrum ipsum. Donec quis lacinia tellus. Integer dui eros, sollicitudin a lectus non, ultricies mattis lorem. Quisque efficitur ut purus eu dignissim. Vestibulum auctor molestie tincidunt. Nunc feugiat et lectus non commodo. Donec hendrerit efficitur ipsum, eget porta felis gravida eget. Ut in fermentum ipsum, quis viverra metus. Pellentesque elementum auctor neque et sollicitudin. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ipsum nisl, condimentum sit amet leo nec, condimentum rutrum ipsum. Donec quis lacinia tellus. Integer dui eros, sollicitudin a lectus non, ultricies mattis lorem. Quisque efficitur ut purus eu dignissim. Vestibulum auctor molestie tincidunt. Nunc feugiat et lectus non commodo. Donec hendrerit efficitur ipsum, eget porta felis gravida eget. Ut in fermentum ipsum, quis viverra metus. Pellentesque elementum auctor neque et sollicitudin.</textarea>
-                <input type="button">
+                <textarea id="newmsg-text"></textarea>
+                <button type="button" id="newmsg-send-btn">Send</button>
             </div>
         </div>
 

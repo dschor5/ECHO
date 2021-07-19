@@ -68,6 +68,11 @@ class Main
         $module_class_name = $module_name.'Module';
         $module = new $module_class_name($this, $this->user);
 
+        // Configure mission time
+        $timeKeeper = TimeKeeper::getInstance();
+        $timeKeeper->config($mission['time_epoch'], $mission['time_sec_per_day'], $mission['time_day']);
+        
+        // Configure communicaiton delay
         $commDelay = Delay::getInstance();
 
         $replace = array(
@@ -76,6 +81,8 @@ class Main
             '/%css_file%/' =>$module->getCss(),
             '/%js_file%/' =>$module->getJavascript(),
             '/%debug%/' =>'',
+            '/%home_planet%/' => $mission['home_planet'],
+            '/%away_planet%/' => $mission['away_planet'],
             '/%delay_distance%/' => $commDelay->getDistanceStr(),
             '/%delay_time%/' => $commDelay->getDelayStr(),
             '/%mission_name%/' => $mission['name'],

@@ -1,0 +1,38 @@
+$(document).ready(setTimeout(refreshContents, 1000));
+
+function refreshContents() {
+    var response = $.ajax({
+        url: '%http%%site_url%/chat/refresh',
+        type: 'POST',
+        dataType: 'json',
+        success: function(data) {
+            $('#time-mcc-value').text(data.time_mcc);
+            $('#time-hab-value').text(data.time_hab);  
+            if(data.messages)      
+            setTimeout(refreshContents, 1000)
+        }
+    });
+}
+
+function receiveMessage(data) {
+
+}
+
+$(document).ready(function() {
+    $('#newmsg-send-btn').on('click', function() {
+		var msgRoom = $('#newmsg-room').val();
+        var msgBody = $('#newmsg-text').val();
+        
+		if(msgTo != '' && msgBody != '') {
+			$.ajax({
+				url:  '%http%%site_url%/chat/send',
+				type: "POST",
+				data: {
+					msgRoom: msgRoom,
+					msgBody: msgBody						
+				},
+                dataType: 'json'
+			});
+		}
+	});
+});
