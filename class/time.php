@@ -52,7 +52,8 @@ class TimeKeeper
 
     public function getMccTimeStr(Datetime $d = null) : string
     {
-        return date_format(new DateTime("@$this->getMccTimestamp($d)"), 'Y-m-d H:i:s');
+        $epoch = $this->getMccTimestamp($d);
+        return date_format(new DateTime("@$epoch"), 'Y-m-d H:i:s');
     }
 
     public function getHabTimeStr(DateTime $d = null) : string
