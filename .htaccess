@@ -3,8 +3,6 @@ RewriteBase /delay/
 
 RewriteRule config.inc.php error
 
-RewriteRule ajax/*$ index.php?action=ajax       [QSA]
-
 RewriteRule ^home index.php?action=home [QSA]
 RewriteRule ^chat/(.*) index.php?action=chat&subaction=$1 [QSA]
 RewriteRule ^chat index.php?action=chat [QSA]
