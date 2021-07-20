@@ -17,26 +17,27 @@
 (b) <a href="https://mars.nasa.gov/resources/6453/valles-marineris-hemisphere-enhanced/">Mars Image Credits courtesy of NASA/JPL-Caltech</a>.</p>
 </div>
 
-<div id="loginform" class="modal">
+<div class="modal" id="loginform" tabindex="-1">
+    <div class="modal-dialog animate">
+        <div class="modal-content">
+            <div class="modal-header">
+                Login to Server
+                <button type="button" class="modal-close"  onclick="document.getElementById('loginform').style.display='none'">&times;</button>
+            </div>
+            <form method="POST" =">
+                <div class="modal-body">
+                    <label for="uname"><b>Username</b></label>
+                    <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
 
-
-    <span onclick="document.getElementById('loginform').style.display='none'" class="login_close" title="Close Modal">&times;</span>
-
-    <form class="modal-content animate" method="POST">
-        <div class="container">
-            <label for="uname"><b>Username</b></label>
-            <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
-
-            <label for="upass"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="upass" id="upass" required>
-
-            <input type="button" id="butlogin">Login</input>
-            <p id="response"></p>
+                    <label for="upass"><b>Password</b></label>
+                    <input type="password" placeholder="Enter Password" name="upass" id="upass" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="modal-btn-pri" id="butlogin">Login</button>
+                    <button type="button" class="modal-btn-sec"  onclick="document.getElementById('loginform').style.display='none'">Cancel</button>
+                </div>
+            </form>
         </div>
-
-        <div class="container" style="background-color:#f1f1f1">
-            <button type="button" onclick="document.getElementById('loginform').style.display='none'" class="cancelbtn">Cancel</button>
-        </div>
-    </form>
+    </div>
 </div>
 

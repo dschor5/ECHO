@@ -1,8 +1,6 @@
 body {
-    background: #FFFFFF;
-    color: #000000;
     font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    font-size: 10pt;
     margin: 0px;
     padding: 0px;
 }
@@ -17,7 +15,7 @@ a:hover {
 
 #canvas {
     position: relative;
-    background: #acacac;
+    background: #ACACAC;
     color: #000000;
     height: 100%;
     text-align: left;
@@ -30,13 +28,14 @@ a:hover {
     width: 100%;
     height: 40px;
     background: #222222;
-    color: #DDDDDD;
+    color: #ACACAC;
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.5);
 }
 
 #header-title {
     position: fixed;
     left: 10px;
-    font-size: 16px;
+    font-size: 14pt;
     height: 40px;
     line-height: 40px;
     padding: 0px 10px;
@@ -49,8 +48,8 @@ a:hover {
     top: 40px;
     bottom: 0px;
     left: 0px;
-    width: 250px;
-    background: #26308b;
+    width: 258px;
+    background: #26308B; /*dark*/
     overflow-y: auto;
     overflow-x: hidden;
     padding: 10px;
@@ -62,7 +61,7 @@ a:hover {
     padding: 5px 0px;
     text-align: center;
     line-height: 20px;
-    background: rgb(174, 179, 252);
+    background: #AEB3FC; /*light*/
     font-weight: bold;
     font-size: 14px;
 }
@@ -70,11 +69,12 @@ a:hover {
 #room-container {
     position: absolute;
     top: 10px;
-    bottom: 250px;
+    bottom: 264px;
     width: 228px;
     border-radius: 10px;
-    border: 2px solid #353f99;
+    border: 2px solid #414ba5; /*highlight*/
     overflow-y: hidden;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.5);
 }
 
 #rooms {
@@ -96,16 +96,18 @@ a:hover {
     margin-left: 10px;
     float: left;
     text-align: center;
-    background: yellow;
+    border: 1px solid #8e9be7;
+    color: #8e9be7;
+    background-color: #222222;
     padding-top: 5px;
     padding-bottom: 5px;
     display: block;
-    border: 1px solid red;
     border-radius: 5px;
 }
 
 #rooms a:hover {
-    background: green;
+    background: #8e9be7;
+    color: #DDDDDD;
 }
 
 #rooms::-webkit-scrollbar {
@@ -139,7 +141,8 @@ a:hover {
     width: 228px;
     bottom: 50px;
     border-radius: 10px;
-    border: 2px solid #353f99;
+    border: 2px solid #414ba5;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.5);
 }
 
 .sim-param-label {
@@ -172,7 +175,7 @@ a:hover {
 #content {
     position: fixed;
     top: 40px;
-    left: 250px;
+    left: 253px;
     right: 0px;
     bottom: 100px;
     background: #c7c7c7;
@@ -220,8 +223,14 @@ a:hover {
     float: left;
 }
 
-.msg img{
-
+.msg img {
+    float: left;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.6);
 }
 
 /* Darker chat container */
@@ -275,33 +284,21 @@ a:hover {
 /* Style The Dropdown Button */
 
 .dropbtn {
-    background-color: #4CAF50;
+    background-color: #AEB3FC;
     color: white;
     font-size: 16px;
-    border: none;
     cursor: pointer;
     height: 40px;
-    line-height: 40px;
+    line-height: 32px;
     padding: 0px 10px;
+    border: 3px solid #222222;
+    color: #222222;
 }
-
-.dropbtn img {
-    float: right;
-    max-width: 30px;
-    width: 100%;
-    border-radius: 50%;
-    margin-top: 5px;
-    margin-left: 15px;
-}
-
-/* The container <div> - needed to position the dropdown content */
 
 .dropdown {
     position: relative;
     display: inline-block;
 }
-
-/* Dropdown Content (Hidden by Default) */
 
 .dropdown-content {
     display: none;
@@ -313,8 +310,6 @@ a:hover {
     z-index: 1;
 }
 
-/* Links inside the dropdown */
-
 .dropdown-content a {
     color: black;
     padding: 12px 16px;
@@ -322,10 +317,8 @@ a:hover {
     display: block;
 }
 
-/* Change color of dropdown links on hover */
-
 .dropdown-content a:hover {
-    background-color: #f1f1f1
+    background-color: #E1E1E1
 }
 
 /* Show the dropdown menu on hover */
@@ -337,5 +330,6 @@ a:hover {
 /* Change the background color of the dropdown button when the dropdown content is shown */
 
 .dropdown:hover .dropbtn {
-    background-color: #3e8e41;
+    color: #AEB3FC;
+    background-color: #414BA5;
 }
