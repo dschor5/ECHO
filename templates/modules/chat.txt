@@ -29,10 +29,10 @@
             <div id="owlt-value" class="sim-param-value">%delay_time%</div>
 
             <div id="time-mcc-label" class="sim-param-label">Earth time:</div>
-            <div id="time-mcc-value" class="sim-param-value">%mcc_time%</div>
+            <div id="time-mcc-value" class="sim-param-value">%time_mcc%</div>
 
             <div id="time-hab-label" class="sim-param-label">Habitat time:</div>
-            <div id="time-hab-value" class="sim-param-value">%hab_time%</div>
+            <div id="time-hab-value" class="sim-param-value">%time_hab%</div>
         </div>
     </div>
 

@@ -23,9 +23,10 @@ class ChatModule extends DefaultModule
         if($subaction == 'refresh')
         {
             $timeKeeper = TimeKeeper::getInstance();
-            $response['time_mcc'] = date_format(new DateTime(), 'Y-m-d H:i:s');
-            $response['time_hab'] = $timeKeeper->getTime();
-            $response['messages'] = array();
+            $response['time_mcc'] = $timeKeeper->getMccTimeStr();
+            $response['time_hab'] = $timeKeeper->getHabTimeStr();
+            $response['msg_new'] = array();
+            $response['msg_status'] = array();
         }
 
         return $response;
@@ -34,6 +35,8 @@ class ChatModule extends DefaultModule
     public function compileHtml(string $subaction) : string
     {
         global $mission;
+
+        $timeKeeper = TimeKeeper::getInstance();
 
         $this->addCss('chat');
         $this->addJavascript('jquery-3.6.0.min');
@@ -45,7 +48,10 @@ class ChatModule extends DefaultModule
 
         return Main::loadTemplate('modules/chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),
-                  '/%delay_src%/' => $this->user->isCrew() ? $mission['hab_name'] : $mission['mcc_name']));
+                  '/%delay_src%/' => $this->user->isCrew() ? $mission['hab_name'] : $mission['mcc_name'],
+                  '/%time_mcc%/' => $timeKeeper->getMccTimeStr(),
+                  '/%time_hab%/' => $timeKeeper->getHabTimeStr()
+                ));
     }
 }
 

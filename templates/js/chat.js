@@ -8,7 +8,7 @@ function refreshContents() {
         success: function(data) {
             $('#time-mcc-value').text(data.time_mcc);
             $('#time-hab-value').text(data.time_hab);  
-            if(data.messages)      
+               
             setTimeout(refreshContents, 1000)
         }
     });
@@ -36,3 +36,4 @@ $(document).ready(function() {
 		}
 	});
 });
+
