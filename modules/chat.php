@@ -36,6 +36,8 @@ class ChatModule extends DefaultModule
     {
         global $mission;
 
+        $timeKeeper = TimeKeeper::getInstance();
+
         $this->addCss('chat');
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('chat');
@@ -46,7 +48,10 @@ class ChatModule extends DefaultModule
 
         return Main::loadTemplate('modules/chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),
-                  '/%delay_src%/' => $this->user->isCrew() ? $mission['hab_name'] : $mission['mcc_name']));
+                  '/%delay_src%/' => $this->user->isCrew() ? $mission['hab_name'] : $mission['mcc_name'],
+                  '/%time_mcc%/' => $timeKeeper->getMccTimeStr(),
+                  '/%time_hab%/' => $timeKeeper->getHabTimeStr()
+                ));
     }
 }
 
