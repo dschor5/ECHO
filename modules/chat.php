@@ -25,8 +25,8 @@ class ChatModule extends DefaultModule
             $timeKeeper = TimeKeeper::getInstance();
             $response['time_mcc'] = $timeKeeper->getMccTimeStr();
             $response['time_hab'] = $timeKeeper->getHabTimeStr();
-            $response['new_messages'] = array();
-            $response['']
+            $response['msg_new'] = array();
+            $response['msg_status'] = array();
         }
 
         return $response;
