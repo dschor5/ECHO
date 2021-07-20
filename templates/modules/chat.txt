@@ -46,39 +46,52 @@
                 <img src="%http%%site_url%/%templates_dir%/images/user-mcc.jpg" class"msg-pic"/>
                 <div class="msg-from">User1</div>
                 <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">Delivered</div>
+                <div>
+                    <div class="msg-time">11:00</div>
+                    <div class="msg-status">Delivered</div>
+                </div>
             </div>
 
             <div class="msg response">
                 <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
                 <div class="msg-from">User1</div>
                 <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">Delivered</div>
+                <div>
+                    <div class="msg-time">11:00</div>
+                    <div class="msg-status">Delivered</div>
+                </div>
             </div>
 
             <div class="msg">
                 <div class="msg-from">User1</div>
                 <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">Delivered</div>
+                <div>
+                    <div class="msg-time">11:00</div>
+                    <div class="msg-status">Delivered</div>
+                </div>
             </div>
 
             <div class="msg response">
+                <div class="msg-from">User1</div>
+                <div class="msg-content">Hello. How are you?</div>
+                <div>
+                    <div class="msg-time">11:00</div>
+                    <div class="msg-status">Delivered</div>
+                </div>
+            </div>
+
+            <div class="msg response">
+                <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
                 <div class="msg-from">User1</div>
                 <div class="msg-content">Hello. How are you?</div>
                 <div class="msg-time">11:00</div>
-                <div class="msg-status">Transmitting</div>
-            </div>
-
-            <div class="msg response">
-                <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
                 <div class="msg-time">Delivered</div>
             </div>
 
             <div class="msg">
                 <div class="msg-from">User1</div>
                 <div class="msg-content">Hello. How are you?</div>
+                <div class="msg-time">11:00</div>
                 <div class="msg-time">Delivered</div>
             </div>
 
@@ -86,12 +99,14 @@
                 <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
                 <div class="msg-from">User1</div>
                 <div class="msg-content">Hello. How are you?</div>
+                <div class="msg-time">11:00</div>
                 <div class="msg-time">Delivered</div>
             </div>
 
             <div class="msg">
                 <div class="msg-from">User1</div>
                 <div class="msg-content">Hello. How are you?</div>
+                <div class="msg-time">11:00</div>
                 <div class="msg-time">Delivered</div>
             </div>
 
@@ -122,11 +137,11 @@
 
     <div id="header">
         <div id="header-title">
-            %mission_name% Comms - %delay_src%
+            &#5125; %mission_name% Comms - %delay_src%
         </div>
         <div style="float: right; margin-right: 20px;">
             <div class="dropdown">
-              <button class="dropbtn">dschor</button>
+              <button class="dropbtn">dschor<span style="font-weight: bold;">&nbsp;&#8801;</span></button>
               <div class="dropdown-content">
                 <a href="%http%%site_url%/settings">User Settings</a>
                 <a href="%http%%site_url%/logout">Logout</a>
