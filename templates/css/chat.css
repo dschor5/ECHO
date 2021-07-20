@@ -19,6 +19,8 @@ a:hover {
     color: #000000;
     height: 100%;
     text-align: left;
+    min-width: 600px;
+    min-height: 400px;
 }
 
 #header {
