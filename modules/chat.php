@@ -23,9 +23,10 @@ class ChatModule extends DefaultModule
         if($subaction == 'refresh')
         {
             $timeKeeper = TimeKeeper::getInstance();
-            $response['time_mcc'] = date_format(new DateTime(), 'Y-m-d H:i:s');
-            $response['time_hab'] = $timeKeeper->getTime();
-            $response['messages'] = array();
+            $response['time_mcc'] = $timeKeeper->getMccTimeStr();
+            $response['time_hab'] = $timeKeeper->getHabTimeStr();
+            $response['new_messages'] = array();
+            $response['']
         }
 
         return $response;

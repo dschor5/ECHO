@@ -9,7 +9,6 @@ class TimeKeeper
 
     private function __construct()
     {
-        
         $this->config(date_format(new DateTime(), 'Y-m-d H:i:s'), 24*60*60, 'Day');
     }
 
@@ -31,15 +30,34 @@ class TimeKeeper
         $this->dayName = $dayName;
     }
 
-    public function getTime(DateTime $d = null) : string
+    public function getHabTimestamp(DateTime $d = null) : string
     {
         if($d == null)
         {
             $d = new DateTime();
         }
-        
-        // Time diff in sec
-        $timeDiff = $d->getTimestamp() - $this->epoch;
+
+        return $d->getTimestamp() - $this->epoch;
+    }
+
+    public function getMccTimestamp(DateTime $d = null) : string 
+    {
+        if($d == null)
+        {
+            $d = new DateTime();
+        }
+
+        return $d->getTimestamp();
+    }
+
+    public function getMccTimeStr(Datetime $d = null) : string
+    {
+        return date_format($this->getMccTimestamp($d), 'Y-m-d H:i:s');
+    }
+
+    public function getHabTimeStr(DateTime $d = null) : string
+    {
+        $timeDiff = $this->getHabTimestamp();
         
         // Format time diff
         $day = floor($timeDiff / $this->secPerDay);
