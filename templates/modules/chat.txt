@@ -118,12 +118,12 @@
     </div>
 
     <div id="newmsg">
-        <div>
-            <textarea id="newmsg-text"></textarea>
-            <button type="button" id="newmsg-send-btn">Send</button>
+        <textarea id="newmsg-text"></textarea>
+        <div id="newmsg-buttons">
             <button type="button" class="newmsg-attach">&#128249;</button>
             <button type="button" class="newmsg-attach">&#127908;</button>
             <button type="button" class="newmsg-attach">&#128206;</button>
+            <button type="button" id="newmsg-send-btn">Send</button>
         </div>
     </div>
 
