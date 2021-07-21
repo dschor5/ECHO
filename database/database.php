@@ -47,12 +47,12 @@ class Database
     {
         if(self::$instance == null)
         {
-            global $config;
+            global $database;
             self::$instance = new Database(
-                $config['db_user'],
-                $config['db_pass'],
-                $config['db_name'],
-                $config['db_host']);
+                $database['db_user'],
+                $database['db_pass'],
+                $database['db_name'],
+                $database['db_host']);
         }
 
         return self::$instance;
@@ -154,7 +154,7 @@ class Database
 
         //if we need to keep the result, create
         //a result object and return it.
-        return new Result($result);
+        return $result;
     }
 
 

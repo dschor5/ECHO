@@ -4,9 +4,8 @@
 header('Pragma: no-cache');
 
 //include config file
-include_once('config.inc.php');
+require_once('config.inc.php');
 
-require_once('database/usersDao.php');
 //start it up...
 try
 {
@@ -158,7 +157,7 @@ class Main
         $err=$db->getErr();
         if ($err != false)
         {
-            $content .= 'Executed '.$db->query_count .' database queries in '. $this->db->query_time .' us';
+            $content .= 'Executed '.$db->query_count .' database queries in '. $db->query_time .' us';
             $content .= '<br/>Error: '.$err['query'] . '<br/>' . $err['error'].'<br/>';
 
             foreach ($err['trace'] as $trace)
@@ -213,6 +212,7 @@ class Main
     public static function loadTemplate($template, $replace=null)
     {
         global $config;
+        global $server;
 
         $template = file_get_contents($config['templates_dir'].'/'.$template);
 
@@ -222,8 +222,8 @@ class Main
         }
 
         $replace = array(
-            '/%http%/' => $config['http'],
-            '/%site_url%/' => $config['site_url'],
+            '/%http%/' => $server['http'],
+            '/%site_url%/' => $server['site_url'],
             '/%templates_dir%/' => $config['templates_dir'],
         );
         $template = preg_replace(array_keys($replace),array_values($replace),$template);

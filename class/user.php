@@ -4,7 +4,6 @@ require_once('database/usersDao.php');
 
 class User
 {
-    private $db;
     private $data;
 
     public function __construct($data)
@@ -29,12 +28,12 @@ class User
 
     public function isResetPasswordRequired() : bool
     {
-        return $this->data['password_reset'] == 1;
+        return ($this->data['password_reset'] == 1);
     }
 
     public function isValidPassword(string $password): bool
     {
-        return md5($password) == $this->data['password'];
+        return (md5($password) == $this->data['password']);
     }
 
     public function createNewSession()
@@ -42,10 +41,15 @@ class User
         $ret = false;
         $usersDao = UsersDao::getInstance();
 
-        $sessionId = dechex(rand(0,time())).dechex(rand(0,time())).dechex(rand(0,time()));
+        $newData = array(
+            'session_id' => dechex(rand(0,time())).dechex(rand(0,time())).dechex(rand(0,time())),
+            'last_login' => date('Y-m-d H:i:s', time())
+        );
 
-        if ($usersDao->update(array('session_id'=>$sessionId,'last_login'=>date('Y-m-d H:i:s', time())),$this->data['id']) !== false)
-            $ret = $sessionId;
+        if ($usersDao->update($newData, $this->data['id']) !== false)
+        {
+            $ret = $newData['session_id'];
+        }
 
         return $ret;
     }
@@ -56,7 +60,6 @@ class User
         if ($cmpKey == $this->data['session_id'])
         {
             $valid=true;
-            //$this->setLastLogin();
         }
 
         return $valid;

@@ -4,17 +4,7 @@
                 Chat Rooms
             </div>
             <div id="rooms">
-                
-                <a href="#">Room #1</a>
-                <a href="#">Room #1 with some long name</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1 with yet another long name</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">Room #1</a>
-                <a href="#">LAST ROOM</a>
+                %chat_rooms%
             </div>
         </div>
         <div id="current-delay-container" class="navigation-container">

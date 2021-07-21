@@ -1,3 +1,4 @@
 .DS_Store
 delay.code-workspace
-config.inc.php
+server.inc.php
+._*

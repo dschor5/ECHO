@@ -2,11 +2,12 @@ RewriteEngine On
 RewriteBase /delay/
 
 RewriteRule config.inc.php error
+RewriteRule server.inc.php error
 
 RewriteRule ^home index.php?action=home [QSA]
 RewriteRule ^chat/(.*) index.php?action=chat&subaction=$1 [QSA]
 RewriteRule ^chat index.php?action=chat [QSA]
-RewriteRule ^admin index.php?action=admin [QSA]
+RewriteRule ^users index.php?action=users [QSA]
 RewriteRule ^login index.php?action=home&subaction=login [QSA]
 RewriteRule ^logout index.php?action=home&subaction=logout [QSA]
 RewriteRule ^css/(.*) index.php?action=file&subaction=css&f=$1 [QSA]

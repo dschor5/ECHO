@@ -8,6 +8,7 @@ class UsersDao extends Dao
 {
     private static $instance = null;
     private static $cache = array();
+    private static $cacheFull = false;
 
     public static function getInstance()
     {
@@ -21,6 +22,31 @@ class UsersDao extends Dao
     protected function __construct()
     {
         parent::__construct('users');
+    }
+
+    public function getById(int $id)
+    {
+        $user = null;
+
+        if(isset(self::$cache[$id]))
+        {
+            $user = self::$cache[$id];
+        }
+
+        if($user == null)
+        {
+            if (($result = $this->select('*','id=\''.$this->database->prepareStatement($id).'\'')) !== false)
+            {
+                if ($result->num_rows > 0)
+                {
+                    $userData = $result->fetch_assoc();
+                    self::$cache[$userData['id']] = new User($userData);
+                    $user = self::$cache[$userData['id']];
+                }
+            }
+        }
+
+        return $user;
     }
 
     public function getByUsername(string $username)
@@ -38,13 +64,11 @@ class UsersDao extends Dao
 
         if($user == null)
         {
-            $ret = null;
-            $result = $this->select('*','username=\''.$this->database->prepareStatement($username).'\'');
-            if ($result != null)
+            if (($result = $this->select('*','username=\''.$this->database->prepareStatement($username).'\'')) !== false)
             {
-                if ($result->getRowCount() > 0)
+                if ($result->num_rows > 0)
                 {
-                    $userData = $result->getRow();
+                    $userData = $result->fetch_assoc();
                     self::$cache[$userData['id']] = new User($userData);
                     $user = self::$cache[$userData['id']];
                 }
@@ -54,24 +78,25 @@ class UsersDao extends Dao
         return $user;
     }
 
-    public function getByUsedId(int $id): User
+    public function getUsers(): array
     {
-        $ret = false;
-        if ($id != 0 && ($result=$this->select('*',$id)) !== false)
-            if ($result->getRowCount() > 0)
-                $ret = new User($result->getRow());
-        return $ret;
-    }
+        if(self::$cacheFull == false)
+        {
+            if(($result = $this->select()) !== false)
+            {   
+                if($result->num_rows > 0)
+                {
+                    // Override cache
+                    while(($data=$result->fetch_assoc()) != null)
+                    {
+                        self::$cache[$data['id']] = new User($data);
+                    }
+                    self::$cacheFull = true;
+                }
+            }
+        }
 
-    public function getUsers(int $mission_id, string $sort='name', string $order='ASC')
-    {
-        $users = array();
-        if(($result=$this->select('*','mission_id=\''.$this->database->prepareStatement($mission_id).'\' OR mission_id is NULL', $sort, $order)) !== false)
-            if($result->getRowCount() > 0)
-                while(($data=$result->getRow()) !== false)
-                    $users[$data['id']] = new User($data);
-
-        return $users;
+        return self::$cache;
     }
 }
 

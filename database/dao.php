@@ -143,6 +143,8 @@ abstract class Dao
 		$query .= ';';
 
 		//run it!
+        
+        
 		return $this->database->query($query);
 	}
 

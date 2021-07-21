@@ -15,7 +15,7 @@ class Result
      */
     public function __construct(&$result)
     {
-        $this->result = &$result;
+        $this->result = new mysqli_result($result);
     }
 
 
@@ -26,7 +26,10 @@ class Result
      */
     public function getRow ()
     {
-        if ($this->result == false) return false;
+        if ($this->result == null) 
+        {
+            return false;
+        }
 
         if (($row=$this->result->fetch_array(MYSQLI_ASSOC)) !== false)
             return $row;
@@ -45,10 +48,7 @@ class Result
      */
     public function getRowCount ()
     {
-        if ($this->rowCount == null)
-            $this->rowCount = mysqli_num_rows($this->result);
-
-        return $this->rowCount;
+        return $this->result->num_rows;
     }
 }
 
