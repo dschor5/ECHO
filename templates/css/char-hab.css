@@ -1,0 +1,55 @@
+#navigation {
+    background: #772f19; /*dark*/
+}
+
+.navigation-title {
+    background: #c78b8b; /*light*/
+}
+
+#room-container {
+    border: 2px solid #a54141; /*highlight*/
+}
+
+#rooms a {
+    border: 1px solid #e78e8e;
+    color: #e78e8e;
+}
+
+#rooms a:hover {
+    background: #e78e8e;
+}
+
+#current-delay-container {
+    border: 2px solid #a54141;
+}
+
+.sim-param-label {
+    color: #e78e8e;
+}
+
+
+#copyright {
+    color: #b97a7a;
+}
+
+#copyright a {
+    color: #b97a7a;
+}
+
+#newmsg {
+    background: #772f19;    
+}
+
+.response {
+    border-color: rgb(128, 55, 55);
+    background-color: rgb(252, 174, 174);
+}
+
+.dropbtn {
+    background-color: #c78b8b;
+}
+
+.dropdown:hover .dropbtn {
+    color: #c78b8b;
+    background-color: #a54141;
+}

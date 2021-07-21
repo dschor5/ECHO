@@ -32,6 +32,15 @@ class ChatModule extends DefaultModule
         $timeKeeper = TimeKeeper::getInstance();
 
         $this->addCss('chat');
+        if($this->user->isCrew())
+        {
+            $this->addCss('chat-hab');
+        }
+        else
+        {
+            $this->addCss('chat-mcc');
+        }
+        $this->addCss('chat');
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('chat');
 
