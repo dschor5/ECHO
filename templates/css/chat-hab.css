@@ -27,6 +27,9 @@
     color: #e78e8e;
 }
 
+.sim-param-value {
+    color: #000000;
+}
 
 #copyright {
     color: #b97a7a;
@@ -36,13 +39,17 @@
     color: #b97a7a;
 }
 
+#content {
+    background: #b3b3b3;
+}
+
 #newmsg {
     background: #772f19;    
 }
 
 .response {
     border-color: rgb(128, 55, 55);
-    background-color: rgb(252, 174, 174);
+    background-color: rgb(224 194 194);
 }
 
 .dropbtn {
@@ -53,3 +60,4 @@
     color: #c78b8b;
     background-color: #a54141;
 }
+

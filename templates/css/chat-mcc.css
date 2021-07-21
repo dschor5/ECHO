@@ -27,6 +27,9 @@
     color: #8e9be7;
 }
 
+.sim-param-value {
+    color: #cecece;
+}
 
 #copyright {
     color: #7a7bb9;
@@ -34,6 +37,10 @@
 
 #copyright a {
     color: #7a7bb9;
+}
+
+#content {
+    background: #c7c7c7;
 }
 
 #newmsg {
