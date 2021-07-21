@@ -62,11 +62,11 @@ class HomeModule extends DefaultModule
 
     private function logout() : string
     {
-        global $config;
+        global $server;
 
         $this->user = null;
         $this->main->setCookie(array('sessionId'=>null,'username'=>null));
-        header('Location: http://'.$config['site_url']);
+        header('Location: '.$server['http'].$server['site_url']);
         return 'Logging out, please wait while you are redirected to the homepage.';
     }    
 }
