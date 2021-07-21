@@ -40,7 +40,6 @@ class ChatModule extends DefaultModule
         {
             $this->addCss('chat-mcc');
         }
-        $this->addCss('chat');
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('chat');
 
