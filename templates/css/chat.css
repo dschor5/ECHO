@@ -257,6 +257,16 @@ a:hover {
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.6);
 }
 
+.newmsg-attach {
+    background-color: inherit;
+    border-radius: 2px;
+    border: 1px solid white;
+    width: 30px;
+    height: 30px;
+    color: #FFF;
+    font-family: 'Times', 'Times New Roman', 'serif', 'sans-serif', system-ui, -apple-system, BlinkMacSystemFont, 'Avenir Next', 'Avenir', 'Segoe UI', 'Lucida Grande', 'Helvetica Neue', 'Helvetica', 'Fira Sans', 'Roboto', 'Noto', 'Droid Sans', 'Cantarell', 'Oxygen', 'Ubuntu', 'Franklin Gothic Medium', 'Century Gothic', 'Liberation Sans', sans-serif, 'EmojiSymbols';
+}
+
 /* Darker chat container */
 
 .response {
