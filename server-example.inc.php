@@ -1,12 +1,10 @@
 <?php
 
-$config = array();
-
 // Site config
-$site = array();
-$site['host_address'] = './';
-$site['http'] = 'http://';
-$site['site_url'] = '127.0.0.1';
+$server = array();
+$server['host_address'] = './';
+$server['http'] = 'http://';
+$server['site_url'] = '127.0.0.1';
 
 // mySQL database login info
 $database = array();
