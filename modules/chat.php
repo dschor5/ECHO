@@ -35,10 +35,10 @@ class ChatModule extends DefaultModule
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('chat');
 
-        $this->chatRoom = $_GET['conversation'] ?? null;
+        $this->conversationId = $_GET['conversation'] ?? null;
 
         $conversationsDao = ConversationsDao::getInstance();
-        $convo = $conversationsDao->getConversationById($id);
+        $convo = $conversationsDao->getConversationById($this->conversationId);
 
 
         // Load default conversaiton given subaction.
