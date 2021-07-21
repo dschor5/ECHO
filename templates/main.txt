@@ -17,7 +17,9 @@
 %debug%
 <center>
 <div id="canvas">
-    %content%
+    <div id="container">
+        %content%
+    </div>
 </div>
 </center>
 
