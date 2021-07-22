@@ -1,4 +1,4 @@
-<div id="navigation">
+    <div id="navigation">
         <div id="room-container" class="navigation-container">
             <div class="navigation-title">
                 Chat Rooms
@@ -120,24 +120,10 @@
     <div id="newmsg">
         <textarea id="newmsg-text"></textarea>
         <div id="newmsg-buttons">
-            <button type="button" class="newmsg-attach">&#128249;</button>
-            <button type="button" class="newmsg-attach">&#127908;</button>
-            <button type="button" class="newmsg-attach">&#128206;</button>
+            <button type="button" class="newmsg-attach"><img src="%http%%site_url%/templates/images/chat-attach.png"/></button>
+            <button type="button" class="newmsg-attach"><img src="%http%%site_url%/templates/images/chat-video.png"/></button>
+            <button type="button" class="newmsg-attach"><img src="%http%%site_url%/templates/images/chat-audio.png"/></button>
             <button type="button" id="newmsg-send-btn">Send</button>
         </div>
     </div>
-
-    <div id="header">
-        <div id="header-title">
-            &#5125; %mission_name% Comms - %delay_src%
-        </div>
-        <div style="float: right; margin-right: 20px;">
-            <div class="dropdown">
-              <button class="dropbtn">dschor<span style="font-weight: bold;">&nbsp;&#8801;</span></button>
-              <div class="dropdown-content">
-                <a href="%http%%site_url%/settings">User Settings</a>
-                <a href="%http%%site_url%/logout">Logout</a>
-              </div>
-            </div>
-        </div>
-    </div>
+    

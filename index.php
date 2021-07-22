@@ -79,6 +79,7 @@ class Main
             '/%content%/' => $module->compile(),
             '/%css_file%/' =>$module->getCss(),
             '/%js_file%/' =>$module->getJavascript(),
+            '/%header%/' => $module->getHeader(),
             '/%debug%/' =>'',
             '/%home_planet%/' => $mission['home_planet'],
             '/%away_planet%/' => $mission['away_planet'],

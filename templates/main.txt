@@ -19,6 +19,7 @@
 <div id="canvas">
     <div id="container">
         %content%
+        %header%
     </div>
 </div>
 </center>

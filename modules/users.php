@@ -19,7 +19,13 @@ class UsersModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
+        $this->addCss('common');
         $this->addCss('settings');
+        if($this->user->isAdmin())
+        {
+            $this->addHeaderMenu('Chat', 'chat');
+            $this->addHeaderMenu('Mission Settings', 'mission');
+        }
 
         $id = $_GET['id'] ?? 0;
         $usersDao = UsersDao::getInstance();

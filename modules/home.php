@@ -24,6 +24,11 @@ class HomeModule extends DefaultModule
         return $response;
     }
 
+    public function getHeader(): string
+    {
+        return '';
+    }
+
     public function compileHtml(string $subaction) : string
     {
         $this->addCss('login');

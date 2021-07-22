@@ -11,8 +11,9 @@ abstract class DefaultModule
     protected $subJsonRequests;
     protected $subHtmlRequests;
 
-    private $css_file;
-    private $js_file;
+    private $cssFiles;
+    private $jsFiles;
+    private $navLinks;
 
     public function __construct(&$main, &$user)
     {
@@ -21,6 +22,7 @@ abstract class DefaultModule
         $this->db = Database::getInstance();
         $this->cssFiles = array();
         $this->jsFiles = array();
+        $this->navLinks = array();
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array();
     }
@@ -30,7 +32,7 @@ abstract class DefaultModule
         return 'Analog Comm Delay';
     }
 
-    public function addCss(string $newCssFile)
+    protected function addCss(string $newCssFile)
     {
         $this->cssFiles[] = $newCssFile;
     }
@@ -46,7 +48,7 @@ abstract class DefaultModule
         return $content;
     }
 
-    public function addJavascript(string $newJsFile)
+    protected function addJavascript(string $newJsFile)
     {
         $this->jsFiles[] = $newJsFile;
     }
@@ -62,14 +64,35 @@ abstract class DefaultModule
         return $content;
     }
 
-    public function requiresLogin(): bool
+    protected function addHeaderMenu(string $label, string $url)
     {
-        return False;
+        $this->navLinks[$label] = $url;
     }
 
-    public function requiresAdmin(): bool
+    public function getHeader(): string
     {
-        return False;
+        // Add default logout option.
+        $this->navLinks['Logout'] = 'logout';
+
+        $links = '';
+        foreach($this->navLinks as $name => $url)
+        {
+            $links .= '<a href="%http%%site_url%/'.$url.'">'.$name.'</a>'."\n";
+        }
+
+        $userLocation = '';
+        $username = '';
+        if($this->user != null)
+        {
+            $userLocation = $this->user->getLocation();
+            $username = $this->user->getUsername();
+        }
+
+        return Main::loadTemplate('modules/header.txt', array(
+            '/%links%/' => $links,
+            '/%user_location%/' => $userLocation,
+            '/%username%/' => $username,
+        ));
     }
 
     public function compile()

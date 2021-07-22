@@ -16,6 +16,22 @@ class User
         return $this->data['username'];
     }
 
+    public function getAlias(): string
+    {
+        return $this->data['username'];
+    }
+
+    public function getLocation(): string
+    {
+        global $mission;
+        $location = $mission['home_planet'];
+        if($this->isCrew())
+        {
+            $location = $mission['away_planet'];
+        }
+        return $location;
+    }
+
     public function isAdmin():bool
     {
         return ($this->data['is_admin'] == 1);

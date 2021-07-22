@@ -24,11 +24,11 @@
 }
 
 .sim-param-label {
-    color: #e78e8e;
+    color: #111;
 }
 
 .sim-param-value {
-    color: #000000;
+    color: #e78e8e;
 }
 
 #copyright {

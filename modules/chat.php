@@ -31,6 +31,7 @@ class ChatModule extends DefaultModule
 
         $timeKeeper = TimeKeeper::getInstance();
 
+        $this->addCss('common');
         $this->addCss('chat');
         if($this->user->isCrew())
         {
@@ -42,6 +43,12 @@ class ChatModule extends DefaultModule
         }
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('chat');
+
+        if($this->user->isAdmin())
+        {
+            $this->addHeaderMenu('User Settings', 'users');
+            $this->addHeaderMenu('Mission Settings', 'mission');
+        }
 
         $this->conversationId = $_GET['conversation'] ?? null;
 

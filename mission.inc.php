@@ -1,7 +1,7 @@
 <?php
 
 $mission = array();
-$mission['name'] = 'LMAH 7';
+$mission['name'] = 'UND LMAH 7';
 $mission['mcc_name'] = 'Mission Control';
 $mission['hab_name'] = 'Mars Habitat';
 $mission['home_planet'] = 'Earth';
