@@ -21,20 +21,21 @@
     <div class="modal-dialog animate">
         <div class="modal-content">
             <div class="modal-header">
-                Login to Server
-                <button type="button" class="modal-close"  onclick="document.getElementById('loginform').style.display='none'">&times;</button>
+                <div class="modal-title">Login to Server</div>
+                <button type="button" class="modal-close">&times;</button>
             </div>
-            <form method="POST" =">
+            <form method="POST">
                 <div class="modal-body">
-                    <label for="uname"><b>Username</b></label>
+                    <div class="modal-response"></div>
+                    <label for="uname">Username</label>
                     <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
 
-                    <label for="upass"><b>Password</b></label>
+                    <label for="upass">Password</label>
                     <input type="password" placeholder="Enter Password" name="upass" id="upass" required>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="modal-btn-pri" id="butlogin">Login</button>
-                    <button type="button" class="modal-btn-sec"  onclick="document.getElementById('loginform').style.display='none'">Cancel</button>
+                    <button type="button" id="login-btn" class="modal-btn-pri">Login</button>
+                    <button type="button" class="modal-btn-sec">Cancel</button>
                 </div>
             </form>
         </div>

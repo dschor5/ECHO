@@ -1,0 +1,1 @@
+<a onclick="%onclick%" href="javascript:void(0);">%text%</a>

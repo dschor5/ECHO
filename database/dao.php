@@ -157,20 +157,24 @@ abstract class Dao
 	*/
 	public function insert($fields)
 	{
-		$query = "insert into `{$this->prefix}{$this->name}` values(";
+		$query = "insert into `{$this->prefix}{$this->name}` (";
 
+        $keys = array();
 		$values = array();
-		foreach ($fields as $value)
+		foreach ($fields as $key => $value)
+        {
+            $keys[] = '`'.$key.'`';
 			if ($value === null)
 				$values[] = 'NULL';
 			else
 				$values[] = '"'.$this->database->prepareStatement($value).'"';
+        }
 
-		$query .= join(',',$values) . ');';
+        $query .= join(',',$keys).') values ('.join(',',$values).');';
 		if ($this->database->query($query,0))
 		{
 		    // get the insert ID.
-		    $id = $this->database->insert_id();
+		    $id = $this->database->getLastInsertId();
 		    return $id;
 
 		} else

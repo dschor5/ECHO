@@ -1,0 +1,67 @@
+<div id="content">
+    <div id="heading">
+        Registered Users
+    </div>
+    <div id="navigation">
+        <button type="button" class="top-button" onclick="editUser(0)">New User</button>
+    </div>
+    %content%
+</div>
+
+<div class="modal" id="edit-user" tabindex="-1">
+    <div class="modal-dialog animate">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Edit User</div>
+                <button type="button" class="modal-close">&times;</button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <div class="modal-response"></div>
+                    
+                    <input type="hidden" id="edit-user-id" value="">
+
+                    <label for="username">Username</label>
+                    <input type="text" placeholder="Enter Username" name="username" id="username" required>
+
+                    <label for="is_crew">Analog Role</label>
+                    <select id="is_crew" name="is_crew">
+                        <option value="1">Astronaut</option>
+                        <option value="0">Mission Control</option>
+                    </select>
+
+                    <label for="is_admin">Software Role</label>
+                    <select id="is_admin" name="is_admin">
+                        <option value="0">User</option>
+                        <option value="1">Administrator</option>
+                    </select>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="edit-user-btn" class="modal-btn-pri">Save Changes</button>
+                    <button type="button" class="modal-btn-sec">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="confirm-delete" tabindex="-1">
+    <div class="modal-dialog animate">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Delete User</div>
+                <button type="button" class="modal-close">&times;</button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    Are you sure you want to delete <span class="username"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirm-delete-btn" class="modal-btn-pri">Yes</button>
+                    <button type="button" class="modal-btn-sec">No</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

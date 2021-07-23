@@ -3,15 +3,17 @@ RewriteBase /delay/
 
 RewriteRule config.inc.php error
 RewriteRule server.inc.php error
+RewriteRule mission.inc.php error
 
 RewriteRule ^home index.php?action=home [QSA]
-RewriteRule ^chat/(.*) index.php?action=chat&subaction=$1 [QSA]
+RewriteRule ^login index.php?action=login [QSA]
+RewriteRule ^logout index.php?action=logout [QSA]
+RewriteRule ^chat/(.*) index.php?action=chat&id=$1 [QSA]
 RewriteRule ^chat index.php?action=chat [QSA]
+RewriteRule ^mission index.php?action=mission [QSA]
 RewriteRule ^users index.php?action=users [QSA]
-RewriteRule ^login index.php?action=home&subaction=login [QSA]
-RewriteRule ^logout index.php?action=home&subaction=logout [QSA]
 RewriteRule ^css/(.*) index.php?action=file&subaction=css&f=$1 [QSA]
-RewriteRule ^js(.*)  index.php?action=file&subaction=js&f=$1 [QSA]
+RewriteRule ^js/(.*)  index.php?action=file&subaction=js&f=$1 [QSA]
 
 ErrorDocument 400 index.php?action=error
 ErrorDocument 403 index.php?action=error

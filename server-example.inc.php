@@ -13,5 +13,7 @@ $database['db_user'] = 'username';
 $database['db_pass'] = 'password';
 $database['db_name'] = 'delay';
 
+$admin = array();
+$admin['default_password'] = 'password';
 ?>
 

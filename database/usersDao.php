@@ -21,7 +21,7 @@ class UsersDao extends Dao
 
     protected function __construct()
     {
-        parent::__construct('users');
+        parent::__construct('users', 'user_id');
     }
 
     public function getById(int $id)
@@ -35,13 +35,13 @@ class UsersDao extends Dao
 
         if($user == null)
         {
-            if (($result = $this->select('*','id=\''.$this->database->prepareStatement($id).'\'')) !== false)
+            if (($result = $this->select('*','user_id=\''.$this->database->prepareStatement($id).'\'')) !== false)
             {
                 if ($result->num_rows > 0)
                 {
                     $userData = $result->fetch_assoc();
-                    self::$cache[$userData['id']] = new User($userData);
-                    $user = self::$cache[$userData['id']];
+                    self::$cache[$userData['user_id']] = new User($userData);
+                    $user = self::$cache[$userData['user_id']];
                 }
             }
         }
@@ -69,8 +69,8 @@ class UsersDao extends Dao
                 if ($result->num_rows > 0)
                 {
                     $userData = $result->fetch_assoc();
-                    self::$cache[$userData['id']] = new User($userData);
-                    $user = self::$cache[$userData['id']];
+                    self::$cache[$userData['user_id']] = new User($userData);
+                    $user = self::$cache[$userData['user_id']];
                 }
             }
         }
@@ -78,18 +78,19 @@ class UsersDao extends Dao
         return $user;
     }
 
-    public function getUsers(): array
+    public function getUsers(string $sort='user_id', string $order='ASC'): array
     {
         if(self::$cacheFull == false)
         {
-            if(($result = $this->select()) !== false)
+            if(($result = $this->select('*','*',$sort,$order)) !== false)
             {   
                 if($result->num_rows > 0)
                 {
                     // Override cache
+                    self::$cache = array();
                     while(($data=$result->fetch_assoc()) != null)
                     {
-                        self::$cache[$data['id']] = new User($data);
+                        self::$cache[$data['user_id']] = new User($data);
                     }
                     self::$cacheFull = true;
                 }

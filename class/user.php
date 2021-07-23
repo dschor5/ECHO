@@ -11,6 +11,11 @@ class User
         $this->data = $data;
     }
 
+    public function getId(): int
+    {
+        return $this->data['user_id'];
+    }
+
     public function getUsername(): string
     {
         return $this->data['username'];

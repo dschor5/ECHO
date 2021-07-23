@@ -97,7 +97,15 @@ abstract class DefaultModule
 
     public function compile()
     {
-        $subaction = $_GET['subaction'] ?? '';
+        $subaction = '';
+        if(isset($_POST['subaction']) && $_POST['subaction'] != null)
+        {
+            $subaction = $_POST['subaction'];
+        }
+        elseif(isset($_GET['subaction']) && $_GET['subaction'] != null)
+        {
+            $subaction = $_GET['subaction'];
+        }
 
         if(in_array($subaction, $this->subJsonRequests))
         {

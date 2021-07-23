@@ -1,40 +1,47 @@
-// Get the modal
-var modal = document.getElementById('loginform');
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-
 $(document).ready(function() {
-    $('#butlogin').on('click', function() {
+    $('#login-btn').on('click', function() {
 		var username = $('#uname').val();
 		var password = $('#upass').val();
 		if(username != '' && password != '') {
 			$.ajax({
-				url:  base_url.concat('/login'),
+				url:  '%http%%site_url%/',
 				type: "POST",
 				data: {
 					uname: username,
-					upass: password						
+					upass: password,
+                    subaction: 'login'
 				},
                 dataType: 'json',
                 success: function(data) {
-                    if(data.login) {
+                    if(data.login == true) {
                         location.href = '%http%%site_url%/chat';
                     }
                     else{
-                        $('#response').text('Invalid username or password.');
-                        $('#response').show();
+                        $('div.modal-response').text('Invalid username or password.');
+                        $('div.modal-response').show();
                     }
                 },
 			});
 		}
 		else{
-			$('#response').text('Invalid username or password.');
-            $('#response').show();
+			$('div.modal-response').text('Invalid username or password.');
+            $('div.modal-response').show();
 		}
 	});
+
+    $('.modal').click( function(event) {
+        if($(event.target).attr('class') == 'modal') {
+            closeModal();
+        }
+    });
+
+    $('button.modal-close').on('click', closeModal);
+    $('button.modal-btn-sec').on('click', closeModal);
 });
+
+function closeModal() {
+    $('#loginform').css('display', 'none');
+    $('#uname').val('');
+    $('#upass').val('');
+    $('div.modal-response').hide();
+}
