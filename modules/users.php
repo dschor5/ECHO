@@ -108,7 +108,11 @@ class UsersModule extends DefaultModule
     private function createNewUser($fields)
     {
         $usersDao = UsersDao::getInstance();
-        return $usersDao->insert($fields);
+        $ret = $usersDao->insert($fields);
+
+        // Create conversations. 
+        // Add participants to conversations. 
+        return $ret;
     }
 
     private function getUser()
