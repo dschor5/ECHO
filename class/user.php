@@ -67,7 +67,7 @@ class User
             'last_login' => date('Y-m-d H:i:s', time())
         );
 
-        if ($usersDao->update($newData, $this->data['id']) !== false)
+        if ($usersDao->update($newData, $this->data['user_id']) !== false)
         {
             $ret = $newData['session_id'];
         }
