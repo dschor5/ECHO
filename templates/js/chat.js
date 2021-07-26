@@ -2,8 +2,11 @@ $(document).ready(setTimeout(refreshContents, 1000));
 
 function refreshContents() {
     var response = $.ajax({
-        url: '%http%%site_url%/chat/refresh',
+        url: '%http%%site_url%/chat',
         type: 'POST',
+        data: {
+            subaction: 'refresh',
+        },
         dataType: 'json',
         success: function(data) {
             $('#time-mcc-value').text(data.time_mcc);

@@ -8,7 +8,7 @@ class UsersModule extends DefaultModule
     public function __construct(&$main, &$user)
     {
         parent::__construct($main, $user);
-        $this->subJsonRequests = array('getuser', 'edituser', 'deleteuser');
+        $this->subJsonRequests = array('getuser', 'edituser', 'deleteuser', 'resetuser');
         $this->subHtmlRequests = array('list');
     }
 
@@ -32,7 +32,16 @@ class UsersModule extends DefaultModule
                 $response = $this->deleteUser();
                 break;
             }
-
+            case 'resetuser':
+            {
+                $response = $this->resetUserPassword();
+                break;
+            }
+            default:
+            {
+                $response['success'] = false;
+                $response['error'] = 'Unknown request.';
+            }
         }
 
         return $response;
@@ -51,9 +60,48 @@ class UsersModule extends DefaultModule
         return $this->listUsers();
     }
 
+    private function resetUserPassword()
+    {
+        global $server;
+
+        $response = array('success'=>false, 'error'=>'');
+
+        $user_id = $_POST['user_id'] ?? 0;
+
+        if($user_id > 0 && $user_id != $this->user->getId())
+        {
+            $usersDao = UsersDao::getInstance();
+            $user = $usersDao->update(array('password_reset'=>1), $user_id);
+            $response['success'] = true;
+        }
+        else
+        {
+            $response['error'] = 'Cannot reset your own account.';
+        }
+
+        return $response; 
+    }
+
     private function deleteUser()
     {
-        
+        global $server;
+
+        $response = array('success'=>false, 'error'=>'');
+
+        $user_id = $_POST['user_id'] ?? 0;
+
+        if($user_id > 0 && $user_id != $this->user->getId())
+        {
+            $usersDao = UsersDao::getInstance();
+            $user = $usersDao->drop($user_id);
+            $response['success'] = true;
+        }
+        else
+        {
+            $response['error'] = 'Cannot delete yourself.';
+        }
+
+        return $response;
     }
 
     private function editUser()
@@ -75,6 +123,10 @@ class UsersModule extends DefaultModule
         elseif($user != null && $user->getId() != $user_id && $user->getUsername() == $username)
         {
             $response['error'] = 'Username already in use.';
+        }
+        elseif($user != null && $user->isAdmin() != $isAdmin)
+        {
+            $response['error'] = 'Cannot remove your own admin priviledges.';
         }
         else
         {
@@ -139,6 +191,8 @@ class UsersModule extends DefaultModule
 
     private function listUsers() : string
     {
+        global $mission;
+
         $sort = $_GET['sort'] ?? 'user_id';
         $order = $_GET['order'] ?? 'ASC';
 
@@ -148,8 +202,8 @@ class UsersModule extends DefaultModule
         $headers = array(
             'id' => 'ID',
             'username' => 'Username',
-            'is_crew'  => 'Is Crew?',
-            'is_admin' => 'Is Admin?',
+            'is_crew'  => 'Role',
+            'is_admin' => 'Admin',
             'tools'    => 'Actions'
         );
         
@@ -157,29 +211,38 @@ class UsersModule extends DefaultModule
 
         foreach($users as $id => $user)
         {
-            $editLink = Main::loadTemplate('modules/link-js.txt', array(
-                '/%onclick%/'=>'editUser('.$id.')', 
+            $tools = array();
+            $tools[] = Main::loadTemplate('modules/link-js.txt', array(
+                '/%onclick%/'=>'getUser('.$id.')', 
                 '/%text%/'=>'Edit'
             ));
-            $deleteLink = Main::loadTemplate('modules/link-js.txt', array(
-                '/%onclick%/'=>'deleteUser('.$id.', \''.$user->getUsername().'\')', 
-                '/%text%/'=>'Delete'
-            ));
-            $resetLink = Main::loadTemplate('modules/link-js.txt', array(
-                '/%onclick%/'=>'resetUserPsw('.$id.', \''.$user->getUsername().'\')', 
-                '/%text%/'=>'Reset Password'
-            ));
+
+            if($this->user->getId() != $id)
+            {
+                $tools[] = Main::loadTemplate('modules/link-js.txt', array(
+                    '/%onclick%/'=>'confirmAction(\'deleteuser\', '.$id.', \''.$user->getUsername().'\')', 
+                    '/%text%/'=>'Delete'
+                ));
+                $tools[] = Main::loadTemplate('modules/link-js.txt', array(
+                    '/%onclick%/'=>'confirmAction(\'resetuser\', '.$id.', \''.$user->getUsername().'\')', 
+                    '/%text%/'=>'Reset Password'
+                ));
+            }
 
             $list->addRow(array(
                 'id' => $id,
                 'username' => $user->getUsername(),
-                'is_crew' => $user->isCrew() ? 'Yes' : 'No',
+                'is_crew' => $user->isCrew() ? $mission['role_hab'] : $mission['role_mcc'],
                 'is_admin' => $user->isAdmin() ? 'Yes' : 'No',
-                'tools' => $editLink.', '.$deleteLink.', '.$resetLink,
+                'tools' => join(', ', $tools),
             ));
         }
 
-        return Main::loadTemplate('modules/users-list.txt', array('/%content%/'=>$list->build()));
+        return Main::loadTemplate('modules/users.txt', array(
+            '/%content%/'=>$list->build(),
+            '/%role_mcc%/'=>$mission['role_mcc'],
+            '/%role_hab%/'=>$mission['role_hab'],
+        ));
     }
 }
 

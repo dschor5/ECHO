@@ -11,6 +11,8 @@ class MessagesDao extends Dao
     {
         return null;
     }
+
+    
 }
 
 ?>

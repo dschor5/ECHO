@@ -149,9 +149,9 @@ class Database
             $this->error =  $this->db->error;
             $this->errorTrace = debug_backtrace();
             echo '<font color=red><b>Database Error.</b></font><br>';
-            //echo $this->errorQuery;
-            //echo $this->error;
-            //echo $this->errorTrace;
+            echo $this->errorQuery;
+            echo $this->error;
+            echo $this->errorTrace;
             return null;
         }
 

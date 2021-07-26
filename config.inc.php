@@ -19,16 +19,16 @@ $config['modules_public'] = array(
     'file'
 );
 
-$config['modules_user'] = array(
+$config['modules_user'] = array_merge($config['modules_public'], array(
     'chat',
     'settings'
-);
+));
 
-$config['modules_admin'] = array(
+$config['modules_admin'] = array_merge($config['modules_user'], array(
     'users', 
     'delay', 
     'mission'
-);
+));
 
 $config['cookie_name'] = 'website';
 $config['cookie_expire'] = 3600;
@@ -52,6 +52,7 @@ require_once('class/user.php');
 require_once('class/delay.php');
 require_once('class/time.php');
 require_once('class/list.php');
+require_once('class/conversation.php');
 
 // Include database objects
 require_once('database/usersDao.php');

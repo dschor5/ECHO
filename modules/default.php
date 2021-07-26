@@ -25,6 +25,7 @@ abstract class DefaultModule
         $this->navLinks = array();
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array();
+        $this->subStreamRequests = array();
     }
 
     public function getPageTitle()
@@ -113,12 +114,22 @@ abstract class DefaultModule
             echo json_encode($this->compileJson($subaction));
             exit();
         }
+        elseif(in_array($subaction, $this->subStreamRequests))
+        {
+            header('Content-Type: text/event-stream');
+            $this->compileStream();
+            exit();
+        }
         
         return $this->compileHtml($subaction);
     }
 
     public abstract function compileJson(string $subaction): array;
     public abstract function compileHtml(string $subaction): string;
+    public function compileStream(string $subaction)
+    {
+        return;
+    }
 }
 
 ?>

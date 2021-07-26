@@ -2,10 +2,13 @@
 
 class ChatModule extends DefaultModule
 {
+    private $conversations;
+    private $conversationId;
+
     public function __construct(&$main, &$user)
     {
         parent::__construct($main, $user);
-        $this->subJsonRequests = array('message', 'upload', 'refresh');
+        $this->subJsonRequests = array('send_message', 'upload', 'refresh');
         $this->subHtmlRequests = array('group');
     }
 
@@ -29,6 +32,8 @@ class ChatModule extends DefaultModule
     {
         global $mission;
 
+        $this->conversationId = $_GET['id'] ?? 1;
+
         $timeKeeper = TimeKeeper::getInstance();
 
         $this->addCss('common');
@@ -50,11 +55,7 @@ class ChatModule extends DefaultModule
             $this->addHeaderMenu('Mission Settings', 'mission');
         }
 
-        $this->conversationId = $_GET['conversation'] ?? null;
-
-        $conversationsDao = ConversationsDao::getInstance();
-        $convo = $conversationsDao->getConversationById($this->conversationId);
-
+        
 
         // Load default conversaiton given subaction.
         
@@ -71,21 +72,36 @@ class ChatModule extends DefaultModule
 
     private function getConversationList(): string 
     {
-        $usersDao = UsersDao::getInstance();
-        $users = $usersDao->getUsers();
-        
-        $content = Main::loadTemplate('modules/chat-rooms.txt', array(
-            '/%room_id%/'=>'', 
-            '/%room_name%/'=> 'Public'
-        ));
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
 
-        foreach($users as $user)
+        $content = '';
+        foreach($conversations as $convo)
         {
-            if($user->getUsername() != $this->user->getUsername())
+            $participants = $convo->getParticipants($this->user->getId());
+            if(count($participants) > 1)
+            {
+                $name = $convo->getName();
+            }
+            else
+            {
+                $name = 'Private: '.array_pop($participants);
+            }
+
+            if($convo->getId() == $this->conversationId)
             {
                 $content .= Main::loadTemplate('modules/chat-rooms.txt', array(
-                    '/%room_id%/'=>'0', 
-                    '/%room_name%/'=> $user->getUsername()
+                    '/%room_id%/'   => $convo->getId(),
+                    '/%room_name%/' => $name,
+                    '/%selected%/'  => 'room-selected',
+                ));
+            }
+            else
+            {
+                $content .= Main::loadTemplate('modules/chat-rooms.txt', array(
+                    '/%room_id%/'   => $convo->getId(),
+                    '/%room_name%/' => $name,
+                    '/%selected%/'  => '',
                 ));
             }
         }

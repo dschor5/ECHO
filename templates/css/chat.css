@@ -44,7 +44,7 @@
     overflow-y: auto;
 }
 
-#rooms a {
+.room {
     position: relative;
     list-style-type: none;
     padding: 5xp;
@@ -60,6 +60,10 @@
     padding-bottom: 5px;
     display: block;
     border-radius: 5px;
+}
+
+.room-selected {
+    background-color: #FF0000;
 }
 
 #rooms a:hover {
@@ -179,6 +183,7 @@
 
 .newmsg-attach {
     float: left;
+    font-family: 'Times', 'Times New Roman', 'serif', 'sans-serif', system-ui, -apple-system, BlinkMacSystemFont, 'Avenir Next', 'Avenir', 'Segoe UI', 'Lucida Grande', 'Helvetica Neue', 'Helvetica', 'Fira Sans', 'Roboto', 'Noto', 'Droid Sans', 'Cantarell', 'Oxygen', 'Ubuntu', 'Franklin Gothic Medium', 'Century Gothic', 'Liberation Sans', sans-serif, 'EmojiSymbols';
 }
 
 /* Chat containers */

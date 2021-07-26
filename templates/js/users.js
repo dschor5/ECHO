@@ -1,4 +1,5 @@
-function editUser(id) {
+// Get user information to edit profile.
+function getUser(id) {
     $.ajax({
         url: '%http%%site_url%/users',
         type: 'POST',
@@ -27,52 +28,80 @@ function editUser(id) {
     });
 }
 
+// Process request to edit user profile. 
+function editUser() {
+    $.ajax({
+        url: '%http%%site_url%/users',
+        type: 'POST',
+        data: {
+            subaction: 'edituser',
+            user_id:  $('#edit-user-id').val(),
+            username: $('#username').val(),
+            is_crew:  $('#is_crew').val(),
+            is_admin: $('#is_admin').val(),
+        },
+        dataType: 'json',
+        success: function(data) {
+            if(data.success != true) {
+                $('div.modal-response').text(data.error);
+                $('div.modal-response').show();
+            }
+            else {
+                location.href = '%http%%site_url%/users';
+            }
+        }
+    });
+}
+
+function confirmAction(subaction, id, username) {
+    $(document).ready(function() {
+        $('#confirm-subaction').val(subaction);
+        $('#confirm-user-id').val(id);
+        if(subaction == 'deleteuser') {
+            $('.modal-title').text('Delete User');
+            $('.modal-confirm-body').text("Are you sure you want to delete '".concat(username, "'?"));
+        }
+        else {
+            $('.modal-title').text('Reset User Password');
+            $('.modal-confirm-body').text("Are you sure you want to reset the password for '".concat(username, "'?"));
+        }
+        $('#confirm-box').css('display', 'block');
+    });
+}
+
 $(document).ready(function() {
-    $('#edit-user-btn').on('click', function() {
+    $('#edit-user-btn').on('click', editUser);
+
+    $('#confirm-btn').on('click', function() {
         $.ajax({
             url: '%http%%site_url%/users',
             type: 'POST',
             data: {
-                subaction: 'edituser',
-                user_id:  $('#edit-user-id').val(),
-                username: $('#username').val(),
-                is_crew:  $('#is_crew').val(),
-                is_admin: $('#is_admin').val(),
+                subaction: $('#confirm-subaction').val(),		
+                user_id: $('#confirm-user-id').val(),		
             },
             dataType: 'json',
-            success: function(data) {
-                if(data.success != true) {
-                    $('div.modal-response').text(data.error);
-                    $('div.modal-response').show();
-                }
-                else {
-                    location.href = '%http%%site_url%/users';
-                }
+            success: function() {
+                location.href = '%http%%site_url%/users';
             }
-        })
+        });
     });
 });
 
-
-
-function deleteUser(id, username) {
-    
-}
-
+// Actions to execute when closing modal window.
 function closeModal() {
     $('#edit-user').css('display', 'none');
-    $('#confirm-delete').css('display', 'none');
+    $('#confirm-box').css('display', 'none');
     $('div.modal-response').hide();
 }
 
-
+// Event handlers for closing modal.
 $(document).ready(function() {
     $('.modal').click( function(event) {
         if($(event.target).attr('class') == 'modal') {
             closeModal();
         }
     });
-
     $('button.modal-close').on('click', closeModal);
-    $('button.modal-btn-sec').on('click', closeModal);
+    $('button.cancel-btn').on('click', closeModal);
 });

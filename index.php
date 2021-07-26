@@ -32,33 +32,37 @@ class Main
         return self::$instance;
     }
 
+    private function getValidModules(User $user)
+    {
+        global $config;
+
+        $validModules = $config['modules_public'];
+
+        if($this->user != null) 
+        {
+            if($this->user->isAdmin())
+            {
+                $validModules = $config['modules_admin'];
+            }
+            else
+            {
+                $validModules = $config['modules_user'];
+            }
+        }
+        
+        return $validModules;
+    }
+
     private function __construct()
     {
         global $config;
         global $mission;
 
         // Read cookie and check if the user is logged in.
-        $this->readCookie();
         $this->checkLogin();
 
-        if($this->user != null) 
-        {
-            if($this->user->isAdmin())
-            {
-                $valid_modules = array_merge($config['modules_public'], $config['modules_user'], $config['modules_admin']);
-            }
-            else
-            {
-                $valid_modules = array_merge($config['modules_public'], $config['modules_user']);
-            }
-        }
-        else
-        {
-            $valid_modules = $config['modules_public'];
-        }
-
         $module_name = 'home';
-        if(isset($_GET['action']) && in_array($_GET['action'], $valid_modules))
+        if(isset($_GET['action']) && in_array($_GET['action'], $this->getValidModules($this->user)))
         {
             $module_name = $_GET['action'];
         }
@@ -80,7 +84,6 @@ class Main
             '/%css_file%/' =>$module->getCss(),
             '/%js_file%/' =>$module->getJavascript(),
             '/%header%/' => $module->getHeader(),
-            '/%debug%/' =>'',
             '/%home_planet%/' => $mission['home_planet'],
             '/%away_planet%/' => $mission['away_planet'],
             '/%delay_distance%/' => $commDelay->getDistanceStr(),
@@ -90,27 +93,6 @@ class Main
             '/%random%/' => rand(1, 100000),
         );
 
-        //print information about database queries
-        if((isset($this->cookie['debug']) && $this->cookie['debug'] == '1') ||
-           (isset($_GET['debug']) && $_GET['debug'] == '1'))
-        {
-            $this->cookie['debug'] = '1';
-            $replace['/%debug%/'] = $this->getDebugInfo();
-        }
-
-        if(isset($_GET['debug']))
-        {
-            $this->setCookie(array('debug'=>$_GET['debug']));
-        }
-        elseif(isset($this->cookie['debug']))
-        {
-            $this->setCookie(array('debug'=>$this->cookie['debug']));
-        }
-        else
-        {
-            $this->setCookie(array('debug'=>'0'));
-        }
-
         header('Content-type: text/html; charset=utf-8');
         echo $this->loadTemplate('main.txt', $replace);
     }
@@ -118,6 +100,8 @@ class Main
     public function checkLogin()
     {
         global $config;
+
+        $this->readCookie();
 
         // Read username and session id from the cookie.
         if(isset($this->cookie['username']) && isset($this->cookie['sessionId']))
@@ -177,13 +161,17 @@ class Main
 
         // Store copy of cookie variables.
         foreach ($data as $key=>$val)
+        {
             $this->cookie[$key] = $val;
+        }
 
         // Create cookie string.
         $cookieStr=array();
         foreach ($this->cookie as $key=>$value)
+        {
             $cookieStr[] = $key.'='.$value;
-        $cookieStr = implode('&',$cookieStr);
+        }
+        $cookieStr = implode('&', $cookieStr);
 
         // Set cookie.
         setcookie($config['cookie_name'], $cookieStr, time() + $config['cookie_expire'], '/');

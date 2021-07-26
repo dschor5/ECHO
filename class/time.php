@@ -9,7 +9,8 @@ class TimeKeeper
 
     private function __construct()
     {
-        $this->config(date_format(new DateTime(), 'Y-m-d H:i:s'), 24*60*60, 'Day');
+        global $mission;
+        $this->config($mission['time_epoch'], $mission['time_sec_per_day'], $mission['time_day']);
     }
 
     public static function getInstance(): TimeKeeper

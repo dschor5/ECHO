@@ -1,1 +1,1 @@
-                <a href="%http%%site_url%/chat/%room_id%">%room_name%</a>
+                <a href="%http%%site_url%/chat/%room_id%" class="room %selected%">%room_name% <span="room-new-%room_id%"></span></a>
