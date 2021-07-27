@@ -24,6 +24,11 @@ class UsersDao extends Dao
         parent::__construct('users', 'user_id');
     }
 
+    public function getByIds(array $ids) : array
+    {
+        // Build 
+    }
+
     public function getById(int $id)
     {
         $user = null;

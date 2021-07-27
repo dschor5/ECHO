@@ -1,0 +1,22 @@
+Enable recovery mode
+> sudo nano /etc/mysql/my.cnf
+
+Uncomment line
+> innodb_force_recovery = 1
+
+Login to mysql
+> mysql -u root -p 
+
+Drop database delay
+> drop database delay;
+
+Exit mysql
+> Exit
+
+Restart mysql
+> systemctl stop mysql
+> systemctl start mysql
+
+Open phpmyadmin
+> Create new delay database
+> run delay.sql 

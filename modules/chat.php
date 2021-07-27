@@ -28,6 +28,14 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
+    public function compileStream() 
+    {
+        while(true)
+        {
+            
+        }
+    }
+
     public function compileHtml(string $subaction) : string
     {
         global $mission;
