@@ -1,23 +1,22 @@
 <?php
 
-require_once('index.php');
+require_once('database/database.php');
 
 abstract class DefaultModule
 {
     protected $db;        // reference to database
-    protected $main;        // reference to main object
     protected $user;
 
     protected $subJsonRequests;
     protected $subHtmlRequests;
+    protected $subStreamRequests;
 
     private $cssFiles;
     private $jsFiles;
     private $navLinks;
 
-    public function __construct(&$main, &$user)
+    public function __construct(&$user)
     {
-        $this->main = &$main;
         $this->user = &$user;
         $this->db = Database::getInstance();
         $this->cssFiles = array();
@@ -98,6 +97,8 @@ abstract class DefaultModule
 
     public function compile()
     {
+        global $mission;
+
         $subaction = '';
         if(isset($_POST['subaction']) && $_POST['subaction'] != null)
         {
@@ -107,6 +108,7 @@ abstract class DefaultModule
         {
             $subaction = $_GET['subaction'];
         }
+        
 
         if(in_array($subaction, $this->subJsonRequests))
         {
@@ -131,7 +133,7 @@ abstract class DefaultModule
 
             $replace = array(
                 '/%title%/' => $this->getPageTitle(),
-                '/%content%/' => $this->compileHtml($subaction);
+                '/%content%/' => $this->compileHtml($subaction),
                 '/%css_file%/' =>$this->getCss(),
                 '/%js_file%/' =>$this->getJavascript(),
                 '/%header%/' => $this->getHeader(),
@@ -144,13 +146,13 @@ abstract class DefaultModule
                 '/%random%/' => rand(1, 100000),
             );
 
-            echo $this->loadTemplate('main.txt', $replace);
+            echo Main::loadTemplate('main.txt', $replace);
         }
     }
 
     public abstract function compileJson(string $subaction): array;
     public abstract function compileHtml(string $subaction): string;
-    public function compileStream(string $subaction)
+    public function compileStream()
     {
         return;
     }

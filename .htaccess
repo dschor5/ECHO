@@ -8,6 +8,7 @@ RewriteRule mission.inc.php error
 RewriteRule ^home index.php?action=home [QSA]
 RewriteRule ^login index.php?action=login [QSA]
 RewriteRule ^logout index.php?action=logout [QSA]
+RewriteRule ^chat/refresh index.php?action=chat&subaction=refresh [QSA]
 RewriteRule ^chat/(.*) index.php?action=chat&id=$1 [QSA]
 RewriteRule ^chat index.php?action=chat [QSA]
 RewriteRule ^mission index.php?action=mission [QSA]

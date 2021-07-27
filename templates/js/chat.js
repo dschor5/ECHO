@@ -1,3 +1,4 @@
+/*
 $(document).ready(setTimeout(refreshContents, 1000));
 
 function refreshContents() {
@@ -39,4 +40,20 @@ $(document).ready(function() {
 		}
 	});
 });
+*/
 
+const evtSource = new EventSource("%http%%site_url%/chat/refresh");
+
+evtSource.onopen = function () {
+    console.info("EventSource connected.");
+};
+  
+evtSource.onerror = function (err) {
+    console.error("EventSource failed:", err);
+};
+
+evtSource.addEventListener("time", function(event) {
+    const data = JSON.parse(event.data);
+    $('#time-mcc-value').text(data.time_mcc);
+    $('#time-hab-value').text(data.time_hab);  
+});

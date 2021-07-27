@@ -5,34 +5,50 @@ class ChatModule extends DefaultModule
     private $conversations;
     private $conversationId;
 
-    public function __construct(&$main, &$user)
+    public function __construct(&$user)
     {
-        parent::__construct($main, $user);
-        $this->subJsonRequests = array('send_message', 'upload', 'refresh');
+        parent::__construct($user);
+        $this->subJsonRequests = array('send_message', 'upload');
         $this->subHtmlRequests = array('group');
+        $this->subStreamRequests = array('refresh');
     }
 
     public function compileJson(string $subaction): array
     {
         $response = array();
 
-        if($subaction == 'refresh')
+        /*if($subaction == 'refresh')
         {
             $timeKeeper = TimeKeeper::getInstance();
             $response['time_mcc'] = $timeKeeper->getMccTimeStr();
             $response['time_hab'] = $timeKeeper->getHabTimeStr();
             $response['msg_new'] = array();
             $response['msg_status'] = array();
-        }
+        }*/
 
         return $response;
     }
 
     public function compileStream() 
     {
+        $timeKeeper = TimeKeeper::getInstance();
+        $eventTime = array();
+
         while(true)
         {
-            
+            $eventTime['time_mcc'] = $timeKeeper->getMccTimeStr();
+            $eventTime['time_hab'] = $timeKeeper->getHabTimeStr();
+            echo "event: time\n";
+            echo 'data: '.json_encode($eventTime)."\n\n";
+
+            ob_end_flush();
+            flush();
+
+            if(connection_aborted())
+            {
+                break;
+            }
+            sleep(1);
         }
     }
 
@@ -87,7 +103,7 @@ class ChatModule extends DefaultModule
         foreach($conversations as $convo)
         {
             $participants = $convo->getParticipants($this->user->getId());
-            if(count($participants) > 1)
+            if(count($participants) > 1 || $convo->getId() == 1)
             {
                 $name = $convo->getName();
             }

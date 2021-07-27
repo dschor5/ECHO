@@ -5,9 +5,9 @@ require_once('modules/default.php');
 
 class FileModule extends DefaultModule
 {
-    public function __construct(&$main, &$user)
+    public function __construct(&$user)
     {
-        parent::__construct($main, $user);
+        parent::__construct($user);
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array('logout');
     }

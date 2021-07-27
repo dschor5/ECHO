@@ -1,14 +1,16 @@
 <?php
 
-
+error_reporting(E_ALL);
 header('Pragma: no-cache');
 
 require_once('config.inc.php');
+require_once('database/usersDao.php');
 
 
 try
 {
-    Main::getInstance();
+   $main = Main::getInstance();
+   $main->compile();
 }
 catch (Exception $e) {}
 
@@ -38,7 +40,7 @@ class Main
      */
     private function __construct()
     {
-        self::readCookie();
+        $this->readCookie();
         $this->checkLogin();
     }
 
@@ -84,8 +86,10 @@ class Main
     /**
      * Load and compile current module. 
      */
-    public function compile() : void
+    public function compile() 
     {
+        global $config;
+
         // Select current module. 
         $moduleName = 'home';
         if(isset($_GET['action']) && in_array($_GET['action'], $this->getValidModulesForUser($this->user)))
@@ -96,7 +100,7 @@ class Main
         // Load module
         require_once($config['modules_dir'].'/'.$moduleName.'.php');
         $moduleClassName = $moduleName.'Module';
-        $module = new $moduleClassName($this, $this->user);
+        $module = new $moduleClassName($this->user);
 
         // Compile module.
         $module->compile();
@@ -107,7 +111,7 @@ class Main
      * set $this->user to the current User. 
      * Assumes the website cookie (username & sessionId) were already read.
      */
-    public function checkLogin() : void
+    public function checkLogin()
     {
         global $config;
 
@@ -131,15 +135,15 @@ class Main
      * Saves a local copy of the array so that this function can be called 
      * multiple times with new parameters if needed. 
      * 
-     * @param $data Associative array of key->value pairs to add to the cookie.
+     * @param array $data Associative array of key->value pairs to add to the cookie.
      */
-    public static function setSiteCookie(array $data) : void
+    public static function setSiteCookie($data)
     {
         global $config;
 
         foreach ($data as $key => $val)
         {
-            $this->cookie[$key] = $val;
+            self::$cookie[$key] = $val;
         }
 
         $cookieStr = http_build_query(self::$cookie);
@@ -147,7 +151,7 @@ class Main
         setcookie($config['cookie_name'], $cookieStr, time() + $config['cookie_expire'], '/');
     }
 
-    public static function readCookie() : void
+    public function readCookie()
     {
         global $config;
 
@@ -156,6 +160,8 @@ class Main
             self::$cookie = array();
             parse_str($_COOKIE[$config['cookie_name']], self::$cookie);
         }
+
+        return;
     }
 
     public static function loadTemplate($template, $replace=null)

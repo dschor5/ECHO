@@ -5,9 +5,9 @@ require_once('modules/default.php');
 
 class UsersModule extends DefaultModule
 {
-    public function __construct(&$main, &$user)
+    public function __construct(&$user)
     {
-        parent::__construct($main, $user);
+        parent::__construct($user);
         $this->subJsonRequests = array('getuser', 'edituser', 'deleteuser', 'resetuser');
         $this->subHtmlRequests = array('list');
     }

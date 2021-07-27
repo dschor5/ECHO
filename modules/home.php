@@ -1,13 +1,12 @@
 <?php
 
-require_once('index.php');
 require_once('modules/default.php');
 
 class HomeModule extends DefaultModule
 {
-    public function __construct(&$main, &$user)
+    public function __construct(&$user)
     {
-        parent::__construct($main, $user);
+        parent::__construct($user);
         $this->subJsonRequests = array('login');
         $this->subHtmlRequests = array('logout');
     }
@@ -58,7 +57,7 @@ class HomeModule extends DefaultModule
             {
                 $this->user = $user;
                 $sessionId = $user->createNewSession();
-                $this->main->setCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
+                Main::setSiteCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
                 $response['login'] = true;
             }
         }
@@ -71,7 +70,7 @@ class HomeModule extends DefaultModule
         global $server;
 
         $this->user = null;
-        $this->main->setCookie(array('sessionId'=>null,'username'=>null));
+        Main::setSiteCookie(array('sessionId'=>null,'username'=>null));
         header('Location: '.$server['http'].$server['site_url']);
         return 'Logging out, please wait while you are redirected to the homepage.';
     }    

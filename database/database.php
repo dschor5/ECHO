@@ -133,7 +133,7 @@ class Database
         //run the query
         $result = $this->db->query($query);
 
-        //get the end time.
+        //get the end time.w
         $time_end = $this->getmicrotime();
 
         //add the query time to the total query time
