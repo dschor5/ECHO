@@ -1,28 +1,51 @@
 <?php
 
-//don't cache this page
+
 header('Pragma: no-cache');
 
-//include config file
 require_once('config.inc.php');
 
-//start it up...
+
 try
 {
     Main::getInstance();
 }
-catch (Exception $e)
-{
-    //echo $e->getMessage();
-}
+catch (Exception $e) {}
 
+/**
+ * Main class.
+ */
 class Main
 {
-    private $user = null;            //user object
-    private $cookie = null;            //associative array of cookie values
+    /** 
+     * Instance of current user. Defaults to null if no user is logged in. 
+     */
+    private $user = null;
+
+    /**
+     * Local copy of parameters read/saved from the website cookie. 
+     */
+    private static $cookie = array();
+
+    /** 
+     * Singleton instance for Main class.
+     */
     private static $instance = null;
 
-    public static function getInstance()
+    /**
+     * Singleton constructor for Main class. 
+     * Read website cookie and validate user session. 
+     */
+    private function __construct()
+    {
+        self::readCookie();
+        $this->checkLogin();
+    }
+
+    /**
+     * Returns singleton instance of Main class. 
+     */
+    public static function getInstance() : Main
     {
         if(self::$instance == null)
         {
@@ -32,7 +55,12 @@ class Main
         return self::$instance;
     }
 
-    private function getValidModules(User $user)
+    /**
+     * Get list of valid modules for current user.
+     * 
+     * @return array List of valid modules.
+     */
+    private function getValidModulesForUser() : array
     {
         global $config;
 
@@ -51,150 +79,82 @@ class Main
         }
         
         return $validModules;
-    }
+    } 
 
-    private function __construct()
+    /**
+     * Load and compile current module. 
+     */
+    public function compile() : void
     {
-        global $config;
-        global $mission;
-
-        // Read cookie and check if the user is logged in.
-        $this->checkLogin();
-
-        $module_name = 'home';
-        if(isset($_GET['action']) && in_array($_GET['action'], $this->getValidModules($this->user)))
+        // Select current module. 
+        $moduleName = 'home';
+        if(isset($_GET['action']) && in_array($_GET['action'], $this->getValidModulesForUser($this->user)))
         {
-            $module_name = $_GET['action'];
+            $moduleName = $_GET['action'];
         }
         
-        require_once($config['modules_dir'].'/'.$module_name.'.php');
-        $module_class_name = $module_name.'Module';
-        $module = new $module_class_name($this, $this->user);
+        // Load module
+        require_once($config['modules_dir'].'/'.$moduleName.'.php');
+        $moduleClassName = $moduleName.'Module';
+        $module = new $moduleClassName($this, $this->user);
 
-        // Configure mission time
-        $timeKeeper = TimeKeeper::getInstance();
-        $timeKeeper->config($mission['time_epoch'], $mission['time_sec_per_day'], $mission['time_day']);
-        
-        // Configure communicaiton delay
-        $commDelay = Delay::getInstance();
-
-        $replace = array(
-            '/%title%/' => $module->getPageTitle(),
-            '/%content%/' => $module->compile(),
-            '/%css_file%/' =>$module->getCss(),
-            '/%js_file%/' =>$module->getJavascript(),
-            '/%header%/' => $module->getHeader(),
-            '/%home_planet%/' => $mission['home_planet'],
-            '/%away_planet%/' => $mission['away_planet'],
-            '/%delay_distance%/' => $commDelay->getDistanceStr(),
-            '/%delay_time%/' => $commDelay->getDelayStr(),
-            '/%mission_name%/' => $mission['name'],
-            '/%year%/' => date('Y'),
-            '/%random%/' => rand(1, 100000),
-        );
-
-        header('Content-type: text/html; charset=utf-8');
-        echo $this->loadTemplate('main.txt', $replace);
+        // Compile module.
+        $module->compile();
     }
 
-    public function checkLogin()
+    /**
+     * Read cookie and validate session for current user. If successful, 
+     * set $this->user to the current User. 
+     * Assumes the website cookie (username & sessionId) were already read.
+     */
+    public function checkLogin() : void
     {
         global $config;
 
-        $this->readCookie();
-
-        // Read username and session id from the cookie.
-        if(isset($this->cookie['username']) && isset($this->cookie['sessionId']))
+        if(isset(self::$cookie['username']) && isset(self::$cookie['sessionId']))
         {
-            $username = $this->cookie['username'];
-            $sessionId = $this->cookie['sessionId'];
+            $username = trim(self::$cookie['username']);
+            $sessionId = trim(self::$cookie['sessionId']);
 
             $usersDao = UsersDao::getInstance();
             $this->user = $usersDao->getByUsername($username);
 
             if($this->user != null && $this->user->isValidSession($sessionId))
             {
-                $this->setCookie(array('sessionId'=>$sessionId, 'username'=>$username));
-            }
-            else
-            {
-                $this->user = null;
-
+                $this->setSiteCookie(array('sessionId'=>$sessionId, 'username'=>$username));
             }
         }
     }
 
-    public function getDebugInfo()
-    {
-        $db = Database::getInstance();
-
-        $content = '<div id="debug">DEBUG INFORMATION<br/>';
-
-        if($this->user != null)
-        {
-            $content .= 'USER: '.$this->user->getUsername().'<br/>';
-        }
-
-        foreach($_GET as $key=>$get)
-            $content .= '<b>'.$key.'</b>=>'.$get.'<br/>';
-        $content .= '<br/>';
-
-        $err=$db->getErr();
-        if ($err != false)
-        {
-            $content .= 'Executed '.$db->query_count .' database queries in '. $db->query_time .' us';
-            $content .= '<br/>Error: '.$err['query'] . '<br/>' . $err['error'].'<br/>';
-
-            foreach ($err['trace'] as $trace)
-                $content .= $trace['function'] .' in '.$trace['file'] . ' on line ' . $trace['line'] .' <br/>';
-        }
-
-        //add validators
-        $content .= '<a href="http://validator.w3.org/check?uri=referer">XHTML</a>&nbsp;<a href="http://jigsaw.w3.org/css-validator/validator?uri=http://musical.darioschor.com//templates/css/common.css">CSS</a></div>';
-
-        return $content;
-    }
-
-    public function setCookie($data)
+    /** 
+     * Set website cookie with associative array. 
+     * Saves a local copy of the array so that this function can be called 
+     * multiple times with new parameters if needed. 
+     * 
+     * @param $data Associative array of key->value pairs to add to the cookie.
+     */
+    public static function setSiteCookie(array $data) : void
     {
         global $config;
 
-        // Store copy of cookie variables.
-        foreach ($data as $key=>$val)
+        foreach ($data as $key => $val)
         {
             $this->cookie[$key] = $val;
         }
 
-        // Create cookie string.
-        $cookieStr=array();
-        foreach ($this->cookie as $key=>$value)
-        {
-            $cookieStr[] = $key.'='.$value;
-        }
-        $cookieStr = implode('&', $cookieStr);
+        $cookieStr = http_build_query(self::$cookie);
 
-        // Set cookie.
         setcookie($config['cookie_name'], $cookieStr, time() + $config['cookie_expire'], '/');
     }
 
-    public function readCookie()
+    public static function readCookie() : void
     {
         global $config;
-        $data = null;        //data read from cookie
 
         if(isset($_COOKIE[$config['cookie_name']]))
         {
-            $tmp = explode('&', urldecode($_COOKIE[$config['cookie_name']]));
-
-            $this->cookie = array();
-            foreach($tmp as $val)
-            {
-                if (strpos($val,'='))
-                {
-                    list($key,$val) = @explode('=',$val);
-                    $this->cookie[$key] = $val;
-                }
-            }
+            self::$cookie = array();
+            parse_str($_COOKIE[$config['cookie_name']], self::$cookie);
         }
     }
 
