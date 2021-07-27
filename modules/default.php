@@ -112,16 +112,40 @@ abstract class DefaultModule
         {
             header('Content-Type: application/json');
             echo json_encode($this->compileJson($subaction));
-            exit();
         }
         elseif(in_array($subaction, $this->subStreamRequests))
         {
             header('Content-Type: text/event-stream');
             $this->compileStream();
-            exit();
         }
-        
-        return $this->compileHtml($subaction);
+        else
+        {
+            header('Content-type: text/html; charset=utf-8');
+
+            // Configure mission time
+            $timeKeeper = TimeKeeper::getInstance();
+            $timeKeeper->config($mission['time_epoch'], $mission['time_sec_per_day'], $mission['time_day']);
+
+            // Configure communicaiton delay
+            $commDelay = Delay::getInstance();
+
+            $replace = array(
+                '/%title%/' => $this->getPageTitle(),
+                '/%content%/' => $this->compileHtml($subaction);
+                '/%css_file%/' =>$this->getCss(),
+                '/%js_file%/' =>$this->getJavascript(),
+                '/%header%/' => $this->getHeader(),
+                '/%home_planet%/' => $mission['home_planet'],
+                '/%away_planet%/' => $mission['away_planet'],
+                '/%delay_distance%/' => $commDelay->getDistanceStr(),
+                '/%delay_time%/' => $commDelay->getDelayStr(),
+                '/%mission_name%/' => $mission['name'],
+                '/%year%/' => date('Y'),
+                '/%random%/' => rand(1, 100000),
+            );
+
+            echo $this->loadTemplate('main.txt', $replace);
+        }
     }
 
     public abstract function compileJson(string $subaction): array;
