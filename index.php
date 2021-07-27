@@ -140,6 +140,7 @@ class Main
     public static function setSiteCookie($data)
     {
         global $config;
+        global $server;
 
         foreach ($data as $key => $val)
         {
@@ -148,7 +149,15 @@ class Main
 
         $cookieStr = http_build_query(self::$cookie);
 
-        setcookie($config['cookie_name'], $cookieStr, time() + $config['cookie_expire'], '/');
+        setcookie(
+            $config['cookie_name'], 
+            $cookieStr, 
+            time() + $config['cookie_expire'], 
+            '/', 
+            $server['site_url'],
+            ($server['http'] == 'https://'),
+            true
+        );
     }
 
     public function readCookie()
