@@ -42,10 +42,7 @@ CREATE TABLE `messages` (
   `conversation_id` int(11) UNSIGNED NOT NULL,
   `text` text CHARACTER SET utf8 NOT NULL,
   `type` enum('text','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
-  `sent_from_mcc` tinyint(1) NOT NULL,
   `sent_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `recv_time_mcc` datetime DEFAULT NULL,
-  `recv_time_hab` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE `messages`
@@ -53,6 +50,17 @@ ALTER TABLE `messages`
 
 ALTER TABLE `messages`
   MODIFY `message_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+CREATE TABLE `msg_status` (
+  `message_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL COMMENT 'Recipient user id',
+  `recv_time` int(11) DEFAULT NULL COMMENT 'In recipient''s time',
+  `is_delivered` tinyint(1) NOT NULL DEFAULT '0',
+  `is_read` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `msg_status`
+  ADD PRIMARY KEY (`message_id`,`user_id`);
 
 INSERT INTO `users` (`user_id`, `username`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`) VALUES
 (1, 'admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', '17eebdfd162812db191eefdf', 1, 0, '2021-07-23 14:52:17', 1);

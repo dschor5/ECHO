@@ -57,5 +57,8 @@ require_once('class/conversation.php');
 // Include database objects
 require_once('database/usersDao.php');
 require_once('database/conversationsDao.php');
+require_once('database/participantsDao.php');
+require_once('database/messagesDao.php');
+require_once('database/messageStatusDao.php');
 
 ?>

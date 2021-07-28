@@ -21,26 +21,24 @@ function refreshContents() {
 function receiveMessage(data) {
 
 }
-
+*/
 $(document).ready(function() {
     $('#newmsg-send-btn').on('click', function() {
-		var msgRoom = $('#newmsg-room').val();
-        var msgBody = $('#newmsg-text').val();
-        
-		if(msgTo != '' && msgBody != '') {
-			$.ajax({
-				url:  '%http%%site_url%/chat/send',
-				type: "POST",
-				data: {
-					msgRoom: msgRoom,
-					msgBody: msgBody						
-				},
+        if($('#newmsg-room').val() != '') {
+            $.ajax({
+                url:  '%http%%site_url%/chat',
+                type: "POST",
+                data: {
+                    subaction: 'send',
+                    msgRoom: $('#newmsg-room').val(),
+                    msgBody: $('#newmsg-text').val()                        
+                },
                 dataType: 'json'
-			});
-		}
-	});
+            });
+        }
+    });
 });
-*/
+
 
 const evtSource = new EventSource("%http%%site_url%/chat/refresh");
 
@@ -57,3 +55,5 @@ evtSource.addEventListener("time", function(event) {
     $('#time-mcc-value').text(data.time_mcc);
     $('#time-hab-value').text(data.time_hab);  
 });
+
+

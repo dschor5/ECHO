@@ -2,6 +2,11 @@
 
 class Message
 {
+    const TEXT = 'text';
+    const FILE = 'file';
+    const AUDIO = 'audio';
+    const VIDEO = 'video';
+
     private $data;
 
     public function __construct($data)

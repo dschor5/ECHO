@@ -13,7 +13,6 @@
 %css_file%%js_file%</head>
 
 <body>
-%debug%
 <center>
 <div id="canvas">
     <div id="container">

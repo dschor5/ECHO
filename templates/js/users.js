@@ -4,8 +4,8 @@ function getUser(id) {
         url: '%http%%site_url%/users',
         type: 'POST',
         data: {
-            subaction: 'getuser',		
-            user_id: id,		
+            subaction: 'getuser',        
+            user_id: id,        
         },
         dataType: 'json',
         success: function(data) {
@@ -77,8 +77,8 @@ $(document).ready(function() {
             url: '%http%%site_url%/users',
             type: 'POST',
             data: {
-                subaction: $('#confirm-subaction').val(),		
-                user_id: $('#confirm-user-id').val(),		
+                subaction: $('#confirm-subaction').val(),        
+                user_id: $('#confirm-user-id').val(),        
             },
             dataType: 'json',
             success: function() {

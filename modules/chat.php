@@ -8,14 +8,29 @@ class ChatModule extends DefaultModule
     public function __construct(&$user)
     {
         parent::__construct($user);
-        $this->subJsonRequests = array('send_message', 'upload');
+        $this->subJsonRequests = array('send', 'upload');
         $this->subHtmlRequests = array('group');
         $this->subStreamRequests = array('refresh');
     }
 
     public function compileJson(string $subaction): array
     {
-        $response = array();
+        $response = array('success' => false);
+        $this->conversationId = $_COOKIE['convo-id'] ?? 1;
+        $response['convo-id'] = $this->conversationId;
+
+        if($subaction == 'send')
+        {
+            $msgText = $_POST['msgBody'] ?? '';
+            if(strlen($msgText) > 0)
+            {
+                $response = $this->sendMessage($msgText);
+            }
+        }
+        elseif($subaction == 'upload')
+        {
+
+        }
 
         /*if($subaction == 'refresh')
         {
@@ -27,6 +42,50 @@ class ChatModule extends DefaultModule
         }*/
 
         return $response;
+    }
+
+    private function sendMessage(string $msgText)
+    {
+        $messageDao = MessagesDao::getInstance();
+        $participantsDao = ParticipantsDao::getInstance();
+        $messageStatusDao = MessageStatusDao::getInstance();
+        
+        $messageDao->startTransaction();
+
+        $msgData = array(
+            'user_id' => $this->user->getId(),
+            'conversation_id' => $this->conversationId,
+            'text' => $msgText,
+            'type' => Message::TEXT,
+            'sent_time' => $this->user->getUserTimeStr(),
+        );
+        $messageId = $messageDao->insert($msgData);
+
+        $partcipants = $participantsDao->getParticipantIds($this->conversationId, $this->user->getId());
+        foreach($partcipants as $userId => $isCrew)
+        {
+            $msgStatusData = array(
+                'message_id' => $messageId,
+                'user_id' => $userId,
+                'recv_time' => ($isCrew == $this->user->isCrew()) ? $this->user->getUserTimeStr() : null,
+                'is_delivered' => ($isCrew == $this->user->isCrew()),
+                'is_read' => false,
+            );
+            $messageStatusDao->insert($msgStatusData);
+        }
+
+        $messageDao->endTransaction();
+
+        // Format JSON response to the user that sent the message
+        $jsonResponse = array(
+            'success' => true,
+            'msg_id' => $messageId,
+            'user_id' => $msgData['user_id'],
+            'username' => $this->user->getUsername(),
+            'text' => $msgText,
+            'sent_time' => $msgData['sent_time'],
+        );
+        return $jsonResponse;
     }
 
     public function compileStream() 
@@ -57,6 +116,7 @@ class ChatModule extends DefaultModule
         global $mission;
 
         $this->conversationId = $_GET['id'] ?? 1;
+        Main::setSiteCookie(array('convo-id'=>$this->conversationId));
 
         $timeKeeper = TimeKeeper::getInstance();
 
@@ -79,10 +139,8 @@ class ChatModule extends DefaultModule
             $this->addHeaderMenu('Mission Settings', 'mission');
         }
 
-        
-
         // Load default conversaiton given subaction.
-        
+
         // Get list of users to put in the navigation bar
 
         return Main::loadTemplate('modules/chat.txt', 
@@ -91,6 +149,7 @@ class ChatModule extends DefaultModule
                   '/%time_mcc%/' => $timeKeeper->getMccTimeStr(),
                   '/%time_hab%/' => $timeKeeper->getHabTimeStr(),
                   '/%chat_rooms%/' => $this->getConversationList(),
+                  '/%convo_id%/' => $this->conversationId,
                 ));
     }
 

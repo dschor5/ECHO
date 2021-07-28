@@ -1,6 +1,6 @@
 <?php
 
-class MessagesDao extends Dao
+class MessageStatusDao extends Dao
 {
     private static $instance = null;
 
@@ -8,14 +8,14 @@ class MessagesDao extends Dao
     {
         if(self::$instance == null)
         {
-            self::$instance = new MessagesDao();
+            self::$instance = new MessageStatusDao();
         }
         return self::$instance;
     }
 
     protected function __construct()
     {
-        parent::__construct('messages');
+        parent::__construct('msg_status');
     }
     
 }

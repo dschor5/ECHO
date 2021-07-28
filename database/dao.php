@@ -12,278 +12,278 @@ require_once("database/database.php");
  */
 abstract class Dao
 {
-	protected $database = null;  // Database resource
-	private $prefix   = '';      // Table prefix
-	private $name     = null;    // Table name
-	private $id       = null;    // Name to be used as index (by default, 'id')
+    protected $database = null;  // Database resource
+    private $prefix   = '';      // Table prefix
+    private $name     = null;    // Table name
+    private $id       = null;    // Name to be used as index (by default, 'id')
 
-	const SEARCH_ANY = 0;
-	const SEARCH_ALL = 1;
-	const SEARCH_PHRASE = 2;
+    const SEARCH_ANY = 0;
+    const SEARCH_ALL = 1;
+    const SEARCH_PHRASE = 2;
 
-	/* PUBLIC: Dao
-	PURPOSE: Constructor.
-	@param: Database $database - reference to the database object (database.php)
-	@param: The name of the table this Dao represents
-	@param: The field to use as the 'ID' (id by default)
-	*/
-	protected function __construct(string $name, string $id = 'id')
-	{
-		$this->database = Database::getInstance();
-		$this->name     = $name;
-		$this->id       = $id;
-	}
-
-
-	/* PUBLIC:  setPrefix
-	PURPOSE: Allows you to set a table name prefix to use
-		(good if you want to run multiple scripts off the same database)
-	@param:  string $prefix
-	*/
-	protected function setPrefix(string $prefix) : void
-	{
-		$this->prefix = $prefix;
-	}
+    /* PUBLIC: Dao
+    PURPOSE: Constructor.
+    @param: Database $database - reference to the database object (database.php)
+    @param: The name of the table this Dao represents
+    @param: The field to use as the 'ID' (id by default)
+    */
+    protected function __construct(string $name, string $id = 'id')
+    {
+        $this->database = Database::getInstance();
+        $this->name     = $name;
+        $this->id       = $id;
+    }
 
 
-	/* PUBLIC: startTransaction
-	PURPOSE: Begins a transaction (duh..)
-	@return void;
-	*/
-	protected function startTransaction()
-	{
-		$this->database->query('START TRANSACTION',0);
-	}
+    /* PUBLIC:  setPrefix
+    PURPOSE: Allows you to set a table name prefix to use
+        (good if you want to run multiple scripts off the same database)
+    @param:  string $prefix
+    */
+    protected function setPrefix(string $prefix) : void
+    {
+        $this->prefix = $prefix;
+    }
 
 
-	/* PUBLIC: endTransaction
-	PURPOSE: ends a transaction and either commits the changes or rolls them back
-		depending on the specified parameter (defaults to commit if not specified)
-	@param boolean commit
-	@return void
-	*/
-	protected function endTransaction($commit=true)
-	{
-		$this->database->query(($commit)?'COMMIT;':'ROLLBACK;');
-	}
+    /* PUBLIC: startTransaction
+    PURPOSE: Begins a transaction (duh..)
+    @return void;
+    */
+    public function startTransaction()
+    {
+        $this->database->query('START TRANSACTION',0);
+    }
 
 
-	/* PUBLIC: Drop
-	PURPOSE: Drops the specified entries from the table
-	@param: $id - a string (or int) specifying either the "where" clause or
-		     or the ID of the field(s) to drop.  By default, deletes everything
-		     (be careful)
-
-	@return boolean - true on success, false on failure.
-	*/
-	public function drop($id = '*')
-	{
-
-		$query = "delete from `{$this->prefix}{$this->name}`";
-
-		// we know which exact entry we want.
-		if (intval($id) > 0)
-		    $query .= " where `{$this->id}` = '$id'";
-
-		// we have been given a where clause to go by.
-		// if $id == '*' then we want everything in the table.
-		else if ($id != '*')
-		    $query .= " where ".$id;
+    /* PUBLIC: endTransaction
+    PURPOSE: ends a transaction and either commits the changes or rolls them back
+        depending on the specified parameter (defaults to commit if not specified)
+    @param boolean commit
+    @return void
+    */
+    public function endTransaction($commit=true)
+    {
+        $this->database->query(($commit)?'COMMIT;':'ROLLBACK;');
+    }
 
 
-		return $this->database->query($query,0);
-	}
+    /* PUBLIC: Drop
+    PURPOSE: Drops the specified entries from the table
+    @param: $id - a string (or int) specifying either the "where" clause or
+             or the ID of the field(s) to drop.  By default, deletes everything
+             (be careful)
+
+    @return boolean - true on success, false on failure.
+    */
+    public function drop($id = '*')
+    {
+
+        $query = "delete from `{$this->prefix}{$this->name}`";
+
+        // we know which exact entry we want.
+        if (intval($id) > 0)
+            $query .= " where `{$this->id}` = '$id'";
+
+        // we have been given a where clause to go by.
+        // if $id == '*' then we want everything in the table.
+        else if ($id != '*')
+            $query .= " where ".$id;
 
 
-	/* PUBLIC: select
-	PURPOSE: Runs a select query to get a list of entries (in a result object)
-	@param: string $what     - Which fields do you want? (* for all)
-	@param: string $where    - A where clause (* for all) or integer ID
-	@param: string $sort     - Which field to sort on? By default sort on the ID field specified above.
-	@param: string $sort     - Which way to sort Ascending or Descending (ASC or DESC respectively)
-	@param: int $limit_start - Allows you to get just a subselection of the results,
-				  eg, 10 starts the result listing after the 10th matching entry
-	@param: int $limit_count - How many results to return (ie n results after the $limit_start)
+        return $this->database->query($query,0);
+    }
 
-	@return Result object
-	*/
-	public function select($what = '*',$where = '*',$sort = '', $order = 'ASC',$limit_start = null,$limit_count = null)
-	{
 
-		$query = "select $what from `{$this->prefix}{$this->name}`";
+    /* PUBLIC: select
+    PURPOSE: Runs a select query to get a list of entries (in a result object)
+    @param: string $what     - Which fields do you want? (* for all)
+    @param: string $where    - A where clause (* for all) or integer ID
+    @param: string $sort     - Which field to sort on? By default sort on the ID field specified above.
+    @param: string $sort     - Which way to sort Ascending or Descending (ASC or DESC respectively)
+    @param: int $limit_start - Allows you to get just a subselection of the results,
+                  eg, 10 starts the result listing after the 10th matching entry
+    @param: int $limit_count - How many results to return (ie n results after the $limit_start)
 
-		// we know exactly which ID we want...
-		if (intval($where) > 0)
-		    $query .= " where `{$this->id}` = '$where'";
+    @return Result object
+    */
+    public function select($what = '*',$where = '*',$sort = '', $order = 'ASC',$limit_start = null,$limit_count = null)
+    {
 
-		// we have been given a where clause to go by.
-		// if $where == '*' then we want everything in the table.
-		else if ($where != '*')
-		    $query .= " where " . $where;
+        $query = "select $what from `{$this->prefix}{$this->name}`";
 
-		if (is_array($sort))
-		{
-			if (count($sort)>0)
-				$query .= ' order by ';
-			for ($i=0;$i<count($sort);$i++)
-			{
-				$query .= '`'.$sort[$i].'` ';
-				$query .= (is_array($order))?$order[$i]:$order;
-				if ($i < count($sort)-1)
-					$query .= ', ';
-			}
+        // we know exactly which ID we want...
+        if (intval($where) > 0)
+            $query .= " where `{$this->id}` = '$where'";
 
-		} else if ($sort != '')
-			$query .= " order by `{$sort}` $order";
+        // we have been given a where clause to go by.
+        // if $where == '*' then we want everything in the table.
+        else if ($where != '*')
+            $query .= " where " . $where;
 
-		if ($limit_start >= 0 && $limit_count > 0)
-		    $query .= " LIMIT $limit_start,$limit_count";
+        if (is_array($sort))
+        {
+            if (count($sort)>0)
+                $query .= ' order by ';
+            for ($i=0;$i<count($sort);$i++)
+            {
+                $query .= '`'.$sort[$i].'` ';
+                $query .= (is_array($order))?$order[$i]:$order;
+                if ($i < count($sort)-1)
+                    $query .= ', ';
+            }
 
-		//add the allmighty semicolon to the end
-		$query .= ';';
+        } else if ($sort != '')
+            $query .= " order by `{$sort}` $order";
 
-		//run it!
+        if ($limit_start >= 0 && $limit_count > 0)
+            $query .= " LIMIT $limit_start,$limit_count";
+
+        //add the allmighty semicolon to the end
+        $query .= ';';
+
+        //run it!
         
         
-		return $this->database->query($query);
-	}
+        return $this->database->query($query);
+    }
 
 
-	/* PUBLIC:  insert
-	PURPOSE: Inserts into the current table.
-	@param:  string[] - an array of strings corresponding to each field in the table.
-	@return  int or boolean - If successfully, returns the ID of the new entry, otherwise
-		false.
-	*/
-	public function insert($fields)
-	{
-		$query = "insert into `{$this->prefix}{$this->name}` (";
+    /* PUBLIC:  insert
+    PURPOSE: Inserts into the current table.
+    @param:  string[] - an array of strings corresponding to each field in the table.
+    @return  int or boolean - If successfully, returns the ID of the new entry, otherwise
+        false.
+    */
+    public function insert($fields)
+    {
+        $query = "insert into `{$this->prefix}{$this->name}` (";
 
         $keys = array();
-		$values = array();
-		foreach ($fields as $key => $value)
+        $values = array();
+        foreach ($fields as $key => $value)
         {
             $keys[] = '`'.$key.'`';
-			if ($value === null)
-				$values[] = 'NULL';
-			else
-				$values[] = '"'.$this->database->prepareStatement($value).'"';
+            if ($value === null)
+                $values[] = 'NULL';
+            else
+                $values[] = '"'.$this->database->prepareStatement($value).'"';
         }
 
         $query .= join(',',$keys).') values ('.join(',',$values).');';
-		if ($this->database->query($query,0))
-		{
-		    // get the insert ID.
-		    $id = $this->database->getLastInsertId();
-		    return $id;
+        if ($this->database->query($query,0))
+        {
+            // get the insert ID.
+            $id = $this->database->getLastInsertId();
+            return $id;
 
-		} else
-		    return false;
-	}
-
-
-	/* PUBLIC:  replace
-	PURPOSE: Replaces into the current table.
-	@param:  string[] - an array of strings corresponding to each field in the table.
-	@return  int or boolean - If successfully, returns the ID of the new entry, otherwise
-		false.
-	*/
-	public function replace($fields)
-	{
-		$query = "replace into `{$this->prefix}{$this->name}` values(";
-
-		$values = array();
-		foreach ($fields as $value)
-		    $values[] = '"'.$this->database->prepareStatement($value).'"';
-
-		$query .= join(',',$values) . ');';
-
-		if ($this->database->query($query,0))
-		{
-		    // get the insert ID.
-		    $id = $this->database->insert_id();
-		    return $id;
-
-		} else
-		    return false;
-	}
+        } 
+        return false;
+    }
 
 
-	/* PUBLIC: update
-	PURPOSE: Updates the entries in a table as specified.
-	@param  string[] - An associative array whose keys are the names
-			  of the fields to change and the values are the new
-			  values to use.
+    /* PUBLIC:  replace
+    PURPOSE: Replaces into the current table.
+    @param:  string[] - an array of strings corresponding to each field in the table.
+    @return  int or boolean - If successfully, returns the ID of the new entry, otherwise
+        false.
+    */
+    public function replace($fields)
+    {
+        $query = "replace into `{$this->prefix}{$this->name}` values(";
 
-	@param  string   - The where clause (* for all) or specific ID to use
-	@return boolean
-	*/
-	public function update($fields,$where = '*')
-	{
+        $values = array();
+        foreach ($fields as $value)
+            $values[] = '"'.$this->database->prepareStatement($value).'"';
 
-		$query = "update `{$this->prefix}{$this->name}` set ";
+        $query .= join(',',$values) . ');';
 
-		$tmp = array();
-		foreach ($fields as $key=>$value)
-			$tmp[]= ($value === null)?
-				"`$key`=null":
-				"`$key`='".$this->database->prepareStatement($value)."'";
+        if ($this->database->query($query,0))
+        {
+            // get the insert ID.
+            $id = $this->database->insert_id();
+            return $id;
 
-		$query .= join(', ',$tmp);
-
-		if (intval($where) > 0)
-		    $query .= " where `{$this->id}` = '$where'";
-		else if ($where != '*')
-		    $query .= " where " . $where;
-
-		$query.=';';
-
-		if ($this->database->query($query,0))
-		    return true;
-		else
-		    return false;
-	}
+        } else
+            return false;
+    }
 
 
-	/* PUBLIC searchClause
-	   PURPOSE: Generates a where clause used for searching.
+    /* PUBLIC: update
+    PURPOSE: Updates the entries in a table as specified.
+    @param  string[] - An associative array whose keys are the names
+              of the fields to change and the values are the new
+              values to use.
 
-	   method == self::SEARCH_ANY
-	   method == self::SEARCH_ALL
-	   method == self::SEARCH_PHRASE
+    @param  string   - The where clause (* for all) or specific ID to use
+    @return boolean
+    */
+    public function update($fields,$where = '*')
+    {
 
-	   @param String[]  columns
-	   @param String searchString
-	   @param int method
-	   @result String whereClause
-	 */
+        $query = "update `{$this->prefix}{$this->name}` set ";
+
+        $tmp = array();
+        foreach ($fields as $key=>$value)
+            $tmp[]= ($value === null)?
+                "`$key`=null":
+                "`$key`='".$this->database->prepareStatement($value)."'";
+
+        $query .= join(', ',$tmp);
+
+        if (intval($where) > 0)
+            $query .= " where `{$this->id}` = '$where'";
+        else if ($where != '*')
+            $query .= " where " . $where;
+
+        $query.=';';
+
+        if ($this->database->query($query,0))
+            return true;
+        else
+            return false;
+    }
+
+
+    /* PUBLIC searchClause
+       PURPOSE: Generates a where clause used for searching.
+
+       method == self::SEARCH_ANY
+       method == self::SEARCH_ALL
+       method == self::SEARCH_PHRASE
+
+       @param String[]  columns
+       @param String searchString
+       @param int method
+       @result String whereClause
+     */
     protected function searchClause(array $search, string $keywords, int $method=0)
-	{
-		if (count($search) > 0)
-		{
-			$keywords=trim($keywords);
-			$search_terms = array();
+    {
+        if (count($search) > 0)
+        {
+            $keywords=trim($keywords);
+            $search_terms = array();
 
-			$keywords = ($method == self::SEARCH_PHRASE ? array($this->database->prepareStatement($keywords)):preg_split("/\s+/",$keywords));
-			foreach ($keywords as $key)
-			{
-				if (strlen($key) >= 3)
-				{
-					$tmp = array();
-					foreach ($search as $col)
-						if ($method == self::SEARCH_ALL)
-							$tmp[] = $col . " like '%" .$this->database->prepareStatement($key). "%'";
-						else
-							$search_terms[] = $col . " like '%" .$this->database->prepareStatement($key). "%'";
+            $keywords = ($method == self::SEARCH_PHRASE ? array($this->database->prepareStatement($keywords)):preg_split("/\s+/",$keywords));
+            foreach ($keywords as $key)
+            {
+                if (strlen($key) >= 3)
+                {
+                    $tmp = array();
+                    foreach ($search as $col)
+                        if ($method == self::SEARCH_ALL)
+                            $tmp[] = $col . " like '%" .$this->database->prepareStatement($key). "%'";
+                        else
+                            $search_terms[] = $col . " like '%" .$this->database->prepareStatement($key). "%'";
 
-					if ($method == self::SEARCH_ALL)
-						$search_terms[] = '('.join(' or ',$tmp).')';
-				}
-			}
-			return (count($search_terms) > 0)? join(($method == self::SEARCH_ALL)? " and ": " or ",$search_terms) : '*';
-		}
-		return '*';
-	}
+                    if ($method == self::SEARCH_ALL)
+                        $search_terms[] = '('.join(' or ',$tmp).')';
+                }
+            }
+            return (count($search_terms) > 0)? join(($method == self::SEARCH_ALL)? " and ": " or ",$search_terms) : '*';
+        }
+        return '*';
+    }
 }
 
 ?>
