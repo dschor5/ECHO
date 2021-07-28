@@ -183,7 +183,7 @@ class UsersModule extends DefaultModule
                     $newConvoData = array(
                         'name' => $user->getUsername().'-'.$this->user->getUsername(),
                     );
-                    $newConvoId = $conversationsDao->insert($newConvo);
+                    $newConvoId = $conversationsDao->insert($newConvoData);
 
                     $newParticipants = array(
                         array(
