@@ -125,13 +125,13 @@ class Database
                              a result object will be returned
            @return: boolean/Result (depending on flag above)
      */
-    public function query(string $query, bool $keepResult = true) 
+    public function query(string $queryStr) 
     {
         //get the start time
         $time_start = $this->getmicrotime();
 
         //run the query
-        $result = $this->db->query($query);
+        $result = $this->db->query($queryStr);
 
         //get the end time.w
         $time_end = $this->getmicrotime();
@@ -143,16 +143,12 @@ class Database
 
         //if there was an error store the error
         //and return false.
-        if ($this->db->error != '')
+        if ($result === false || $this->db->error != '')
         {
             $this->errorQuery = $query;
             $this->error =  $this->db->error;
             $this->errorTrace = debug_backtrace();
-            echo '<font color=red><b>Database Error.</b></font><br>';
-            echo $this->errorQuery;
-            echo $this->error;
-            echo $this->errorTrace;
-            return null;
+            throw new DatabaseException($query, $this->db->error, debug_backtrace());
         }
 
         //if we need to keep the result, create
@@ -199,6 +195,11 @@ class Database
     public function getLastInsertId()
     {
         return $this->db->insert_id;
+    }
+
+    public function getNumRowsAffected()
+    {
+        return $this->db->affected_rows;
     }
 }
 ?>

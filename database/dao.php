@@ -181,6 +181,36 @@ abstract class Dao
         return false;
     }
 
+    public function insertMultiple($entries)
+    {
+        $valuesStr = array();
+        
+        foreach($entries as $fields)
+        {
+            $values = array();
+            $keys = array();
+            foreach ($fields as $key => $value)
+            {
+                $keys[] = '`'.$key.'`';
+                if ($value === null)
+                    $values[] = 'NULL';
+                else
+                    $values[] = '"'.$this->database->prepareStatement($value).'"';
+            }
+            $keysStr = join(',', $keys);
+            $valuesStr[] = '('.join(',', $values).')';
+        }
+
+        $query = 'INSERT INTO `'.$this->prefix.$this->name.'` '.
+                    '('.$keysStr.') VALUES '.join(','$valuesStr).';';
+
+        if ($this->database->query($query, false))
+        {
+            return $this->database->getNumRowsAffected();
+        } 
+        return false;
+    }
+
 
     /* PUBLIC:  replace
     PURPOSE: Replaces into the current table.

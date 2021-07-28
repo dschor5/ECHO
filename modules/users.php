@@ -160,11 +160,54 @@ class UsersModule extends DefaultModule
     private function createNewUser($fields)
     {
         $usersDao = UsersDao::getInstance();
-        $ret = $usersDao->insert($fields);
+        $conversationsDao = ConversationsDao::getInstance();
+        $participantsDao = ParticipantsDao::getInstance();
+        
+        try
+        {
+            $usersDao->startTransaction();
+            $userId = $usersDao->insert($fields);
+            // Add to mission conversation
+            $newParticipants = array(
+                'conversation_id' => 1,
+                'user_id' => userId,
+            );
+            $participantsDao->insert($newParticipants);
 
-        // Create conversations. 
-        // Add participants to conversations. 
-        return $ret;
+            $users = $usersDao->getUsers();
+
+            foreach($users as $userId => $user)
+            {
+                if($userId != $this->user->getUserId())
+                {
+                    $newConvoData = array(
+                        'name' => $user->getUsername().'-'.$this->user->getUsername(),
+                    );
+                    $newConvoId = $conversationsDao->insert($newConvo);
+
+                    $newParticipants = array(
+                        array(
+                            'conversation_id' => $newConvoId,
+                            'user_id' => $userId,
+                        ),
+                        array(
+                            'conversation_id' => $newConvoId,
+                            'user_id' => $this->user->getUserId(),
+                        ),
+                    );
+                    $participantsDao->insertMultiple($newParticipants);
+                }
+            }
+            $usersDao->endTransaction(true);
+
+        }
+        catch(DatabaseException $e)
+        {
+            $usersDao->endTransaction(false);
+            return false;
+        }
+
+        return true;
     }
 
     private function getUser()
