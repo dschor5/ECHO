@@ -178,7 +178,7 @@ class UsersModule extends DefaultModule
 
             foreach($users as $userId => $user)
             {
-                if($userId != $this->user->getUserId())
+                if($userId != $this->user->getId())
                 {
                     $newConvoData = array(
                         'name' => $user->getUsername().'-'.$this->user->getUsername(),
@@ -192,7 +192,7 @@ class UsersModule extends DefaultModule
                         ),
                         array(
                             'conversation_id' => $newConvoId,
-                            'user_id' => $this->user->getUserId(),
+                            'user_id' => $this->user->getId(),
                         ),
                     );
                     $participantsDao->insertMultiple($newParticipants);
