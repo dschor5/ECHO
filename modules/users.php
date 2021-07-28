@@ -170,7 +170,7 @@ class UsersModule extends DefaultModule
             // Add to mission conversation
             $newParticipants = array(
                 'conversation_id' => 1,
-                'user_id' => userId,
+                'user_id' => $userId,
             );
             $participantsDao->insert($newParticipants);
 
