@@ -202,7 +202,7 @@ abstract class Dao
         }
 
         $query = 'INSERT INTO `'.$this->prefix.$this->name.'` '.
-                    '('.$keysStr.') VALUES '.join(','$valuesStr).';';
+                    '('.$keysStr.') VALUES '.join(',', $valuesStr).';';
 
         if ($this->database->query($query, false))
         {
