@@ -108,6 +108,7 @@ class UsersModule extends DefaultModule
     {
         $user_id = $_POST['user_id'] ?? 0;
         $username = $_POST['username'] ?? '';
+        $alias = $_POST['alias'] ?? '';
         $isCrew = $_POST['is_crew'] ?? 1;
         $isAdmin = $_POST['is_admin'] ?? 0;
 
@@ -132,6 +133,7 @@ class UsersModule extends DefaultModule
         {
             $fields = array(
                 'username' => $username, 
+                'alias'    => $alias,
                 'is_crew'  => $isCrew,
                 'is_admin' => $isAdmin
             );
@@ -176,12 +178,12 @@ class UsersModule extends DefaultModule
 
             $users = $usersDao->getUsers();
 
-            foreach($users as $userId => $user)
+            foreach($users as $user)
             {
-                if($userId != $this->user->getId())
+                if($userId != $user->getId())
                 {
                     $newConvoData = array(
-                        'name' => $user->getUsername().'-'.$this->user->getUsername(),
+                        'name' => $user->getAlias().'-'.$fields['alias'],
                     );
                     $newConvoId = $conversationsDao->insert($newConvoData);
 
@@ -192,7 +194,7 @@ class UsersModule extends DefaultModule
                         ),
                         array(
                             'conversation_id' => $newConvoId,
-                            'user_id' => $this->user->getId(),
+                            'user_id' => $user->getId(),
                         ),
                     );
                     $participantsDao->insertMultiple($newParticipants);
@@ -224,6 +226,7 @@ class UsersModule extends DefaultModule
                 'success'  => true,
                 'user_id'  => $id,
                 'username' => $user->getUsername(),
+                'alias'    => $user->getAlias(),
                 'is_admin' => $user->isAdmin() ? 1 : 0,
                 'is_crew'  => $user->isCrew() ? 1 : 0,
             );
@@ -245,6 +248,7 @@ class UsersModule extends DefaultModule
         $headers = array(
             'id' => 'ID',
             'username' => 'Username',
+            'alias'    => 'Alias',
             'is_crew'  => 'Role',
             'is_admin' => 'Admin',
             'tools'    => 'Actions'
@@ -275,6 +279,7 @@ class UsersModule extends DefaultModule
             $list->addRow(array(
                 'id' => $id,
                 'username' => $user->getUsername(),
+                'alias' => $user->getAlias(),
                 'is_crew' => $user->isCrew() ? $mission['role_hab'] : $mission['role_mcc'],
                 'is_admin' => $user->isAdmin() ? 'Yes' : 'No',
                 'tools' => join(', ', $tools),

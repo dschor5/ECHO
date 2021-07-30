@@ -6,11 +6,12 @@ class TimeKeeper
     private $epoch;
     private $secPerDay;
     private $dayName;
+    private $timezone;
 
     private function __construct()
     {
         global $mission;
-        $this->config($mission['time_epoch'], $mission['time_sec_per_day'], $mission['time_day']);
+        $this->config($mission['time_epoch'], $mission['timezone'], $mission['time_sec_per_day'], $mission['time_day']);
     }
 
     public static function getInstance(): TimeKeeper
@@ -23,12 +24,13 @@ class TimeKeeper
         return self::$instance;
     }
 
-    public function config(string $epoch, int $secPerDay, string $dayName)
+    private function config(string $epoch, string $timezone, int $secPerDay, string $dayName)
     {
-        $temp = new DateTime($epoch);
+        $temp = new DateTime($epoch, new DateTimeZone($timezone));
         $this->epoch = $temp->getTimestamp();
         $this->secPerDay = $secPerDay;
         $this->dayName = $dayName;
+        $this->timezone = $timezone;
     }
 
     public function getHabTimestamp(DateTime $d = null) : string
@@ -36,6 +38,7 @@ class TimeKeeper
         if($d == null)
         {
             $d = new DateTime();
+            $d->setTimezone(new DateTimeZone($this->timezone));
         }
 
         return $d->getTimestamp() - $this->epoch;
@@ -46,6 +49,7 @@ class TimeKeeper
         if($d == null)
         {
             $d = new DateTime();
+            $d->setTimezone(new DateTimeZone($this->timezone));
         }
 
         return $d->getTimestamp();
@@ -54,7 +58,9 @@ class TimeKeeper
     public function getMccTimeStr(Datetime $d = null) : string
     {
         $epoch = $this->getMccTimestamp($d);
-        return date_format(new DateTime("@$epoch"), 'Y-m-d H:i:s');
+        $date = new DateTime("@$epoch");
+        $date->setTimezone(new DateTimeZone($this->timezone));
+        return $date->format('Y-m-d H:i:s');
     }
 
     public function getHabTimeStr(DateTime $d = null) : string

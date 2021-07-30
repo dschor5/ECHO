@@ -23,7 +23,7 @@ class User
 
     public function getAlias(): string
     {
-        return $this->data['username'];
+        return $this->data['alias'];
     }
 
     public function getLocation(): string

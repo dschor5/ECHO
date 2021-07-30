@@ -23,6 +23,9 @@
                 <label for="username">Username</label>
                 <input type="text" placeholder="Enter Username" name="username" id="username" required>
 
+                <label for="alias">Username</label>
+                <input type="text" placeholder="Enter Alias / Name" name="alias" id="alias" required>
+
                 <label for="is_crew">Analog Role</label>
                 <select id="is_crew" name="is_crew">
                     <option value="1">%role_hab%</option>

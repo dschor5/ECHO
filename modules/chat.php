@@ -32,15 +32,6 @@ class ChatModule extends DefaultModule
 
         }
 
-        /*if($subaction == 'refresh')
-        {
-            $timeKeeper = TimeKeeper::getInstance();
-            $response['time_mcc'] = $timeKeeper->getMccTimeStr();
-            $response['time_hab'] = $timeKeeper->getHabTimeStr();
-            $response['msg_new'] = array();
-            $response['msg_status'] = array();
-        }*/
-
         return $response;
     }
 
@@ -113,6 +104,7 @@ class ChatModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
+        global $config;
         global $mission;
 
         $this->conversationId = $_GET['id'] ?? 1;
@@ -150,7 +142,34 @@ class ChatModule extends DefaultModule
                   '/%time_hab%/' => $timeKeeper->getHabTimeStr(),
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversationId,
+                  '/%template-msg-sent-user%/' => $this->compileMsgHtml(array('user'=>'DARIO SCHOR')),
+                  '/%template-msg-sent-hab%/' => file_get_contents($config['templates_dir'].'/modules/chat-msg-sent-hab.txt'),
+                  '/%template-msg-sent-mcc%/' => file_get_contents($config['templates_dir'].'/modules/chat-msg-sent-mcc.txt'),
                 ));
+    }
+
+    private function compileMsgHtml(array $msgData = null) : string
+    {
+        $templateData = array();
+
+        if($msgData != null)
+        {
+            $templateData = array(
+                '/%user-id%/' => $msgData['user-id'],
+
+            );
+        }
+        else
+        {
+            $templateData = array(
+                '/%user-id%/' => '',
+
+            );
+        }
+
+        
+
+        return Main::loadTemplate($template, $templateData);
     }
 
     private function getConversationList(): string 

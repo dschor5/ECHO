@@ -45,6 +45,7 @@ require_once('database/database.php');
 require_once('database/dao.php');
 require_once('database/result.php');
 require_once('modules/default.php');
+require_once('database/databaseException.php');
 
 // Include classes
 require_once('class/message.php');

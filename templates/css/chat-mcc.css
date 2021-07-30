@@ -43,7 +43,7 @@
     background: #c7c7c7;
 }
 
-#newmsg {
+#new-msg {
     background: #26308b;    
 }
 
@@ -59,4 +59,8 @@
 .dropdown:hover .dropbtn {
     color: #AEB3FC;
     background-color: #414BA5;
+}
+
+#new-msg textarea {
+    background-color:rgb(174, 179, 252);
 }

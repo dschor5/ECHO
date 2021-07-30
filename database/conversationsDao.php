@@ -48,7 +48,7 @@ class ConversationsDao extends Dao
     {
         $queryStr = 'SELECT conversations.*, '.
                         'GROUP_CONCAT(DISTINCT participants.user_id) AS conversation_participants, '.
-                        'GROUP_CONCAT(DISTINCT users.username) AS conversation_usernames '.
+                        'GROUP_CONCAT(DISTINCT users.alias) AS conversation_usernames '.
                     'FROM conversations '.
                     'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
                     'JOIN users ON users.user_id=participants.user_id '.

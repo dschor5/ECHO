@@ -16,7 +16,7 @@
 
 #navigation {
     position: relative;
-    width: 600px;
+    width: 800px;
     left: 50%;
     transform: translateX(-50%);
     margin-top: 15px;
@@ -29,7 +29,7 @@
     transform: translateX(-50%);
     margin: 0px;
     padding: 0px;
-    width: 600px;
+    width: 800px;
     border: 0px;
 }
 

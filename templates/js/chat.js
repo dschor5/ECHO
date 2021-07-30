@@ -23,21 +23,35 @@ function receiveMessage(data) {
 }
 */
 $(document).ready(function() {
-    $('#newmsg-send-btn').on('click', function() {
-        if($('#newmsg-room').val() != '') {
+    $('#send-btn').on('click', function() {
+        if($('#new-msg-room').val() != '') {
+            newMsgText = $('#new-msg-text').val();
             $.ajax({
                 url:  '%http%%site_url%/chat',
                 type: "POST",
                 data: {
                     subaction: 'send',
-                    msgRoom: $('#newmsg-room').val(),
-                    msgBody: $('#newmsg-text').val()                        
+                    msgRoom: $('#new-msg-room').val(),
+                    msgBody: newMsgText,
                 },
-                dataType: 'json'
+                dataType: 'json',
+                success: function(resp) {
+                    if(resp.success) {
+                        sentMsg(resp, newMsgText);
+                        $('#new-msg-text').val('');
+                    }
+                },
+                error: function(jqHR, textStatus, errorThrown) {
+                    location.href = '%http%%site_url%/chat';
+                },
             });
         }
     });
 });
+
+function sentMsg(resp, msgText) {
+    
+}
 
 
 const evtSource = new EventSource("%http%%site_url%/chat/refresh");

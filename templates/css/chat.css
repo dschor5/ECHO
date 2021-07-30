@@ -63,7 +63,8 @@
 }
 
 .room-selected {
-    background-color: #FF0000;
+    color: #000;
+    background-color: rgb(255, 255, 255, 0.2);
 }
 
 #rooms a:hover {
@@ -146,45 +147,11 @@
     overflow-x: hidden;
 }
 
-#newmsg {
-    position: absolute;
-    bottom: 0px;
-    left: calc(250px + 22px);
-    right: 22px;
-    height: 100px;
-    background: #26308b;    
-    padding: 0px;
-    margin: 0px;
+@font-face {
+    font-family: symbols;
+    src: url(%http%%site_url%/%templates_dir%/fonts/symbols.woff);
 }
 
-#newmsg div {
-    position: absolute;
-    left: 0px;
-    right: 0px;
-    top: 0px;
-    padding: 0px;
-    margin: 0px;
-    width: 100%;
-}
-
-#newmsg textarea {
-    position: absolute;
-    width: calc(100% - 140px);
-    top: 10px;
-    left: 10px;
-    height: 75px;
-    resize: none;
-    border-radius: 0px;
-    padding: 0px;
-    margin: 0px;
-    border: 0px;
-    float: left;
-}
-
-.newmsg-attach {
-    float: left;
-    font-family: 'Times', 'Times New Roman', 'serif', 'sans-serif', system-ui, -apple-system, BlinkMacSystemFont, 'Avenir Next', 'Avenir', 'Segoe UI', 'Lucida Grande', 'Helvetica Neue', 'Helvetica', 'Fira Sans', 'Roboto', 'Noto', 'Droid Sans', 'Cantarell', 'Oxygen', 'Ubuntu', 'Franklin Gothic Medium', 'Century Gothic', 'Liberation Sans', sans-serif, 'EmojiSymbols';
-}
 
 /* Chat containers */
 
@@ -213,32 +180,87 @@
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.6);
 }
 
-.newmsg-attach {
-    background-color: inherit;
-    border-radius: 2px;
-    border: 1px solid white;
-    width: 30px;
-    height: 30px;
-    color: #FFF;
-    float: right;
-}
-
-#newmsg-send-btn {
+#new-msg {
     position: absolute;
-    background-color: inherit;
-    border-radius: 2px;
-    border: 1px solid white;
-    width: 30px;
-    height: 30px;
-    color: #FFF;
-    top: 30px;
-    right: 60px;
-    width: 90px;
+    bottom: 0px;
+    left: calc(250px + 22px);
+    right: 22px;
+    height: 100px;
+    background: #26308b;    
+    padding: 0px;
+    margin: 0px;
 }
 
-.newmsg-attach img {
-    height: 30px;
-    width: 30px;
+#new-msg textarea {
+    position: absolute;
+    width: calc(100% - 150px);
+    top: 10px;
+    left: 10px;
+    height: 64px;
+    resize: none;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 0px;
+    border: 0px;
+    font-size: 11pt;
+    background-color:rgb(174, 179, 252);
+}
+
+#send-btn {
+    position: absolute;
+    font-size: 16px;
+    height: 36px;
+    top: 48px;
+    right: 10px;
+    width: 113px;
+}
+
+#video-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-family: "symbols";
+}
+
+#audio-btn {
+    position: absolute;
+    right: 50px;
+    top: 10px;
+    font-family: "symbols";
+}
+
+#file-btn {
+    position: absolute;
+    right: 90px;
+    top: 10px;
+    font-family: "symbols";
+}
+
+.new-msg-btn {
+    height: 33px;
+    width: 33px;
+    background-color: inherit;
+    border-radius: 5px;
+    border: 1px solid #CCC;
+    color: #CCC;
+    background-color: rgb(255, 255, 255, 0.2);
+    float: right;
+    line-height: -2px;
+    font-size: 20px;
+    margin: 0px;
+    cursor: pointer;
+}
+
+.new-msg-btn:hover:enabled {
+    color: #000;
+    background-color: rgb(255, 255, 255, 0.5);
+}
+
+.new-msg-btn:disabled {
+    color: #333;
+    background-color: rgba(211, 211, 211, 0.2);
+    border: 1px solid #666;
+    cursor: not-allowed;
 }
 
 /* Darker chat container */

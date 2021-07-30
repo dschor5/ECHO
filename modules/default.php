@@ -124,10 +124,6 @@ abstract class DefaultModule
         {
             header('Content-type: text/html; charset=utf-8');
 
-            // Configure mission time
-            $timeKeeper = TimeKeeper::getInstance();
-            $timeKeeper->config($mission['time_epoch'], $mission['time_sec_per_day'], $mission['time_day']);
-
             // Configure communicaiton delay
             $commDelay = Delay::getInstance();
 

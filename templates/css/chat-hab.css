@@ -43,7 +43,7 @@
     background: #b3b3b3;
 }
 
-#newmsg {
+#new-msg {
     background: #772f19;    
 }
 
@@ -61,3 +61,6 @@
     background-color: #a54141;
 }
 
+#new-msg textarea {
+    background-color: rgb(224 194 194);
+}

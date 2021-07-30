@@ -12,6 +12,7 @@ function getUser(id) {
             if(data.success == true) {
                 $('#edit-user-id').val(data.user_id);
                 $('#username').val(data.username);
+                $('#alias').val(data.alias);
                 $('#is_admin').val(data.is_admin).change();
                 $('#is_crew').val(data.is_crew).change();
                 $('.modal-title').text('Edit User');
@@ -19,6 +20,7 @@ function getUser(id) {
             else {
                 $('#edit-user-id').val(0);
                 $('#username').val('');
+                $('#alias').val('');
                 $('#is_admin').val(0).change();
                 $('#is_crew').val(1).change();
                 $('.modal-title').text('Create User');
@@ -37,6 +39,7 @@ function editUser() {
             subaction: 'edituser',
             user_id:  $('#edit-user-id').val(),
             username: $('#username').val(),
+            alias:    $('#alias').val(),
             is_crew:  $('#is_crew').val(),
             is_admin: $('#is_admin').val(),
         },

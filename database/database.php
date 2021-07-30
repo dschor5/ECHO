@@ -145,10 +145,10 @@ class Database
         //and return false.
         if ($result === false || $this->db->error != '')
         {
-            $this->errorQuery = $query;
+            $this->errorQuery = $queryStr;
             $this->error =  $this->db->error;
             $this->errorTrace = debug_backtrace();
-            throw new DatabaseException($query, $this->db->error, debug_backtrace());
+            throw new DatabaseException($queryStr, $this->db->error);
         }
 
         //if we need to keep the result, create

@@ -1,8 +1,9 @@
 CREATE TABLE `users` (
   `user_id` int(10) UNSIGNED NOT NULL,
-  `username` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-  `session_id` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `username` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
+  `alias` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
+  `password` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
+  `session_id` varchar(60) COLLATE utf8_unicode_ci DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL,
   `is_crew` tinyint(1) NOT NULL,
   `last_login` datetime DEFAULT NULL,

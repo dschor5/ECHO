@@ -2,6 +2,7 @@
 
 error_reporting(E_ALL);
 header('Pragma: no-cache');
+date_default_timezone_set('US/Eastern');
 
 require_once('config.inc.php');
 require_once('database/usersDao.php');
@@ -155,9 +156,9 @@ class Main
         setcookie(
             $config['cookie_name'], 
             $cookieStr, 
-            time() + $config['cookie_expire']);
-            /*'/',
-            , 
+            time() + $config['cookie_expire'],
+            '/');
+            /*, 
             $server['site_url'],
             ($server['http'] == 'https://'),
             true
