@@ -18,13 +18,17 @@ class ParticipantsDao extends Dao
         parent::__construct('participants');
     }
 
-    public function getParticipantIds(int $convoId, int $excludeUserId) : array
+    public function getParticipantIds(int $convoId, int $excludeUserId = -1) : array
     {
         $queryStr = 'SELECT participants.user_id, users.is_crew '.
                     'FROM participants '.
                     'JOIN users ON users.user_id=participants.user_id '. 
-                    'WHERE participants.conversation_id=\''.$this->database->prepareStatement($convoId).
-                        '\' AND participants.user_id!=\''.$this->database->prepareStatement($excludeUserId).'\'';
+                    'WHERE participants.conversation_id=\''.$this->database->prepareStatement($convoId).'\' ';
+    
+        if($excludeUserId > 0)
+        {
+            $queryStr .= 'AND participants.user_id!=\''.$this->database->prepareStatement($excludeUserId).'\'';
+        }
         
         $participants = array();
 

@@ -52,7 +52,7 @@ class ChatModule extends DefaultModule
         );
         $messageId = $messageDao->insert($msgData);
 
-        $partcipants = $participantsDao->getParticipantIds($this->conversationId, $this->user->getId());
+        $partcipants = $participantsDao->getParticipantIds($this->conversationId);
         foreach($partcipants as $userId => $isCrew)
         {
             $msgStatusData = array(
@@ -73,7 +73,7 @@ class ChatModule extends DefaultModule
             'msg_id' => $messageId,
             'user_id' => $msgData['user_id'],
             'username' => $this->user->getUsername(),
-            'text' => $msgText,
+            'alias' => $this->user->getAlias(),
             'sent_time' => $msgData['sent_time'],
         );
         return $jsonResponse;
