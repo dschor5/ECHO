@@ -42,7 +42,7 @@ $(document).ready(function() {
                     }
                 },
                 error: function(jqHR, textStatus, errorThrown) {
-                    location.href = '%http%%site_url%/chat';
+                    //location.href = '%http%%site_url%/chat';
                 },
             });
         }

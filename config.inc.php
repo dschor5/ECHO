@@ -48,10 +48,10 @@ require_once('modules/default.php');
 require_once('database/databaseException.php');
 
 // Include classes
-require_once('class/message.php');
-require_once('class/user.php');
 require_once('class/delay.php');
 require_once('class/time.php');
+require_once('class/message.php');
+require_once('class/user.php');
 require_once('class/list.php');
 require_once('class/conversation.php');
 

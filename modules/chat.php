@@ -43,26 +43,43 @@ class ChatModule extends DefaultModule
         
         $messageDao->startTransaction();
 
+        $currTime = new DelayTime();
+        
+
         $msgData = array(
             'user_id' => $this->user->getId(),
             'conversation_id' => $this->conversationId,
             'text' => $msgText,
+            'filename' => null,
             'type' => Message::TEXT,
-            'sent_time' => $this->user->getUserTimeStr(),
+            'sent_time' => $currTime->getTime(),
+            'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew()),
+            'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew()),
         );
+
         $messageId = $messageDao->insert($msgData);
+
+        $msgStatusData = array(
+            'message_id' => $messageId,
+            'user_id' => $this->user->getId(),
+            'is_delivered' => true,
+            'is_read' => true,
+        );
+        $messageStatusDao->insert($msgStatusData);
 
         $partcipants = $participantsDao->getParticipantIds($this->conversationId);
         foreach($partcipants as $userId => $isCrew)
         {
-            $msgStatusData = array(
-                'message_id' => $messageId,
-                'user_id' => $userId,
-                'recv_time' => ($isCrew == $this->user->isCrew()) ? $this->user->getUserTimeStr() : null,
-                'is_delivered' => ($isCrew == $this->user->isCrew()),
-                'is_read' => false,
-            );
-            $messageStatusDao->insert($msgStatusData);
+            if($userId != $this->user->getId())
+            {
+                $msgStatusData = array(
+                    'message_id' => $messageId,
+                    'user_id' => $userId,
+                    'is_delivered' => ($isCrew === $this->user->isCrew()),
+                    'is_read' => false,
+                );
+                $messageStatusDao->insert($msgStatusData);
+            }
         }
 
         $messageDao->endTransaction();
@@ -75,19 +92,21 @@ class ChatModule extends DefaultModule
             'username' => $this->user->getUsername(),
             'alias' => $this->user->getAlias(),
             'sent_time' => $msgData['sent_time'],
+            'recv_time_hab' => $msgData['recv_time_hab'],
+            'recv_time_mcc' => $msgData['recv_time_mcc'],
         );
         return $jsonResponse;
     }
 
     public function compileStream() 
     {
-        $timeKeeper = TimeKeeper::getInstance();
         $eventTime = array();
 
         while(true)
         {
-            $eventTime['time_mcc'] = $timeKeeper->getMccTimeStr();
-            $eventTime['time_hab'] = $timeKeeper->getHabTimeStr();
+            $currTime = new DelayTime();
+            $eventTime['time_mcc'] = $currTime->getTime();
+            $eventTime['time_hab'] = $currTime->getTime(false);
             echo "event: time\n";
             echo 'data: '.json_encode($eventTime)."\n\n";
 
@@ -110,7 +129,7 @@ class ChatModule extends DefaultModule
         $this->conversationId = $_GET['id'] ?? 1;
         Main::setSiteCookie(array('convo-id'=>$this->conversationId));
 
-        $timeKeeper = TimeKeeper::getInstance();
+        $time = new DelayTime();
 
         $this->addCss('common');
         $this->addCss('chat');
@@ -138,38 +157,29 @@ class ChatModule extends DefaultModule
         return Main::loadTemplate('modules/chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),
                   '/%delay_src%/' => $this->user->isCrew() ? $mission['hab_name'] : $mission['mcc_name'],
-                  '/%time_mcc%/' => $timeKeeper->getMccTimeStr(),
-                  '/%time_hab%/' => $timeKeeper->getHabTimeStr(),
+                  '/%time_mcc%/' => $time->getTime(),
+                  '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversationId,
-                  '/%template-msg-sent-user%/' => $this->compileMsgHtml(array('user'=>'DARIO SCHOR')),
-                  '/%template-msg-sent-hab%/' => file_get_contents($config['templates_dir'].'/modules/chat-msg-sent-hab.txt'),
-                  '/%template-msg-sent-mcc%/' => file_get_contents($config['templates_dir'].'/modules/chat-msg-sent-mcc.txt'),
+                  '/%template-msg-sent-usr%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
+                  '/%template-msg-sent-hab%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
+                  '/%template-msg-sent-mcc%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
                 ));
     }
 
-    private function compileMsgHtml(array $msgData = null) : string
+    private function compileEmptyMsgTemplate(string $template) : string
     {
-        $templateData = array();
+        $templateData = array(
+            '/%message-id%/'    => '',
+            '/%user-id%/'       => '',
+            '/%author%/'        => '',
+            '/%message%/'       => '',
+            '/%msg-sent-time%/' => '',
+            '/%msg-recv-time%/' => '',
+            '/%msg-status%/'    => '',
+        );
 
-        if($msgData != null)
-        {
-            $templateData = array(
-                '/%user-id%/' => $msgData['user-id'],
-
-            );
-        }
-        else
-        {
-            $templateData = array(
-                '/%user-id%/' => '',
-
-            );
-        }
-
-        
-
-        return Main::loadTemplate($template, $templateData);
+        return Main::loadTemplate('modules/'.$template, $templateData);
     }
 
     private function getConversationList(): string 

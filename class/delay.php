@@ -30,7 +30,7 @@ class Delay
 
     public function getDelay(): int
     {
-        return 0;
+        return $this->currDelay;
     }
 
     public function getDelayStr(): string

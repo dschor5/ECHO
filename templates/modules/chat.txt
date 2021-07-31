@@ -34,7 +34,7 @@
         <div id="msg-container">
 
             <template id="msg-sent-user">
-                %template-msg-sent-user%
+                %template-msg-sent-usr%
             </template>
 
             <template id="msg-sent-hab">

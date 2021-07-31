@@ -8,7 +8,7 @@ CREATE TABLE `users` (
   `is_crew` tinyint(1) NOT NULL,
   `last_login` datetime DEFAULT NULL,
   `password_reset` tinyint(1) NOT NULL DEFAULT '1',
-  `preferences` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `preferences` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

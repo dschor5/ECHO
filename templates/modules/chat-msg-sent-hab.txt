@@ -1,0 +1,11 @@
+<div class="msg" id="msg-%message-id%">
+                    <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
+                    <div class="msg-from">%author%</div>
+                    <div class="msg-content">%message%</div>
+                    <div>
+                        <div class="msg-sent-time">%sent-time%</div>
+                        <div class="msg-recv-time">%recv-time%</div>
+                        <div class="msg-status">%delivered-status%</div>
+                    </div>
+                </div>
+                                

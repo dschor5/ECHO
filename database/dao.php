@@ -13,7 +13,6 @@ require_once("database/database.php");
 abstract class Dao
 {
     protected $database = null;  // Database resource
-    private $prefix   = '';      // Table prefix
     private $name     = null;    // Table name
     private $id       = null;    // Name to be used as index (by default, 'id')
 
@@ -32,17 +31,6 @@ abstract class Dao
         $this->database = Database::getInstance();
         $this->name     = $name;
         $this->id       = $id;
-    }
-
-
-    /* PUBLIC:  setPrefix
-    PURPOSE: Allows you to set a table name prefix to use
-        (good if you want to run multiple scripts off the same database)
-    @param:  string $prefix
-    */
-    protected function setPrefix(string $prefix) : void
-    {
-        $this->prefix = $prefix;
     }
 
 
@@ -79,7 +67,7 @@ abstract class Dao
     public function drop($id = '*')
     {
 
-        $query = "delete from `{$this->prefix}{$this->name}`";
+        $query = "delete from `{$this->name}`";
 
         // we know which exact entry we want.
         if (intval($id) > 0)
@@ -110,7 +98,7 @@ abstract class Dao
     public function select($what = '*',$where = '*',$sort = '', $order = 'ASC',$limit_start = null,$limit_count = null)
     {
 
-        $query = "select $what from `{$this->prefix}{$this->name}`";
+        $query = "select $what from `{$this->name}`";
 
         // we know exactly which ID we want...
         if (intval($where) > 0)
@@ -157,7 +145,7 @@ abstract class Dao
     */
     public function insert($fields)
     {
-        $query = "insert into `{$this->prefix}{$this->name}` (";
+        $query = "insert into `{$this->name}` (";
 
         $keys = array();
         $values = array();
@@ -201,7 +189,7 @@ abstract class Dao
             $valuesStr[] = '('.join(',', $values).')';
         }
 
-        $query = 'INSERT INTO `'.$this->prefix.$this->name.'` '.
+        $query = 'INSERT INTO `'.$this->name.'` '.
                     '('.$keysStr.') VALUES '.join(',', $valuesStr).';';
 
         if ($this->database->query($query, false))
@@ -220,7 +208,7 @@ abstract class Dao
     */
     public function replace($fields)
     {
-        $query = "replace into `{$this->prefix}{$this->name}` values(";
+        $query = "replace into `{$this->name}` values(";
 
         $values = array();
         foreach ($fields as $value)
@@ -251,7 +239,7 @@ abstract class Dao
     public function update($fields,$where = '*')
     {
 
-        $query = "update `{$this->prefix}{$this->name}` set ";
+        $query = "update `{$this->name}` set ";
 
         $tmp = array();
         foreach ($fields as $key=>$value)

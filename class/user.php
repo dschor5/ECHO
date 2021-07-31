@@ -47,18 +47,6 @@ class User
         return ($this->data['is_crew'] == 1);
     }
 
-    public function getUserTimeStr(): string
-    {
-        $timeKeeper = TimeKeeper::getInstance();
-        $timeStr = $timeStr = $timeKeeper->getMccTimeStr();
-        if($this->isCrew())
-        {
-            $timeStr = $timeKeeper->getHabTimeStr();
-        }
-
-        return $timeStr;
-    }
-
     public function isResetPasswordRequired() : bool
     {
         return ($this->data['password_reset'] == 1);
