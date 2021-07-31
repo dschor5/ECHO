@@ -43,7 +43,7 @@ class Message
         );
         
         // If authored by this user
-        if($this->user->getId() == $this->data['user_id'])
+        if($userPerspective->getId() == $this->data['user_id'])
         {
             $template = 'modules/chat-msg-sent-usr.txt';
         }
