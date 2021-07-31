@@ -20,3 +20,25 @@ Restart mysql
 Open phpmyadmin
 > Create new delay database
 > run delay.sql 
+
+
+> pi@raspi:/var/lib/mysql $ systemctl status mariadb.service
+
+● mariadb.service - MariaDB 10.1.48 database server
+   Loaded: loaded (/lib/systemd/system/mariadb.service; enabled; vendor preset: enabled)
+   Active: failed (Result: exit-code) since Sat 2021-07-31 17:17:07 EDT; 16s ago
+     Docs: man:mysqld(8)
+           https://mariadb.com/kb/en/library/systemd/
+  Process: 4065 ExecStart=/usr/sbin/mysqld $MYSQLD_OPTS $_WSREP_NEW_CLUSTER $_WSREP_START_POSITION (code=exited, status=1/FAILURE)
+  Process: 3987 ExecStartPre=/bin/sh -c [ ! -e /usr/bin/galera_recovery ] && VAR= ||   VAR=`cd /usr/bin/..; /usr/bin/galera_recovery`; [ $? -eq 0 ]   && systemctl set-environment _WSREP_START_POSITION=
+  Process: 3983 ExecStartPre=/bin/sh -c systemctl unset-environment _WSREP_START_POSITION (code=exited, status=0/SUCCESS)
+  Process: 3980 ExecStartPre=/usr/bin/install -m 755 -o mysql -g root -d /var/run/mysqld (code=exited, status=0/SUCCESS)
+ Main PID: 4065 (code=exited, status=1/FAILURE)
+   Status: "MariaDB server is down"
+
+Jul 31 17:17:05 raspi systemd[1]: Starting MariaDB 10.1.48 database server...
+Jul 31 17:17:06 raspi mysqld[4065]: 2021-07-31 17:17:06 1995566896 [Note] /usr/sbin/mysqld (mysqld 10.1.48-MariaDB-0+deb9u1) starting as process 4065 ...
+Jul 31 17:17:07 raspi systemd[1]: mariadb.service: Main process exited, code=exited, status=1/FAILURE
+Jul 31 17:17:07 raspi systemd[1]: Failed to start MariaDB 10.1.48 database server.
+Jul 31 17:17:07 raspi systemd[1]: mariadb.service: Unit entered failed state.
+Jul 31 17:17:07 raspi systemd[1]: mariadb.service: Failed with result 'exit-code'.
