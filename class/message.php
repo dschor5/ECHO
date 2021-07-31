@@ -28,7 +28,7 @@ class Message
         return ($this->data['is_delivered']) ? 'Delivered' : 'In Transit';
     }
 
-    public function compile(User $userPerspective) : string 
+    public function compile(User &$userPerspective) : string 
     {
         global $config;
 

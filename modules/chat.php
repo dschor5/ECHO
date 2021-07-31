@@ -152,7 +152,14 @@ class ChatModule extends DefaultModule
 
         // Load default conversaiton given subaction.
         $messagesDao = MessagesDao::getInstance();
-        
+        $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew());
+
+        $messageStr = '';
+        foreach($messages as $message)
+        {
+            $messageStr .= $message->compile($this->user);
+        }
+
 
         return Main::loadTemplate('modules/chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),
@@ -162,7 +169,7 @@ class ChatModule extends DefaultModule
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversationId,
                   '/%message-nav%/' => '',
-                  '/%messages%/' => $messages,
+                  '/%messages%/' => $messagesStr,
                   '/%template-msg-sent-usr%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
                   '/%template-msg-sent-hab%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
                   '/%template-msg-sent-mcc%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
