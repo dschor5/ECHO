@@ -45,87 +45,9 @@
                 %template-msg-sent-mcc%
             </template>
 
-            <div class="msg">
-                <img src="%http%%site_url%/%templates_dir%/images/user-mcc.jpg" class"msg-pic"/>
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div>
-                    <div class="msg-time">11:00</div>
-                    <div class="msg-status">Delivered</div>
-                </div>
-            </div>
+            %message-nav%
 
-            <div class="msg response">
-                <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div>
-                    <div class="msg-time">11:00</div>
-                    <div class="msg-status">Delivered</div>
-                </div>
-            </div>
-
-            <div class="msg">
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div>
-                    <div class="msg-time">11:00</div>
-                    <div class="msg-status">Delivered</div>
-                </div>
-            </div>
-
-            <div class="msg response">
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div>
-                    <div class="msg-time">11:00</div>
-                    <div class="msg-status">Delivered</div>
-                </div>
-            </div>
-
-            <div class="msg response">
-                <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">11:00</div>
-                <div class="msg-time">Delivered</div>
-            </div>
-
-            <div class="msg">
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">11:00</div>
-                <div class="msg-time">Delivered</div>
-            </div>
-
-            <div class="msg response">
-                <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class"msg-pic"/>
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">11:00</div>
-                <div class="msg-time">Delivered</div>
-            </div>
-
-            <div class="msg">
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">11:00</div>
-                <div class="msg-time">Delivered</div>
-            </div>
-
-            <div class="msg response">
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">11:00</div>
-                <div class="msg-status">Transmitting</div>
-            </div>
-
-            <div class="msg response">
-                <div class="msg-from">User1</div>
-                <div class="msg-content">Hello. How are you?</div>
-                <div class="msg-time">11:00</div>
-                <div class="msg-status">Transmitting</div>
-            </div>
+            %messages%
 
         </div>
     </div>

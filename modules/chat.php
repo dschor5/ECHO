@@ -151,8 +151,8 @@ class ChatModule extends DefaultModule
         }
 
         // Load default conversaiton given subaction.
-
-        // Get list of users to put in the navigation bar
+        $messagesDao = MessagesDao::getInstance();
+        
 
         return Main::loadTemplate('modules/chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),
@@ -161,6 +161,8 @@ class ChatModule extends DefaultModule
                   '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversationId,
+                  '/%message-nav%/' => '',
+                  '/%messages%/' => $messages,
                   '/%template-msg-sent-usr%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
                   '/%template-msg-sent-hab%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
                   '/%template-msg-sent-mcc%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),

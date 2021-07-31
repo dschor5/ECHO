@@ -27,16 +27,23 @@ class MessagesDao extends Dao
     // Create/update link offset each time it is pressed
     
 
-    public function getMessagesReceived(int $convoId, int $userId) : array
+    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, int $offset=0, string $date=null) : array
     {
+        $qConvoId = $this->database->prepareStatement($convoId);
+        $qUserId = $this->database->prepareStatement($userId);
+        $qOffset = $this->database->prepareStatement($offset);
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qDate = ($date == null) ? 'NOW()' : $this->database->prepareStatement($date);
+
         $queryStr = 'SELECT messages.*, users.username, users.alias, users.is_crew, msg_status.is_delivered '.
                     'FROM messages '.
-                    'JOIN users ON users.user_id = messages.user_id '.
-                    'JOIN msg_status ON messages.message_id = msg_status.message_id '.
-                        'AND msg_status.user_id = 2 '.
-                    'WHERE messages.conversation_id=1, messages.recv_time_mcc <= "2021-07-31 23:59:00" AND msg_status.is_delivered=1 '.
-                    'ORDER BY messages.recv_time_mcc '.
-                    'LIMIT '.$offset.', 25';
+                    'JOIN users ON users.user_id=messages.user_id '.
+                    'JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                        'AND msg_status.user_id=\''.$qUserId.'\' '.
+                    'WHERE messages.conversation_id=\''.$qConvoId.'\', '.
+                           'messages.'.$qRefTime.' <= \''.$qDate.'\' AND msg_status.is_delivered=1 '.
+                    'ORDER BY messages.'.$qRefTime.' '.
+                    'LIMIT '.$qOffset.', 25';
 
         $messages = array();
 
