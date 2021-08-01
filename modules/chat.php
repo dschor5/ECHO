@@ -2,34 +2,68 @@
 
 class ChatModule extends DefaultModule
 {
-    private $conversations;
+    private $conversation;
     private $conversationId;
+    private $convoAccessGranted;
 
     public function __construct(&$user)
     {
         parent::__construct($user);
+        
         $this->subJsonRequests = array('send', 'upload');
         $this->subHtmlRequests = array('group');
         $this->subStreamRequests = array('refresh');
+
+        if(isset($_POST['conversation_id']) && intval($_POST['conversation_id']) > 0)
+        {
+            $this->conversationId = intval($_POST['conversation_id']);
+        }
+        elseif(isset($_GET['conversation_id']) && intval($_GET['conversation_id']) > 0)
+        {
+            $this->conversationId = intval($_GET['conversation_id']);
+        }
+        elseif(isset($_COOKIE['conversation_id']) && intval($_COOKIE['conversation_id']) > 0)
+        {
+            $this->conversationId = intval($_COOKIE['conversation_id']);
+        }
+        else
+        {
+            $this->conversationId = 1;
+        }
+
+        Main::setSiteCookie(array('conversation_id'=>$this->conversationId));
+
+        $participantsDao = ParticipantsDao::getInstance();
+        $this->convoAccessGranted = $participantsDao->canUserAccessConvo($this->conversationId, $this->user->getId());
     }
 
     public function compileJson(string $subaction): array
     {
         $response = array('success' => false);
-        $this->conversationId = $_COOKIE['convo-id'] ?? 1;
-        $response['convo-id'] = $this->conversationId;
 
-        if($subaction == 'send')
+        if($this->convoAccessGranted)
         {
-            $msgText = $_POST['msgBody'] ?? '';
-            if(strlen($msgText) > 0)
+        
+            $response['conversation_id'] = $this->conversationId;
+
+            // TODO - Validate the user can post to this conversation 
+
+            if($subaction == 'send')
             {
-                $response = $this->sendMessage($msgText);
+                $msgText = $_POST['msgBody'] ?? '';
+                if(strlen($msgText) > 0)
+                {
+                    $response = $this->sendMessage($msgText);
+                }
+            }
+            elseif($subaction == 'upload')
+            {
+
             }
         }
-        elseif($subaction == 'upload')
+        else
         {
-
+            $response['error'] = 'User cannot access conversation_id='.$this->conversationId;
         }
 
         return $response;
@@ -102,6 +136,8 @@ class ChatModule extends DefaultModule
     {
         $eventTime = array();
 
+        // TODO - Validate user has access to this conversation
+
         while(true)
         {
             $currTime = new DelayTime();
@@ -126,9 +162,6 @@ class ChatModule extends DefaultModule
         global $config;
         global $mission;
 
-        $this->conversationId = $_GET['id'] ?? 1;
-        Main::setSiteCookie(array('convo-id'=>$this->conversationId));
-
         $time = new DelayTime();
 
         $this->addCss('common');
@@ -150,14 +183,23 @@ class ChatModule extends DefaultModule
             $this->addHeaderMenu('Mission Settings', 'mission');
         }
 
-        // Load default conversaiton given subaction.
         $messagesDao = MessagesDao::getInstance();
-        $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew());
+        try {
+        $messagesDao->updateReceivedFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
 
-        $messageStr = '';
+        // Load default conversaiton given subaction.
+        
+        
+            $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
+        } catch (Exception $e) {
+            var_dump($e);
+        }
+        
+
+        $messagesStr = '';
         foreach($messages as $message)
         {
-            $messageStr .= $message->compile($this->user);
+            $messagesStr .= $message->compile($this->user);
         }
 
 
@@ -193,8 +235,13 @@ class ChatModule extends DefaultModule
 
     private function getConversationList(): string 
     {
-        $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
+        try {
+            $conversationsDao = ConversationsDao::getInstance();
+            $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
+        } catch (Exception $e) {
+            var_dump($e);
+        }
+        
 
         $content = '';
         foreach($conversations as $convo)

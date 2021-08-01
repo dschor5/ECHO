@@ -31,7 +31,7 @@ $(document).ready(function() {
                 type: "POST",
                 data: {
                     subaction: 'send',
-                    msgRoom: $('#new-msg-room').val(),
+                    conversation_id: $('#conversation_id').val(),
                     msgBody: newMsgText,
                 },
                 dataType: 'json',

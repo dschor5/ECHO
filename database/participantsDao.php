@@ -18,6 +18,19 @@ class ParticipantsDao extends Dao
         parent::__construct('participants');
     }
 
+    public function canUserAccessConvo(int $convoId, int $userId) : bool
+    {
+        $result = false;
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+
+        if(($result = $this->select('*', 'conversation_id='.$qConvoId.' AND user_id='.$qUserId)))
+        {
+            $result = ($result->num_rows == 1);
+        }
+        return $result;
+    }
+
     public function getParticipantIds(int $convoId, int $excludeUserId = -1) : array
     {
         $queryStr = 'SELECT participants.user_id, users.is_crew '.

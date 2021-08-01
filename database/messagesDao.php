@@ -18,6 +18,36 @@ class MessagesDao extends Dao
         parent::__construct('messages');
     }
 
+    public function newUserAccessToPrevMessages(int $convoId, int $userId, bool $isCrew)
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $currTime = new DelayTime();
+        $msgStatusDao = MessageStatusDao::getInstance();
+        
+        // TODO - Inneficient if there are a large number of messages. 
+        //        Would need to get count and use that to break up the 
+        //        request into batches. 
+        if (($result = $this->select('message_id, '.$qRefTime.' AS recv_time', 'conversation_id='.$qConvoId)) !== false)
+        {
+            if ($result->num_rows > 0)
+            {
+                $msgStatus = array();
+                while(($msgData = $result->fetch_assoc()) != null)
+                {
+                    $msgStatus[] = array(
+                        'message_id' => $msgData['message_id'],
+                        'user_id' => $userId,
+                        'is_delivered' => $msgData['recv_time'] <= $currTime->getTime(),
+                        'is_read' => 0
+                    );
+                }
+                $msgStatusDao->insertMultiple($msgStatus);
+            }
+        }
+    }
+
     // Get messages for user not yet delivered
     //SELECT messages.*, users.is_crew, msg_status.is_delivered FROM messages JOIN users ON users.user_id = messages.user_id JOIN msg_status ON messages.message_id=msg_status.message_id AND msg_status.user_id = 2 WHERE messages.recv_time_mcc <= '2021-07-31 23:59:00'
 
@@ -25,25 +55,56 @@ class MessagesDao extends Dao
     // Need to add ORDER BY received time, OFFSET/LIMIT
     // Get messages in chronological order ORDER BY messages.recv_time_mcc DESC LIMIT 0, 25
     // Create/update link offset each time it is pressed
-    
-
-    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, int $offset=0, string $date=null) : array
+    public function updateReceivedFlag(int $convoId, int $userId, bool $isCrew, string $date)
     {
-        $qConvoId = $this->database->prepareStatement($convoId);
-        $qUserId = $this->database->prepareStatement($userId);
-        $qOffset = $this->database->prepareStatement($offset);
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
-        $qDate = ($date == null) ? 'NOW()' : $this->database->prepareStatement($date);
+        $qDate    = '\''.$this->database->prepareStatement($date).'\'';
+
+        $queryStr = 'UPDATE msg_status '.
+                    'JOIN messages ON msg_status.message_id=messages.message_id '.
+                    'SET msg_status.is_delivered=1 '. 
+                    'WHERE msg_status.user_id='.$qUserId.' '.
+                        'AND msg_status.is_delivered=0 '.
+                        'AND messages.conversation_id='.$qConvoId.' '. 
+                        'AND messages.'.$qRefTime.' <= '.$qDate;
+
+        $messagesChanged = 0;
+        if($this->database->query($queryStr) !== false)
+        {
+            $messagesChanged = $this->database->getNumRowsAffected();
+        }
+
+        return $messagesChanged;
+    }
+
+    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $date, int $offset=0) : array
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $qOffset  = $this->database->prepareStatement($offset);
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qDate    = '\''.$this->database->prepareStatement($date).'\'';
 
         $queryStr = 'SELECT messages.*, users.username, users.alias, users.is_crew, msg_status.is_delivered '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '.
-                        'AND msg_status.user_id=\''.$qUserId.'\' '.
-                    'WHERE messages.conversation_id=\''.$qConvoId.'\', '.
-                           'messages.'.$qRefTime.' <= \''.$qDate.'\' AND msg_status.is_delivered=1 '.
+                        'AND msg_status.user_id='.$qUserId.' '.
+                    'WHERE messages.conversation_id='.$qConvoId.' '.
+                           'AND messages.'.$qRefTime.' <= '.$qDate.' '.
+                           'AND msg_status.is_delivered=1 '.
                     'ORDER BY messages.'.$qRefTime.' '.
                     'LIMIT '.$qOffset.', 25';
+        
+        /*
+        SELECT messages.*, users.username, users.alias, users.is_crew, msg_status.is_delivered 
+        FROM messages JOIN users ON users.user_id=messages.user_id 
+        JOIN msg_status ON messages.message_id=msg_status.message_id AND msg_status.user_id='2' 
+        WHERE messages.conversation_id='1' AND messages.recv_time_hab <= '2021-07-31 18:41:57' AND 
+        msg_status.is_delivered=1 ORDER BY messages.recv_time_hab LIMIT 0, 25
+        */
 
         $messages = array();
 

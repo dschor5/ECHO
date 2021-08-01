@@ -23,6 +23,10 @@ class User
 
     public function getAlias(): string
     {
+        if(strlen($this->data['alias']) == 0)
+        {
+            return $this->getUsername();
+        }
         return $this->data['alias'];
     }
 

@@ -28,13 +28,21 @@ class Conversation
     {
         $convos = array();
         $ids = explode(',', $this->data['conversation_participants']);
+        $alias = explode(',', $this->data['conversation_alias']);
         $usernames = explode(',', $this->data['conversation_usernames']);
 
         for($i = 0; $i < count($ids); $i++)
         {
             if(intval($ids[$i]) != $excludeUserId)
             {
-                $convos[intval($ids[$i])] = $usernames[$i];
+                if(strlen($alias[$i]) == 0)
+                {
+                    $convos[intval($ids[$i])] = $usernames[$i];
+                }
+                else
+                {
+                    $convos[intval($ids[$i])] = $alias[$i];
+                }
             }
         }
 

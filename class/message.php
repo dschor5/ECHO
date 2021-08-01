@@ -14,9 +14,9 @@ class Message
         $this->data = $data; // requires union with corresponding msg_status
     }
 
-    private function getReceivedTime(bool $mccPerspective) : string
+    private function getReceivedTime(bool $isCrew) : string
     {
-        if($this->data['is_crew'])
+        if($isCrew)
         {
             return $this->data['recv_time_hab'];
         }
@@ -33,13 +33,14 @@ class Message
         global $config;
 
         $msgData = array(
-            '/%message-id%/'    => $this->data['message_id'],
-            '/%user-id%/'       => $this->data['user_id'],
-            '/%author%/'        => $this->data['alias'],
-            '/%message%/'       => $this->data['text'],
-            '/%msg-sent-time%/' => $this->data['sent_time'],
-            '/%msg-recv-time%/' => $this->getReceivedTime($this->data['is_crew']),
-            '/%msg-status%/'    => $this->getMsgStatus(),
+            '/%message-id%/'       => $this->data['message_id'],
+            '/%user-id%/'          => $this->data['user_id'],
+            '/%author%/'           => $this->data['alias'],
+            '/%message%/'          => $this->data['text'],
+            '/%sent-time%/'        => $this->data['sent_time'],
+            '/%recv-time-mcc%/'    => $this->data['recv_time_mcc'],
+            '/%recv-time-hab%/'    => $this->data['recv_time_hab'],
+            '/%delivered-status%/' => $this->getMsgStatus(),
         );
         
         // If authored by this user

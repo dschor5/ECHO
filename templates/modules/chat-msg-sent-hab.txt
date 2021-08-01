@@ -3,9 +3,10 @@
                     <div class="msg-from">%author%</div>
                     <div class="msg-content">%message%</div>
                     <div>
-                        <div class="msg-sent-time">%sent-time%</div>
-                        <div class="msg-recv-time">%recv-time%</div>
-                        <div class="msg-status">%delivered-status%</div>
+                        <div class="msg-sent-time">SENT: %sent-time%</div>
+                        <div class="msg-recv-time-hab">RECV(HAB): %recv-time-hab%</div>
+                        <div class="msg-recv-time-mcc">RECV(MCC): %recv-time-mcc%</div>
+                        <div class="msg-status">STATUS: %delivered-status%</div>
                     </div>
                 </div>
                                 

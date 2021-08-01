@@ -85,7 +85,7 @@ abstract class DefaultModule
         if($this->user != null)
         {
             $userLocation = $this->user->getLocation();
-            $username = $this->user->getUsername();
+            $username = $this->user->getAlias().' ('.$this->user->getUsername().')';
         }
 
         return Main::loadTemplate('modules/header.txt', array(

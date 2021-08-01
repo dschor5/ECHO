@@ -164,37 +164,43 @@ class UsersModule extends DefaultModule
         $usersDao = UsersDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
+        $messagesDao = MessagesDao::getInstance();
         
         try
         {
             $usersDao->startTransaction();
-            $userId = $usersDao->insert($fields);
+            $newUserId = $usersDao->insert($fields);
             // Add to mission conversation
             $newParticipants = array(
                 'conversation_id' => 1,
-                'user_id' => $userId,
+                'user_id' => $newUserId,
             );
             $participantsDao->insert($newParticipants);
 
             $users = $usersDao->getUsers();
 
-            foreach($users as $user)
+            // Give the new user access to all the previous mission messges
+            $messagesDao->newUserAccessToPrevMessages(1, $newUserId, $users[$newUserId]->isCrew());
+
+            
+
+            foreach($users as $otherUserId=>$user)
             {
-                if($userId != $user->getId())
+                if($newUserId != $user->getId())
                 {
                     $newConvoData = array(
-                        'name' => $user->getAlias().'-'.$fields['alias'],
+                        'name' => $user->getAlias().'-'.$users[$newUserId]->getAlias(),
                     );
                     $newConvoId = $conversationsDao->insert($newConvoData);
 
                     $newParticipants = array(
                         array(
                             'conversation_id' => $newConvoId,
-                            'user_id' => $userId,
+                            'user_id' => $newUserId,
                         ),
                         array(
                             'conversation_id' => $newConvoId,
-                            'user_id' => $user->getId(),
+                            'user_id' => $otherUserId,
                         ),
                     );
                     $participantsDao->insertMultiple($newParticipants);
