@@ -31,6 +31,23 @@ class ParticipantsDao extends Dao
         return $result;
     }
 
+    public function getLastRead(int $convoId, int $userId) : string
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+
+        if(($result = $this->select('last_read', 'conversation_id='.$qConvoId.' AND user_id='.$qUserId)))
+        {
+            if($result->num_rows > 0)
+            {
+               $rowData = $result->fetch_assoc();
+               return $rowData['last_read'];
+            }
+        }
+
+        return '0000-00-00 00:00:00';
+    }
+
     public function getParticipantIds(int $convoId, int $excludeUserId = -1) : array
     {
         $queryStr = 'SELECT participants.user_id, users.is_crew '.

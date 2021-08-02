@@ -11,7 +11,7 @@ class Delay
 
     private function __construct()
     {
-        $this->currDelay = 60;
+        $this->currDelay = 20;
     }
 
     public static function getInstance()

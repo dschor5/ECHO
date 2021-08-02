@@ -170,19 +170,23 @@ class UsersModule extends DefaultModule
         {
             $usersDao->startTransaction();
             $newUserId = $usersDao->insert($fields);
-            // Add to mission conversation
-            $newParticipants = array(
-                'conversation_id' => 1,
-                'user_id' => $newUserId,
-            );
-            $participantsDao->insert($newParticipants);
+            
 
             $users = $usersDao->getUsers();
 
             // Give the new user access to all the previous mission messges
-            $messagesDao->newUserAccessToPrevMessages(1, $newUserId, $users[$newUserId]->isCrew());
-
+            $convos = $conversationsDao->getGlobalConvos();
             
+            $newParticipants = array();
+            foreach($convos as $convoId)
+            {
+                $newParticipants[] = array(
+                    'conversation_id' => $convoId,
+                    'user_id' => $newUserId,
+                );
+                $messagesDao->newUserAccessToPrevMessages($convoId, $newUserId);
+            }
+            $participantsDao->insertMultiple($newParticipants);
 
             foreach($users as $otherUserId=>$user)
             {
@@ -190,6 +194,7 @@ class UsersModule extends DefaultModule
                 {
                     $newConvoData = array(
                         'name' => $user->getAlias().'-'.$users[$newUserId]->getAlias(),
+                        'parent_conversation_id' => null,
                     );
                     $newConvoId = $conversationsDao->insert($newConvoData);
 
@@ -212,6 +217,7 @@ class UsersModule extends DefaultModule
         catch(DatabaseException $e)
         {
             $usersDao->endTransaction(false);
+            var_dump($e);
             return false;
         }
 

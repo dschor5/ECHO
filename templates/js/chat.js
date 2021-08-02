@@ -22,6 +22,9 @@ function receiveMessage(data) {
 
 }
 */
+
+var refreshAttempts = 0;
+
 $(document).ready(function() {
     $('#send-btn').on('click', function() {
         if($('#new-msg-room').val() != '') {
@@ -53,7 +56,6 @@ function sentMsg(resp, msgText) {
     
 }
 
-
 const evtSource = new EventSource("%http%%site_url%/chat/refresh");
 
 evtSource.onopen = function () {
@@ -65,9 +67,11 @@ evtSource.onerror = function (err) {
 };
 
 evtSource.addEventListener("time", function(event) {
+
     const data = JSON.parse(event.data);
     $('#time-mcc-value').text(data.time_mcc);
     $('#time-hab-value').text(data.time_hab);  
+    //$('#content').animate({scrollTop: $('#content').height()}, 1);
 });
 
 

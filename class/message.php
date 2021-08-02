@@ -25,10 +25,26 @@ class Message
 
     private function getMsgStatus() : string
     {
-        return ($this->data['is_delivered']) ? 'Delivered' : 'In Transit';
+        $time = new DelayTime();
+        return ($this->getReceivedTime(!$this->data['is_crew']) <= $time->getTime()) ? 'Delivered' : 'In Transit';
     }
 
-    public function compile(User &$userPerspective) : string 
+    public function compileJson(User &$userPerspective) : string
+    {
+        $msgData = array(
+            'message-id'       => $this->data['message_id'],
+            'user-id'          => $this->data['user_id'],
+            'author'           => $this->data['alias'],
+            'message'          => $this->data['text'],
+            'sent-time'        => $this->data['sent_time'],
+            'recv-time-mcc'    => $this->data['recv_time_mcc'],
+            'recv-time-hab'    => $this->data['recv_time_hab'],
+            'delivered-status' => $this->getMsgStatus(),
+        );
+        return json_encode($msgData);
+    }
+
+    public function compileHtml(User &$userPerspective) : string 
     {
         global $config;
 

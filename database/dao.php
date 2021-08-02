@@ -173,6 +173,11 @@ abstract class Dao
     {
         $valuesStr = array();
         
+        if(count($entries) == 0)
+        {
+            return true;
+        }
+        
         foreach($entries as $fields)
         {
             $values = array();
