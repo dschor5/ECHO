@@ -53,7 +53,12 @@ class ChatModule extends DefaultModule
                 $msgText = $_POST['msgBody'] ?? '';
                 if(strlen($msgText) > 0)
                 {
-                    $response = $this->sendMessage($msgText);
+                    try {
+                        $response = $this->sendMessage($msgText);
+                    } catch (Exception $e) {
+                        var_dump($e);
+                    }
+                    
                 }
             }
             elseif($subaction == 'upload')
@@ -74,6 +79,7 @@ class ChatModule extends DefaultModule
         $messageDao = MessagesDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
         $messageStatusDao = MessageStatusDao::getInstance();
+        $conversationsDao = ConversationsDao::getInstance();
         
         $messageDao->startTransaction();
 
@@ -96,7 +102,6 @@ class ChatModule extends DefaultModule
         $msgStatusData = array(
             'message_id' => $messageId,
             'user_id' => $this->user->getId(),
-            'is_delivered' => true,
             'is_read' => true,
         );
         $messageStatusDao->insert($msgStatusData);
@@ -109,12 +114,14 @@ class ChatModule extends DefaultModule
                 $msgStatusData = array(
                     'message_id' => $messageId,
                     'user_id' => $userId,
-                    'is_delivered' => ($isCrew === $this->user->isCrew()),
                     'is_read' => false,
                 );
                 $messageStatusDao->insert($msgStatusData);
             }
         }
+
+        // Finally, update the timestamp for the last message received
+        $conversationsDao->update(array('last_message'=>$currTime->getTime()), 'conversation_id='.$this->conversationId);
 
         $messageDao->endTransaction();
 
@@ -135,7 +142,10 @@ class ChatModule extends DefaultModule
     public function compileStream() 
     {
         $eventTime = array();
-
+        
+        $messagesDao = MessagesDao::getInstance();
+        $participantsDao = ParticipantsDao::getInstance();
+        $lastRead = $participantsDao->getLastRead($this->conversationId, $this->user->getId());
         // TODO - Validate user has access to this conversation
 
         while(true)
@@ -145,6 +155,18 @@ class ChatModule extends DefaultModule
             $eventTime['time_hab'] = $currTime->getTime(false);
             echo "event: time\n";
             echo 'data: '.json_encode($eventTime)."\n\n";
+
+            $messagesDao->updateReadFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $currTime->getTime());
+            $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $currTime->getTime(), 0, $lastRead);
+            $lastRead = $currTime->getTime();
+            $participantsDao->update(array('last_read'=>$lastRead), 
+                'conversation_id=\''.$this->conversationId.'\' AND user_id=\''.$this->user->getId().'\'');
+
+            foreach($messages as $msgId => $msg)
+            {
+                echo "event: msg\n";
+                echo 'data: '.$msg->compileJson($this->user)."\n\n";
+            }
 
             ob_end_flush();
             flush();
@@ -184,13 +206,13 @@ class ChatModule extends DefaultModule
         }
 
         $messagesDao = MessagesDao::getInstance();
-        try {
-        $messagesDao->updateReceivedFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
-
-        // Load default conversaiton given subaction.
-        
-        
+        try 
+        {
+            $messagesDao->updateReadFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
             $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
+            $participantsDao = ParticipantsDao::getInstance();
+            $participantsDao->update(array('last_read'=>$time->getTime()), 
+                'conversation_id=\''.$this->conversationId.'\' AND user_id=\''.$this->user->getId().'\'');
         } catch (Exception $e) {
             var_dump($e);
         }
@@ -199,7 +221,7 @@ class ChatModule extends DefaultModule
         $messagesStr = '';
         foreach($messages as $message)
         {
-            $messagesStr .= $message->compile($this->user);
+            $messagesStr .= $message->compileHtml($this->user);
         }
 
 
@@ -212,25 +234,10 @@ class ChatModule extends DefaultModule
                   '/%convo_id%/' => $this->conversationId,
                   '/%message-nav%/' => '',
                   '/%messages%/' => $messagesStr,
-                  '/%template-msg-sent-usr%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
-                  '/%template-msg-sent-hab%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
-                  '/%template-msg-sent-mcc%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
+                  '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
+                  '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
+                  '/%template-msg-sent-mcc%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
                 ));
-    }
-
-    private function compileEmptyMsgTemplate(string $template) : string
-    {
-        $templateData = array(
-            '/%message-id%/'    => '',
-            '/%user-id%/'       => '',
-            '/%author%/'        => '',
-            '/%message%/'       => '',
-            '/%msg-sent-time%/' => '',
-            '/%msg-recv-time%/' => '',
-            '/%msg-status%/'    => '',
-        );
-
-        return Main::loadTemplate('modules/'.$template, $templateData);
     }
 
     private function getConversationList(): string 

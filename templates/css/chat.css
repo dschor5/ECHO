@@ -152,15 +152,6 @@
     src: url(%http%%site_url%/%templates_dir%/fonts/symbols.woff);
 }
 
-
-/* Chat containers */
-
-#msg-container {
-    background-color; green;
-}
-
-
-
 .msg {
     border: 2px solid #dedede;
     background-color: #f1f1f1;

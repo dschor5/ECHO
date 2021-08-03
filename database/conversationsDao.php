@@ -19,6 +19,23 @@ class ConversationsDao extends Dao
         parent::__construct('conversations');
     }
 
+    public function getGlobalConvos()
+    {
+        $convos = array();
+        if(($result = $this->select('conversation_id, parent_conversation_id', 'conversation_id=\'1\' OR parent_conversation_id=\'1\'')) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                while(($data=$result->fetch_assoc()) != null)  
+                {
+                    $convos[$data['conversation_id']] = $data['conversation_id'];
+                    $convos[$data['parent_conversation_id']] = $data['parent_conversation_id'];
+                }
+            }
+        }
+        return $convos;
+    }
+
     public function getById(int $id = null)
     {
         $conversation = null;

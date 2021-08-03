@@ -33,7 +33,7 @@
     <div id="content">
         <div id="msg-container">
 
-            <template id="msg-sent-user">
+            <template id="msg-sent-usr">
                 %template-msg-sent-usr%
             </template>
 

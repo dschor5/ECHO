@@ -15,8 +15,9 @@ CREATE TABLE `users` (
 CREATE TABLE `conversations` (
   `conversation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `parent_conversation_id` int(11) UNSIGNED NULL DEFAULT NULL,
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_message` datetime DEFAULT NULL,
+  `last_message` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`conversation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -47,7 +48,6 @@ CREATE TABLE `messages` (
 CREATE TABLE `msg_status` (
   `message_id` int(10) UNSIGNED NOT NULL ,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Recipient',
-  `is_delivered` tinyint(1) NOT NULL DEFAULT '0',
   `is_read` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY(`message_id`, `user_id`),
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -57,8 +57,8 @@ CREATE TABLE `msg_status` (
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`) VALUES
 (1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', '17eebdfd162812db191eefdf', 1, 0, '2021-07-23 14:52:17', 1);
 
-INSERT INTO `conversations` (`conversation_id`, `name`, `date_created`) VALUES
-(1, 'Mission Chat', '2021-07-23 14:57:49');
+INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`) VALUES
+(1, 'Mission Chat', NULL, '2021-07-23 14:57:49');
 
 INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
 (1, 1, '0000-00-00 00:00:00');
