@@ -32,16 +32,49 @@ class Message
     public function compileJson(User &$userPerspective) : string
     {
         $msgData = array(
-            'message-id'       => $this->data['message_id'],
-            'user-id'          => $this->data['user_id'],
+            'message_id'       => $this->data['message_id'],
+            'user_id'          => $this->data['user_id'],
             'author'           => $this->data['alias'],
             'message'          => $this->data['text'],
-            'sent-time'        => $this->data['sent_time'],
-            'recv-time-mcc'    => $this->data['recv_time_mcc'],
-            'recv-time-hab'    => $this->data['recv_time_hab'],
-            'delivered-status' => $this->getMsgStatus(),
+            'sent_time'        => $this->data['sent_time'],
+            'recv_time_mcc'    => $this->data['recv_time_mcc'],
+            'recv_time_hab'    => $this->data['recv_time_hab'],
+            'delivered_status' => $this->getMsgStatus(),
         );
+
+        // If authored by this user
+        if($userPerspective->getId() == $this->data['user_id'])
+        {
+            $msgData['type'] = 'usr';
+        }
+        // Else authored by someone else on the habitat
+        elseif($this->data['is_crew'])
+        {
+            $msgData['type'] = 'hab';
+        }
+        // Or authored by someone else in MCC. 
+        else
+        {
+            $msgData['type'] = 'mcc';
+        }
+
         return json_encode($msgData);
+    }
+
+    public static function compileEmptyMsgTemplate(string $template) : string
+    {
+        $templateData = array(
+            '/%message-id%/'       => '',
+            '/%user-id%/'          => '',
+            '/%author%/'           => '',
+            '/%message%/'          => '',
+            '/%sent-time%/'        => '',
+            '/%recv-time-mcc%/'    => '',
+            '/%recv-time-hab%/'    => '',
+            '/%delivered-status%/' => '',
+        );
+
+        return Main::loadTemplate('modules/'.$template, $templateData);
     }
 
     public function compileHtml(User &$userPerspective) : string 

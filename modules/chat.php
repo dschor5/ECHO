@@ -234,25 +234,10 @@ class ChatModule extends DefaultModule
                   '/%convo_id%/' => $this->conversationId,
                   '/%message-nav%/' => '',
                   '/%messages%/' => $messagesStr,
-                  '/%template-msg-sent-usr%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
-                  '/%template-msg-sent-hab%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
-                  '/%template-msg-sent-mcc%/' => $this->compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
+                  '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
+                  '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
+                  '/%template-msg-sent-mcc%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
                 ));
-    }
-
-    private function compileEmptyMsgTemplate(string $template) : string
-    {
-        $templateData = array(
-            '/%message-id%/'    => '',
-            '/%user-id%/'       => '',
-            '/%author%/'        => '',
-            '/%message%/'       => '',
-            '/%msg-sent-time%/' => '',
-            '/%msg-recv-time%/' => '',
-            '/%msg-status%/'    => '',
-        );
-
-        return Main::loadTemplate('modules/'.$template, $templateData);
     }
 
     private function getConversationList(): string 
