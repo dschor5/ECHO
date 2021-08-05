@@ -29,7 +29,10 @@ class ConversationsDao extends Dao
                 while(($data=$result->fetch_assoc()) != null)  
                 {
                     $convos[$data['conversation_id']] = $data['conversation_id'];
-                    $convos[$data['parent_conversation_id']] = $data['parent_conversation_id'];
+                    if($data['parent_conversation_id'] != null)
+                    {
+                        $convos[$data['parent_conversation_id']] = $data['parent_conversation_id'];
+                    }
                 }
             }
         }
@@ -64,9 +67,9 @@ class ConversationsDao extends Dao
     public function getConversationsByUserId(int $userId, string $sort='conversation_id', $order='ASC')
     {
         $queryStr = 'SELECT conversations.*, '.
-                        'GROUP_CONCAT(DISTINCT participants.user_id) AS conversation_participants, '.
-                        'GROUP_CONCAT(DISTINCT users.username) AS conversation_usernames, '.
-                        'GROUP_CONCAT(DISTINCT users.alias) AS conversation_alias '.
+                        'GROUP_CONCAT( participants.user_id) AS conversation_participants, '.
+                        'GROUP_CONCAT( users.username) AS conversation_usernames, '.
+                        'GROUP_CONCAT( users.alias) AS conversation_alias '.
                     'FROM conversations '.
                     'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
                     'JOIN users ON users.user_id=participants.user_id '.
@@ -75,7 +78,7 @@ class ConversationsDao extends Dao
                         'FROM participants '.
                         'WHERE participants.user_id=\''.$this->database->prepareStatement($userId).'\' ) '.
                     'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
-        
+
         $conversations = array();
 
         if(($result = $this->database->query($queryStr)) !== false)

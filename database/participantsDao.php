@@ -31,6 +31,15 @@ class ParticipantsDao extends Dao
         return $result;
     }
 
+    public function updateLastRead($convoId, int $userId, string $lastRead)
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+
+        return $this->update(array('last_read' => $lastRead),
+            'conversation_id='.$qConvoId.' AND user_id='.$qUserId);
+    }
+
     public function getLastRead(int $convoId, int $userId) : string
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';

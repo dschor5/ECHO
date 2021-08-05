@@ -22,9 +22,9 @@ class ChatModule extends DefaultModule
         {
             $this->conversationId = intval($_GET['conversation_id']);
         }
-        elseif(isset($_COOKIE['conversation_id']) && intval($_COOKIE['conversation_id']) > 0)
+        elseif(Main::getCookieValue('conversation_id') != null)
         {
-            $this->conversationId = intval($_COOKIE['conversation_id']);
+            $this->conversationId = intval(Main::getCookieValue('conversation_id'));
         }
         else
         {
@@ -99,26 +99,17 @@ class ChatModule extends DefaultModule
 
         $messageId = $messageDao->insert($msgData);
 
-        $msgStatusData = array(
-            'message_id' => $messageId,
-            'user_id' => $this->user->getId(),
-            'is_read' => true,
-        );
-        $messageStatusDao->insert($msgStatusData);
-
         $partcipants = $participantsDao->getParticipantIds($this->conversationId);
+        $msgStatusData = array();
         foreach($partcipants as $userId => $isCrew)
         {
-            if($userId != $this->user->getId())
-            {
-                $msgStatusData = array(
-                    'message_id' => $messageId,
-                    'user_id' => $userId,
-                    'is_read' => false,
-                );
-                $messageStatusDao->insert($msgStatusData);
-            }
+            $msgStatusData[] = array(
+                'message_id' => $messageId,
+                'user_id' => $userId,
+                'is_read' => 0,
+            );
         }
+        $messageStatusDao->insertMultiple($msgStatusData);
 
         // Finally, update the timestamp for the last message received
         $conversationsDao->update(array('last_message'=>$currTime->getTime()), 'conversation_id='.$this->conversationId);
@@ -145,23 +136,23 @@ class ChatModule extends DefaultModule
         
         $messagesDao = MessagesDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
-        $lastRead = $participantsDao->getLastRead($this->conversationId, $this->user->getId());
         // TODO - Validate user has access to this conversation
 
         while(true)
         {
-            $currTime = new DelayTime();
-            $eventTime['time_mcc'] = $currTime->getTime();
-            $eventTime['time_hab'] = $currTime->getTime(false);
+            $time = new DelayTime();
+            $timeStr = $time->getTime();
+            $eventTime['time_mcc'] = $timeStr;
+            $eventTime['time_hab'] = $time->getTime(false);
             echo "event: time\n";
             echo 'data: '.json_encode($eventTime)."\n\n";
 
-            $messagesDao->updateReadFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $currTime->getTime());
-            $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $currTime->getTime(), 0, $lastRead);
-            $lastRead = $currTime->getTime();
-            $participantsDao->update(array('last_read'=>$lastRead), 
-                'conversation_id=\''.$this->conversationId.'\' AND user_id=\''.$this->user->getId().'\'');
+            echo "event: debug\n";
+            echo "data: CONVOID=".$this->conversationId."\n\n";
 
+            $messages = $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $timeStr);
+            $participantsDao->updateLastRead($this->conversationId, $this->user->getId(), $timeStr);
+            
             foreach($messages as $msgId => $msg)
             {
                 echo "event: msg\n";
@@ -205,14 +196,17 @@ class ChatModule extends DefaultModule
             $this->addHeaderMenu('Mission Settings', 'mission');
         }
 
+        
+        
         $messagesDao = MessagesDao::getInstance();
         try 
         {
-            $messagesDao->updateReadFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
             $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
             $participantsDao = ParticipantsDao::getInstance();
-            $participantsDao->update(array('last_read'=>$time->getTime()), 
-                'conversation_id=\''.$this->conversationId.'\' AND user_id=\''.$this->user->getId().'\'');
+            $participantsDao->updateLastRead($this->conversationId, $this->user->getId(), $time->getTime());
+            
+            $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
+            
         } catch (Exception $e) {
             var_dump($e);
         }
@@ -223,7 +217,6 @@ class ChatModule extends DefaultModule
         {
             $messagesStr .= $message->compileHtml($this->user);
         }
-
 
         return Main::loadTemplate('modules/chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),

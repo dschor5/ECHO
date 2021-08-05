@@ -165,7 +165,12 @@ class Main
         );*/
     }
 
-    public function readCookie()
+    public static function getCookieValue(string $key) 
+    {
+        return self::$cookie[$key] ?? null;
+    }
+
+    private function readCookie()
     {
         global $config;
 
@@ -174,8 +179,6 @@ class Main
             self::$cookie = array();
             parse_str($_COOKIE[$config['cookie_name']], self::$cookie);
         }
-
-        return;
     }
 
     public static function loadTemplate($template, $replace=null)
