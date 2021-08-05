@@ -146,6 +146,7 @@ class Main
         global $config;
         global $server;
 
+        self::$cookie['expiration'] = time() + $config['cookie_expire'];
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;
@@ -156,7 +157,7 @@ class Main
         setcookie(
             $config['cookie_name'], 
             $cookieStr, 
-            time() + $config['cookie_expire'],
+            self::$cookie['expiration'],
             '/');
             /*, 
             $server['site_url'],

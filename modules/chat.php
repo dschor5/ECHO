@@ -43,22 +43,14 @@ class ChatModule extends DefaultModule
 
         if($this->convoAccessGranted)
         {
-        
             $response['conversation_id'] = $this->conversationId;
-
-            // TODO - Validate the user can post to this conversation 
 
             if($subaction == 'send')
             {
                 $msgText = $_POST['msgBody'] ?? '';
                 if(strlen($msgText) > 0)
                 {
-                    try {
-                        $response = $this->sendMessage($msgText);
-                    } catch (Exception $e) {
-                        var_dump($e);
-                    }
-                    
+                    $response = $this->sendMessage($msgText);
                 }
             }
             elseif($subaction == 'upload')
@@ -85,7 +77,6 @@ class ChatModule extends DefaultModule
 
         $currTime = new DelayTime();
         
-
         $msgData = array(
             'user_id' => $this->user->getId(),
             'conversation_id' => $this->conversationId,
@@ -120,12 +111,6 @@ class ChatModule extends DefaultModule
         $jsonResponse = array(
             'success' => true,
             'msg_id' => $messageId,
-            'user_id' => $msgData['user_id'],
-            'username' => $this->user->getUsername(),
-            'alias' => $this->user->getAlias(),
-            'sent_time' => $msgData['sent_time'],
-            'recv_time_hab' => $msgData['recv_time_hab'],
-            'recv_time_mcc' => $msgData['recv_time_mcc'],
         );
         return $jsonResponse;
     }
@@ -147,9 +132,6 @@ class ChatModule extends DefaultModule
             echo "event: time\n";
             echo 'data: '.json_encode($eventTime)."\n\n";
 
-            echo "event: debug\n";
-            echo "data: CONVOID=".$this->conversationId."\n\n";
-
             $messages = $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $timeStr);
             $participantsDao->updateLastRead($this->conversationId, $this->user->getId(), $timeStr);
             
@@ -162,9 +144,17 @@ class ChatModule extends DefaultModule
             ob_end_flush();
             flush();
 
+            // Check if the connection was aborted by the user (e.g., closed browser)
             if(connection_aborted())
             {
                 break;
+            }
+            
+            // Check if the cookie expired to force logout. 
+            if(time() > intval(Main::getCookieValue('expiration')))
+            {
+                echo "event: logout\n";
+                echo "data: session expired\n\n";
             }
             sleep(1);
         }
@@ -199,18 +189,11 @@ class ChatModule extends DefaultModule
         
         
         $messagesDao = MessagesDao::getInstance();
-        try 
-        {
-            $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
-            $participantsDao = ParticipantsDao::getInstance();
-            $participantsDao->updateLastRead($this->conversationId, $this->user->getId(), $time->getTime());
-            
-            $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
-            
-        } catch (Exception $e) {
-            var_dump($e);
-        }
-        
+        $participantsDao = ParticipantsDao::getInstance();
+
+        $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
+        $participantsDao->updateLastRead($this->conversationId, $this->user->getId(), $time->getTime());
+        $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
 
         $messagesStr = '';
         foreach($messages as $message)
@@ -235,14 +218,9 @@ class ChatModule extends DefaultModule
 
     private function getConversationList(): string 
     {
-        try {
-            $conversationsDao = ConversationsDao::getInstance();
-            $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
-        } catch (Exception $e) {
-            var_dump($e);
-        }
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
         
-
         $content = '';
         foreach($conversations as $convo)
         {

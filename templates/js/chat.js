@@ -73,6 +73,10 @@ evtSource.addEventListener("time", function(event) {
     //$('#content').animate({scrollTop: $('#content').height()}, 1);
 });
 
+evtSource.addEventListener("logout", function(event) {
+    evtSource.close();
+});
+
 evtSource.addEventListener("msg", function(event) {
     const data = JSON.parse(event.data);
     if('content' in document.createElement('template'))
