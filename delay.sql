@@ -48,17 +48,51 @@ CREATE TABLE `messages` (
 CREATE TABLE `msg_status` (
   `message_id` int(10) UNSIGNED NOT NULL ,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Recipient',
-  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `is_read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Rx Perspective',
   PRIMARY KEY(`message_id`, `user_id`),
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`) VALUES
-(1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', '17eebdfd162812db191eefdf', 1, 0, '2021-07-23 14:52:17', 1);
+INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
+(1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
 
-INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`) VALUES
-(1, 'Mission Chat', NULL, '2021-07-23 14:57:49');
+INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
+(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', '0000-00-00 00:00:00');
 
 INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
 (1, 1, '0000-00-00 00:00:00');
+
+
+
+INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
+(2, 'user1', 'Flight Director', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 0, NULL, 1, ''),
+(3, 'user2', 'Blueberry', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 1, NULL, 1, ''),
+(4, 'user3', 'Tangirine', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 1, NULL, 1, '');
+
+
+INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
+(2, 'Admin-Flight Director', NULL, '2021-08-03 23:14:48', '0000-00-00 00:00:00'),
+(3, 'Admin-Blueberry', NULL, '2021-08-03 23:14:59', '0000-00-00 00:00:00'),
+(4, 'Flight Director-Blueberry', NULL, '2021-08-03 23:14:59', '0000-00-00 00:00:00'),
+(5, 'Admin-Tangirine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
+(6, 'Flight Director-Tangirine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
+(7, 'Blueberry-Tangirine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00');
+
+
+INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
+(1, 2, '0000-00-00 00:00:00'),
+(1, 3, '0000-00-00 00:00:00'),
+(1, 4, '0000-00-00 00:00:00'),
+(2, 1, '0000-00-00 00:00:00'),
+(2, 2, '0000-00-00 00:00:00'),
+(3, 1, '0000-00-00 00:00:00'),
+(3, 3, '0000-00-00 00:00:00'),
+(4, 2, '0000-00-00 00:00:00'),
+(4, 3, '0000-00-00 00:00:00'),
+(5, 1, '0000-00-00 00:00:00'),
+(5, 4, '0000-00-00 00:00:00'),
+(6, 2, '0000-00-00 00:00:00'),
+(6, 4, '0000-00-00 00:00:00'),
+(7, 3, '0000-00-00 00:00:00'),
+(7, 4, '0000-00-00 00:00:00');
