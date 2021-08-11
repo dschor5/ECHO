@@ -43,7 +43,7 @@ abstract class DefaultModule
         foreach($this->cssFiles as $file)
         {
             $content .= "\t".Main::loadTemplate('css_file.txt', 
-                array('/%filename%/'=>$file))."\n";
+                array('/%filename%/'=>$file)).PHP_EOL;
         }
         return $content;
     }
@@ -59,7 +59,7 @@ abstract class DefaultModule
         foreach($this->jsFiles as $file)
         {
             $content .= "\t".Main::loadTemplate('javascript_file.txt', 
-                array('/%filename%/'=>$file))."\n";
+                array('/%filename%/'=>$file)).PHP_EOL;
         }
         return $content;
     }
@@ -77,7 +77,7 @@ abstract class DefaultModule
         $links = '';
         foreach($this->navLinks as $name => $url)
         {
-            $links .= '<a href="%http%%site_url%/'.$url.'">'.$name.'</a>'."\n";
+            $links .= '<a href="%http%%site_url%/'.$url.'">'.$name.'</a>'.PHP_EOL;
         }
 
         $userLocation = '';

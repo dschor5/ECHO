@@ -2,7 +2,9 @@
 
 error_reporting(E_ALL);
 header('Pragma: no-cache');
-date_default_timezone_set('US/Eastern');
+
+require_once('mission.inc.php');
+date_default_timezone_set($mission['timezone']);
 
 require_once('config.inc.php');
 require_once('database/usersDao.php');

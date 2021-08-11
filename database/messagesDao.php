@@ -18,6 +18,33 @@ class MessagesDao extends Dao
         parent::__construct('messages');
     }
 
+    public function sendMessage(array $msgData)
+    {
+        $messageStatusDao = MessageStatusDao::getInstance();
+        $conversationsDao = ConversationsDao::getInstance();
+        $participantsDao = ParticipantsDao::getInstance();
+
+        $this->startTransaction();
+
+        $messageId = $this->insert($msgData);
+
+        $participants = $participantsDao->getParticipantIds($msgData['conversation_id']);
+        $msgStatusData = array();
+        foreach($participants as $userId => $isCrew)
+        {
+            $msgStatusData[] = array(
+                'message_id' => $messageId,
+                'user_id' => $userId,
+                'is_read' => 0,
+            );
+        }
+        $messageStatusDao->insertMultiple($msgStatusData);
+        $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
+        $this->endTransaction();
+        
+        return $messageId;
+    }
+
     public function newUserAccessToPrevMessages(int $convoId, int $userId)
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
@@ -43,7 +70,7 @@ class MessagesDao extends Dao
                 $msgStatusDao->insertMultiple($msgStatus);
             }
         }
-    }
+    }   
 
     public function getNewMessages(int $convoId, int $userId, bool $isCrew, string $toDate, int $offset=0) : array
     {
@@ -64,7 +91,6 @@ class MessagesDao extends Dao
                         'AND (messages.'.$qRefTime.' BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' '.
                     'LIMIT '.$qOffset.', 25';
-        //return array($queryStr);
         
         $messages = array();
 
@@ -80,7 +106,6 @@ class MessagesDao extends Dao
                 }
             }
         }
-
         
         if(count($messages) > 0)
         {
@@ -88,6 +113,9 @@ class MessagesDao extends Dao
             $messageStatusDao = MessageStatusDao::getInstance();
             $messageStatusDao->update(array('is_read'=>'1'), 'user_id='.$qUserId.' AND message_id IN '.$messageIds);
         }
+
+        $participantsDao = ParticipantsDao::getInstance();
+        $participantsDao->updateLastRead($convoId, $userId, $toDate);
         
         $this->endTransaction();
 
@@ -141,6 +169,7 @@ class MessagesDao extends Dao
         return $messages;
     }
 
+    
 
 }
 

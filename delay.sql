@@ -48,7 +48,7 @@ CREATE TABLE `messages` (
 CREATE TABLE `msg_status` (
   `message_id` int(10) UNSIGNED NOT NULL ,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Recipient',
-  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `is_read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Rx Perspective',
   PRIMARY KEY(`message_id`, `user_id`),
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE

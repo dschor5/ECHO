@@ -20,6 +20,7 @@ class FileModule extends DefaultModule
     public function compileHtml(string $subaction) : string
     {
         global $config;
+        global $mission;
 
         $filename = $_GET['f'] ?? '';
         
@@ -47,7 +48,14 @@ class FileModule extends DefaultModule
                     break;
             }
             
-            echo Main::loadTemplate($filepath);
+            $replace = array(
+                '/%epoch%/'            => DelayTime::getEpoch(),
+                '/%time_sec_per_day%/' => $mission['time_sec_per_day'],
+                '/%time_day%/'         => $mission['time_day'],
+                '/%timezone_offset%/'  => DelayTime::getTimezoneOffset(),
+            );
+
+            echo Main::loadTemplate($filepath, $replace);
         }
 
         exit();

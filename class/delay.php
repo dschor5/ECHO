@@ -11,7 +11,7 @@ class Delay
 
     private function __construct()
     {
-        $this->currDelay = 20;
+        $this->currDelay = 3600;
     }
 
     public static function getInstance()
@@ -44,7 +44,7 @@ class Delay
         {
             $delayStr .= number_format($hrs).'hr ';
         }
-        if($min > 0)
+        if($hrs > 0 || $min > 0)
         {
             $delayStr .= number_format($min).'min ';
         }
@@ -60,11 +60,6 @@ class Delay
     public function getDistanceStr(): string
     {
         return number_format($this->getDistance(),2)." km"; 
-    }
-
-    public function getDelayString(): string
-    {
-        return ''.$this;
     }
 }
 

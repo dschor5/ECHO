@@ -23,8 +23,6 @@ function receiveMessage(data) {
 }
 */
 
-var refreshAttempts = 0;
-
 $(document).ready(function() {
     $('#send-btn').on('click', function() {
         if($('#new-msg-room').val() != '') {
@@ -40,8 +38,10 @@ $(document).ready(function() {
                 dataType: 'json',
                 success: function(resp) {
                     if(resp.success) {
-                        sentMsg(resp, newMsgText);
-                        $('#new-msg-text').val('');
+                        console.log(resp.message_id);
+                    }
+                    else {
+                        console.log(resp.error);
                     }
                 },
                 error: function(jqHR, textStatus, errorThrown) {
@@ -52,9 +52,6 @@ $(document).ready(function() {
     });
 });
 
-function sentMsg(resp, msgText) {
-    
-}
 
 const evtSource = new EventSource("%http%%site_url%/chat/refresh");
 
@@ -68,8 +65,8 @@ evtSource.onerror = function (err) {
 
 evtSource.addEventListener("time", function(event) {
     const data = JSON.parse(event.data);
-    $('#time-mcc-value').text(data.time_mcc);
-    $('#time-hab-value').text(data.time_hab);
+    //$('#time-mcc-value').text(data.time_mcc);
+    //$('#time-hab-value').text(data.time_hab);
     //$('#content').animate({scrollTop: $('#content').height()}, 1);
 });
 
@@ -85,7 +82,7 @@ evtSource.addEventListener("msg", function(event) {
         var template = document.querySelector('#msg-sent-'.concat(data.type));
         var clone = template.content.cloneNode(true);
         clone.querySelector(".msg-from").textContent = data.author;
-        clone.querySelector(".msg-content").textContent = data.message;
+        clone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');
         var subclone = clone.querySelector(".msg-status");
         subclone.querySelector(".msg-sent-time").textContent = data.sent_time;
         subclone.querySelector(".msg-recv-time-hab").textContent = data.recv_time_hab;
@@ -98,3 +95,15 @@ evtSource.addEventListener("msg", function(event) {
         // Browser does not support elements. 
     }
 });
+
+$(document).ready(function() {
+    var matches = document.querySelectorAll("time[status='Transit']");
+    var sentTime = null;
+    var recvTime = null;
+    matches.forEach(function(match) {
+        sentTime = new Date(match.getAttribute("sent"));
+        recvTime = new Date(match.getAttribute("recv"));
+    });
+    
+});
+
