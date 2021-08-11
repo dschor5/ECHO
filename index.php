@@ -2,7 +2,9 @@
 
 error_reporting(E_ALL);
 header('Pragma: no-cache');
-date_default_timezone_set('US/Eastern');
+
+require_once('mission.inc.php');
+date_default_timezone_set($mission['timezone']);
 
 require_once('config.inc.php');
 require_once('database/usersDao.php');
@@ -146,6 +148,7 @@ class Main
         global $config;
         global $server;
 
+        self::$cookie['expiration'] = time() + $config['cookie_expire'];
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;
@@ -156,7 +159,7 @@ class Main
         setcookie(
             $config['cookie_name'], 
             $cookieStr, 
-            time() + $config['cookie_expire'],
+            self::$cookie['expiration'],
             '/');
             /*, 
             $server['site_url'],
@@ -165,7 +168,12 @@ class Main
         );*/
     }
 
-    public function readCookie()
+    public static function getCookieValue(string $key) 
+    {
+        return self::$cookie[$key] ?? null;
+    }
+
+    private function readCookie()
     {
         global $config;
 
@@ -174,8 +182,6 @@ class Main
             self::$cookie = array();
             parse_str($_COOKIE[$config['cookie_name']], self::$cookie);
         }
-
-        return;
     }
 
     public static function loadTemplate($template, $replace=null)

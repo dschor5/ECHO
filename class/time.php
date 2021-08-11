@@ -22,22 +22,40 @@ class DelayTime
         $this->ts = $time->getTimestamp();
     }
 
-    public function getTime(bool $mccFormat = true, bool $withDelay = false) : string
+    public static function getEpoch() : string
+    {
+        global $mission;
+        $epoch = new DateTime($mission['time_epoch'], new DateTimeZone($mission['timezone']));
+        return $epoch->format(self::DATE_FORMAT.'P');
+    }
+
+    // Return minutes for offset
+    public static function getTimezoneOffset() : int 
+    {   
+        global $mission;
+        $met = new DateTime('now', new DateTimeZone($mission['timezone']));
+        return $met->format('Z');
+    }
+
+    public function getTimeUTC() : string 
+    {
+        $time = new DateTime();
+        $time->setTimestamp($this->ts);
+        $time->setTimezone(new DateTimeZone("UTC"));
+        return $time->format(self::DATE_FORMAT.'P');
+    }
+
+    public function getTime(bool $mccFormat = true, bool $withDelay = false, bool $withTz = false) : string
     {
         $timeStr = '';
-        $delay = 0;
-
-        if($withDelay)
-        {
-            $delay = Delay::getInstance()->getDelay();
-        }
+        $delay = ($withDelay) ? Delay::getInstance()->getDelay() : 0;
 
         if($mccFormat)
         {
             $time = new DateTime();
             $time->setTimestamp($this->ts + $delay);
             $time->setTimezone(self::$timezone);
-            $timeStr = $time->format(self::DATE_FORMAT);
+            $timeStr = $time->format(self::DATE_FORMAT.($withTz ? 'P' : ''));
         }
         else
         {

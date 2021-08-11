@@ -2,7 +2,6 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
-putenv("TZ=US/Eastern");
 
 require_once('server.inc.php');
 require_once('mission.inc.php');

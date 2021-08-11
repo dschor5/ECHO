@@ -2,7 +2,8 @@
 
 class ChatModule extends DefaultModule
 {
-    private $conversation;
+    private $participants;
+    private $convoHasParticipantsInBothSites;
     private $conversationId;
     private $convoAccessGranted;
 
@@ -22,9 +23,9 @@ class ChatModule extends DefaultModule
         {
             $this->conversationId = intval($_GET['conversation_id']);
         }
-        elseif(isset($_COOKIE['conversation_id']) && intval($_COOKIE['conversation_id']) > 0)
+        elseif(Main::getCookieValue('conversation_id') != null)
         {
-            $this->conversationId = intval($_COOKIE['conversation_id']);
+            $this->conversationId = intval(Main::getCookieValue('conversation_id'));
         }
         else
         {
@@ -34,7 +35,9 @@ class ChatModule extends DefaultModule
         Main::setSiteCookie(array('conversation_id'=>$this->conversationId));
 
         $participantsDao = ParticipantsDao::getInstance();
-        $this->convoAccessGranted = $participantsDao->canUserAccessConvo($this->conversationId, $this->user->getId());
+        $this->participants = $participantsDao->getParticipantIds($this->conversationId);
+        $this->convoAccessGranted = isset($this->participants[$this->user->getId()]);
+        $this->convoHasParticipantsInBothSites = (count(array_unique($this->participants)) == 2);
     }
 
     public function compileJson(string $subaction): array
@@ -43,27 +46,15 @@ class ChatModule extends DefaultModule
 
         if($this->convoAccessGranted)
         {
-        
             $response['conversation_id'] = $this->conversationId;
-
-            // TODO - Validate the user can post to this conversation 
 
             if($subaction == 'send')
             {
-                $msgText = $_POST['msgBody'] ?? '';
-                if(strlen($msgText) > 0)
-                {
-                    try {
-                        $response = $this->sendMessage($msgText);
-                    } catch (Exception $e) {
-                        var_dump($e);
-                    }
-                    
-                }
+                $response = $this->textMessage();
             }
             elseif($subaction == 'upload')
             {
-
+                $response = $this->uploadFile();
             }
         }
         else
@@ -74,106 +65,88 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
-    private function sendMessage(string $msgText)
+    
+
+    private function uploadFile()
     {
-        $messageDao = MessagesDao::getInstance();
-        $participantsDao = ParticipantsDao::getInstance();
-        $messageStatusDao = MessageStatusDao::getInstance();
-        $conversationsDao = ConversationsDao::getInstance();
-        
-        $messageDao->startTransaction();
+        return '';
+    }
 
+    private function textMessage()
+    {
+        $messagesDao = MessagesDao::getInstance();
         $currTime = new DelayTime();
+
+        $msgText = $_POST['msgBody'] ?? '';
         
+        $response = array('success' => false);
 
-        $msgData = array(
-            'user_id' => $this->user->getId(),
-            'conversation_id' => $this->conversationId,
-            'text' => $msgText,
-            'filename' => null,
-            'type' => Message::TEXT,
-            'sent_time' => $currTime->getTime(),
-            'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew()),
-            'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew()),
-        );
-
-        $messageId = $messageDao->insert($msgData);
-
-        $msgStatusData = array(
-            'message_id' => $messageId,
-            'user_id' => $this->user->getId(),
-            'is_read' => true,
-        );
-        $messageStatusDao->insert($msgStatusData);
-
-        $partcipants = $participantsDao->getParticipantIds($this->conversationId);
-        foreach($partcipants as $userId => $isCrew)
+        if(strlen($msgText) > 0)
         {
-            if($userId != $this->user->getId())
+            $msgData = array(
+                'user_id' => $this->user->getId(),
+                'conversation_id' => $this->conversationId,
+                'text' => $msgText,
+                'filename' => null,
+                'type' => Message::TEXT,
+                'sent_time' => $currTime->getTime(),
+                'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew(), false),
+                'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew(), false),
+            );
+            
+            if(($messageId = $messagesDao->sendMessage($msgData)) > 0)
             {
-                $msgStatusData = array(
-                    'message_id' => $messageId,
-                    'user_id' => $userId,
-                    'is_read' => false,
+                $response = array(
+                    'success' => true,
+                    'message_id' => $messageId
                 );
-                $messageStatusDao->insert($msgStatusData);
             }
         }
-
-        // Finally, update the timestamp for the last message received
-        $conversationsDao->update(array('last_message'=>$currTime->getTime()), 'conversation_id='.$this->conversationId);
-
-        $messageDao->endTransaction();
-
-        // Format JSON response to the user that sent the message
-        $jsonResponse = array(
-            'success' => true,
-            'msg_id' => $messageId,
-            'user_id' => $msgData['user_id'],
-            'username' => $this->user->getUsername(),
-            'alias' => $this->user->getAlias(),
-            'sent_time' => $msgData['sent_time'],
-            'recv_time_hab' => $msgData['recv_time_hab'],
-            'recv_time_mcc' => $msgData['recv_time_mcc'],
-        );
-        return $jsonResponse;
+        
+        return $response;
     }
 
     public function compileStream() 
     {
-        $eventTime = array();
-        
         $messagesDao = MessagesDao::getInstance();
-        $participantsDao = ParticipantsDao::getInstance();
-        $lastRead = $participantsDao->getLastRead($this->conversationId, $this->user->getId());
-        // TODO - Validate user has access to this conversation
 
+        // Block invalid access. 
+        if(!$this->convoAccessGranted)
+        {
+            echo "event: logout".PHP_EOL;
+            echo "data: session expired".PHP_EOL.PHP_EOL;
+            return;
+        }
+
+        // Infinite loop processing data. 
         while(true)
         {
-            $currTime = new DelayTime();
-            $eventTime['time_mcc'] = $currTime->getTime();
-            $eventTime['time_hab'] = $currTime->getTime(false);
-            echo "event: time\n";
-            echo 'data: '.json_encode($eventTime)."\n\n";
-
-            $messagesDao->updateReadFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $currTime->getTime());
-            $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $currTime->getTime(), 0, $lastRead);
-            $lastRead = $currTime->getTime();
-            $participantsDao->update(array('last_read'=>$lastRead), 
-                'conversation_id=\''.$this->conversationId.'\' AND user_id=\''.$this->user->getId().'\'');
-
+            $time = new DelayTime();
+            $timeStr = $time->getTime();
+            
+            $messages = $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $timeStr);
+            
             foreach($messages as $msgId => $msg)
             {
-                echo "event: msg\n";
-                echo 'data: '.$msg->compileJson($this->user)."\n\n";
+                echo "event: msg".PHP_EOL;
+                echo 'data: '.$msg->compileJson($this->user, $this->convoHasParticipantsInBothSites).PHP_EOL.PHP_EOL;
             }
 
+            // Flush output to the user. 
             ob_end_flush();
             flush();
 
+            // Check if the connection was aborted by the user (e.g., closed browser)
             if(connection_aborted())
             {
                 break;
+            }
+            
+            // Check if the cookie expired to force logout. 
+            if(time() > intval(Main::getCookieValue('expiration')))
+            {
+                echo "event: logout".PHP_EOL;
+                echo "data: session expired".PHP_EOL.PHP_EOL;
             }
             sleep(1);
         }
@@ -198,6 +171,7 @@ class ChatModule extends DefaultModule
         }
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('chat');
+        $this->addJavascript('time');
 
         if($this->user->isAdmin())
         {
@@ -205,25 +179,20 @@ class ChatModule extends DefaultModule
             $this->addHeaderMenu('Mission Settings', 'mission');
         }
 
-        $messagesDao = MessagesDao::getInstance();
-        try 
-        {
-            $messagesDao->updateReadFlag($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
-            $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
-            $participantsDao = ParticipantsDao::getInstance();
-            $participantsDao->update(array('last_read'=>$time->getTime()), 
-                'conversation_id=\''.$this->conversationId.'\' AND user_id=\''.$this->user->getId().'\'');
-        } catch (Exception $e) {
-            var_dump($e);
-        }
         
+        
+        $messagesDao = MessagesDao::getInstance();
+        $participantsDao = ParticipantsDao::getInstance();
+
+        $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
+        $participantsDao->updateLastRead($this->conversationId, $this->user->getId(), $time->getTime());
+        $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
 
         $messagesStr = '';
         foreach($messages as $message)
         {
-            $messagesStr .= $message->compileHtml($this->user);
+            $messagesStr .= $message->compileHtml($this->user, $this->convoHasParticipantsInBothSites);
         }
-
 
         return Main::loadTemplate('modules/chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),
@@ -242,14 +211,9 @@ class ChatModule extends DefaultModule
 
     private function getConversationList(): string 
     {
-        try {
-            $conversationsDao = ConversationsDao::getInstance();
-            $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
-        } catch (Exception $e) {
-            var_dump($e);
-        }
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
         
-
         $content = '';
         foreach($conversations as $convo)
         {
@@ -262,23 +226,12 @@ class ChatModule extends DefaultModule
             {
                 $name = 'Private: '.array_pop($participants);
             }
-
-            if($convo->getId() == $this->conversationId)
-            {
-                $content .= Main::loadTemplate('modules/chat-rooms.txt', array(
-                    '/%room_id%/'   => $convo->getId(),
-                    '/%room_name%/' => $name,
-                    '/%selected%/'  => 'room-selected',
-                ));
-            }
-            else
-            {
-                $content .= Main::loadTemplate('modules/chat-rooms.txt', array(
-                    '/%room_id%/'   => $convo->getId(),
-                    '/%room_name%/' => $name,
-                    '/%selected%/'  => '',
-                ));
-            }
+            
+            $content .= Main::loadTemplate('modules/chat-rooms.txt', array(
+                '/%room_id%/'   => $convo->getId(),
+                '/%room_name%/' => $name,
+                '/%selected%/'  => ($convo->getId() == $this->conversationId) ? 'room-selected' : '',
+            ));
         }
 
         return $content;

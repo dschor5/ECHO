@@ -3,6 +3,7 @@
 class ParticipantsDao extends Dao
 {
     private static $instance = null;
+    private static $cache = array();
 
     public static function getInstance()
     {
@@ -18,17 +19,13 @@ class ParticipantsDao extends Dao
         parent::__construct('participants');
     }
 
-    public function canUserAccessConvo(int $convoId, int $userId) : bool
+    public function updateLastRead($convoId, int $userId, string $lastRead)
     {
-        $result = false;
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
 
-        if(($result = $this->select('*', 'conversation_id='.$qConvoId.' AND user_id='.$qUserId)))
-        {
-            $result = ($result->num_rows == 1);
-        }
-        return $result;
+        return $this->update(array('last_read' => $lastRead),
+            'conversation_id='.$qConvoId.' AND user_id='.$qUserId);
     }
 
     public function getLastRead(int $convoId, int $userId) : string
@@ -48,32 +45,32 @@ class ParticipantsDao extends Dao
         return '0000-00-00 00:00:00';
     }
 
-    public function getParticipantIds(int $convoId, int $excludeUserId = -1) : array
+    public function getParticipantIds(int $convoId) : array
     {
-        $queryStr = 'SELECT participants.user_id, users.is_crew '.
-                    'FROM participants '.
-                    'JOIN users ON users.user_id=participants.user_id '. 
-                    'WHERE participants.conversation_id=\''.$this->database->prepareStatement($convoId).'\' ';
-    
-        if($excludeUserId > 0)
+        if(!isset(self::$cache[$convoId]))
         {
-            $queryStr .= 'AND participants.user_id!=\''.$this->database->prepareStatement($excludeUserId).'\'';
-        }
-        
-        $participants = array();
+            $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
 
-        if(($result = $this->database->query($queryStr)) !== false)
-        {
-            if($result->num_rows > 0)
+            $queryStr = 'SELECT participants.user_id, users.is_crew '.
+                        'FROM participants '.
+                        'JOIN users ON users.user_id=participants.user_id '. 
+                        'WHERE participants.conversation_id='.$qConvoId;
+            
+            self::$cache[$convoId] = array();
+
+            if(($result = $this->database->query($queryStr)) !== false)
             {
-                while(($rowData=$result->fetch_assoc()) != null)
+                if($result->num_rows > 0)
                 {
-                    $participants[$rowData['user_id']] = $rowData['is_crew'];
+                    while(($rowData=$result->fetch_assoc()) != null)
+                    {
+                        self::$cache[$convoId][$rowData['user_id']] = $rowData['is_crew'];
+                    }
                 }
             }
         }
 
-        return $participants;
+        return self::$cache[$convoId];
     }
 
 }

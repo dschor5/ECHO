@@ -26,19 +26,31 @@ class Message
     private function getMsgStatus() : string
     {
         $time = new DelayTime();
-        return ($this->getReceivedTime(!$this->data['is_crew']) <= $time->getTime()) ? 'Delivered' : 'In Transit';
+        return ($this->getReceivedTime(!$this->data['is_crew']) <= $time->getTime()) ? 'Delivered' : 'Transit';
     }
 
-    public function compileJson(User &$userPerspective) : string
+    private function getTime(string $name) : string
+    {
+        $time = new DelayTime($this->data[$name]);
+        return $time->getTime(true, false, true);
+    }
+
+    private function getTimeUTC(string $name) : string
+    {
+        $time = new DelayTime($this->data[$name]);
+        return $time->getTimeUtc();
+    }
+
+    public function compileJson(User &$userPerspective, bool $remoteStatus=false) : string
     {
         $msgData = array(
             'message_id'       => $this->data['message_id'],
             'user_id'          => $this->data['user_id'],
             'author'           => $this->data['alias'],
             'message'          => $this->data['text'],
-            'sent_time'        => $this->data['sent_time'],
-            'recv_time_mcc'    => $this->data['recv_time_mcc'],
-            'recv_time_hab'    => $this->data['recv_time_hab'],
+            'sent_time'        => $this->getTime('sent_time'),
+            'recv_time_mcc'    => $this->getTime('recv_time_mcc'),
+            'recv_time_hab'    => $this->getTime('recv_time_hab'),
             'delivered_status' => $this->getMsgStatus(),
         );
 
@@ -77,7 +89,12 @@ class Message
         return Main::loadTemplate('modules/'.$template, $templateData);
     }
 
-    public function compileHtml(User &$userPerspective) : string 
+    private function getRecvTime(bool $isCrew, bool $remoteStatus) : string
+    {
+        return "";
+    }
+
+    public function compileHtml(User &$userPerspective, bool $remoteStatus=false) : string 
     {
         global $config;
 
@@ -85,10 +102,11 @@ class Message
             '/%message-id%/'       => $this->data['message_id'],
             '/%user-id%/'          => $this->data['user_id'],
             '/%author%/'           => $this->data['alias'],
-            '/%message%/'          => $this->data['text'],
-            '/%sent-time%/'        => $this->data['sent_time'],
-            '/%recv-time-mcc%/'    => $this->data['recv_time_mcc'],
-            '/%recv-time-hab%/'    => $this->data['recv_time_hab'],
+            '/%message%/'          => nl2br($this->data['text']),
+            '/%sent-time%/'        => $this->getTime('sent_time'),
+            '/%recv-time-mcc%/'    => $this->getTime('recv_time_mcc'),
+            '/%recv-time-hab%/'    => $this->getTime('recv_time_hab'),
+            '/%recv-time%/'        => $this->getRecvTime($userPerspective->isCrew(), $remoteStatus),
             '/%delivered-status%/' => $this->getMsgStatus(),
         );
         
