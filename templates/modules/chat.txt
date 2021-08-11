@@ -61,3 +61,63 @@
         <button type="button" class="new-msg-btn" id="send-btn">SEND</button>
     </div>
     
+    <div class="modal" id="modal_video" tabindex="-1">
+        <div class="modal-dialog animate">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Video Message</div>
+                    <button type="button" class="modal-close">&times;</button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        Some body
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="login-btn" class="modal-btn-pri">Send Video</button>
+                        <button type="button" class="modal-btn-sec">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal_audio" tabindex="-1">
+        <div class="modal-dialog animate">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Audio Message</div>
+                    <button type="button" class="modal-close">&times;</button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        Some body
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="login-btn" class="modal-btn-pri">Send Audio</button>
+                        <button type="button" class="modal-btn-sec">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal_file" tabindex="-1">
+        <div class="modal-dialog animate">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">File Upload</div>
+                    <button type="button" class="modal-close">&times;</button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        Some body
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="login-btn" class="modal-btn-pri">Send File</button>
+                        <button type="button" class="modal-btn-sec">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    

@@ -107,3 +107,35 @@ $(document).ready(function() {
     
 });
 
+$(document).ready(function() {
+    $('.modal').click( function(event) {
+        if($(event.target).attr('class') == 'modal') {
+            closeModal();
+        }
+    });
+
+    $('button.modal-close').on('click', closeModal);
+    $('button.modal-btn-sec').on('click', closeModal);
+
+    $('#video-btn').prop('disabled', false);
+    $('#video-btn').on('click', function() {
+        $('#modal_video').css('display', 'block');
+    });
+
+    $('#audio-btn').prop('disabled', false);
+    $('#audio-btn').on('click', function() {
+        $('#modal_audio').css('display', 'block');
+    });
+    $('#file-btn').prop('disabled', false);
+    $('#file-btn').on('click', function() {
+        $('#modal_file').css('display', 'block');
+    });
+});
+
+function closeModal() {
+    $('#modal_file').css('display', 'none');
+    $('#modal_video').css('display', 'none');
+    $('#modal_audio').css('display', 'none');
+    // Clear other variables 
+    $('div.modal-response').hide();
+}
