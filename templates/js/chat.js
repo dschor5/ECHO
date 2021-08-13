@@ -38,6 +38,7 @@ $(document).ready(function() {
                 dataType: 'json',
                 success: function(resp) {
                     if(resp.success) {
+                        $('#new-msg-text').val("");
                         console.log(resp.message_id);
                     }
                     else {

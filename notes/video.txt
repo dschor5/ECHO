@@ -1,0 +1,15 @@
+// Stop video stream
+// https://stackoverflow.com/questions/11642926/stop-close-webcam-stream-which-is-opened-by-navigator-mediadevices-getusermedia
+stream.getTracks().forEach(function(track) {
+  track.stop();
+});
+
+
+// WebRTC samples MediaRecorder
+https://webrtc.github.io/samples/src/content/getusermedia/record/
+
+
+// Upload files with JQuery
+https://stackoverflow.com/questions/2320069/jquery-ajax-file-upload
+
+

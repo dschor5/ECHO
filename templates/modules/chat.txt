@@ -110,7 +110,10 @@
                 </div>
                 <form method="POST">
                     <div class="modal-body">
-                        Some body
+                        <div class="modal-response" ></div>
+                        <input type="file" id="new-msg-file" name="new-msg-file" style="width: 600px;"/>
+                        <p>Filetypes allowed: *.docx, *.xlsx, *.pptx, *.pdf, *.jpg, *.gif, *.png.</p>
+                        <p>Max file size: 10MB</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" id="login-btn" class="modal-btn-pri">Send File</button>
