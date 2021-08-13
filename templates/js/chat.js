@@ -140,3 +140,46 @@ function closeModal() {
     // Clear other variables 
     $('div.modal-response').hide();
 }
+
+class File {
+    constructor(file) {
+        this.file = file;
+    }
+
+    upload() {
+        var fromData = new FormData();
+        FormData.append("file", this.file, this.file.name);
+        FormData.append("upload_file", true);
+
+        $.ajax({
+            type: "POST",
+            url: '%http%%site_url%/chat',
+            xhr: function() {
+                var myXhr = #.ajaxSettings.xhr();
+                if(myXhr.upload) {
+                    myXhr.upload.addEventListener('progress', this.progressHandling, false);
+                }
+                return myXhr;
+            },
+            success: function(data) {
+                // What to do on success
+            },
+            error: function(error) {
+                // What to do on errors
+            },
+            async: true,
+            data: FormData,
+            cache: false,
+            contentType: false, 
+            processData: false,
+            timeout: 60000
+        });
+    }
+
+    progressHandling(event) {
+        var percent = 0;
+        var position = event.loaded || event.position;
+        var total = event.total;
+        var progress_bar_id
+    }
+}
