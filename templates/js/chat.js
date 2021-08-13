@@ -64,15 +64,15 @@ evtSource.onerror = function (err) {
     console.error("EventSource failed:", err);
 };
 
-evtSource.addEventListener("time", function(event) {
-    const data = JSON.parse(event.data);
-    //$('#time-mcc-value').text(data.time_mcc);
-    //$('#time-hab-value').text(data.time_hab);
-    //$('#content').animate({scrollTop: $('#content').height()}, 1);
-});
-
 evtSource.addEventListener("logout", function(event) {
     evtSource.close();
+    $('#send-btn').prop('disabled', true);
+    $('#file-btn').prop('disabled', true);
+    $('#audio-btn').prop('disabled', true);
+    $('#video-btn').prop('disabled', true);
+    $('#modal-logout').css('display', 'block');
+    await sleep(5000);
+    location.href = '%http%%site_url%';
 });
 
 evtSource.addEventListener("msg", function(event) {
@@ -120,23 +120,27 @@ $(document).ready(function() {
 
     $('#video-btn').prop('disabled', false);
     $('#video-btn').on('click', function() {
-        $('#modal_video').css('display', 'block');
+        $('#modal-video').css('display', 'block');
     });
 
     $('#audio-btn').prop('disabled', false);
     $('#audio-btn').on('click', function() {
-        $('#modal_audio').css('display', 'block');
+        $('#modal-audio').css('display', 'block');
     });
     $('#file-btn').prop('disabled', false);
     $('#file-btn').on('click', function() {
-        $('#modal_file').css('display', 'block');
+        $('#modal-file').css('display', 'block');
     });
 });
 
 function closeModal() {
-    $('#modal_file').css('display', 'none');
-    $('#modal_video').css('display', 'none');
-    $('#modal_audio').css('display', 'none');
+    $('#modal-file').css('display', 'none');
+    $('#new-msg-file').val("");
+
+    $('#modal-video').css('display', 'none');
+
+
+    $('#modal-audio').css('display', 'none');
     // Clear other variables 
     $('div.modal-response').hide();
 }
