@@ -1,20 +1,17 @@
 $(document).ready(function() {
+    // Register key-press event 
     $('#uname, #upass').keypress( function(event) {
         if(event.which == 13) {
             login();
         }
     });
 
-    $('#login-btn').on('click', login);
-
+    // Register on-click to close modal when the user clicks outside the window.
     $('.modal').click( function(event) {
         if($(event.target).attr('class') == 'modal') {
             closeModal();
         }
     });
-
-    $('button.modal-close').on('click', closeModal);
-    $('button.modal-btn-sec').on('click', closeModal);
 });
 
 function login() {
@@ -22,7 +19,7 @@ function login() {
     var password = $('#upass').val();
     if(username != '' && password != '') {
         $.ajax({
-            url:  '%http%%site_url%/',
+            url:  BASE_URL,
             type: "POST",
             data: {
                 uname: username,
@@ -32,7 +29,7 @@ function login() {
             dataType: 'json',
             success: function(data) {
                 if(data.login == true) {
-                    location.href = '%http%%site_url%/chat';
+                    location.href = BASE_URL + '/chat';
                 }
                 else{
                     $('div.modal-response').text('Invalid username or password.');

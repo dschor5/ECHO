@@ -1,57 +1,33 @@
-/*
-$(document).ready(setTimeout(refreshContents, 1000));
+function sendTextMessage() {
+    var newMsgText = ($('#new-msg-text').val()).trim();
 
-function refreshContents() {
-    var response = $.ajax({
-        url: '%http%%site_url%/chat',
-        type: 'POST',
+    if(newMsgText.length == 0) {
+        return;
+    }
+    
+    $.ajax({
+        url:  '%http%%site_url%/chat',
+        type: "POST",
         data: {
-            subaction: 'refresh',
+            subaction: 'send',
+            conversation_id: $('#conversation_id').val(),
+            msgBody: newMsgText,
         },
         dataType: 'json',
-        success: function(data) {
-            $('#time-mcc-value').text(data.time_mcc);
-            $('#time-hab-value').text(data.time_hab);  
-               
-            setTimeout(refreshContents, 1000)
-        }
+        success: function(resp) {
+            if(resp.success) {
+                $('#new-msg-text').val("");
+                console.log("Sent message_id=" + resp.message_id);
+            }
+            else {
+                console.log(resp.error);
+            }
+        },
+        error: function(jqHR, textStatus, errorThrown) {
+            //location.href = '%http%%site_url%/chat';
+        },
     });
 }
-
-function receiveMessage(data) {
-
-}
-*/
-
-$(document).ready(function() {
-    $('#send-btn').on('click', function() {
-        if($('#new-msg-room').val() != '') {
-            newMsgText = $('#new-msg-text').val();
-            $.ajax({
-                url:  '%http%%site_url%/chat',
-                type: "POST",
-                data: {
-                    subaction: 'send',
-                    conversation_id: $('#conversation_id').val(),
-                    msgBody: newMsgText,
-                },
-                dataType: 'json',
-                success: function(resp) {
-                    if(resp.success) {
-                        $('#new-msg-text').val("");
-                        console.log(resp.message_id);
-                    }
-                    else {
-                        console.log(resp.error);
-                    }
-                },
-                error: function(jqHR, textStatus, errorThrown) {
-                    //location.href = '%http%%site_url%/chat';
-                },
-            });
-        }
-    });
-});
 
 
 const evtSource = new EventSource("%http%%site_url%/chat/refresh");
@@ -71,7 +47,7 @@ evtSource.addEventListener("logout", function(event) {
     $('#audio-btn').prop('disabled', true);
     $('#video-btn').prop('disabled', true);
     $('#modal-logout').css('display', 'block');
-    await sleep(5000);
+    sleep(5000);
     location.href = '%http%%site_url%';
 });
 
@@ -114,35 +90,67 @@ $(document).ready(function() {
             closeModal();
         }
     });
-
-    $('button.modal-close').on('click', closeModal);
-    $('button.modal-btn-sec').on('click', closeModal);
-
-    $('#video-btn').prop('disabled', false);
-    $('#video-btn').on('click', function() {
-        $('#modal-video').css('display', 'block');
-    });
-
-    $('#audio-btn').prop('disabled', false);
-    $('#audio-btn').on('click', function() {
-        $('#modal-audio').css('display', 'block');
-    });
-    $('#file-btn').prop('disabled', false);
-    $('#file-btn').on('click', function() {
-        $('#modal-file').css('display', 'block');
-    });
 });
 
+function openFileModal() {
+    $('#modal-file').css('display', 'block');
+}
+
+async function openVideoModal() { 
+    $('#modal-video').css('display', 'block');
+    const constraints = {
+        audio: { echoCancellation: {exact: true}},
+        video: { width: 1280, height: 720}
+    };
+    await initMediaStream(constraints, 'video');
+}
+
+async function initMediaStream(constraints, type) {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.querySelector('#video-player');
+        $('#record-btn').prop('disabled', false);
+        window.stream = stream;
+        video.srcObject = stream;
+    }
+    catch(e) {
+        console.error('navigator.getUserMedia error: ', e);
+    }
+}
+
+async function openAudioModal() {
+    $('#modal-audio').css('display', 'block');
+    const constraints = {
+        audio: { echoCancellation: {exact: true}},
+        video: false
+    };
+    await initMediaStream(constraints, 'audio');
+}
+
 function closeModal() {
+    // Common
+    $('div.modal-response').hide();
+    stream.getTracks().forEach(function(track) {
+        track.stop();
+    });
+
+    // File
     $('#modal-file').css('display', 'none');
     $('#new-msg-file').val("");
-
+    
+    // Video
     $('#modal-video').css('display', 'none');
 
-
+    // Audio 
     $('#modal-audio').css('display', 'none');
-    // Clear other variables 
-    $('div.modal-response').hide();
+}
+
+function toggleAudioRecording() {
+    return;
+}
+
+function toggleVideoRecording() {
+    return;
 }
 
 class File {
@@ -159,7 +167,7 @@ class File {
             type: "POST",
             url: '%http%%site_url%/chat',
             xhr: function() {
-                var myXhr = #.ajaxSettings.xhr();
+                var myXhr = $.ajaxSettings.xhr();
                 if(myXhr.upload) {
                     myXhr.upload.addEventListener('progress', this.progressHandling, false);
                 }

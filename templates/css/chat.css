@@ -291,3 +291,13 @@
     clear: both;
     display: table;
 }
+
+.modal-content {
+    min-width: 200px;
+    max-width: 600px;
+}
+
+.modal-body video {
+    position: relative;
+    width: 100%;
+}

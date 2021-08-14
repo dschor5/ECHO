@@ -13,7 +13,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Edit User</div>
-                <button type="button" class="modal-close">&times;</button>
+                <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="modal-response"></div>
@@ -40,8 +40,8 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" id="edit-user-btn" class="modal-btn-pri">Save Changes</button>
-                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="button" onclick="editUser()">Save Changes</button>
+                <button type="button" onclick="closeModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -52,14 +52,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title"></div>
-                <button type="button" class="modal-close">&times;</button>
+                <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-confirm-body"></div>
             <input type="hidden" id="confirm-user-id" name="user_id" value="">
             <input type="hidden" id="confirm-subaction" name="subaction" value="">
             <div class="modal-footer">
-                <button type="button" id="confirm-btn" class="modal-btn-pri">Yes</button>
-                <button type="button" class="cancel-btn">No</button>
+                <button type="button" onclick="deleteOrResetUser()">Yes</button>
+                <button type="button" onclick="closeModal()">No</button>
             </div>
         </div>
     </div>

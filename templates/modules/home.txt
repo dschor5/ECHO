@@ -22,7 +22,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">Login to Server</div>
-                <button type="button" class="modal-close">&times;</button>
+                <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <form method="POST">
                 <div class="modal-body">
@@ -34,8 +34,8 @@
                     <input type="password" placeholder="Enter Password" name="upass" id="upass" required>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="login-btn" class="modal-btn-pri">Login</button>
-                    <button type="button" class="modal-btn-sec">Cancel</button>
+                    <button type="button" id="login-btn" onclick="login()">Login</button>
+                    <button type="button" onclick="closeModal()">Cancel</button>
                 </div>
             </form>
         </div>

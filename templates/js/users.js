@@ -1,7 +1,7 @@
 // Get user information to edit profile.
 function getUser(id) {
     $.ajax({
-        url: '%http%%site_url%/users',
+        url: BASE_URL + '/users',
         type: 'POST',
         data: {
             subaction: 'getuser',        
@@ -33,7 +33,7 @@ function getUser(id) {
 // Process request to edit user profile. 
 function editUser() {
     $.ajax({
-        url: '%http%%site_url%/users',
+        url: BASE_URL + '/users',
         type: 'POST',
         data: {
             subaction: 'edituser',
@@ -50,7 +50,7 @@ function editUser() {
                 $('div.modal-response').show();
             }
             else {
-                location.href = '%http%%site_url%/users';
+                location.href = BASE_URL + '/users';
             }
         }
     });
@@ -62,34 +62,30 @@ function confirmAction(subaction, id, username) {
         $('#confirm-user-id').val(id);
         if(subaction == 'deleteuser') {
             $('.modal-title').text('Delete User');
-            $('.modal-confirm-body').text("Are you sure you want to delete '".concat(username, "'?"));
+            $('.modal-confirm-body').text("Are you sure you want to delete '" + username + "'?");
         }
         else {
             $('.modal-title').text('Reset User Password');
-            $('.modal-confirm-body').text("Are you sure you want to reset the password for '".concat(username, "'?"));
+            $('.modal-confirm-body').text("Are you sure you want to reset the password for '" + username + "'?");
         }
         $('#confirm-box').css('display', 'block');
     });
 }
 
-$(document).ready(function() {
-    $('#edit-user-btn').on('click', editUser);
-
-    $('#confirm-btn').on('click', function() {
-        $.ajax({
-            url: '%http%%site_url%/users',
-            type: 'POST',
-            data: {
-                subaction: $('#confirm-subaction').val(),        
-                user_id: $('#confirm-user-id').val(),        
-            },
-            dataType: 'json',
-            success: function() {
-                location.href = '%http%%site_url%/users';
-            }
-        });
+function deleteOrResetUser() {
+    $.ajax({
+        url: BASE_URL + '/users',
+        type: 'POST',
+        data: {
+            subaction: $('#confirm-subaction').val(),        
+            user_id: $('#confirm-user-id').val(),        
+        },
+        dataType: 'json',
+        success: function() {
+            location.href = BASE_URL + '/users';
+        }
     });
-});
+}
 
 // Actions to execute when closing modal window.
 function closeModal() {
@@ -105,6 +101,4 @@ $(document).ready(function() {
             closeModal();
         }
     });
-    $('button.modal-close').on('click', closeModal);
-    $('button.cancel-btn').on('click', closeModal);
 });

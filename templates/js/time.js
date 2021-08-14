@@ -1,18 +1,11 @@
 $(document).ready(setTimeout(updateTime, 1000));
 
 function updateTime() {
-
-    const EPOCH_UTC = new Date("%epoch%"); // sec
-    const SEC_PER_DAY = %time_sec_per_day%; // sec
-    const TIME_DAY = "%time_day%"; // eg., Sol
-    const TZ_OFFSET = %timezone_offset%; // sec
-
     var dt = new Date();
     var mccMet = dt.getTime() + TZ_OFFSET * 1000; // milliseconds
 
     // Format MCC date
     dt.setTime(mccMet);
-    console.log(dt);
     var mccDate = dt.getUTCFullYear() + "-" + 
                   (dt.getUTCMonth()+1).toString().padStart(2, "0") + "-" + 
                   dt.getUTCDate().toString().padStart(2, "0") + " " +

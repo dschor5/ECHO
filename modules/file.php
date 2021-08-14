@@ -9,7 +9,7 @@ class FileModule extends DefaultModule
     {
         parent::__construct($user);
         $this->subJsonRequests = array();
-        $this->subHtmlRequests = array('logout');
+        $this->subHtmlRequests = array();
     }
 
     public function compileJson(string $subaction): array
@@ -47,15 +47,8 @@ class FileModule extends DefaultModule
                     header('Content-Type: text/plain');
                     break;
             }
-            
-            $replace = array(
-                '/%epoch%/'            => DelayTime::getEpoch(),
-                '/%time_sec_per_day%/' => $mission['time_sec_per_day'],
-                '/%time_day%/'         => $mission['time_day'],
-                '/%timezone_offset%/'  => DelayTime::getTimezoneOffset(),
-            );
 
-            echo Main::loadTemplate($filepath, $replace);
+            echo Main::loadTemplate($filepath);
         }
 
         exit();
