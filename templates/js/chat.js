@@ -220,7 +220,6 @@ function progressHandling(event) {
     if (event.lengthComputable) {
         percent = Math.ceil(position / total * 100);
     }
-    console.log(percent);
     // update progressbars classes so it fits your code
     $("#progress-wrp .progress-bar").css("width", +percent + "%");
     $("#progress-wrp .status").text(percent + "%");
