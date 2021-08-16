@@ -6,7 +6,7 @@ function sendTextMessage() {
     }
     
     $.ajax({
-        url:  '%http%%site_url%/chat',
+        url:  BASE_URL + '/chat',
         type: "POST",
         data: {
             subaction: 'send',
@@ -24,14 +24,14 @@ function sendTextMessage() {
             }
         },
         error: function(jqHR, textStatus, errorThrown) {
-            //location.href = '%http%%site_url%/chat';
+            //location.href = BASE_URL + '/chat';
         },
     });
 }
 
 function sendUpload(uploadType) {
     $.ajax({
-        url:  '%http%%site_url%/chat',
+        url:  BASE_URL + '/chat',
         type: "POST",
         data: {
             subaction: 'upload',
@@ -50,13 +50,13 @@ function sendUpload(uploadType) {
             }
         },
         error: function(jqHR, textStatus, errorThrown) {
-            //location.href = '%http%%site_url%/chat';
+            //location.href = BASE_URL + '/chat';
         },
     });
 }
 
 
-const evtSource = new EventSource("%http%%site_url%/chat/refresh");
+const evtSource = new EventSource(BASE_URL + '/chat/refresh');
 
 evtSource.onopen = function () {
     console.info("EventSource connected.");
@@ -74,7 +74,7 @@ evtSource.addEventListener("logout", function(event) {
     $('#video-btn').prop('disabled', true);
     $('#modal-logout').css('display', 'block');
     sleep(5000);
-    location.href = '%http%%site_url%';
+    location.href = BASE_URL;
 });
 
 evtSource.addEventListener("msg", function(event) {
@@ -147,6 +147,9 @@ function closeModal() {
     catch (e) {
         console.log('Cannot revoke url.');
     }
+
+    $("#progress-wrp .progress-bar").css("width", "0%");
+    $("#progress-wrp .status").text("0%");
 }
 
 
@@ -154,61 +157,71 @@ function openFileModal() {
     $('#modal-file').css('display', 'block');
 }
 
-function upload(mediaType) {
+function uploadMedia(mediaType) {
+
+    $("#progress-wrp .progress-bar").css("width", "0%");
+    $("#progress-wrp .status").text("0%");
+
     var formData = new FormData();
+    formData.append("conversation_id", $('#conversation_id').val());
+    formData.append("subaction", "upload");
 
     if(mediaType === 'video' || mediaType === 'audio') {
-        //const blob = new Blob(recordedBlobs, )
+        if(recordedBlobs === undefined) {
+            return;
+        }
+        const blobMimeType = (recordedBlobs[0] || {}).type;
+        const blob = new Blob(recordedBlobs, {type: blobMimeType});
+        formData.append("type", mediaType);
+        formData.append("fname", "");
+        formData.append("fsize", blob.size);
+        formData.append("data", blob, "myBlob");
     }
     else {
-        file = document.querySelector('#new-msg-file').files[0];
+        const file = document.querySelector('#new-msg-file').files[0];
+        if(file === undefined) {
+            return;
+        }
+        formData.append("type", "file");
+        formData.append("fname", file.name);
+        formData.append("fsize", file.size);
+        formData.append("data", file, file.name);
     }
 
-    
-    //formData.append("file", )
+    $.ajax({
+        type: "POST",
+        url:  BASE_URL + '/chat',
+        async: true,
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        timeout: 60000,
+        xhr: function () {
+            var myXhr = $.ajaxSettings.xhr();
+            if (myXhr.upload) {
+                myXhr.upload.addEventListener('progress', progressHandling, false);
+            }
+            return myXhr;
+        },
+        success: function (data) {
+            // your callback here
+        },
+        error: function (error) {
+            // handle error
+        },
+    });
 }
 
-
-
-class File {
-    constructor(file) {
-        this.file = file;
+function progressHandling(event) {
+    var percent = 0;
+    var position = event.loaded || event.position;
+    var total = event.total;
+    if (event.lengthComputable) {
+        percent = Math.ceil(position / total * 100);
     }
-
-    upload() {
-        var fromData = new FormData();
-        FormData.append("file", this.file, this.file.name);
-        FormData.append("upload_file", true);
-
-        $.ajax({
-            type: "POST",
-            url: '%http%%site_url%/chat',
-            xhr: function() {
-                var myXhr = $.ajaxSettings.xhr();
-                /*if(myXhr.upload) {
-                    myXhr.upload.addEventListener('progress', this.progressHandling, false);
-                }*/
-                return myXhr;
-            },
-            success: function(data) {
-                // What to do on success
-            },
-            error: function(error) {
-                // What to do on errors
-            },
-            async: true,
-            data: FormData,
-            cache: false,
-            contentType: false, 
-            processData: false,
-            timeout: 60000
-        });
-    }
-
-    progressHandling(event) {
-        var percent = 0;
-        var position = event.loaded || event.position;
-        var total = event.total;
-        var progress_bar_id
-    }
+    console.log(percent);
+    // update progressbars classes so it fits your code
+    $("#progress-wrp .progress-bar").css("width", +percent + "%");
+    $("#progress-wrp .status").text(percent + "%");
 }

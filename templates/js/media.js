@@ -37,6 +37,9 @@ async function openMediaModal(mediaType) {
     recMediaPlayer = document.querySelector('#rec-' + mediaType + '-player');
     playMediaPlayer = document.querySelector('#play-' + mediaType + '-player');
 
+    $("#progress-wrp .progress-bar").css("width", "0%");
+    $("#progress-wrp .status").text("0%");
+
     recBtn.disabled = false;
     stopBtn.disabled = true;
     sendBtn.disabled = true;
