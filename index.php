@@ -11,9 +11,10 @@ require_once('database/usersDao.php');
 
 try
 {
+    // Force HTTPS. 
     if ((str_starts_with($server['http'], 'https')) && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off")) {
         header('HTTP/1.1 301 Moved Permanently');
-        header('Location: '.$server['http'].$server['site_url'].'/'.$_SERVER['REQUEST_URI']); 
+        header('Location: '.$server['http'].$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); 
         exit;
     }
 
