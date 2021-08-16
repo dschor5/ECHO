@@ -104,7 +104,11 @@ class Main
 
         // Select current module. 
         $moduleName = 'home';
-        if(isset($_GET['action']) && in_array($_GET['action'], $this->getValidModulesForUser($this->user)))
+        if(isset($_POST['action']) && in_array($_POST['action'], $this->getValidModulesForUser($this->user)))
+        {
+            $moduleName = $_POST['action'];
+        }
+        else if(isset($_GET['action']) && in_array($_GET['action'], $this->getValidModulesForUser($this->user)))
         {
             $moduleName = $_GET['action'];
         }
