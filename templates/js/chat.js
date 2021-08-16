@@ -29,6 +29,32 @@ function sendTextMessage() {
     });
 }
 
+function sendUpload(uploadType) {
+    $.ajax({
+        url:  '%http%%site_url%/chat',
+        type: "POST",
+        data: {
+            subaction: 'upload',
+            type: uploadType,
+            conversation_id: $('#conversation_id').val(),
+            msgBody: newMsgText,
+        },
+        dataType: 'json',
+        success: function(resp) {
+            if(resp.success) {
+                closeModal();
+                console.log("Sent message_id=" + resp.message_id);
+            }
+            else {
+                console.log(resp.error);
+            }
+        },
+        error: function(jqHR, textStatus, errorThrown) {
+            //location.href = '%http%%site_url%/chat';
+        },
+    });
+}
+
 
 const evtSource = new EventSource("%http%%site_url%/chat/refresh");
 
@@ -92,47 +118,15 @@ $(document).ready(function() {
     });
 });
 
-function openFileModal() {
-    $('#modal-file').css('display', 'block');
-}
-
-async function openVideoModal() { 
-    $('#modal-video').css('display', 'block');
-    const constraints = {
-        audio: { echoCancellation: {exact: true}},
-        video: { width: 1280, height: 720}
-    };
-    await initMediaStream(constraints, 'video');
-}
-
-async function initMediaStream(constraints, type) {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        const video = document.querySelector('#video-player');
-        $('#record-btn').prop('disabled', false);
-        window.stream = stream;
-        video.srcObject = stream;
-    }
-    catch(e) {
-        console.error('navigator.getUserMedia error: ', e);
-    }
-}
-
-async function openAudioModal() {
-    $('#modal-audio').css('display', 'block');
-    const constraints = {
-        audio: { echoCancellation: {exact: true}},
-        video: false
-    };
-    await initMediaStream(constraints, 'audio');
-}
-
 function closeModal() {
     // Common
     $('div.modal-response').hide();
-    stream.getTracks().forEach(function(track) {
-        track.stop();
-    });
+    try {
+        stream.getTracks().forEach(function(track) {
+            track.stop();
+        });
+    }
+    catch (e) {} // Do nothing.
 
     // File
     $('#modal-file').css('display', 'none');
@@ -145,12 +139,9 @@ function closeModal() {
     $('#modal-audio').css('display', 'none');
 }
 
-function toggleAudioRecording() {
-    return;
-}
 
-function toggleVideoRecording() {
-    return;
+function openFileModal() {
+    $('#modal-file').css('display', 'block');
 }
 
 class File {
@@ -168,9 +159,9 @@ class File {
             url: '%http%%site_url%/chat',
             xhr: function() {
                 var myXhr = $.ajaxSettings.xhr();
-                if(myXhr.upload) {
+                /*if(myXhr.upload) {
                     myXhr.upload.addEventListener('progress', this.progressHandling, false);
-                }
+                }*/
                 return myXhr;
             },
             success: function(data) {

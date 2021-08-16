@@ -215,14 +215,23 @@ a:hover {
     color: #000000;
     font-size: 16pt;
     font-weight: bold;
+    text-align: center;
 }
 
 .modal-footer button {
-    margin: auto 0px;
+    margin: 0px auto;
     position: relative;
-    width: 48%;
+    width: calc(50% - 5px);
     border: 0px;
-    padding: 5px;
+    padding: 5px 0px;
+    height: 25px;
+    border-radius: 5px;
+    border: 1px solid #666;
+}
+
+.modal-footer button:hover {
+    background-color: #666;
+    color: #FFF;
 }
 
 /* Add Zoom Animation */

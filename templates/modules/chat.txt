@@ -55,8 +55,8 @@
     <div id="new-msg">
         <textarea id="new-msg-text" name="newmsg-text" placeholder="Enter Message"></textarea>
         <input type="hidden" id="conversation_id" name="conversation_id" value="%convo_id%">
-        <button type="button" class="new-msg-btn" id="video-btn" onclick="openVideoModal()">&#128249;</button>
-        <button type="button" class="new-msg-btn" id="audio-btn" onclick="openAudioModal()">&#127908;</button>
+        <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')">&#128249;</button>
+        <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')">&#127908;</button>
         <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()">&#128206;</button>
         <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage()">SEND</button>
     </div>
@@ -70,12 +70,15 @@
                 </div>
                 <form method="POST">
                     <div class="modal-body">
-                        <video id="video-player" playsinline autoplay muted></video>
-                        <button type="button" id="record-video-btn" onclick="toggleVideoRecording()">Record Message</button>
+                        <p>Record and preview your message before sending.</p>
+                        <div class="media" style="margin-right: 2px;">Webcam <br> <video id="rec-video-player" src="" playsinline autoplay muted></video></div>
+                        <div class="media" style="margin-left: 2px;">Preview <br> <video id="play-video-player" src="" playsinline autoplay></video></div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" id="video-send-btn">Send Video</button>
-                        
+                    <div class="modal-footer-small">
+                        <button type="button" id="video-record-btn" onclick="startRecording('video')"><span class="symbol-small">&#11044;</span> Start Recording</button>
+                        <button type="button" id="video-stop-btn" onclick="stopRecording('video')"><span class="symbol">&#xE074;</span> Stop Recording</button>
+                        <!--<button type="button" id="video-play-btn" onclick="playRecording('video')"><span class="symbol">&#xE072;</span> Play Preview</button>-->
+                        <button type="button" id="video-send-btn" disabled>Send Video</button>
                     </div>
                 </form>
             </div>
@@ -91,12 +94,15 @@
                 </div>
                 <form method="POST">
                     <div class="modal-body">
-                        <audio id="audio-player" playsinline autoplay muted></audio>
-                        <button type="button" id="record-audio-btn" onclick="toggleAudioRecording()">Record Message</button>
+                        <p>Record and preview your message before sending.</p>
+                        <audio id="rec-audio-player" src="" playsinline autoplay muted></audio>
+                        <audio id="play-audio-player" src="" playsinline autoplay controls></audio>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" id="audio-send-btn">Send Audio</button>
-                        
+                    <div class="modal-footer-small">
+                        <button type="button" id="audio-record-btn" onclick="startRecording('audio')"><span class="symbol-small">&#11044;</span> Record</button>
+                        <button type="button" id="audio-stop-btn" onclick="stopRecording('audio')"><span class="symbol">&#xE074;</span> Stop</button>
+                        <!--<button type="button" id="audio-play-btn" disabled><span class="symbol">&#xE072;</span> Play</button>-->
+                        <button type="button" id="audio-send-btn" disabled>Send Audio</button>
                     </div>
                 </form>
             </div>

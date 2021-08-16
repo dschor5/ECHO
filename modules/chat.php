@@ -183,8 +183,9 @@ class ChatModule extends DefaultModule
         }
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('chat');
+        $this->addJavascript('media');
         $this->addJavascript('time');
-
+        
         if($this->user->isAdmin())
         {
             $this->addHeaderMenu('User Settings', 'users');
