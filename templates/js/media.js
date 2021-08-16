@@ -8,6 +8,7 @@ let stopBtn;
 let sendBtn;
 let recMediaPlayer;
 let playMediaPlayer;
+let mediaUrl;
 
 $(document).ready(function() {
     mimeType = getSupportedMimeTypes();
@@ -35,6 +36,9 @@ async function openMediaModal(mediaType) {
     sendBtn = document.querySelector('#' + mediaType + '-send-btn');
     recMediaPlayer = document.querySelector('#rec-' + mediaType + '-player');
     playMediaPlayer = document.querySelector('#play-' + mediaType + '-player');
+
+    $("#progress-wrp .progress-bar").css("width", "0%");
+    $("#progress-wrp .status").text("0%");
 
     recBtn.disabled = false;
     stopBtn.disabled = true;
@@ -87,8 +91,13 @@ function startRecording(mediaType) {
         mediaRecorder = new MediaRecorder(window.stream, {mimeType});
     }
     catch (e) {
-        console.error('Exception while creating MediaRecorder: ', e);
-        return;
+        try {
+            mediaRecorder = new MediaRecorder(window.stream);
+        }
+        catch (e) {
+            console.error('Exception while creating MediaRecorder: ', e);
+            return;
+        }
     }
     mediaRecorder.ondataavailable = handleDataAvailable;
     mediaRecorder.start();
@@ -114,13 +123,12 @@ async function stopRecording(mediaType) {
     playMediaPlayer.muted = false;
     playMediaPlayer.controls = true;
 
-    const blobMimeType = mimeType.split(';', 1)[0];
+    const blobMimeType = (recordedBlobs[0] || {}).type;
     const superBuffer = new Blob(recordedBlobs, {type: blobMimeType});
-    playMediaPlayer.src = null;
-    playMediaPlayer.srcObject = null;
-    playMediaPlayer.src = window.URL.createObjectURL(superBuffer);
+    mediaUrl = window.URL.createObjectURL(superBuffer);
+    playMediaPlayer.src = mediaUrl;
     playMediaPlayer.controls = true;
-    console.log('Recorded ' + playMediaPlayer.duration + 'sec file.');
+
     playMediaPlayer.play();
 }
 

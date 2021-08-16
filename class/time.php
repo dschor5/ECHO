@@ -26,7 +26,7 @@ class DelayTime
     {
         global $mission;
         $epoch = new DateTime($mission['time_epoch'], new DateTimeZone($mission['timezone']));
-        return $epoch->format(self::DATE_FORMAT.'P');
+        return $epoch->getTimestamp();
     }
 
     // Return minutes for offset

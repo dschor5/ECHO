@@ -69,7 +69,13 @@ class ChatModule extends DefaultModule
 
     private function uploadFile()
     {
-        return '';
+        var_dump($_FILES);
+        var_dump($_POST);
+
+        return array(
+            'success' => true,
+            'message_id' => 0
+        );
     }
 
     private function textMessage()
