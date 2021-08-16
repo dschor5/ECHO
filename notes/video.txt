@@ -13,3 +13,8 @@ https://webrtc.github.io/samples/src/content/getusermedia/record/
 https://stackoverflow.com/questions/2320069/jquery-ajax-file-upload
 
 
+// LEFT JOIN to get a row even if it is empty. 
+SELECT messages.*, msg_file.* FROM messages LEFT JOIN msg_file ON msg_file.file_id=messages.file_id
+
+if type != "TEXT"
+    
