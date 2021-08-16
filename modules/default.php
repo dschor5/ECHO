@@ -111,8 +111,8 @@ abstract class DefaultModule
         }
         
         // Only allow requests from this server. 
-        //header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
-        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
+        //header('Access-Control-Allow-Origin: *');
 
         if(in_array($subaction, $this->subJsonRequests))
         {

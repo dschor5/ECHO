@@ -50,6 +50,7 @@ class ChatModule extends DefaultModule
 
             if($subaction == 'send')
             {
+                var_dump($_POST);
                 $response = $this->textMessage();
             }
             elseif($subaction == 'upload')
