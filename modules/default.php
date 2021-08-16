@@ -98,6 +98,7 @@ abstract class DefaultModule
     public function compile()
     {
         global $mission;
+        global $server;
 
         $subaction = '';
         if(isset($_POST['subaction']) && $_POST['subaction'] != null)
@@ -109,11 +110,11 @@ abstract class DefaultModule
             $subaction = $_GET['subaction'];
         }
         
+        header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
         if(in_array($subaction, $this->subJsonRequests))
         {
             header('Content-Type: application/json');
-            header('Access-Control-Allow-Origin: *');
             echo json_encode($this->compileJson($subaction));
         }
         elseif(in_array($subaction, $this->subStreamRequests))
