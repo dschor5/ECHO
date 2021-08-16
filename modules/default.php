@@ -110,7 +110,8 @@ abstract class DefaultModule
             $subaction = $_GET['subaction'];
         }
         
-        header('Access-Control-Allow-Origin: *');//.$server['http'].$server['site_url']);
+        // Only allow requests from this server. 
+        header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
         if(in_array($subaction, $this->subJsonRequests))
         {
