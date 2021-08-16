@@ -6,9 +6,10 @@ function sendTextMessage() {
     }
     
     $.ajax({
-        url:  BASE_URL + '/chat',
+        url:  BASE_URL,
         type: "POST",
         data: {
+            action: 'chat',
             subaction: 'send',
             conversation_id: $('#conversation_id').val(),
             msgBody: newMsgText,
