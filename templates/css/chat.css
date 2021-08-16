@@ -269,7 +269,7 @@
     border: 1px solid #666;
 }
 
-.modal-footer-small button:hover {
+.modal-footer-small button:hover:enabled {
     background-color: #666;
     color: #FFF;
 }

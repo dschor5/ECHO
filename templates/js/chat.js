@@ -137,12 +137,38 @@ function closeModal() {
 
     // Audio 
     $('#modal-audio').css('display', 'none');
+
+    // Media general
+    try {
+        playMediaPlayer.src = "";
+        playMediaPlayer.removeAttribute('src');
+        window.URL.revokeObjectURL(mediaUrl);
+    }
+    catch (e) {
+        console.log('Cannot revoke url.');
+    }
 }
 
 
 function openFileModal() {
     $('#modal-file').css('display', 'block');
 }
+
+function upload(mediaType) {
+    var formData = new FormData();
+
+    if(mediaType === 'video' || mediaType === 'audio') {
+        //const blob = new Blob(recordedBlobs, )
+    }
+    else {
+        file = document.querySelector('#new-msg-file').files[0];
+    }
+
+    
+    //formData.append("file", )
+}
+
+
 
 class File {
     constructor(file) {

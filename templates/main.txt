@@ -10,7 +10,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="%http%%site_url%/%templates_dir%/images/favicon.ico"/>
     <script type="text/javascript">
         const BASE_URL    = '%http%%site_url%';
-        const EPOCH_UTC   = new Date("%epoch%"); // sec
+        const EPOCH_UTC   = new Date(%epoch% * 1000); // sec
         const SEC_PER_DAY = %time_sec_per_day%; // sec
         const TIME_DAY    = "%time_day%"; // eg., Sol
         const TZ_OFFSET   = %timezone_offset%; // sec
