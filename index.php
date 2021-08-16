@@ -9,9 +9,14 @@ date_default_timezone_set($mission['timezone']);
 require_once('config.inc.php');
 require_once('database/usersDao.php');
 
-
 try
 {
+    if ((str_starts_with($server['http'], 'https')) && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off")) {
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Location: '.$server['http'].$server['site_url'].'/'.$_SERVER['REQUEST_URI'];);
+        exit;
+    }
+
    $main = Main::getInstance();
    $main->compile();
 }
