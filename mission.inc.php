@@ -11,6 +11,6 @@ $mission['role_mcc'] = 'Mission Control';
 $mission['time_day'] = 'Mission Sol';
 $mission['time_epoch'] = '2021-08-10 00:00:00'; // ISO
 $mission['timezone'] = 'America/Chicago';
-$mission['time_sec_per_day'] = 24 * 60 * 60;
+$mission['time_sec_per_day'] = 24 * 60 * 60 + 39 * 60 + 35;
 
 ?>
