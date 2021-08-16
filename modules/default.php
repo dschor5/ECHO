@@ -113,6 +113,7 @@ abstract class DefaultModule
         if(in_array($subaction, $this->subJsonRequests))
         {
             header('Content-Type: application/json');
+            header('Access-Control-Allow-Origin: *');
             echo json_encode($this->compileJson($subaction));
         }
         elseif(in_array($subaction, $this->subStreamRequests))

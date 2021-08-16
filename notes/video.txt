@@ -17,4 +17,10 @@ https://stackoverflow.com/questions/2320069/jquery-ajax-file-upload
 SELECT messages.*, msg_file.* FROM messages LEFT JOIN msg_file ON msg_file.file_id=messages.file_id
 
 if type != "TEXT"
+
+
+// File uploads
+https://stackoverflow.com/questions/38509334/full-secure-image-upload-script
+
+
     
