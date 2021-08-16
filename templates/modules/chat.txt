@@ -55,58 +55,60 @@
     <div id="new-msg">
         <textarea id="new-msg-text" name="newmsg-text" placeholder="Enter Message"></textarea>
         <input type="hidden" id="conversation_id" name="conversation_id" value="%convo_id%">
-        <button type="button" class="new-msg-btn" id="video-btn" disabled>&#128249; <!-- camera --></button>
-        <button type="button" class="new-msg-btn" id="audio-btn" disabled>&#127908; <!-- mic --></button>
-        <button type="button" class="new-msg-btn" id="file-btn" disabled>&#128206; <!-- attach --></button>
-        <button type="button" class="new-msg-btn" id="send-btn">SEND</button>
+        <button type="button" class="new-msg-btn" id="video-btn" onclick="openVideoModal()">&#128249;</button>
+        <button type="button" class="new-msg-btn" id="audio-btn" onclick="openAudioModal()">&#127908;</button>
+        <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()">&#128206;</button>
+        <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage()">SEND</button>
     </div>
     
-    <div class="modal" id="modal_video" tabindex="-1">
+    <div class="modal" id="modal-video" tabindex="-1">
         <div class="modal-dialog animate">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-title">Video Message</div>
-                    <button type="button" class="modal-close">&times;</button>
+                    <div class="modal-title">Record Video Message</div>
+                    <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
                 </div>
                 <form method="POST">
                     <div class="modal-body">
-                        Some body
+                        <video id="video-player" playsinline autoplay muted></video>
+                        <button type="button" id="record-video-btn" onclick="toggleVideoRecording()">Record Message</button>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="login-btn" class="modal-btn-pri">Send Video</button>
-                        <button type="button" class="modal-btn-sec">Cancel</button>
+                        <button type="button" id="video-send-btn">Send Video</button>
+                        
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="modal_audio" tabindex="-1">
+    <div class="modal" id="modal-audio" tabindex="-1">
         <div class="modal-dialog animate">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-title">Audio Message</div>
-                    <button type="button" class="modal-close">&times;</button>
+                    <div class="modal-title">Record Audio Message</div>
+                    <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
                 </div>
                 <form method="POST">
                     <div class="modal-body">
-                        Some body
+                        <audio id="audio-player" playsinline autoplay muted></audio>
+                        <button type="button" id="record-audio-btn" onclick="toggleAudioRecording()">Record Message</button>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="login-btn" class="modal-btn-pri">Send Audio</button>
-                        <button type="button" class="modal-btn-sec">Cancel</button>
+                        <button type="button" id="audio-send-btn">Send Audio</button>
+                        
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="modal_file" tabindex="-1">
+    <div class="modal" id="modal-file" tabindex="-1">
         <div class="modal-dialog animate">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-title">File Upload</div>
-                    <button type="button" class="modal-close">&times;</button>
+                    <div class="modal-title">Select File to Send</div>
+                    <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
                 </div>
                 <form method="POST">
                     <div class="modal-body">
@@ -116,11 +118,23 @@
                         <p>Max file size: 10MB</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="login-btn" class="modal-btn-pri">Send File</button>
-                        <button type="button" class="modal-btn-sec">Cancel</button>
+                        <button type="button" id="file-send-btn">Send File</button>
+                        <button type="button" onclick="closeModal()">Cancel</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     
+    <div class="modal" id="modal-logout" tabindex="-1">
+        <div class="modal-dialog animate">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Session Expired</div>
+                </div>
+                <div class="modal-body">
+                    Your session has expired.  Please relogin.
+                </div>
+            </div>
+        </div>
+    </div>

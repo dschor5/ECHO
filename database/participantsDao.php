@@ -73,6 +73,28 @@ class ParticipantsDao extends Dao
         return self::$cache[$convoId];
     }
 
+    public function getConvosWithSingleParticipant() : array
+    {
+        $queryStr = 'SELECT conversation_id, COUNT(user_id) AS active_participants '.
+                    'FROM participants WHERE conversation_id != 1 '.
+                    'GROUP BY conversation_id HAVING active_participants = 1';
+
+        $convoIds = array();
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                while(($rowData=$result->fetch_assoc()) != null)
+                {
+                    $convoIds[] = $rowData['conversation_id'];
+                }
+            }
+        }
+
+        return $convoIds;
+    }
+
 }
 
 ?>

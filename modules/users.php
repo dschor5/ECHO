@@ -95,6 +95,16 @@ class UsersModule extends DefaultModule
             $usersDao = UsersDao::getInstance();
             $user = $usersDao->drop($user_id);
             $response['success'] = true;
+
+            $participantsDao = ParticipantsDao::getInstance();
+            $convosToDelete = $participantsDao->getConvosWithSingleParticipant();
+
+            $conversationsDao = ConversationsDao::getInstance();
+            if(count($convosToDelete) > 0)
+            {
+                $conversationsDao->drop('conversation_id IN ('.implode(',', $convosToDelete).')');
+            }
+
         }
         else
         {

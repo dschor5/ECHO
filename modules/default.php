@@ -128,18 +128,22 @@ abstract class DefaultModule
             $commDelay = Delay::getInstance();
 
             $replace = array(
-                '/%title%/' => $this->getPageTitle(),
-                '/%content%/' => $this->compileHtml($subaction),
-                '/%css_file%/' =>$this->getCss(),
-                '/%js_file%/' =>$this->getJavascript(),
-                '/%header%/' => $this->getHeader(),
-                '/%home_planet%/' => $mission['home_planet'],
-                '/%away_planet%/' => $mission['away_planet'],
-                '/%delay_distance%/' => $commDelay->getDistanceStr(),
-                '/%delay_time%/' => $commDelay->getDelayStr(),
-                '/%mission_name%/' => $mission['name'],
-                '/%year%/' => date('Y'),
-                '/%random%/' => rand(1, 100000),
+                '/%title%/'            => $this->getPageTitle(),
+                '/%content%/'          => $this->compileHtml($subaction),
+                '/%css_file%/'         =>$this->getCss(),
+                '/%js_file%/'          =>$this->getJavascript(),
+                '/%header%/'           => $this->getHeader(),
+                '/%home_planet%/'      => $mission['home_planet'],
+                '/%away_planet%/'      => $mission['away_planet'],
+                '/%delay_distance%/'   => $commDelay->getDistanceStr(),
+                '/%delay_time%/'       => $commDelay->getDelayStr(),
+                '/%mission_name%/'     => $mission['name'],
+                '/%year%/'             => date('Y'),
+                '/%random%/'           => rand(1, 100000),
+                '/%epoch%/'            => DelayTime::getEpoch(),
+                '/%time_sec_per_day%/' => $mission['time_sec_per_day'],
+                '/%time_day%/'         => $mission['time_day'],
+                '/%timezone_offset%/'  => DelayTime::getTimezoneOffset(),                   
             );
 
             echo Main::loadTemplate('main.txt', $replace);

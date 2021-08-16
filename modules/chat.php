@@ -118,6 +118,8 @@ class ChatModule extends DefaultModule
             return;
         }
 
+        $lastMsg = time();
+
         // Infinite loop processing data. 
         while(true)
         {
@@ -125,11 +127,21 @@ class ChatModule extends DefaultModule
             $timeStr = $time->getTime();
             
             $messages = $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $timeStr);
-            
-            foreach($messages as $msgId => $msg)
+            if(count($messages) > 0)
             {
-                echo "event: msg".PHP_EOL;
-                echo 'data: '.$msg->compileJson($this->user, $this->convoHasParticipantsInBothSites).PHP_EOL.PHP_EOL;
+                foreach($messages as $msgId => $msg)
+                {
+                    echo "event: msg".PHP_EOL;
+                    echo 'data: '.$msg->compileJson($this->user, $this->convoHasParticipantsInBothSites).PHP_EOL.PHP_EOL;
+                }
+                $lastMsg = time();
+            }
+
+            // Send keep-alive message every 5 seconds of inactivity. 
+            if($lastMsg + 5 <= time())
+            {
+                echo ":\n";
+                $lastMsg = time();
             }
 
             // Flush output to the user. 

@@ -7,8 +7,13 @@
     <meta name="keywords" content="human spaceflight, analog mission, communication delay" />
     <meta name="description" content="Emulator for Interplanetary Human Spaceflight" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="%http%%site_url%/%templates_dir%/images/favicon.ico"/>
     <script type="text/javascript">
-        var base_url = '%http%%site_url%';
+        const BASE_URL    = '%http%%site_url%';
+        const EPOCH_UTC   = new Date("%epoch%"); // sec
+        const SEC_PER_DAY = %time_sec_per_day%; // sec
+        const TIME_DAY    = "%time_day%"; // eg., Sol
+        const TZ_OFFSET   = %timezone_offset%; // sec
     </script>
 %css_file%%js_file%</head>
 
