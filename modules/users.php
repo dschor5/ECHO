@@ -93,13 +93,13 @@ class UsersModule extends DefaultModule
 
         $response = array('success'=>false, 'error'=>'');
 
-        $user_id = $_POST['user_id'] ?? 0;
+        $userId = $_POST['user_id'] ?? 0;
 
-        if($user_id > 0 && $user_id != $this->user->getId())
+        if($userId > 0 && $userId != $this->user->getId())
         {
-            if($usersDao->deleteUser($user_id) !== true)
+            if($usersDao->deleteUser($userId) !== true)
             {
-                $response['error'] = 'Failed to delete user. (user_id='.$user_id.')';
+                $response['error'] = 'Failed to delete user. (user_id='.$userId.')';
             }
         }
         else
@@ -112,7 +112,7 @@ class UsersModule extends DefaultModule
 
     private function editUser()
     {
-        $user_id = $_POST['user_id'] ?? 0;
+        $userId = $_POST['user_id'] ?? 0;
         $username = $_POST['username'] ?? '';
         $alias = $_POST['alias'] ?? '';
         $isCrew = $_POST['is_crew'] ?? 1;
@@ -127,7 +127,7 @@ class UsersModule extends DefaultModule
         {
             $response['error'] = 'Invalid username. Min 4 characters.';
         }
-        elseif($user !== false && $user->getId() != $user_id && $user->getUsername() == $username)
+        elseif($user !== false && $user->getId() != $userId && $user->getUsername() == $username)
         {
             $response['error'] = 'Username already in use.';
         }
@@ -143,7 +143,7 @@ class UsersModule extends DefaultModule
                 'is_crew'  => $isCrew,
                 'is_admin' => $isAdmin
             );
-            if($user_id == 0)
+            if($userId == 0)
             {
                 global $admin;
                 $fields['user_id'] = null;
@@ -161,13 +161,13 @@ class UsersModule extends DefaultModule
             }
             else
             {
-                if($usersDao->update($fields, 'user_id='.$user_id) === true)
+                if($usersDao->update($fields, 'user_id='.$userId) === true)
                 {
                     $response = array('success'=>true, 'error'=>'');
                 }
                 else
                 {
-                    $response['error'] = 'Failed to update user (user_id='.$user_id.')';
+                    $response['error'] = 'Failed to update user (user_id='.$userId.')';
                 }
             }
         }
