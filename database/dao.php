@@ -79,7 +79,7 @@ abstract class Dao
             $query .= " where ".$id;
 
 
-        return $this->database->query($query,0);
+        return $this->database->query($query, false);
     }
 
 
@@ -261,10 +261,7 @@ abstract class Dao
 
         $query.=';';
 
-        if ($this->database->query($query,0))
-            return true;
-        else
-            return false;
+        return $this->database->query($query, false);
     }
 
 

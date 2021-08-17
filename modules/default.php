@@ -99,6 +99,7 @@ abstract class DefaultModule
     {
         global $mission;
         global $server;
+        global $config;
 
         $subaction = '';
         if(isset($_POST['subaction']) && $_POST['subaction'] != null)
@@ -117,7 +118,13 @@ abstract class DefaultModule
         if(in_array($subaction, $this->subJsonRequests))
         {
             header('Content-Type: application/json');
-            echo json_encode($this->compileJson($subaction));
+            $response = $this->compileJson($subaction);
+            if($config['debug'])
+            {
+                $db = Database::getInstance();
+                $response['debug'] = $db->getErr();
+            }
+            echo json_encode($response);
         }
         elseif(in_array($subaction, $this->subStreamRequests))
         {

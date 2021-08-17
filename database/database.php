@@ -22,6 +22,7 @@ class Database
     private $errorTrace = '';    // private: if theres an error, the debug trace will be in here.
     public $query_count = 0;    // public: keeps track of the number of queries
     public $query_time = 0;    // public: keeps track of the total time taken.
+    private $throwException = false;
 
     private static $instance = null;
 
@@ -110,6 +111,15 @@ class Database
         return $this->daos[$dao];
     }
 
+    public function enableQueryException()
+    {
+        $this->throwException = true;
+    }
+
+    public function disableQueryException()
+    {
+        $this->throwException = true;
+    }
 
     /* PRIVATE: query
            PURPOSE: Runs an actual query and (if needed) creates
@@ -127,28 +137,24 @@ class Database
      */
     public function query(string $queryStr) 
     {
-        //get the start time
         $time_start = $this->getmicrotime();
-
-        //run the query
         $result = $this->db->query($queryStr);
-
-        //get the end time.w
         $time_end = $this->getmicrotime();
-
-        //add the query time to the total query time
-        //being stored and increment the query count.
+            
         $this->query_time+= $time_end - $time_start;
         $this->query_count++;
 
-        //if there was an error store the error
-        //and return false.
+        // Store errors for debugging.
         if ($result === false || $this->db->error != '')
         {
             $this->errorQuery = $queryStr;
             $this->error =  $this->db->error;
             $this->errorTrace = debug_backtrace();
-            throw new DatabaseException($queryStr, $this->db->error);
+            
+            if($this->throwException)
+            {
+                throw new DatabaseException($queryStr, $this->db->error);
+            }
         }
 
         //if we need to keep the result, create
@@ -179,7 +185,7 @@ class Database
      */
     public function getMicrotime()
     {
-        $time=microtime();
+        $time = microtime();
         return substr($time,11).substr($time,1,9);
     }
 

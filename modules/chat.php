@@ -50,7 +50,6 @@ class ChatModule extends DefaultModule
 
             if($subaction == 'send')
             {
-                var_dump($_POST);
                 $response = $this->textMessage();
             }
             elseif($subaction == 'upload')
@@ -85,8 +84,11 @@ class ChatModule extends DefaultModule
         $currTime = new DelayTime();
 
         $msgText = $_POST['msgBody'] ?? '';
-        
-        $response = array('success' => false);
+
+        $response = array(
+            'success' => false, 
+            'message_id' => -1
+        );
 
         if(strlen($msgText) > 0)
         {
@@ -101,13 +103,14 @@ class ChatModule extends DefaultModule
                 'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew(), false),
             );
             
-            if(($messageId = $messagesDao->sendMessage($msgData)) > 0)
+            if(($messageId = $messagesDao->sendMessage($msgData)) !== false)
             {
                 $response = array(
                     'success' => true,
                     'message_id' => $messageId
                 );
             }
+
         }
         
         return $response;

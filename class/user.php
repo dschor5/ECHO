@@ -63,20 +63,8 @@ class User
 
     public function createNewSession()
     {
-        $ret = false;
-        $usersDao = UsersDao::getInstance();
-
-        $newData = array(
-            'session_id' => dechex(rand(0,time())).dechex(rand(0,time())).dechex(rand(0,time())),
-            'last_login' => date('Y-m-d H:i:s', time())
-        );
-
-        if ($usersDao->update($newData, $this->data['user_id']) !== false)
-        {
-            $ret = $newData['session_id'];
-        }
-
-        return $ret;
+        $this->data['session_id'] = dechex(rand(0,time())).dechex(rand(0,time())).dechex(rand(0,time()));
+        return $this->data['session_id'];
     }
 
     public function isValidSession($cmpKey)

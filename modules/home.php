@@ -53,12 +53,20 @@ class HomeModule extends DefaultModule
             $usersDao = UsersDao::getInstance();
             $user = $usersDao->getByUsername($_POST['uname']);
 
-            if($user != null && $user->isValidPassword($_POST['upass']))
+            if($user !== false && $user->isValidPassword($_POST['upass']))
             {
                 $this->user = $user;
                 $sessionId = $user->createNewSession();
-                Main::setSiteCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
-                $response['login'] = true;
+                $newData = array(
+                    'session_id' => $sessionId,
+                    'last_login' => date('Y-m-d H:i:s', time())
+                );
+        
+                if ($usersDao->update($newData, $this->user->getId()) !== false)
+                {
+                    Main::setSiteCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
+                    $response['login'] = true;
+                }
             }
         }
 

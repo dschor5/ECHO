@@ -63,6 +63,7 @@ class UsersModule extends DefaultModule
     private function resetUserPassword()
     {
         global $server;
+        $usersDao = UsersDao::getInstance();
 
         $response = array('success'=>false, 'error'=>'');
 
@@ -70,9 +71,10 @@ class UsersModule extends DefaultModule
 
         if($user_id > 0 && $user_id != $this->user->getId())
         {
-            $usersDao = UsersDao::getInstance();
-            $user = $usersDao->update(array('password_reset'=>1), $user_id);
-            $response['success'] = true;
+            if($usersDao->update(array('password_reset'=>1), $user_id) !== true)
+            {
+                $response['error'] = 'Failed to reset user password (user_id='.$user_id.').';
+            } 
         }
         else
         {
@@ -85,6 +87,9 @@ class UsersModule extends DefaultModule
     private function deleteUser()
     {
         global $server;
+        $usersDao = UsersDao::getInstance();
+        $participantsDao = ParticipantsDao::getInstance();
+        $conversationsDao = ConversationsDao::getInstance();
 
         $response = array('success'=>false, 'error'=>'');
 
@@ -92,19 +97,10 @@ class UsersModule extends DefaultModule
 
         if($user_id > 0 && $user_id != $this->user->getId())
         {
-            $usersDao = UsersDao::getInstance();
-            $user = $usersDao->drop($user_id);
-            $response['success'] = true;
-
-            $participantsDao = ParticipantsDao::getInstance();
-            $convosToDelete = $participantsDao->getConvosWithSingleParticipant();
-
-            $conversationsDao = ConversationsDao::getInstance();
-            if(count($convosToDelete) > 0)
+            if($usersDao->deleteUser($user_id) !== true)
             {
-                $conversationsDao->drop('conversation_id IN ('.implode(',', $convosToDelete).')');
+                $response['error'] = 'Failed to delete user. (user_id='.$user_id.')';
             }
-
         }
         else
         {
@@ -131,11 +127,11 @@ class UsersModule extends DefaultModule
         {
             $response['error'] = 'Invalid username. Min 4 characters.';
         }
-        elseif($user != null && $user->getId() != $user_id && $user->getUsername() == $username)
+        elseif($user !== false && $user->getId() != $user_id && $user->getUsername() == $username)
         {
             $response['error'] = 'Username already in use.';
         }
-        elseif($user != null && $user->isAdmin() != $isAdmin)
+        elseif($user !== false && $user->isAdmin() != $isAdmin)
         {
             $response['error'] = 'Cannot remove your own admin priviledges.';
         }
@@ -153,85 +149,30 @@ class UsersModule extends DefaultModule
                 $fields['user_id'] = null;
                 $fields['password'] = md5($admin['default_password']);
                 $fields['password_reset'] = 1;
-                $ret = $this->createNewUser($fields);
+                
+                if($usersDao->createNewUser($fields) === true)
+                {
+                    $response = array('success'=>true, 'error'=>'');
+                }
+                else
+                {
+                    $response['error'] = 'Failed to create new user (username='.$username.')';
+                }
             }
             else
             {
-                $ret = $usersDao->update($fields, 'user_id='.$user_id);
-            }
-
-            if($ret !== false)
-            {
-                $response = array('success'=>true, 'error'=>'');
+                if($usersDao->update($fields, 'user_id='.$user_id) === true)
+                {
+                    $response = array('success'=>true, 'error'=>'');
+                }
+                else
+                {
+                    $response['error'] = 'Failed to update user (user_id='.$user_id.')';
+                }
             }
         }
 
         return $response;
-    }
-
-    private function createNewUser($fields)
-    {
-        $usersDao = UsersDao::getInstance();
-        $conversationsDao = ConversationsDao::getInstance();
-        $participantsDao = ParticipantsDao::getInstance();
-        $messagesDao = MessagesDao::getInstance();
-        
-        try
-        {
-            $usersDao->startTransaction();
-            $newUserId = $usersDao->insert($fields);
-            
-
-            $users = $usersDao->getUsers();
-
-            // Give the new user access to all the previous mission messges
-            $convos = $conversationsDao->getGlobalConvos();
-            
-            $newParticipants = array();
-            foreach($convos as $convoId)
-            {
-                $newParticipants[] = array(
-                    'conversation_id' => $convoId,
-                    'user_id' => $newUserId,
-                );
-                $messagesDao->newUserAccessToPrevMessages($convoId, $newUserId);
-            }
-            $participantsDao->insertMultiple($newParticipants);
-
-            foreach($users as $otherUserId=>$user)
-            {
-                if($newUserId != $user->getId())
-                {
-                    $newConvoData = array(
-                        'name' => $user->getAlias().'-'.$users[$newUserId]->getAlias(),
-                        'parent_conversation_id' => null,
-                    );
-                    $newConvoId = $conversationsDao->insert($newConvoData);
-
-                    $newParticipants = array(
-                        array(
-                            'conversation_id' => $newConvoId,
-                            'user_id' => $newUserId,
-                        ),
-                        array(
-                            'conversation_id' => $newConvoId,
-                            'user_id' => $otherUserId,
-                        ),
-                    );
-                    $participantsDao->insertMultiple($newParticipants);
-                }
-            }
-            $usersDao->endTransaction(true);
-
-        }
-        catch(DatabaseException $e)
-        {
-            $usersDao->endTransaction(false);
-            var_dump($e);
-            return false;
-        }
-
-        return true;
     }
 
     private function getUser()

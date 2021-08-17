@@ -7,6 +7,7 @@ require_once('server.inc.php');
 require_once('mission.inc.php');
 
 $config = array();
+$config['debug'] = true;
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 

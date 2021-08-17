@@ -56,7 +56,7 @@ class UsersDao extends Dao
 
     public function getByUsername(string $username)
     {
-        $user = null;
+        $user = false;
 
         foreach(self::$cache as $cachedUser)
         {
@@ -67,7 +67,7 @@ class UsersDao extends Dao
             }
         }
 
-        if($user == null)
+        if($user === false)
         {
             if (($result = $this->select('*','username=\''.$this->database->prepareStatement($username).'\'')) !== false)
             {
@@ -85,7 +85,7 @@ class UsersDao extends Dao
 
     public function getUsers(string $sort='user_id', string $order='ASC'): array
     {
-        if(self::$cacheFull == false)
+        if(self::$cacheFull === false)
         {
             if(($result = $this->select('*','*',$sort,$order)) !== false)
             {   
@@ -93,7 +93,7 @@ class UsersDao extends Dao
                 {
                     // Override cache
                     self::$cache = array();
-                    while(($data=$result->fetch_assoc()) != null)
+                    while(($data = $result->fetch_assoc()) != null)
                     {
                         self::$cache[$data['user_id']] = new User($data);
                     }
@@ -103,6 +103,102 @@ class UsersDao extends Dao
         }
 
         return self::$cache;
+    }
+
+    public function createNewUser($fields)
+    {
+        $result = false;
+        $conversationsDao = ConversationsDao::getInstance();
+        $participantsDao = ParticipantsDao::getInstance();
+        $messagesDao = MessagesDao::getInstance();
+        
+        $this->database->enableQueryException();
+
+        try
+        {
+            $this->startTransaction();
+            $newUserId = $this->insert($fields);
+            
+
+            $users = $this->getUsers();
+
+            // Give the new user access to all the previous mission messges
+            $convos = $conversationsDao->getGlobalConvos();
+            
+            $newParticipants = array();
+            foreach($convos as $convoId)
+            {
+                $newParticipants[] = array(
+                    'conversation_id' => $convoId,
+                    'user_id' => $newUserId,
+                );
+                $messagesDao->newUserAccessToPrevMessages($convoId, $newUserId);
+            }
+            $participantsDao->insertMultiple($newParticipants);
+
+            foreach($users as $otherUserId=>$user)
+            {
+                if($newUserId != $user->getId())
+                {
+                    $newConvoData = array(
+                        'name' => $user->getAlias().'-'.$users[$newUserId]->getAlias(),
+                        'parent_conversation_id' => null,
+                    );
+                    $newConvoId = $conversationsDao->insert($newConvoData);
+
+                    $newParticipants = array(
+                        array(
+                            'conversation_id' => $newConvoId,
+                            'user_id' => $newUserId,
+                        ),
+                        array(
+                            'conversation_id' => $newConvoId,
+                            'user_id' => $otherUserId,
+                        ),
+                    );
+                    $participantsDao->insertMultiple($newParticipants);
+                }
+            }
+            $this->endTransaction(true);
+            $result = true;
+        }
+        catch(DatabaseException $e)
+        {
+            $this->endTransaction(false);
+        }
+
+        $this->database->disableQueryException();
+
+        return $result;
+    }    
+
+    public function deleteUser($userId)
+    {
+        $result = false;
+        $participantsDao = ParticipantsDao::getInstance();
+        $conversationsDao = ConversationsDao::getInstance();
+
+        $this->database->enableQueryException();
+        try 
+        {
+            $this->startTransaction();
+            $this->drop($userId);
+            $convosToDelete = $participantsDao->getConvosWithSingleParticipant();
+
+            if(count($convosToDelete) > 0)
+            {
+                $conversationsDao->drop('conversation_id IN ('.implode(',', $convosToDelete).')');
+            }
+            $this->endTransaction();
+            $result = true;
+        }
+        catch(Exception $e)
+        {
+            $this->endTransaction(false);
+        }
+        $this->database->disableQueryException();
+
+        return $result;
     }
 }
 
