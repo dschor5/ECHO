@@ -8,7 +8,7 @@
         <div id="owlt-label" class="sim-param-label">one-way-light-time</div>
         <div id="owlt-value" class="sim-param-value">%delay_time%</div>
 
-        <button type="button" id="current-delay-login" onclick="document.getElementById('loginform').style.display='block'">Login</button>
+        <button type="button" id="current-delay-login" onclick="openLoginModal()">Login</button>
     </div>
 </div>
 
