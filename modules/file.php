@@ -3,24 +3,23 @@
 require_once('index.php');
 require_once('modules/default.php');
 
-class FileModule extends DefaultModule
+class FileModule implements Module
 {
+    private $user;
+    private $db;
+
     public function __construct(&$user)
     {
-        parent::__construct($user);
-        $this->subJsonRequests = array();
-        $this->subHtmlRequests = array();
+        $this->user = &$user;
+        $this->db = Database::getInstance();
     }
 
-    public function compileJson(string $subaction): array
-    {
-        return array();
-    }
-
-    public function compileHtml(string $subaction) : string
+    public function compile(string $subaction) : string
     {
         global $config;
         global $mission;
+
+        $subaction = $_GET['subaction'] ?? '';
 
         $filename = $_GET['f'] ?? '';
         

@@ -73,6 +73,7 @@ $config['db_tables'] = array(
 require_once('database/database.php');
 require_once('database/dao.php');
 require_once('database/result.php');
+require_once('modules/interface.php');
 require_once('modules/default.php');
 require_once('database/databaseException.php');
 

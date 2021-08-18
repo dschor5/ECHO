@@ -45,6 +45,22 @@
                 %template-msg-sent-mcc%
             </template>
 
+            <template id="msg-file">
+                %template-msg-file%
+            </template>
+
+            <template id="msg-img">
+                %template-msg-img%
+            </template>
+
+            <template id="msg-audio">
+                %template-msg-audio%
+            </template>
+
+            <template id="msg-video">
+                %template-msg-video%
+            </template>
+
             %message-nav%
 
             %messages%
