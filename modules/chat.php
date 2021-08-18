@@ -69,13 +69,87 @@ class ChatModule extends DefaultModule
 
     private function uploadFile()
     {
-        var_dump($_FILES);
-        var_dump($_POST);
+        global $config;
+        global $server;
 
-        return array(
-            'success' => true,
-            'message_id' => 0
+        $messagesDao = MessagesDao::getInstance();
+        $currTime = new DelayTime();
+
+        // Inputs provided by the script. 
+        $fileType  = trim($_POST['type'] ?? 'file');
+        $fileName  = trim($_FILES['data']['name'] ?? '');
+        $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
+        $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
+        $fileSize  = intval($_FILES['data']['size'] ?? 0);
+
+        // Server name to use for the file.
+        $serverName = FileUpload::generateFilename();
+        $fullPath = $server['host_address'].'/'.$config['uploads_dir'].'/'.$serverName;
+        
+        $result = array(
+            'success' => false,
         );
+
+        if(!in_array(strtolower($fileType), array('file', 'audio', 'video')))
+        {
+            $result['error'] = 'Invalid upload type.';
+        }
+        else if(strlen($fileName) < 3)
+        {
+            // Min 1 char name, period, 1 char extension.
+            $result['error'] = 'Invalid filename.';
+        }
+        else if(!isset($config['uploads_allowed'][$fileMime]))
+        {
+            $result['error'] = 'Invalid file type uploaded. (MimeType)';
+        }
+        else if(!in_array($fileExt, $config['uploads_allowed']))
+        {
+            $result['error'] = 'Invalid file type uploaded. (Extension)';
+        }
+        else if($fileSize <= 0 || $fileSize > 10485760)
+        {
+            $result['error'] = 'Invalid file size (0 < size < 10485760)';
+        }
+        else if(!move_uploaded_file($_FILES['data']['tmp_name'], $fullPath))
+        {
+            $result['error'] = 'Error writing file.';
+        }
+        else
+        {
+            $msgData = array(
+                'user_id' => $this->user->getId(),
+                'conversation_id' => $this->conversationId,
+                'text' => '',
+                'type' => Message::TEXT,
+                'sent_time' => $currTime->getTime(),
+                'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew(), false),
+                'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew(), false),
+            );
+
+            $fileData = array(
+                'message_id' => 0,
+                'server_name' => $serverName,
+                'original_name' => $fileName,
+                'mime_type' => $fileMime,
+            );
+
+            if(($messageId = $messagesDao->sendMessage($msgData, $fileData)) !== false)
+            {
+                $response = array(
+                    'success' => true,
+                    'message_id' => $messageId
+                );
+            }
+            else
+            {
+                $result['error'] = 'Database error.';
+            }
+            
+            $result['success'] = true;
+        }
+
+        return $result;
     }
 
     private function textMessage()
@@ -96,7 +170,6 @@ class ChatModule extends DefaultModule
                 'user_id' => $this->user->getId(),
                 'conversation_id' => $this->conversationId,
                 'text' => $msgText,
-                'filename' => null,
                 'type' => Message::TEXT,
                 'sent_time' => $currTime->getTime(),
                 'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew(), false),
