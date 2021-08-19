@@ -1,1 +1,1 @@
-<img src="%http%%site_url%/file/%message_id%">
+<img src="%http%%site_url%/file/%message-id%">
