@@ -122,6 +122,7 @@ class Message
                 '/%filesize%/' => $this->file->getSize(),
             );
             $content = Main::loadTemplate($templateFile, $templateData);
+            var_dump($content);
         }
         else
         {
