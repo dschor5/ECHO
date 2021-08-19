@@ -38,6 +38,9 @@ class FileModule implements Module
         $messageFileDao = MessageFileDao::getInstance();
         $file = $messageFileDao->getFile($fileId, $this->user->getId());
 
+        // Also catches the case where the user does not have 
+        // access to the image (because they are guessing files 
+        // or trying to access a file without being logged in)
         if($file == null || !$file->exists()) 
         {
             header("HTTP/1.1 404 Not Found");
@@ -49,8 +52,9 @@ class FileModule implements Module
         $origName = $file->getOriginalName();
         $filesize = $file->getSize();
         $templateType = $file->getTemplateType();
+
         
-        if($templateType == 'image' || $templateType == 'video' || $templateType == 'audio')
+        if(isset($_GET['download']) || in_array($templateType, array('image', 'video', 'audio')))
         {
             // Display inline. 
             header('Content-Disposition: filename='.basename($origName));

@@ -1,1 +1,2 @@
-<img src="%http%%site_url%/file/%message-id%">
+<img src="%http%%site_url%/file/%message-id%"><br>
+<a href="%http%%site_url%/file/%message-id%?download">%filename% (%filesize%)</a>
