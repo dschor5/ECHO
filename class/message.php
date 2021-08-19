@@ -118,8 +118,9 @@ class Message
             $templateType = $this->file->getTemplateType();
             $templateFile = 'modules/chat-msg-'.$templateType.'.txt';
             $templateData = array(
-                '/%filename%/' => $this->file->getOriginalName(),
-                '/%filesize%/' => $this->file->getSize(),
+                '/%message-id%/' => $this->data['message_id'],
+                '/%filename%/'   => $this->file->getOriginalName(),
+                '/%filesize%/'   => $this->file->getSize(),
             );
             $content = Main::loadTemplate($templateFile, $templateData);
         }
