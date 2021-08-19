@@ -1,0 +1,1 @@
+<video src="%http%%site_url%/files/%message_id%" controls preload="metadata"></video>

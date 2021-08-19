@@ -97,6 +97,7 @@ class UsersModule extends DefaultModule
 
         if($userId > 0 && $userId != $this->user->getId())
         {
+            // Delete associated images. 
             if($usersDao->deleteUser($userId) !== true)
             {
                 $response['error'] = 'Failed to delete user. (user_id='.$userId.')';

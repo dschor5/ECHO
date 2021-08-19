@@ -14,18 +14,53 @@ class FileModule implements Module
         $this->db = Database::getInstance();
     }
 
-    public function compile(string $subaction) : string
+    public function compile() : string
     {
         global $config;
         global $mission;
 
-        $subaction = $_GET['subaction'] ?? '';
-
-        $filename = $_GET['f'] ?? '';
+        $id = $_GET['id'] ?? '';
         
-        if(strlen($filename) > 0 && ($subaction == 'css' || $subaction == 'js'))
+        if(intval($id) > 0)
         {
-            $filepath = '/'.$subaction.'/'.$filename;
+            $this->getFileUpload($id);
+        }
+        else 
+        {
+            $this->parseFile($id);
+        }
+
+        exit();
+    }
+
+    private function getFileUpload($fileId)
+    {
+        $messageFileDao = MessageFileDao::getInstance();
+        $file = $messageFileDao->getFile($fileId, $this->user->getId());
+
+        if($file == null) 
+        {
+            header("HTTP/1.1 404 Not Found");
+            return;
+        }
+
+        $filepath = $file->getServerPath();
+
+        // This forces a download prompt.
+        //header('Content-Disposition: attachment; filename='.basename($file->getOriginalName()));
+        header('Content-Disposition: filename='.basename($file->getOriginalName()));
+        header('Content-Length: ' . filesize($filepath));
+        header("Content-Type: ".$file->getMimeType());
+        readfile($filepath);
+    }
+
+    private function parseFile($filename)
+    {
+        global $config;
+
+        $extension = substr($filename, strrpos($filename, '.') + 1);
+
+        $filepath = '/'.$extension.'/'.$filename;
 
             if(!file_exists($config['templates_dir'].$filepath))
             {
@@ -33,8 +68,7 @@ class FileModule implements Module
                 exit();
             }
 
-            $fileinfo = pathinfo($filepath);
-            switch($fileinfo['extension'])
+            switch($extension)
             {
                 case 'css':
                     header('Content-Type: text/css');
@@ -48,9 +82,6 @@ class FileModule implements Module
             }
 
             echo Main::loadTemplate($filepath);
-        }
-
-        exit();
     }
 }
 

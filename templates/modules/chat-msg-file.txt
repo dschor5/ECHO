@@ -1,0 +1,1 @@
+Attachment: <a href="%http%%site_url%/files/%message_id%" target="_blank">%filename% (%size%)</a>
