@@ -105,7 +105,9 @@ class MessagesDao extends Dao
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
         $qFromDate = 'SUBTIME(CAST('.$qToDate.' AS DATETIME), \'00:00:05\')';
 
-        $queryStr = 'SELECT messages.*, users.username, users.alias, users.is_crew, msg_status.is_read '.
+        $queryStr = 'SELECT messages.*, '. 
+                        'users.username, users.alias, users.is_crew, msg_status.is_read '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '.
@@ -157,7 +159,9 @@ class MessagesDao extends Dao
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
         
-        $queryStr = 'SELECT messages.*, users.username, users.alias, users.is_crew, msg_status.is_read '.
+        $queryStr = 'SELECT messages.*, '. 
+                        'users.username, users.alias, users.is_crew, msg_status.is_read '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '.
