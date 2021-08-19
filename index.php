@@ -9,7 +9,6 @@ date_default_timezone_set($mission['timezone']);
 require_once('config.inc.php');
 require_once('database/usersDao.php');
 
-
 try
 {
     // Force HTTPS. 
