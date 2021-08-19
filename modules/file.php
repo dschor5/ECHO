@@ -45,12 +45,22 @@ class FileModule implements Module
         }
 
         $filepath = $file->getServerPath();
-
-        // This forces a download prompt.
-        //header('Content-Disposition: attachment; filename='.basename($file->getOriginalName()));
-        header('Content-Disposition: filename='.basename($file->getOriginalName()));
+        $mimeType = $file->getMimeType();
+        $origName = $file->getOriginalName();
+        $type = explode('/', $mimeType, 2)[0];
+        
+        if($type == 'image' || $type == 'video' || $type == 'audio')
+        {
+            // Display inline. 
+            header('Content-Disposition: filename='.basename($origName));
+        }
+        else
+        {
+            // Force file download
+            header('Content-Disposition: attachment; filename='.basename($file->getOriginalName()));
+        }
         header('Content-Length: ' . filesize($filepath));
-        header("Content-Type: ".$file->getMimeType());
+        header("Content-Type: ".$mimeType);
         readfile($filepath);
     }
 
