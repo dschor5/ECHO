@@ -35,13 +35,18 @@ class FileModule implements Module
 
     private function getFileUpload($fileId)
     {
-        $messageFileDao = MessageFileDao::getInstance();
-        $file = $messageFileDao->getFile($fileId, $this->user->getId());
+        $file = false;
+
+        if($this->user != null)
+        {
+            $messageFileDao = MessageFileDao::getInstance();
+            $file = $messageFileDao->getFile($fileId, $this->user->getId());
+        }
 
         // Also catches the case where the user does not have 
         // access to the image (because they are guessing files 
         // or trying to access a file without being logged in)
-        if(is_null($file) || !$file->exists()) 
+        if($file == null || !$file->exists()) 
         {
             header("HTTP/1.1 404 Not Found");
             return;
