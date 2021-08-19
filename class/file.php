@@ -7,7 +7,6 @@ class FileUpload
 
     public function __construct($data)
     {
-        var_dump($data);
         $this->data = $data; // requires union with corresponding msg_status
     }
 
