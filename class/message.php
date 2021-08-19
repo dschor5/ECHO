@@ -20,6 +20,7 @@ class Message
                 array_intersect_key($this->data, 
                 array_flip('message_id', 'server_name', 'original_name', 'mime_type'))
             );
+            var_dump($this->file);
         }
     }
 
@@ -113,7 +114,7 @@ class Message
         {
             $content = nl2br($this->data['text']);
         }
-        else if($this->file->exists())
+        else if($this->file != null && $this->file->exists())
         {
             $templateType = $this->file->getTemplateType();
             $templateFile = 'modules/chat-msg-'.$templateType.'.txt';
