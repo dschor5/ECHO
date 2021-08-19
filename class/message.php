@@ -99,8 +99,24 @@ class Message
     }
 
     public function compileContentHtml() : string 
-    {
-        
+    {/*
+        switch($this->data['type'])
+        {
+            case self::TEXT:
+                $content = nl2br($this->data['text']);
+                break;
+            case self::AUDIO:
+        }
+
+        $content = nl2br($this->data['text']);
+
+        if($this->data['type'] == self::AUDIO)
+        {
+            
+        }*/
+        return '';
+
+
     }
 
     public function compileHtml(User &$userPerspective, bool $remoteStatus=false) : string 
