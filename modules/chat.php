@@ -121,7 +121,7 @@ class ChatModule extends DefaultModule
                 'user_id' => $this->user->getId(),
                 'conversation_id' => $this->conversationId,
                 'text' => '',
-                'type' => Message::TEXT,
+                'type' => Message::FILE,
                 'sent_time' => $currTime->getTime(),
                 'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew(), false),
                 'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew(), false),

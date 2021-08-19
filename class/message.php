@@ -18,9 +18,8 @@ class Message
         {
             $this->file = new FileUpload(
                 array_intersect_key($this->data, 
-                array_flip('message_id', 'server_name', 'original_name', 'mime_type'))
+                array_flip(array('message_id', 'server_name', 'original_name', 'mime_type')))
             );
-            var_dump($this->file);
         }
     }
 
