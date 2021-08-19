@@ -41,7 +41,7 @@ class FileModule implements Module
         // Also catches the case where the user does not have 
         // access to the image (because they are guessing files 
         // or trying to access a file without being logged in)
-        if($file == null || !$file->exists()) 
+        if(is_null($file) || !$file->exists()) 
         {
             header("HTTP/1.1 404 Not Found");
             return;
