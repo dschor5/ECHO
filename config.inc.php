@@ -85,7 +85,7 @@ require_once('class/message.php');
 require_once('class/user.php');
 require_once('class/list.php');
 require_once('class/conversation.php');
-require_once('class/file.php');
+require_once('class/attachment.php');
 
 // Include database objects
 require_once('database/usersDao.php');
