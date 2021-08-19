@@ -139,7 +139,7 @@ class Message
             '/%message-id%/'       => $this->data['message_id'],
             '/%user-id%/'          => $this->data['user_id'],
             '/%author%/'           => $this->data['alias'],
-            '/%message%/'          => nl2br($this->data['text']),
+            '/%message%/'          => $this->compileContentHtml(),
             '/%sent-time%/'        => $this->getTime('sent_time'),
             '/%recv-time-mcc%/'    => $this->getTime('recv_time_mcc'),
             '/%recv-time-hab%/'    => $this->getTime('recv_time_hab'),
