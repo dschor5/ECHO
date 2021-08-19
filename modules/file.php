@@ -38,7 +38,7 @@ class FileModule implements Module
         $messageFileDao = MessageFileDao::getInstance();
         $file = $messageFileDao->getFile($fileId, $this->user->getId());
 
-        if($file == null) 
+        if($file == null || !$file->exists()) 
         {
             header("HTTP/1.1 404 Not Found");
             return;
@@ -47,9 +47,10 @@ class FileModule implements Module
         $filepath = $file->getServerPath();
         $mimeType = $file->getMimeType();
         $origName = $file->getOriginalName();
-        $type = explode('/', $mimeType, 2)[0];
+        $filesize = $file->getSize();
+        $templateType = $file->getTemplateType();
         
-        if($type == 'image' || $type == 'video' || $type == 'audio')
+        if($templateType == 'image' || $templateType == 'video' || $templateType == 'audio')
         {
             // Display inline. 
             header('Content-Disposition: filename='.basename($origName));
@@ -57,9 +58,9 @@ class FileModule implements Module
         else
         {
             // Force file download
-            header('Content-Disposition: attachment; filename='.basename($file->getOriginalName()));
+            header('Content-Disposition: attachment; filename='.basename($origName));
         }
-        header('Content-Length: ' . filesize($filepath));
+        header('Content-Length: ' . $filesize);
         header("Content-Type: ".$mimeType);
         readfile($filepath);
     }
