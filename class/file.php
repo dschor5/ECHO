@@ -22,6 +22,23 @@ class FileUpload
 
         return $filename;
     }
+
+    public function getOriginalName()
+    {
+        return $this->data['original_name'];
+    }
+
+    public function getServerPath()
+    {
+        global $server;
+        global $config;
+        return $server['host_address'].$config['uploads_dir'].'/'.$this->data['server_name']; 
+    }
+
+    public function getMimeType()
+    {
+        return $this->data['mime_type'];
+    }
 }
 
 ?>

@@ -2,20 +2,21 @@
 
 class ErrorModule extends DefaultModule
 {
-    public function getPageTitle()
+    public function __construct(&$user)
     {
-        return parent::getpageTitle();
+        parent::__construct($user);
     }
 
-    public function getNavigation()
+    public function compileJson(string $subaction): array
+    {
+        return array();
+    }
+
+    public function compileHtml(string $subaction) : string
     {
         return '';
     }
-
-    public function compile()
-     {
-         return $this->main->loadTemplate('modules/error.txt', array());
-     }
 }
+
 
 ?>

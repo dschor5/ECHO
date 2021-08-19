@@ -75,6 +75,7 @@ require_once('database/dao.php');
 require_once('database/result.php');
 require_once('modules/interface.php');
 require_once('modules/default.php');
+require_once('modules/error.php');
 require_once('database/databaseException.php');
 
 // Include classes

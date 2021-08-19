@@ -84,7 +84,7 @@ class ChatModule extends DefaultModule
 
         // Server name to use for the file.
         $serverName = FileUpload::generateFilename();
-        $fullPath = $server['host_address'].'/'.$config['uploads_dir'].'/'.$serverName;
+        $fullPath = $server['host_address'].$config['uploads_dir'].'/'.$serverName;
         
         $result = array(
             'success' => false,
