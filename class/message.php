@@ -117,6 +117,7 @@ class Message
         {
             $templateType = $this->file->getTemplateType();
             $templateFile = 'modules/chat-msg-'.$templateType.'.txt';
+            return $templateFile;
             $templateData = array(
                 '/%filename%/' => $this->file->getOriginalName(),
                 '/%filesize%/' => $this->file->getSize(),
@@ -128,7 +129,7 @@ class Message
             $content = 'File "'.$file->getOriginalName().'" was not found.';
         }
 
-        return $content.'E';
+        return $content;
     }
 
     public function compileHtml(User &$userPerspective, bool $remoteStatus=false) : string 
