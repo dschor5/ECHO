@@ -36,7 +36,6 @@ CREATE TABLE `messages` (
   `conversation_id` int(10) UNSIGNED NOT NULL ,
   `text` text CHARACTER SET utf8 DEFAULT NULL,
   `type` enum('text','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
-  `file_id` int(10) UNSIGNED,
   `sent_time` datetime NOT NULL,
   `recv_time_hab` datetime NOT NULL,
   `recv_time_mcc` datetime NOT NULL,
@@ -46,7 +45,7 @@ CREATE TABLE `messages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `msg_status` (
-  `message_id` int(10) UNSIGNED NOT NULL ,
+  `message_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Recipient',
   `is_read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Rx Perspective',
   PRIMARY KEY(`message_id`, `user_id`),
@@ -54,12 +53,13 @@ CREATE TABLE `msg_status` (
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `msg_file` (
-  `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE `msg_files` (
+  `message_id` int(10) UNSIGNED NOT NULL,
   `server_name` varchar(64) NOT NULL,
   `original_name` varchar(64) NOT NULL,
   `mime_type` varchar(32) NOT NULL,
-  PRIMARY KEY(`file_id`)
+  PRIMARY KEY(`message_id`),
+  FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES

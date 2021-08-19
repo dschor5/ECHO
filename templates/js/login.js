@@ -14,6 +14,11 @@ $(document).ready(function() {
     });
 });
 
+function openLoginModal() {
+    document.getElementById('loginform').style.display='block';
+    document.getElementById('uname').focus();
+}
+
 function login() {
     var username = $('#uname').val();
     var password = $('#upass').val();

@@ -76,6 +76,7 @@ class Message
     public static function compileEmptyMsgTemplate(string $template) : string
     {
         $templateData = array(
+            // Message template
             '/%message-id%/'       => '',
             '/%user-id%/'          => '',
             '/%author%/'           => '',
@@ -84,6 +85,9 @@ class Message
             '/%recv-time-mcc%/'    => '',
             '/%recv-time-hab%/'    => '',
             '/%delivered-status%/' => '',
+
+            // Content template
+
         );
 
         return Main::loadTemplate('modules/'.$template, $templateData);
@@ -92,6 +96,11 @@ class Message
     private function getRecvTime(bool $isCrew, bool $remoteStatus) : string
     {
         return "";
+    }
+
+    public function compileContentHtml() : string 
+    {
+        
     }
 
     public function compileHtml(User &$userPerspective, bool $remoteStatus=false) : string 

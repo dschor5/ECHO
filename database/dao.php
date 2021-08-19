@@ -79,7 +79,7 @@ abstract class Dao
             $query .= " where ".$id;
 
 
-        return $this->database->query($query,0);
+        return $this->database->query($query, false);
     }
 
 
@@ -102,30 +102,44 @@ abstract class Dao
 
         // we know exactly which ID we want...
         if (intval($where) > 0)
+        {
             $query .= " where `{$this->id}` = '$where'";
+        }
 
         // we have been given a where clause to go by.
         // if $where == '*' then we want everything in the table.
         else if ($where != '*')
+        {
             $query .= " where " . $where;
+        }
 
         if (is_array($sort))
         {
             if (count($sort)>0)
+            {
                 $query .= ' order by ';
+            }
+
             for ($i=0;$i<count($sort);$i++)
             {
                 $query .= '`'.$sort[$i].'` ';
                 $query .= (is_array($order))?$order[$i]:$order;
                 if ($i < count($sort)-1)
+                {
                     $query .= ', ';
+                }
             }
 
-        } else if ($sort != '')
+        } 
+        else if ($sort != '')
+        {
             $query .= " order by `{$sort}` $order";
+        }
 
         if ($limit_start >= 0 && $limit_count > 0)
+        {
             $query .= " LIMIT $limit_start,$limit_count";
+        }
 
         //add the allmighty semicolon to the end
         $query .= ';';
@@ -261,10 +275,7 @@ abstract class Dao
 
         $query.=';';
 
-        if ($this->database->query($query,0))
-            return true;
-        else
-            return false;
+        return $this->database->query($query, false);
     }
 
 

@@ -18,37 +18,61 @@ class MessagesDao extends Dao
         parent::__construct('messages');
     }
 
-    public function sendMessage(array $msgData)
+    public function sendMessage(array $msgData, array $fileData=array())
     {
         $messageStatusDao = MessageStatusDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
+        $msgFileDao = MessageFileDao::getInstance();
 
-        $this->startTransaction();
-
-        $messageId = $this->insert($msgData);
-
-        $participants = $participantsDao->getParticipantIds($msgData['conversation_id']);
-        $msgStatusData = array();
-        foreach($participants as $userId => $isCrew)
+        $this->database->enableQueryException();
+        try 
         {
-            $msgStatusData[] = array(
-                'message_id' => $messageId,
-                'user_id' => $userId,
-                'is_read' => 0,
-            );
+            $this->startTransaction();
+            $messageId = $this->insert($msgData);
+            if($messageId !== false)
+            {
+                if(count($fileData) > 0)
+                {
+                    $fileData['message_id'] = $messageId;
+                    $msgFileDao->insert($fileData);
+                }
+
+                $participants = $participantsDao->getParticipantIds($msgData['conversation_id']);
+                $msgStatusData = array();
+                foreach($participants as $userId => $isCrew)
+                {
+                    $msgStatusData[] = array(
+                        'message_id' => $messageId,
+                        'user_id' => $userId,
+                        'is_read' => 0,
+                    );
+                }
+                $messageStatusDao->insertMultiple($msgStatusData);
+                $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
+                $this->endTransaction();
+            }
+            else
+            {
+                $messageId = false;
+                $this->endTransaction(false);
+            }
         }
-        $messageStatusDao->insertMultiple($msgStatusData);
-        $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
-        $this->endTransaction();
-        
+        catch(Exception $e)
+        {
+            $messageId = false;
+            $this->endTransaction(false);
+        }
+        $this->database->disableQueryException();
+
         return $messageId;
     }
+
+
 
     public function newUserAccessToPrevMessages(int $convoId, int $userId)
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
-        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $msgStatusDao = MessageStatusDao::getInstance();
         
         // TODO - Inneficient if there are a large number of messages. 
@@ -86,6 +110,7 @@ class MessagesDao extends Dao
                     'JOIN users ON users.user_id=messages.user_id '.
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id='.$qConvoId.' '.
                         'AND msg_status.is_read=0 '.    
                         'AND (messages.'.$qRefTime.' BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
@@ -94,6 +119,7 @@ class MessagesDao extends Dao
         
         $messages = array();
 
+    
         $this->startTransaction();
 
         if(($result = $this->database->query($queryStr)) !== false)
@@ -118,7 +144,7 @@ class MessagesDao extends Dao
         $participantsDao->updateLastRead($convoId, $userId, $toDate);
         
         $this->endTransaction();
-
+        
         return $messages;
     }
 
@@ -136,6 +162,7 @@ class MessagesDao extends Dao
                     'JOIN users ON users.user_id=messages.user_id '.
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id='.$qConvoId.' '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
                     'ORDER BY messages.'.$qRefTime.' '.
@@ -143,28 +170,39 @@ class MessagesDao extends Dao
         
         $messages = array();
 
-        $this->startTransaction();
-
-        if(($result = $this->database->query($queryStr)) !== false)
+        $this->database->enableQueryException();
+        try
         {
-            if($result->num_rows > 0)
+            $this->startTransaction();
+
+            if(($result = $this->database->query($queryStr)) !== false)
             {
-                while(($rowData=$result->fetch_assoc()) != null)
+                if($result->num_rows > 0)
                 {
-                    $messages[$rowData['message_id']] = new Message($rowData);
+                    while(($rowData=$result->fetch_assoc()) != null)
+                    {
+                        $messages[$rowData['message_id']] = new Message($rowData);
+                    }
                 }
             }
+            
+            $queryStr = 'UPDATE msg_status '.
+                'JOIN messages ON msg_status.message_id=messages.message_id '.
+                'SET msg_status.is_read=1 '. 
+                'WHERE msg_status.user_id='.$qUserId.' '.
+                    'AND messages.conversation_id='.$qConvoId.' '. 
+                    'AND messages.'.$qRefTime.' <= '.$qToDate;
+
+            $this->database->query($queryStr);
+            $this->endTransaction();
+
+            
+        } 
+        catch (Exception $e) 
+        {
+            $this->endTransaction(false);
         }
-
-        $queryStr = 'UPDATE msg_status '.
-            'JOIN messages ON msg_status.message_id=messages.message_id '.
-            'SET msg_status.is_read=1 '. 
-            'WHERE msg_status.user_id='.$qUserId.' '.
-                'AND messages.conversation_id='.$qConvoId.' '. 
-                'AND messages.'.$qRefTime.' <= '.$qToDate;
-
-        $this->database->query($queryStr);
-        $this->endTransaction();
+        $this->database->disableQueryException();
 
         return $messages;
     }

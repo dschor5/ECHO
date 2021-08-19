@@ -7,8 +7,38 @@ require_once('server.inc.php');
 require_once('mission.inc.php');
 
 $config = array();
+$config['debug'] = true;
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
+$config['uploads_dir'] = 'uploads';
+
+// Extension => Mime Type
+$config['uploads_allowed'] = array(
+    'application/msword' => 'doc' ,
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+    'application/pdf' => 'pdf' ,
+    'text/plain' => 'txt' ,
+    'application/vnd.ms-powerpoint' => 'ppt' ,
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+    'application/vnd.ms-excel' => 'xls' ,
+    'text/csv' => 'csv' ,
+    'image/bmp' => 'bmp' ,
+    'image/gif' => 'gif' ,
+    'image/jpg' => 'jpg' ,
+    'image/jpeg'  => 'jpeg',
+    'image/png' => 'png' ,
+    'image/tiff' => 'tif' ,
+    'image/tiff' => 'tiff',
+    'application/vnd.rar' => 'rar' ,
+    'application/x-tar' => 'tar' ,
+    'application/vnd.visio' => 'vsd' ,
+    'audio/webm' => 'mka' ,
+    'video/webm' => 'mkv' ,
+    'video/x-matroska' => 'mkv' ,
+    'application/zip' => 'zip' ,
+    'application/x-7z-compressed' => '7z',
+);
 
 // this is the array of modules that are allowed to run
 $config['modules_public'] = array(
@@ -43,6 +73,7 @@ $config['db_tables'] = array(
 require_once('database/database.php');
 require_once('database/dao.php');
 require_once('database/result.php');
+require_once('modules/interface.php');
 require_once('modules/default.php');
 require_once('database/databaseException.php');
 
@@ -53,6 +84,7 @@ require_once('class/message.php');
 require_once('class/user.php');
 require_once('class/list.php');
 require_once('class/conversation.php');
+require_once('class/file.php');
 
 // Include database objects
 require_once('database/usersDao.php');
@@ -60,5 +92,8 @@ require_once('database/conversationsDao.php');
 require_once('database/participantsDao.php');
 require_once('database/messagesDao.php');
 require_once('database/messageStatusDao.php');
+require_once('database/messageFileDao.php');
+
+
 
 ?>

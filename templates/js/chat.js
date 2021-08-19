@@ -174,9 +174,14 @@ function uploadMedia(mediaType) {
         const blobMimeType = (recordedBlobs[0] || {}).type;
         const blob = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
-        formData.append("fname", "");
-        formData.append("fsize", blob.size);
-        formData.append("data", blob, "myBlob");
+        if(mediaType === 'video')
+        {
+            formData.append("data", blob, "recording.mkv");    
+        }
+        else
+        {
+            formData.append("data", blob, "recording.mka");
+        }
     }
     else {
         const file = document.querySelector('#new-msg-file').files[0];
