@@ -107,7 +107,7 @@ class Message
         return "";
     }
 
-    public function compileContentHtml() : string 
+    private function compileContentHtml() : string 
     {
         if($this->data['type'] == self::TEXT)
         {
@@ -122,14 +122,13 @@ class Message
                 '/%filesize%/' => $this->file->getSize(),
             );
             $content = Main::loadTemplate($templateFile, $templateData);
-            var_dump($content);
         }
         else
         {
             $content = 'File "'.$file->getOriginalName().'" was not found.';
         }
 
-        return $content;
+        return $content.'E';
     }
 
     public function compileHtml(User &$userPerspective, bool $remoteStatus=false) : string 
