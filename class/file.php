@@ -35,7 +35,7 @@ class FileUpload
         return $server['host_address'].$config['uploads_dir'].'/'.$this->data['server_name']; 
     }
 
-    public function exists() : boolean
+    public function exists() : bool
     {
         return file_exists($this->getServerPath());
     }
