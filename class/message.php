@@ -18,7 +18,7 @@ class Message
         {
             $this->file = new FileUpload(
                 array_intersect_key($this->data, 
-                array('message_id'=>0, 'server_name'=>0, 'original_name'=>0, 'mime_type'=>0)))
+                    array('message_id'=>0, 'server_name'=>0, 'original_name'=>0, 'mime_type'=>0))
             );
         }
     }
