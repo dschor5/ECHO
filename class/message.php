@@ -8,10 +8,19 @@ class Message
     const VIDEO = 'video';
 
     private $data;
+    private $file;
 
     public function __construct($data)
     {
         $this->data = $data; // requires union with corresponding msg_status
+        $this->file = null;
+        if($this->data['type'] != self::TEXT)
+        {
+            $this->file = new FileUpload(
+                array_intersect_key($this->data, 
+                array_flip('message_id', 'server_name', 'original_name', 'mime_type'))
+            );
+        }
     }
 
     private function getReceivedTime(bool $isCrew) : string
@@ -99,24 +108,27 @@ class Message
     }
 
     public function compileContentHtml() : string 
-    {/*
-        switch($this->data['type'])
+    {
+        if($this->data['type'] == self::TEXT)
         {
-            case self::TEXT:
-                $content = nl2br($this->data['text']);
-                break;
-            case self::AUDIO:
+            $content = nl2br($this->data['text']);
+        }
+        else if($this->file->exists())
+        {
+            $templateType = $this->file->getTemplateType();
+            $templateFile = 'modules/chat-msg-'.$templateType.'.txt';
+            $templateData = array(
+                '/%filename%/' => $this->file->getOriginalName(),
+                '/%filesize%/' => $this->file->getSize(),
+            );
+            $content = Main::loadTemplate($templateFile, $templateData);
+        }
+        else
+        {
+            $content = 'File "'.$file->getOriginalName().'" was not found.';
         }
 
-        $content = nl2br($this->data['text']);
-
-        if($this->data['type'] == self::AUDIO)
-        {
-            
-        }*/
-        return '';
-
-
+        return $content;
     }
 
     public function compileHtml(User &$userPerspective, bool $remoteStatus=false) : string 
