@@ -77,9 +77,27 @@ class ChatModule extends DefaultModule
 
         // Inputs provided by the script. 
         $fileType  = trim($_POST['type'] ?? 'file');
-        $fileName  = trim($_FILES['data']['name'] ?? '');
-        $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
-        $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
+        if($fileType == 'file')
+        {
+            $fileName  = trim($_FILES['data']['name'] ?? '');
+            $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
+            $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
+        }
+        else
+        {
+            if($fileType == 'video')
+            {
+                $fileExt = 'mkv';
+                $fileMime = 'video/webm';
+            }
+            else 
+            {
+                $fileExt = 'mkv';
+                $fileMime = 'audio/webm';
+            }
+            $fileName = $this->user->getUsername().'_'.date('YmdHis').'.'.$fileExt;
+        }
+        
         $fileSize  = intval($_FILES['data']['size'] ?? 0);
 
         // Server name to use for the file.
@@ -302,6 +320,10 @@ class ChatModule extends DefaultModule
                   '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
                   '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
                   '/%template-msg-sent-mcc%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
+                  '/%template-msg-file%/' => Message::compileEmptyMsgTemplate('chat-msg-file.txt'),
+                  '/%template-msg-img%/' => Message::compileEmptyMsgTemplate('chat-msg-image.txt'),
+                  '/%template-msg-audio%/' => Message::compileEmptyMsgTemplate('chat-msg-audio.txt'),
+                  '/%template-msg-video%/' => Message::compileEmptyMsgTemplate('chat-msg-video.txt'),
                 ));
     }
 

@@ -1,1 +1,2 @@
-<audio src="%http%%site_url%/file/%message-id%" controls preload="metadata"></audio>
+<audio class="msg-audio file-location" src="%http%%site_url%/file/%message-id%" controls preload="metadata"></audio><br>
+                Download <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>

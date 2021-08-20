@@ -1,5 +1,5 @@
 <div class="msg">
-                    <img src="%http%%site_url%/%templates_dir%/images/user-mcc.jpg" class"msg-pic"/>
+                    <img src="%http%%site_url%/%templates_dir%/images/user-mcc.jpg" class="msg-avatar"/>
                     <div class="msg-from">%author%</div>
                     <div class="msg-content">%message%</div>
                     <div class="msg-status">

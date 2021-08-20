@@ -49,7 +49,7 @@
                 %template-msg-file%
             </template>
 
-            <template id="msg-img">
+            <template id="msg-image">
                 %template-msg-img%
             </template>
 
