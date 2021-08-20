@@ -43,7 +43,7 @@ abstract class DefaultModule implements Module
         foreach($this->cssFiles as $file)
         {
             $content .= "\t".Main::loadTemplate('css_file.txt', 
-                array('/%filename%/'=>$file)).PHP_EOL;
+                array('/%filename%/'=>$file), 'css').PHP_EOL;
         }
         return $content;
     }
@@ -59,7 +59,7 @@ abstract class DefaultModule implements Module
         foreach($this->jsFiles as $file)
         {
             $content .= "\t".Main::loadTemplate('javascript_file.txt', 
-                array('/%filename%/'=>$file)).PHP_EOL;
+                array('/%filename%/'=>$file), 'js').PHP_EOL;
         }
         return $content;
     }
