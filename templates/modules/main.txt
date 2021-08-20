@@ -15,6 +15,17 @@
         const TIME_DAY    = "%time_day%"; // eg., Sol
         const TZ_OFFSET   = %timezone_offset%; // sec
     </script>
+    <style>
+        @font-face {
+            font-family: symbols;
+            src: url(%http%%site_url%/%templates_dir%/fonts/symbols.woff) format("woff");
+        }
+        @font-face {
+            font-family: glyphicons;
+            src: url(%http%%site_url%/%templates_dir%/fonts/glyphicons.woff) format("woff");
+        }
+    </style>
+
 %css_file%%js_file%</head>
 
 <body>

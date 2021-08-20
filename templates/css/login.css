@@ -27,7 +27,6 @@ h2 {
 }
 
 #current-delay {
-    background-image: url('%http%%site_url%/%templates_dir%/images/background-home.jpg');
     background-repeat: no-repeat;
     background-position: center;
     position: relative;
