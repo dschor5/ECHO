@@ -204,7 +204,7 @@ class Main
         global $server;
         global $mission;
 
-        $template = file_get_contents($config['templates_dir'].'/'.$template);
+        $template = file_get_contents($config['templates_dir'].'/modules/'.$template);
 
         if($replace != null)
         {
