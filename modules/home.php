@@ -40,7 +40,7 @@ class HomeModule extends DefaultModule
             $this->logout();
         }
 
-        return Main::loadTemplate('modules/home.txt', array());
+        return Main::loadTemplate('home.txt', array());
     }
 
     private function login() : array
