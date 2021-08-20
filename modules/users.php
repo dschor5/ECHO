@@ -51,6 +51,14 @@ class UsersModule extends DefaultModule
     {
         $this->addCss('common');
         $this->addCss('settings');
+        if($this->user->isCrew())
+        {
+            $this->addCss('chat-hab');
+        }
+        else
+        {
+            $this->addCss('chat-mcc');
+        }
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('users');
 

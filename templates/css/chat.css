@@ -2,11 +2,10 @@
     position: absolute;
     top: 40px;
     bottom: 0px;
-    
     left: 22px;
     width: 230px;
     height: calc(100% - 60px);
-    background: #26308B; /*dark*/
+    background: var(--background-dark);
     overflow-y: auto;
     overflow-x: hidden;
     padding: 10px;
@@ -18,7 +17,7 @@
     padding: 5px 0px;
     text-align: center;
     line-height: 20px;
-    background: #AEB3FC; /*light*/
+    background: var(--text-light-opaque);
     font-weight: bold;
     font-size: 14px;
 }
@@ -29,7 +28,7 @@
     bottom: 264px;
     width: 228px;
     border-radius: 10px;
-    border: 2px solid #414ba5; /*highlight*/
+    border: 2px solid var(--border-dark);
     overflow-y: hidden;
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.5);
 }
@@ -67,8 +66,13 @@
     background-color: rgb(255, 255, 255, 0.2);
 }
 
+#rooms a {
+    border: 1px solid var(--text-light-bright);
+    color: var(--text-light-bright);
+}
+
 #rooms a:hover {
-    background: #8e9be7;
+    background: var(--text-light-bright);
     color: #DDDDDD;
 }
 
@@ -103,19 +107,19 @@
     width: 228px;
     bottom: 50px;
     border-radius: 10px;
-    border: 2px solid #414ba5;
+    border: 2px solid var(--border-dark);
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.5);
 }
 
 .sim-param-label {
-    color: #8e9be7;
+    color: var(--text-dark-opaque);
     padding-left: 10px;
     padding-top: 5px;
 }
 
 .sim-param-value {
     font-weight: bold;
-    color: #cecece;
+    color: var(--text-light-bright);
     text-align: right;
     padding-bottom: 5px;
     padding-right: 10px;
@@ -127,12 +131,12 @@
     height: 15px;
     left: 22px;
     width: 250px;
-    color: #7a7bb9;
+    color: var(--text-light-opaque);
     text-align: center;
 }
 
 #copyright a {
-    color: #7a7bb9;
+    color: var(--text-light-opaque);
 }
 
 #content {
@@ -141,7 +145,7 @@
     left: calc(253px + 22px);
     right: 22px;
     bottom: 100px;
-    background: #c7c7c7;
+    background: var(--content-back);
     padding: 10px;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -184,7 +188,7 @@
     left: calc(250px + 22px);
     right: 22px;
     height: 100px;
-    background: #26308b;    
+    background: var(--background-dark);  
     padding: 0px;
     margin: 0px;
 }
@@ -201,7 +205,7 @@
     margin: 0px;
     border: 0px;
     font-size: 11pt;
-    background-color:rgb(174, 179, 252);
+    background-color: var(--background-light);
 }
 
 #send-btn {
@@ -304,8 +308,8 @@
 /* Darker chat container */
 
 .response {
-    border-color: rgb(55, 56, 128);
-    background-color: rgb(174, 179, 252);
+    border-color: var(--background-dark);
+    background-color: var(--background-light);
     float: right;
     resize: horizontal;
 }
@@ -313,10 +317,6 @@
 .msg-from {
     font-weight: bold;
     padding-bottom: 3px;
-}
-
-.msg-content {
-
 }
 
 .msg-time {
