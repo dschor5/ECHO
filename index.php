@@ -198,13 +198,13 @@ class Main
         }
     }
 
-    public static function loadTemplate($template, $replace=null)
+    public static function loadTemplate($template, $replace=null, $dir='modules')
     {
         global $config;
         global $server;
         global $mission;
 
-        $template = file_get_contents($config['templates_dir'].'/'.$template);
+        $template = file_get_contents($config['templates_dir'].'/'.$dir.'/'.$template);
 
         if($replace != null)
         {
