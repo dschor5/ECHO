@@ -86,9 +86,14 @@ function startRecording(mediaType) {
     
     playMediaPlayer.pause();
 
+    recordingMimeType = mimeType;
+    if(mediaType == 'audio') {
+        recordingMimeType = 'audio/webm';
+    }
+
     recordedBlobs = [];
     try {
-        mediaRecorder = new MediaRecorder(window.stream, {mimeType});
+        mediaRecorder = new MediaRecorder(window.stream, {recordingMimeType});
     }
     catch (e) {
         try {

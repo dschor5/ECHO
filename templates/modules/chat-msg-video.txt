@@ -1,1 +1,2 @@
-<video src="%http%%site_url%/file/%message-id%" controls preload="metadata"></video>
+<video class="msg-video file-location" src="%http%%site_url%/file/%message-id%" controls preload="metadata"></video><br>
+                Download <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>

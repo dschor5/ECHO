@@ -57,26 +57,34 @@ class Message
             'user_id'          => $this->data['user_id'],
             'author'           => $this->data['alias'],
             'message'          => $this->data['text'],
+            'type'             => self::TEXT,
             'sent_time'        => $this->getTime('sent_time'),
             'recv_time_mcc'    => $this->getTime('recv_time_mcc'),
             'recv_time_hab'    => $this->getTime('recv_time_hab'),
             'delivered_status' => $this->getMsgStatus(),
         );
 
+        if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
+        {
+            $msgData['filename'] = $this->file->getOriginalName();
+            $msgData['filesize'] = $this->file->getHumanReadableSize();
+            $msgData['type'] = $this->file->getTemplateType();
+        }
+
         // If authored by this user
         if($userPerspective->getId() == $this->data['user_id'])
         {
-            $msgData['type'] = 'usr';
+            $msgData['source'] = 'usr';
         }
         // Else authored by someone else on the habitat
         elseif($this->data['is_crew'])
         {
-            $msgData['type'] = 'hab';
+            $msgData['source'] = 'hab';
         }
         // Or authored by someone else in MCC. 
         else
         {
-            $msgData['type'] = 'mcc';
+            $msgData['source'] = 'mcc';
         }
 
         return json_encode($msgData);
@@ -96,7 +104,8 @@ class Message
             '/%delivered-status%/' => '',
 
             // Content template
-
+            '/%filename%/'   => '',
+            '/%filesize%/'   => '',
         );
 
         return Main::loadTemplate($template, $templateData);
@@ -120,13 +129,13 @@ class Message
             $templateData = array(
                 '/%message-id%/' => $this->data['message_id'],
                 '/%filename%/'   => $this->file->getOriginalName(),
-                '/%filesize%/'   => $this->file->getSize(),
+                '/%filesize%/'   => $this->file->getHumanReadableSize(),
             );
             $content = Main::loadTemplate($templateFile, $templateData);
         }
         else
         {
-            $content = 'File "'.$file->getOriginalName().'" was not found.';
+            $content = 'File not found.';
         }
 
         return $content;

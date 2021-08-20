@@ -83,16 +83,32 @@ evtSource.addEventListener("msg", function(event) {
     if('content' in document.createElement('template'))
     {
         var container = document.querySelector('#msg-container');
-        var template = document.querySelector('#msg-sent-'.concat(data.type));
-        var clone = template.content.cloneNode(true);
-        clone.querySelector(".msg-from").textContent = data.author;
-        clone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');
-        var subclone = clone.querySelector(".msg-status");
-        subclone.querySelector(".msg-sent-time").textContent = data.sent_time;
-        subclone.querySelector(".msg-recv-time-hab").textContent = data.recv_time_hab;
-        subclone.querySelector(".msg-recv-time-mcc").textContent = data.recv_time_mcc;
-        subclone.querySelector(".msg-delivery-status").textContent = data.delivered_status;
-        container.appendChild(clone);
+        var template = document.querySelector('#msg-sent-'.concat(data.source));
+        var msgClone = template.content.cloneNode(true);
+        msgClone.querySelector(".msg-from").textContent = data.author;
+
+        if(data.type === 'text') {
+            msgClone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');
+        }
+        else {
+            template = document.querySelector('#msg-' + data.type);
+            var contentClone = template.content.cloneNode(true);
+            try {
+            contentClone.querySelector(".file-location").src = BASE_URL + "/file/" + data.message_id;
+            }
+            catch(e) {}
+            contentClone.querySelector("a").href = BASE_URL + "/file/" + data.message_id;
+            contentClone.querySelector(".filename").textContent = data.filename;
+            contentClone.querySelector(".filesize").textContent = data.filesize;
+            msgClone.querySelector(".msg-content").appendChild(contentClone);
+        }
+        var msgStatus = msgClone.querySelector(".msg-status");
+        msgStatus.querySelector(".msg-sent-time").textContent = data.sent_time;
+        msgStatus.querySelector(".msg-recv-time-hab").textContent = data.recv_time_hab;
+        msgStatus.querySelector(".msg-recv-time-mcc").textContent = data.recv_time_mcc;
+        msgStatus.querySelector(".msg-delivery-status").textContent = data.delivered_status;
+
+        container.appendChild(msgClone);
     }
     else
     {
@@ -174,14 +190,7 @@ function uploadMedia(mediaType) {
         const blobMimeType = (recordedBlobs[0] || {}).type;
         const blob = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
-        if(mediaType === 'video')
-        {
-            formData.append("data", blob, "recording.mkv");    
-        }
-        else
-        {
-            formData.append("data", blob, "recording.mka");
-        }
+        formData.append("data", blob, "recording");
     }
     else {
         const file = document.querySelector('#new-msg-file').files[0];
@@ -211,7 +220,7 @@ function uploadMedia(mediaType) {
             return myXhr;
         },
         success: function (data) {
-            // your callback here
+            closeModal();
         },
         error: function (error) {
             // handle error

@@ -50,6 +50,19 @@ class FileUpload
         return $filesize;
     }
 
+    public function getHumanReadableSize() : string 
+    {
+        $bytes = $this->getSize();
+        $human = '0 B';
+        if($bytes > 0)
+        {
+            $sz = 'BKMGTP';
+            $factor = floor((strlen($bytes) - 1) / 3);
+            $human = sprintf("%.2f %s", $bytes / pow(1024, $factor),  substr($sz, $factor, 1));
+        }
+        return $human;
+    }
+
     public function getMimeType()
     {
         return $this->data['mime_type'];
@@ -58,8 +71,14 @@ class FileUpload
     // Extracts first part of mimetype
     public function getTemplateType()
     {
-        return explode('/', $this->data['mime_type'], 2)[0];
+        $fileType = explode('/', $this->data['mime_type'], 2)[0];
+        if(!in_array($fileType, array('image', 'audio', 'video')))
+        {
+            $fileType = 'file';
+        }
+        return $fileType;
     }
+
 }
 
 ?>
