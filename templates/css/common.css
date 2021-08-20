@@ -61,7 +61,7 @@ a:hover {
 }
 
 .dropbtn {
-    background-color: #AEB3FC;
+    background-color: var(--text-light-opaque);
     font-size: 16px;
     cursor: pointer;
     height: 40px;
@@ -108,8 +108,8 @@ a:hover {
 /* Change the background color of the dropdown button when the dropdown content is shown */
 
 .dropdown:hover .dropbtn {
-    color: #AEB3FC;
-    background-color: #414BA5;
+    color: var(--text-light-opaque);
+    background-color: var(--border-dark);
 }
 
 .modal {

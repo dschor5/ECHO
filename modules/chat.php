@@ -290,7 +290,7 @@ class ChatModule extends DefaultModule
             $messagesStr .= $message->compileHtml($this->user, $this->convoHasParticipantsInBothSites);
         }
 
-        return Main::loadTemplate('modules/chat.txt', 
+        return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->getUsername(),
                   '/%delay_src%/' => $this->user->isCrew() ? $mission['hab_name'] : $mission['mcc_name'],
                   '/%time_mcc%/' => $time->getTime(),
@@ -323,7 +323,7 @@ class ChatModule extends DefaultModule
                 $name = 'Private: '.array_pop($participants);
             }
             
-            $content .= Main::loadTemplate('modules/chat-rooms.txt', array(
+            $content .= Main::loadTemplate('chat-rooms.txt', array(
                 '/%room_id%/'   => $convo->getId(),
                 '/%room_name%/' => $name,
                 '/%selected%/'  => ($convo->getId() == $this->conversationId) ? 'room-selected' : '',

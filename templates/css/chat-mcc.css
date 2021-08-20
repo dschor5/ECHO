@@ -1,66 +1,9 @@
-#navigation {
-    background: #26308B; /*dark*/
-}
-
-.navigation-title {
-    background: #AEB3FC; /*light*/
-}
-
-#room-container {
-    border: 2px solid #414ba5; /*highlight*/
-}
-
-#rooms a {
-    border: 1px solid #8e9be7;
-    color: #8e9be7;
-}
-
-#rooms a:hover {
-    background: #8e9be7;
-}
-
-#current-delay-container {
-    border: 2px solid #414ba5;
-}
-
-.sim-param-label {
-    color: #8e9be7;
-}
-
-.sim-param-value {
-    color: #cecece;
-}
-
-#copyright {
-    color: #7a7bb9;
-}
-
-#copyright a {
-    color: #7a7bb9;
-}
-
-#content {
-    background: #c7c7c7;
-}
-
-#new-msg {
-    background: #26308b;    
-}
-
-.response {
-    border-color: rgb(55, 56, 128);
-    background-color: rgb(174, 179, 252);
-}
-
-.dropbtn {
-    background-color: #AEB3FC;
-}
-
-.dropdown:hover .dropbtn {
-    color: #AEB3FC;
-    background-color: #414BA5;
-}
-
-#new-msg textarea {
-    background-color:rgb(174, 179, 252);
+:root {
+    --background-dark: #26308B;
+    --background-light: #AEB3FC;
+    --text-light-opaque: #AEB3FC;
+    --border-dark: #414BA5; 
+    --text-light-bright: #8E9BE7;
+    --text-dark-opaque: #7A7BB9;
+    --content-back: #C7C7C7;
 }

@@ -51,6 +51,14 @@ class UsersModule extends DefaultModule
     {
         $this->addCss('common');
         $this->addCss('settings');
+        if($this->user->isCrew())
+        {
+            $this->addCss('chat-hab');
+        }
+        else
+        {
+            $this->addCss('chat-mcc');
+        }
         $this->addJavascript('jquery-3.6.0.min');
         $this->addJavascript('users');
 
@@ -223,18 +231,18 @@ class UsersModule extends DefaultModule
         foreach($users as $id => $user)
         {
             $tools = array();
-            $tools[] = Main::loadTemplate('modules/link-js.txt', array(
+            $tools[] = Main::loadTemplate('link-js.txt', array(
                 '/%onclick%/'=>'getUser('.$id.')', 
                 '/%text%/'=>'Edit'
             ));
 
             if($this->user->getId() != $id)
             {
-                $tools[] = Main::loadTemplate('modules/link-js.txt', array(
+                $tools[] = Main::loadTemplate('link-js.txt', array(
                     '/%onclick%/'=>'confirmAction(\'deleteuser\', '.$id.', \''.$user->getUsername().'\')', 
                     '/%text%/'=>'Delete'
                 ));
-                $tools[] = Main::loadTemplate('modules/link-js.txt', array(
+                $tools[] = Main::loadTemplate('link-js.txt', array(
                     '/%onclick%/'=>'confirmAction(\'resetuser\', '.$id.', \''.$user->getUsername().'\')', 
                     '/%text%/'=>'Reset Password'
                 ));
@@ -250,7 +258,7 @@ class UsersModule extends DefaultModule
             ));
         }
 
-        return Main::loadTemplate('modules/users.txt', array(
+        return Main::loadTemplate('users.txt', array(
             '/%content%/'=>$list->build(),
             '/%role_mcc%/'=>$mission['role_mcc'],
             '/%role_hab%/'=>$mission['role_hab'],

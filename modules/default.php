@@ -88,7 +88,7 @@ abstract class DefaultModule implements Module
             $username = $this->user->getAlias().' ('.$this->user->getUsername().')';
         }
 
-        return Main::loadTemplate('modules/header.txt', array(
+        return Main::loadTemplate('header.txt', array(
             '/%links%/' => $links,
             '/%user_location%/' => $userLocation,
             '/%username%/' => $username,

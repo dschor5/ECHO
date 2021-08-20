@@ -58,8 +58,7 @@ class FileModule implements Module
         $filesize = $file->getSize();
         $templateType = $file->getTemplateType();
 
-        
-        if(isset($_GET['download']) || in_array($templateType, array('image', 'video', 'audio')))
+        if(!isset($_GET['download']) && in_array($templateType, array('image', 'video', 'audio')))
         {
             // Display inline. 
             header('Content-Disposition: filename='.basename($origName));

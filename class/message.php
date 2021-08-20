@@ -99,7 +99,7 @@ class Message
 
         );
 
-        return Main::loadTemplate('modules/'.$template, $templateData);
+        return Main::loadTemplate(''.$template, $templateData);
     }
 
     private function getRecvTime(bool $isCrew, bool $remoteStatus) : string
