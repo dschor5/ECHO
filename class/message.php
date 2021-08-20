@@ -151,17 +151,17 @@ class Message
         // If authored by this user
         if($userPerspective->getId() == $this->data['user_id'])
         {
-            $template = 'modules/chat-msg-sent-usr.txt';
+            $template = 'chat-msg-sent-usr.txt';
         }
         // Else authored by someone else on the habitat
         elseif($this->data['is_crew'])
         {
-            $template = 'modules/chat-msg-sent-hab.txt';
+            $template = 'chat-msg-sent-hab.txt';
         }
         // Or authored by someone else in MCC. 
         else
         {
-            $template = 'modules/chat-msg-sent-mcc.txt';
+            $template = 'chat-msg-sent-mcc.txt';
         }
 
         return Main::loadTemplate($template, $msgData);
