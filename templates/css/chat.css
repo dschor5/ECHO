@@ -151,16 +151,6 @@
     overflow-x: hidden;
 }
 
-@font-face {
-    font-family: symbols;
-    src: url(%http%%site_url%/%templates_dir%/fonts/symbols.woff) format("woff");
-}
-
-@font-face {
-    font-family: glyphicons;
-    src: url(%http%%site_url%/%templates_dir%/fonts/glyphicons.woff) format("woff");
-}
-
 .msg {
     border: 2px solid #dedede;
     background-color: #f1f1f1;

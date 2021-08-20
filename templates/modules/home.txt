@@ -1,7 +1,7 @@
 <h1>Communication Delay Simulator</h1>
 <h2>Mission: %mission_name%</h2>
 
-<div id="current-delay">
+<div id="current-delay" style="background-image: url('%http%%site_url%/%templates_dir%/images/background-home.jpg');">
     <div id="current-delay-container">
         <div id="distance-label" class="sim-param-label">distance between planets</div>
         <div id="distance-value" class="sim-param-value">%delay_distance%</div>
