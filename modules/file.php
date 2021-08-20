@@ -100,7 +100,7 @@ class FileModule implements Module
                     break;
             }
 
-            echo Main::loadTemplate($filepath);
+            echo Main::loadTemplate($filepath, array(), '');
     }
 }
 
