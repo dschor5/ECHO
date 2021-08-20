@@ -99,7 +99,7 @@ class Message
 
         );
 
-        return Main::loadTemplate(''.$template, $templateData);
+        return Main::loadTemplate($template, $templateData);
     }
 
     private function getRecvTime(bool $isCrew, bool $remoteStatus) : string
@@ -116,7 +116,7 @@ class Message
         else if($this->file != null && $this->file->exists())
         {
             $templateType = $this->file->getTemplateType();
-            $templateFile = 'modules/chat-msg-'.$templateType.'.txt';
+            $templateFile = 'chat-msg-'.$templateType.'.txt';
             $templateData = array(
                 '/%message-id%/' => $this->data['message_id'],
                 '/%filename%/'   => $this->file->getOriginalName(),
