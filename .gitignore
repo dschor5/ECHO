@@ -4,4 +4,6 @@ server.inc.php
 ._*
 .vscode
 uploads/*
+.htaccess-1n1
+update.php
 
