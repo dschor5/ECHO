@@ -117,7 +117,7 @@ class MessagesDao extends Dao
                         'AND msg_status.is_read=0 '.    
                         'AND (messages.'.$qRefTime.' BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' '.
-                    'LIMIT '.$qOffset.', 25';
+                    'LIMIT '.$qOffset.', 100';
         
         $messages = array();
 

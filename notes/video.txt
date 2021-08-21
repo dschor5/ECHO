@@ -32,3 +32,6 @@ preload="none" - no preload is done
 preload="metadata" - only meetadata is preloaded (dimensions, first-frame, track list, duration, etc)
 preload="auto" - load as soon as page loads
 poster="image" to load before video loads
+
+isTypeSupported | RecordRTC
+https://www.webrtc-experiment.com/RecordRTC/simple-demos/isTypeSupported.html
