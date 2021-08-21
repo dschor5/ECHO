@@ -108,12 +108,27 @@ evtSource.addEventListener("msg", function(event) {
         msgStatus.querySelector(".msg-recv-time-mcc").textContent = data.recv_time_mcc;
         msgStatus.querySelector(".msg-delivery-status").textContent = data.delivered_status;
 
+
+        var scrollContainer = document.querySelector("#content");
+        var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
         container.appendChild(msgClone);
+        if(autoScroll < 200)
+        {
+            autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            $('#content').animate({
+                scrollTop: autoScroll.toString() + 'px'
+            }, 1000);
+        }
     }
     else
     {
         // Browser does not support elements. 
     }
+});
+
+$(document).ready(function() {
+    var scrollContainer = document.querySelector("#content");
+    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
 });
 
 $(document).ready(function() {
