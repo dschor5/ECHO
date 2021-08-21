@@ -23,6 +23,11 @@ class Message
         }
     }
 
+    public function getId() : int
+    {
+        return $this->data['message_id'];
+    }
+
     private function getReceivedTime(bool $isCrew) : string
     {
         if($isCrew)
@@ -38,10 +43,10 @@ class Message
         return ($this->getReceivedTime(!$this->data['is_crew']) <= $time->getTime()) ? 'Delivered' : 'Transit';
     }
 
-    private function getTime(string $name) : string
+    private function getTime(string $name, $withTz=true) : string
     {
         $time = new DelayTime($this->data[$name]);
-        return $time->getTime(true, false, true);
+        return $time->getTime(true, false);
     }
 
     private function getTimeUTC(string $name) : string

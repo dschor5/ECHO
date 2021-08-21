@@ -12,6 +12,7 @@ RewriteRule ^chat/(.*) index.php?action=chat&subaction=$1 [QSA]
 RewriteRule ^chat index.php?action=chat [QSA]
 RewriteRule ^mission index.php?action=mission [QSA]
 RewriteRule ^users index.php?action=users [QSA]
+RewriteRule ^preferences index.php?action=preferences [QSA]
 RewriteRule ^(file|css|js)/(.*) index.php?action=file&id=$2 [QSA]
 
 ErrorDocument 400 index.php?action=error

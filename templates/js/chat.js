@@ -85,7 +85,8 @@ evtSource.addEventListener("msg", function(event) {
         var container = document.querySelector('#msg-container');
         var template = document.querySelector('#msg-sent-'.concat(data.source));
         var msgClone = template.content.cloneNode(true);
-        msgClone.querySelector(".msg-from").textContent = data.author;
+        msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
+        msgClone.querySelector(".msg-from").textContent = data.author + "(" + data.message_id + ")";
 
         if(data.type === 'text') {
             msgClone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');
@@ -117,7 +118,7 @@ evtSource.addEventListener("msg", function(event) {
             autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
             $('#content').animate({
                 scrollTop: autoScroll.toString() + 'px'
-            }, 1000);
+            }, 250);
         }
     }
     else

@@ -150,6 +150,30 @@ class MessagesDao extends Dao
         return $messages;
     }
 
+    public function getNumMsgInCombo(int $convoId, bool $isCrew, string $toDate) : int
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
+
+        $queryStr = 'SELECT count(*) AS num_msgs FROM messages '. 
+                    'WHERE messages.conversation_id='.$qConvoId.' '.
+                    'AND messages.'.$qRefTime.' <= '.$qToDate;
+
+        $numMsgs = 0;
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                $temp = $result->fetch_assoc();
+                $numMsgs = $temp['num_msgs'];
+            }
+        }
+
+        return $numMsgs;
+    }
+
     public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $toDate, int $offset=0) : array
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
@@ -157,7 +181,6 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
-
         
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_crew, msg_status.is_read, '.
@@ -169,8 +192,8 @@ class MessagesDao extends Dao
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id='.$qConvoId.' '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
-                    'ORDER BY messages.'.$qRefTime.' '.
-                    'LIMIT '.$qOffset.', 25';
+                    'ORDER BY messages.'.$qRefTime.' DESC '.
+                    'LIMIT '.$qOffset.', 5';
         
         $messages = array();
 
@@ -208,7 +231,7 @@ class MessagesDao extends Dao
         }
         $this->database->disableQueryException();
 
-        return $messages;
+        return array_reverse($messages, true);
     }
 
     

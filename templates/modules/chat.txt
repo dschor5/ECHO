@@ -61,7 +61,7 @@
                 %template-msg-video%
             </template>
 
-            %message-nav%
+            <div id="msg-nav">%message-nav%</div>
 
             %messages%
 

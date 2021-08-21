@@ -6,6 +6,7 @@ class ChatModule extends DefaultModule
     private $convoHasParticipantsInBothSites;
     private $conversationId;
     private $convoAccessGranted;
+    private $conversation;
 
     public function __construct(&$user)
     {
@@ -14,29 +15,37 @@ class ChatModule extends DefaultModule
         $this->subJsonRequests = array('send', 'upload');
         $this->subHtmlRequests = array('group');
         $this->subStreamRequests = array('refresh');
+        $conversationId = 1;
 
         if(isset($_POST['conversation_id']) && intval($_POST['conversation_id']) > 0)
         {
-            $this->conversationId = intval($_POST['conversation_id']);
+            $conversationId = intval($_POST['conversation_id']);
         }
         elseif(isset($_GET['conversation_id']) && intval($_GET['conversation_id']) > 0)
         {
-            $this->conversationId = intval($_GET['conversation_id']);
+            $conversationId = intval($_GET['conversation_id']);
         }
         elseif(Main::getCookieValue('conversation_id') != null)
         {
-            $this->conversationId = intval(Main::getCookieValue('conversation_id'));
+            $conversationId = intval(Main::getCookieValue('conversation_id'));
         }
-        else
-        {
-            $this->conversationId = 1;
-        }
-
-        Main::setSiteCookie(array('conversation_id'=>$this->conversationId));
+        
+        
 
         $participantsDao = ParticipantsDao::getInstance();
-        $this->participants = $participantsDao->getParticipantIds($this->conversationId);
+        $this->participants = $participantsDao->getParticipantIds($conversationId);
         $this->convoAccessGranted = isset($this->participants[$this->user->getId()]);
+        if(!$this->convoAccessGranted)
+        {
+            $conversationId = 1;
+            $this->participants = $participantsDao->getParticipantIds($conversationId);
+            $this->convoAccessGranted = isset($this->participants[$this->user->getId()]);
+        }
+
+        Main::setSiteCookie(array('conversation_id'=>$conversationId));
+
+        $conversationsDao = ConversationsDao::getInstance();
+        $this->conversation = $conversationsDao->getById($conversationId);
         $this->convoHasParticipantsInBothSites = (count(array_unique($this->participants)) == 2);
     }
 
@@ -46,7 +55,7 @@ class ChatModule extends DefaultModule
 
         if($this->convoAccessGranted)
         {
-            $response['conversation_id'] = $this->conversationId;
+            $response['conversation_id'] = $this->conversation->getId();
 
             if($subaction == 'send')
             {
@@ -59,7 +68,7 @@ class ChatModule extends DefaultModule
         }
         else
         {
-            $response['error'] = 'User cannot access conversation_id='.$this->conversationId;
+            $response['error'] = 'User cannot access conversation_id='.$this->conversation->getId();
         }
 
         return $response;
@@ -137,7 +146,7 @@ class ChatModule extends DefaultModule
         {
             $msgData = array(
                 'user_id' => $this->user->getId(),
-                'conversation_id' => $this->conversationId,
+                'conversation_id' => $this->conversation->getId(),
                 'text' => '',
                 'type' => Message::FILE,
                 'sent_time' => $currTime->getTime(),
@@ -186,7 +195,7 @@ class ChatModule extends DefaultModule
         {
             $msgData = array(
                 'user_id' => $this->user->getId(),
-                'conversation_id' => $this->conversationId,
+                'conversation_id' => $this->conversation->getId(),
                 'text' => $msgText,
                 'type' => Message::TEXT,
                 'sent_time' => $currTime->getTime(),
@@ -227,7 +236,7 @@ class ChatModule extends DefaultModule
             $time = new DelayTime();
             $timeStr = $time->getTime();
             
-            $messages = $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $timeStr);
+            $messages = $messagesDao->getNewMessages($this->conversation->getId(), $this->user->getId(), $this->user->isCrew(), $timeStr);
             if(count($messages) > 0)
             {
                 foreach($messages as $msgId => $msg)
@@ -298,9 +307,10 @@ class ChatModule extends DefaultModule
         $messagesDao = MessagesDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
 
-        $messages = $messagesDao->getMessagesReceived($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
-        $participantsDao->updateLastRead($this->conversationId, $this->user->getId(), $time->getTime());
-        $messagesDao->getNewMessages($this->conversationId, $this->user->getId(), $this->user->isCrew(), $time->getTime());
+        $messages = $messagesDao->getMessagesReceived($this->conversation->getId(), $this->user->getId(), $this->user->isCrew(), $time->getTime());
+        $participantsDao->updateLastRead($this->conversation->getId(), $this->user->getId(), $time->getTime());
+        //$messagesDao->getNewMessages($this->conversation->getId(), $this->user->getId(), $this->user->isCrew(), $time->getTime());
+        $totalMsgs = $messagesDao->getNumMsgInCombo($this->conversation->getId(), $this->user->isCrew(), $time->getTime());
 
         $messagesStr = '';
         foreach($messages as $message)
@@ -314,8 +324,8 @@ class ChatModule extends DefaultModule
                   '/%time_mcc%/' => $time->getTime(),
                   '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
-                  '/%convo_id%/' => $this->conversationId,
-                  '/%message-nav%/' => '',
+                  '/%convo_id%/' => $this->conversation->getId(),
+                  '/%message-nav%/' => $this->getConvoNav($messages, $totalMsgs),
                   '/%messages%/' => $messagesStr,
                   '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
                   '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
@@ -325,6 +335,31 @@ class ChatModule extends DefaultModule
                   '/%template-msg-audio%/' => Message::compileEmptyMsgTemplate('chat-msg-audio.txt'),
                   '/%template-msg-video%/' => Message::compileEmptyMsgTemplate('chat-msg-video.txt'),
                 ));
+    }
+
+    private function getConvoNav(array $msgsDisplayed, int $totalMsgs) : string
+    {
+        $content = '';
+
+        $firstMsg = array_values($msgsDisplayed)[0];
+
+        if($firstMsg != null && $totalMsgs > count($msgsDisplayed))
+        {
+            $content = Main::loadTemplate('chat-load-old-msgs.txt', 
+                array(
+                    '/%convo_id%/' => $this->conversation->getId(),
+                    '/%message_id%/' => $firstMsg->getId()
+                ));  
+        }
+        else
+        {
+            $content = Main::loadTemplate('chat-no-old-msgs.txt', 
+                array(
+                    '/%convo_start_date%/' => $firstMsg->getTime('sent_time', false),
+                )); 
+        }
+
+        return $content;
     }
 
     private function getConversationList(): string 
@@ -348,7 +383,7 @@ class ChatModule extends DefaultModule
             $content .= Main::loadTemplate('chat-rooms.txt', array(
                 '/%room_id%/'   => $convo->getId(),
                 '/%room_name%/' => $name,
-                '/%selected%/'  => ($convo->getId() == $this->conversationId) ? 'room-selected' : '',
+                '/%selected%/'  => ($convo->getId() == $this->conversation->getId()) ? 'room-selected' : '',
             ));
         }
 
