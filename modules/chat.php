@@ -334,7 +334,7 @@ class ChatModule extends DefaultModule
         $messagesStr = '';
         foreach($messages as $message)
         {
-            $messagesStr .= $message->compileHtml($this->user, $this->conersation->hasParticipantsOnBothSites());
+            $messagesStr .= $message->compileHtml($this->user, $this->conversation->hasParticipantsOnBothSites());
         }
 
         return Main::loadTemplate('chat.txt', 
