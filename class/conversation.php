@@ -21,15 +21,15 @@ class Conversation
 
     public function getNumParticipants() : int
     {
-        return count($this->data['conversation_participants']);
+        return count($this->data['participant_ids']);
     }
 
     public function getParticipants(int $excludeUserId = -1) : array
     {
         $convos = array();
         $ids = explode(',', $this->data['participant_ids']);
-        $alias = explode(',', $this->data['participant_aliases']);
-        $usernames = explode(',', $this->data['participants_usernames']);
+        $alias = explode(',', $this->data['participants_aliases']);
+        $usernames = explode(',', $this->data['participant_usernames']);
 
         for($i = 0; $i < count($ids); $i++)
         {
