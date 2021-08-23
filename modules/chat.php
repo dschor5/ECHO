@@ -263,7 +263,7 @@ class ChatModule extends DefaultModule
                 foreach($messages as $msgId => $msg)
                 {
                     echo "event: msg".PHP_EOL;
-                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conersation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
+                    echo 'data: '.json_encode($msg->compileArray($this->user, true)).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
