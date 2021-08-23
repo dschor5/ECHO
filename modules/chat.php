@@ -263,21 +263,21 @@ class ChatModule extends DefaultModule
                 foreach($messages as $msgId => $msg)
                 {
                     echo "event: msg".PHP_EOL;
-                    echo 'data: '.json_encode($msg->compileArray($this->user, true)).PHP_EOL.PHP_EOL;
+                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conersation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
 
-            /*$notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
+            $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
             if(count($notifications) > 0)
             {
                 echo "event: notification".PHP_EOL;
                 echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
                 $lastMsg = time();
-            }*/
+            }
 
             // Send keep-alive message every 5 seconds of inactivity. 
-            if($lastMsg + 5 <= time())
+            if($lastMsg + 1 <= time())
             {
                 echo ":\n";
                 $lastMsg = time();
