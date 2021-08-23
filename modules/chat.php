@@ -89,7 +89,7 @@ class ChatModule extends DefaultModule
             $messagesDao = MessagesDao::getInstance();
             $messages = $messagesDao->getMessagesReceived(
                 $this->conversation->getId(), $this->user->getId(), 
-                $this->user->isCrew(), $time->getTime(), intval($msgId), 5);
+                $this->user->isCrew(), $time->getTime(), intval($msgId), 10);
             
             $response['success'] = true;
             $response['messages'] = array();

@@ -309,9 +309,9 @@ function loadPrevMsgs() {
                     console.log(resp.error);
                 }
                 oldMsgQueryInProgress = false;
+                scrollContainer.scrollTo(0, child.offsetTop);
                 if(!hasMoreMessages) {
                     scrollContainer.style.padding = "0px";
-                    scrollContainer.scrollTop = 0;
                 }
             },
             error: function(jqHR, textStatus, errorThrown) {

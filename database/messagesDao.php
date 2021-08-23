@@ -174,7 +174,7 @@ class MessagesDao extends Dao
         return $numMsgs;
     }
 
-    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=25) : array
+    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
