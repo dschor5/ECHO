@@ -274,6 +274,8 @@ class ChatModule extends DefaultModule
                 $lastMsg = time();
             }
 
+
+
             // Send keep-alive message every 5 seconds of inactivity. 
             if($lastMsg + 5 <= time())
             {

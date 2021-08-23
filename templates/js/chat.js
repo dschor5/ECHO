@@ -271,7 +271,7 @@ $(document).ready(function() {
 
     // Setup an event listener to poll for older messages.
     scrollContainer.addEventListener('scroll', function(event) {
-        if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 50) {
+        if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
             loadPrevMsgs();
         }
     });
@@ -309,7 +309,7 @@ function loadPrevMsgs() {
                     console.log(resp.error);
                 }
                 oldMsgQueryInProgress = false;
-                scrollContainer.scrollTo(0, child.offsetTop);
+                scrollContainer.scrollTo(0, child.offsetTop - 80);
                 if(!hasMoreMessages) {
                     scrollContainer.style.padding = "0px";
                 }
