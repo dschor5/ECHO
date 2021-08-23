@@ -254,6 +254,8 @@ class ChatModule extends DefaultModule
         // Infinite loop processing data. 
         while(true)
         {
+            ob_start(null, 0, PHP_OUTPUT_HANDLER_FLUSHABLE);
+
             $time = new DelayTime();
             $timeStr = $time->getTime();
             
