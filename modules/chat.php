@@ -284,7 +284,7 @@ class ChatModule extends DefaultModule
             }
 
             // Flush output to the user. 
-            ob_flush();
+            //ob_flush();
             flush();
 
             // Check if the connection was aborted by the user (e.g., closed browser)
