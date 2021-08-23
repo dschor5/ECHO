@@ -37,17 +37,6 @@ class ChatModule extends DefaultModule
             $this->conversation = $conversations[$conversationId];
         }
 
-        $time = new DelayTime();
-        $timeStr = $time->getTime();
-        $messagesDao = MessagesDao::getInstance();
-        $conversationIds = array_keys($conversations);
-        $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
-        if(count($notifications) > 0)
-        {
-            //echo 'event: notification'.PHP_EOL;
-            //echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
-        }
-
         Main::setSiteCookie(array('conversation_id'=>$conversationId));
     }
 
@@ -249,7 +238,7 @@ class ChatModule extends DefaultModule
     {
         $messagesDao = MessagesDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getConversationsByUserId();
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
         $conversationIds = array_keys($conversations);
 
         // Block invalid access. 
@@ -282,7 +271,7 @@ class ChatModule extends DefaultModule
             $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
             if(count($notifications) > 0)
             {
-                echo 'event: notification'.PHP_EOL;
+                echo "event: notification".PHP_EOL;
                 echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
                 $lastMsg = time();
             }
