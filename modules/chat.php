@@ -41,7 +41,7 @@ class ChatModule extends DefaultModule
         $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
         $conversationIds = array_keys($conversations);
-        $notifications = $messagesDao->getNewMsgInOtherCombo($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
+        $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
         if(count($notifications) > 0)
         {
             echo 'event: notification'.PHP_EOL;

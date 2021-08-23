@@ -235,9 +235,9 @@ class MessagesDao extends Dao
         return array_reverse($messages, true);
     }
 
-    public function getNewMsgInOtherCombo(array $conversations, int $userId, bool $isCrew, string $toDate)
+    public function getMsgNotifications(array $conversations, int $userId, bool $isCrew, string $toDate)
     {
-        $result = array();
+        $notifications = array();
 
         if(count($conversations) > 0)
         {
@@ -260,13 +260,13 @@ class MessagesDao extends Dao
                 {
                     while(($rowData=$result->fetch_assoc()) != null)
                     {
-                        $results[$rowData['conversation_id']] = $rowData['num_new'];
+                        $notifications[$rowData['conversation_id']] = $rowData['num_new'];
                     }
                 }
             }       
         }
 
-        return $result;
+        return $notifications;
     }
 
 }
