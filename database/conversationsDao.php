@@ -47,7 +47,7 @@ class ConversationsDao extends Dao
                         'GROUP_CONCAT( participants.user_id) AS participant_ids, '.
                         'GROUP_CONCAT( users.username) AS participant_usernames, '.
                         'GROUP_CONCAT( users.alias) AS participants_aliases, '.
-                        'COUNT(DISTINCT users.is_crew) AS participants_both_sites '
+                        'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
                     'FROM conversations '.
                     'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
                     'JOIN users ON users.user_id=participants.user_id '.

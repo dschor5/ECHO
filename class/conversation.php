@@ -49,7 +49,7 @@ class Conversation
         return $convos;
     }
 
-    public function hasParticipantsOnBothSites() : boolean
+    public function hasParticipantsOnBothSites() : bool
     {
         if(isset($this->data['participants_both_sites']))
         {
