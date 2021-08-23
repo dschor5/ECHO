@@ -44,8 +44,8 @@ class ChatModule extends DefaultModule
         $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
         if(count($notifications) > 0)
         {
-            echo 'event: notification'.PHP_EOL;
-            echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
+            //echo 'event: notification'.PHP_EOL;
+            //echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
         }
 
         Main::setSiteCookie(array('conversation_id'=>$conversationId));
@@ -279,7 +279,13 @@ class ChatModule extends DefaultModule
                 $lastMsg = time();
             }
 
-            
+            $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
+            if(count($notifications) > 0)
+            {
+                echo 'event: notification'.PHP_EOL;
+                echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
+                $lastMsg = time();
+            }
 
             // Send keep-alive message every 5 seconds of inactivity. 
             if($lastMsg + 5 <= time())
