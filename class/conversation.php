@@ -49,6 +49,10 @@ class Conversation
         return $convos;
     }
 
+    public function getDateCreated()
+    {
+        return $this->data['date_created'];
+    }
 
     public function getTimestampe()
     {

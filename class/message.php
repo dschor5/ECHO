@@ -55,7 +55,7 @@ class Message
         return $time->getTimeUtc();
     }
 
-    public function compileJson(User &$userPerspective, bool $remoteStatus=false) : string
+    public function compileArray(User &$userPerspective) : array
     {
         $msgData = array(
             'message_id'       => $this->data['message_id'],
@@ -92,7 +92,7 @@ class Message
             $msgData['source'] = 'mcc';
         }
 
-        return json_encode($msgData);
+        return $msgData;
     }
 
     public static function compileEmptyMsgTemplate(string $template) : string

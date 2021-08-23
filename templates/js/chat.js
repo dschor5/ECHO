@@ -80,10 +80,23 @@ evtSource.addEventListener("logout", function(event) {
 
 evtSource.addEventListener("msg", function(event) {
     const data = JSON.parse(event.data);
+    var scrollContainer = document.querySelector("#content");
+    var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
+    compileMsg(data, false)
+    
+    if(autoScroll < 200)
+    {
+        autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+        $('#content').animate({
+            scrollTop: autoScroll.toString() + 'px'
+        }, 250);
+    }
+});
+
+function compileMsg(data, before){
+    var template = document.querySelector('#msg-sent-'.concat(data.source));
     if('content' in document.createElement('template'))
     {
-        var container = document.querySelector('#msg-container');
-        var template = document.querySelector('#msg-sent-'.concat(data.source));
         var msgClone = template.content.cloneNode(true);
         msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
         msgClone.querySelector(".msg-from").textContent = data.author + "(" + data.message_id + ")";
@@ -109,28 +122,20 @@ evtSource.addEventListener("msg", function(event) {
         msgStatus.querySelector(".msg-recv-time-mcc").textContent = data.recv_time_mcc;
         msgStatus.querySelector(".msg-delivery-status").textContent = data.delivered_status;
 
-
-        var scrollContainer = document.querySelector("#content");
-        var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
-        container.appendChild(msgClone);
-        if(autoScroll < 200)
-        {
-            autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-            $('#content').animate({
-                scrollTop: autoScroll.toString() + 'px'
-            }, 250);
+        if(before) {
+            var container = document.querySelector('#msg-container');
+            container.prepend(msgClone);
+        }
+        else {
+            var container = document.querySelector('#msg-container');
+            container.appendChild(msgClone);
         }
     }
     else
     {
         // Browser does not support elements. 
     }
-});
-
-$(document).ready(function() {
-    var scrollContainer = document.querySelector("#content");
-    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-});
+}
 
 $(document).ready(function() {
     var matches = document.querySelectorAll("time[status='Transit']");
@@ -254,4 +259,66 @@ function progressHandling(event) {
     // update progressbars classes so it fits your code
     $("#progress-wrp .progress-bar").css("width", +percent + "%");
     $("#progress-wrp .status").text(percent + "%");
+}
+
+var oldMsgQueryInProgress = false;
+var hasMoreMessages = true;
+
+$(document).ready(function() {
+    // On-load scroll to the bottom to the newest messages
+    var scrollContainer = document.querySelector("#content");
+    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+
+    // Setup an event listener to poll for older messages.
+    scrollContainer.addEventListener('scroll', function(event) {
+        if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 50) {
+            loadPrevMsgs();
+        }
+    });
+});
+
+function loadPrevMsgs() {
+    var scrollContainer = document.querySelector('#content');
+    var target = document.querySelector('#msg-container');
+    var child = target.querySelector('.msg');
+
+    if(child != null && hasMoreMessages) {
+        var msgId = child.getAttribute('id').substring(7);
+        oldMsgQueryInProgress = true;
+        $.ajax({
+            url:  BASE_URL,
+            type: "POST",
+            data: {
+                action: 'chat',
+                subaction: 'prevMsgs',
+                conversation_id: $('#conversation_id').val(),
+                message_id: msgId
+            },
+            dataType: 'json',
+            success: function(resp) {
+                if(resp.success) {
+                    var i;
+                    for(i = resp.messages.length-1; i >= 0; i--) {
+                        compileMsg(resp.messages[i], true);
+                    }
+                    scrollContainer.scrollTop = 100;
+                    hasMoreMessages = (resp.messages.length > 0);
+                }
+                else {
+                    hasMoreMessages = false;
+                    console.log(resp.error);
+                }
+                oldMsgQueryInProgress = false;
+                if(!hasMoreMessages) {
+                    scrollContainer.style.padding = "0px";
+                    scrollContainer.scrollTop = 0;
+                }
+            },
+            error: function(jqHR, textStatus, errorThrown) {
+                //location.href = BASE_URL + '/chat';
+            },
+        });
+    }
+
+    
 }

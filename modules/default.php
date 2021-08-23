@@ -151,10 +151,12 @@ abstract class DefaultModule implements Module
                 '/%mission_name%/'     => $mission['name'],
                 '/%year%/'             => date('Y'),
                 '/%random%/'           => rand(1, 100000),
-                '/%epoch%/'            => DelayTime::getEpoch(),
+                '/%epoch%/'            => DelayTime::getEpochUTC(),
                 '/%time_sec_per_day%/' => $mission['time_sec_per_day'],
                 '/%time_day%/'         => $mission['time_day'],
-                '/%timezone_offset%/'  => DelayTime::getTimezoneOffset(),                   
+                '/%hab_time_format%/'  => $mission['time_hab_format'] ? 'true' : 'false',
+                '/%timezone_mcc_offset%/'  => DelayTime::getTimezoneOffset(true),
+                '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffset(false),
             );
 
             echo Main::loadTemplate('main.txt', $replace);

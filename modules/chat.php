@@ -12,7 +12,7 @@ class ChatModule extends DefaultModule
     {
         parent::__construct($user);
         
-        $this->subJsonRequests = array('send', 'upload');
+        $this->subJsonRequests = array('send', 'upload', 'prevMsgs');
         $this->subHtmlRequests = array('group');
         $this->subStreamRequests = array('refresh');
         $conversationId = 1;
@@ -65,6 +65,10 @@ class ChatModule extends DefaultModule
             {
                 $response = $this->uploadFile();
             }
+            elseif($subaction == 'prevMsgs')
+            {
+                $response = $this->getPrevMessages();
+            }
         }
         else
         {
@@ -74,7 +78,30 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
-    
+    private function getPrevMessages()
+    {
+        $msgId = $_POST['message_id'] ?? 0;
+        $time = new DelayTime();
+        $response = array();
+
+        if(intval($msgId) > 0)
+        {
+            $messagesDao = MessagesDao::getInstance();
+            $messages = $messagesDao->getMessagesReceived(
+                $this->conversation->getId(), $this->user->getId(), 
+                $this->user->isCrew(), $time->getTime(), intval($msgId), 5);
+            
+            $response['success'] = true;
+            $response['messages'] = array();
+
+            foreach($messages as $msg)
+            {
+                $response['messages'][] = $msg->compileArray($this->user, $this->convoHasParticipantsInBothSites);
+            }
+        }
+
+        return $response;
+    }
 
     private function uploadFile()
     {
@@ -242,7 +269,7 @@ class ChatModule extends DefaultModule
                 foreach($messages as $msgId => $msg)
                 {
                     echo "event: msg".PHP_EOL;
-                    echo 'data: '.$msg->compileJson($this->user, $this->convoHasParticipantsInBothSites).PHP_EOL.PHP_EOL;
+                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->convoHasParticipantsInBothSites)).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
@@ -341,22 +368,25 @@ class ChatModule extends DefaultModule
     {
         $content = '';
 
-        $firstMsg = array_values($msgsDisplayed)[0];
-
-        if($firstMsg != null && $totalMsgs > count($msgsDisplayed))
+        $firstMsg = null;
+        if(count($msgsDisplayed) > 0)
         {
-            $content = Main::loadTemplate('chat-load-old-msgs.txt', 
-                array(
-                    '/%convo_id%/' => $this->conversation->getId(),
-                    '/%message_id%/' => $firstMsg->getId()
-                ));  
+            $firstMsg = array_values($msgsDisplayed)[0];
         }
-        else
+
+        if($totalMsgs > 0)
         {
-            $content = Main::loadTemplate('chat-no-old-msgs.txt', 
-                array(
-                    '/%convo_start_date%/' => $firstMsg->getTime('sent_time', false),
-                )); 
+            if($firstMsg != null && $totalMsgs > count($msgsDisplayed))
+            {
+                $content = Main::loadTemplate('chat-load-old-msgs.txt');  
+            }
+            else
+            {
+                $content = Main::loadTemplate('chat-no-old-msgs.txt', 
+                    array(
+                        '/%convo_start_date%/' => $this->conversation->getDateCreated(),
+                    )); 
+            }
         }
 
         return $content;

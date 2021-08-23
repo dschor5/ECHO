@@ -149,6 +149,7 @@
     padding: 10px;
     overflow-y: scroll;
     overflow-x: hidden;
+    padding-top: 80px;
 }
 
 .msg {
@@ -306,6 +307,14 @@
 }
 
 /* Darker chat container */
+
+#msg-nav {
+    display: block;
+    height: 55px;
+    border: 1px solid red;
+    width: 100%;
+}
+
 
 .response {
     border-color: var(--background-dark);

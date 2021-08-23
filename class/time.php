@@ -7,14 +7,16 @@ class DelayTime
     private static $timezone = '';
     private $ts = 0;
 
-    public function __construct(string $datetime = 'now')
+    public function __construct(string $datetime = 'now', bool $mccTz=true)
     {
         global $mission;
+
+        $timezone = $mccTz ? $mission['timezone_mcc'] : $mission['timezone_hab'];
         
         if(self::$epochMet == null)
         {
-            self::$timezone = new DateTimeZone($mission['timezone']);
-            $epoch = new DateTime($mission['time_epoch'], self::$timezone);
+            self::$timezone = new DateTimeZone($timezone);
+            $epoch = new DateTime($mission['time_epoch_hab'], self::$timezone);
             self::$epochMet = $epoch->getTimestamp();
         }
 
@@ -22,18 +24,19 @@ class DelayTime
         $this->ts = $time->getTimestamp();
     }
 
-    public static function getEpoch() : string
+    public static function getEpochUTC() : string
     {
         global $mission;
-        $epoch = new DateTime($mission['time_epoch'], new DateTimeZone($mission['timezone']));
+        $epoch = new DateTime($mission['time_epoch_hab'], new DateTimeZone('UTC'));
         return $epoch->getTimestamp();
     }
 
-    // Return minutes for offset
-    public static function getTimezoneOffset() : int 
+    // Return minutes for offset to UTC
+    public static function getTimezoneOffset(bool $mccTz=true) : int 
     {   
         global $mission;
-        $met = new DateTime('now', new DateTimeZone($mission['timezone']));
+        $timezone = $mccTz ? $mission['timezone_mcc'] : $mission['timezone_hab'];
+        $met = new DateTime('now', new DateTimeZone($timezone));
         return $met->format('Z');
     }
 

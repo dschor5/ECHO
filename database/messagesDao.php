@@ -174,11 +174,11 @@ class MessagesDao extends Dao
         return $numMsgs;
     }
 
-    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $toDate, int $offset=0) : array
+    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=25) : array
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
-        $qOffset  = $this->database->prepareStatement($offset);
+        $qlastMsgId  = '\''.$this->database->prepareStatement($lastMsgId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
         
@@ -192,8 +192,9 @@ class MessagesDao extends Dao
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id='.$qConvoId.' '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
+                        'AND messages.message_id < '.$qlastMsgId.' '.
                     'ORDER BY messages.'.$qRefTime.' DESC '.
-                    'LIMIT '.$qOffset.', 5';
+                    'LIMIT 0, '.$numMsgs;
         
         $messages = array();
 

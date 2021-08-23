@@ -31,41 +31,41 @@
     </div>
 
     <div id="content">
+        <!--<div id="msg-nav">
+            %message-nav%
+        </div>-->
+
         <div id="msg-container">
-
-            <template id="msg-sent-usr">
-                %template-msg-sent-usr%
-            </template>
-
-            <template id="msg-sent-hab">
-                %template-msg-sent-hab%
-            </template>
-
-            <template id="msg-sent-mcc">
-                %template-msg-sent-mcc%
-            </template>
-
-            <template id="msg-file">
-                %template-msg-file%
-            </template>
-
-            <template id="msg-image">
-                %template-msg-img%
-            </template>
-
-            <template id="msg-audio">
-                %template-msg-audio%
-            </template>
-
-            <template id="msg-video">
-                %template-msg-video%
-            </template>
-
-            <div id="msg-nav">%message-nav%</div>
-
             %messages%
-
         </div>
+
+        <template id="msg-sent-usr">
+            %template-msg-sent-usr%
+        </template>
+
+        <template id="msg-sent-hab">
+            %template-msg-sent-hab%
+        </template>
+
+        <template id="msg-sent-mcc">
+            %template-msg-sent-mcc%
+        </template>
+
+        <template id="msg-file">
+            %template-msg-file%
+        </template>
+
+        <template id="msg-image">
+            %template-msg-img%
+        </template>
+
+        <template id="msg-audio">
+            %template-msg-audio%
+        </template>
+
+        <template id="msg-video">
+            %template-msg-video%
+        </template>
     </div>
 
     <div id="new-msg">

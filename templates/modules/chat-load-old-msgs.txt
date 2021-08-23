@@ -1,1 +1,1 @@
-<a onclick="loadPrevMsgs(%convo_id%, %message_id%)" href="javascript:void(0);">Load previous messages</a>
+<a onclick="loadPrevMsgs()" href="javascript:void(0);">Load previous messages</a>
