@@ -236,6 +236,9 @@ class ChatModule extends DefaultModule
     public function compileStream() 
     {
         $messagesDao = MessagesDao::getInstance();
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversations = $conversationsDao->getConversationsByUserId();
+        $conversationIds = array_keys($conversations);
 
         // Block invalid access. 
         if($this->conversation == null)
@@ -264,7 +267,13 @@ class ChatModule extends DefaultModule
                 $lastMsg = time();
             }
 
-
+            $notifications = $messagesDao->getNewMsgInOtherCombo($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
+            if(count($notifications) > 0)
+            {
+                echo 'event: notification'.PHP_EOL;
+                echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
+                $lastMsg = time();
+            }
 
             // Send keep-alive message every 5 seconds of inactivity. 
             if($lastMsg + 5 <= time())
