@@ -2,10 +2,7 @@
 
 class ChatModule extends DefaultModule
 {
-    private $participants;
-    private $convoHasParticipantsInBothSites;
     private $conversationId;
-    private $convoAccessGranted;
     private $conversation;
 
     public function __construct(&$user)
@@ -30,30 +27,23 @@ class ChatModule extends DefaultModule
             $conversationId = intval(Main::getCookieValue('conversation_id'));
         }
         
-        
-
-        $participantsDao = ParticipantsDao::getInstance();
-        $this->participants = $participantsDao->getParticipantIds($conversationId);
-        $this->convoAccessGranted = isset($this->participants[$this->user->getId()]);
-        if(!$this->convoAccessGranted)
-        {
-            $conversationId = 1;
-            $this->participants = $participantsDao->getParticipantIds($conversationId);
-            $this->convoAccessGranted = isset($this->participants[$this->user->getId()]);
-        }
-
-        Main::setSiteCookie(array('conversation_id'=>$conversationId));
-
+        $userConvos = $this->user->getConversationList();
         $conversationsDao = ConversationsDao::getInstance();
-        $this->conversation = $conversationsDao->getById($conversationId);
-        $this->convoHasParticipantsInBothSites = (count(array_unique($this->participants)) == 2);
+        // Caches all conversations for this user. This is used later to create the navication.
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
+        
+        if(isset($conversations[$conversationId]))
+        {
+            $this->conversation = $conversations[$conversationId];
+        }
+        Main::setSiteCookie(array('conversation_id'=>$conversationId));
     }
 
     public function compileJson(string $subaction): array
     {
         $response = array('success' => false);
 
-        if($this->convoAccessGranted)
+        if($this->conversation != null)
         {
             $response['conversation_id'] = $this->conversation->getId();
 
@@ -96,7 +86,7 @@ class ChatModule extends DefaultModule
 
             foreach($messages as $msg)
             {
-                $response['messages'][] = $msg->compileArray($this->user, $this->convoHasParticipantsInBothSites);
+                $response['messages'][] = $msg->compileArray($this->user, $this->conersation->hasParticipantsOnBothSites());
             }
         }
 
@@ -248,7 +238,7 @@ class ChatModule extends DefaultModule
         $messagesDao = MessagesDao::getInstance();
 
         // Block invalid access. 
-        if(!$this->convoAccessGranted)
+        if($this->conversation == null)
         {
             echo "event: logout".PHP_EOL;
             echo "data: session expired".PHP_EOL.PHP_EOL;
@@ -269,7 +259,7 @@ class ChatModule extends DefaultModule
                 foreach($messages as $msgId => $msg)
                 {
                     echo "event: msg".PHP_EOL;
-                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->convoHasParticipantsInBothSites)).PHP_EOL.PHP_EOL;
+                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conersation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
@@ -344,7 +334,7 @@ class ChatModule extends DefaultModule
         $messagesStr = '';
         foreach($messages as $message)
         {
-            $messagesStr .= $message->compileHtml($this->user, $this->convoHasParticipantsInBothSites);
+            $messagesStr .= $message->compileHtml($this->user, $this->conersation->hasParticipantsOnBothSites());
         }
 
         return Main::loadTemplate('chat.txt', 

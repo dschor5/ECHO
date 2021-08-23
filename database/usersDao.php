@@ -40,7 +40,11 @@ class UsersDao extends Dao
 
         if($user == null)
         {
-            if (($result = $this->select('*','user_id=\''.$this->database->prepareStatement($id).'\'')) !== false)
+            $queryStr = 'SELECT users.*, GROUP_CONCAT(participants.conversation_id) AS conversations FROM users '. 
+                        'JOIN participants ON users.user_id=participants.user_id '. 
+                        'WHERE users.user_id=\''.$this->database->prepareStatement($id).'\'';
+
+            if (($result = $this->database->query($queryStr)) !== false)
             {
                 if ($result->num_rows > 0)
                 {
@@ -69,7 +73,11 @@ class UsersDao extends Dao
 
         if($user === false)
         {
-            if (($result = $this->select('*','username=\''.$this->database->prepareStatement($username).'\'')) !== false)
+            $queryStr = 'SELECT users.*, GROUP_CONCAT(participants.conversation_id) AS conversations FROM users '. 
+            'JOIN participants ON users.user_id=participants.user_id '. 
+            'WHERE users.username=\''.$this->database->prepareStatement($username).'\'';
+
+            if (($result = $this->database->query($queryStr)) !== false)
             {
                 if ($result->num_rows > 0)
                 {

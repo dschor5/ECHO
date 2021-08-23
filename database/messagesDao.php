@@ -235,7 +235,39 @@ class MessagesDao extends Dao
         return array_reverse($messages, true);
     }
 
-    
+    public function getNewMsgInOtherCombo(array $conversations, int $userId, bool $isCrew, string $toDate)
+    {
+        $result = array();
+
+        if(count($conversations) > 0)
+        {
+            $qConvos = implode(',',$conversations);
+            $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+            $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+            $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
+
+            $queryStr = 'SELECT messages.conversation_id, COUNT(*) AS num_new FROM messages '. 
+                        'JOIN msg_status ON messages.message_id=msg_status.message_id '. 
+                        'WHERE messages.conversation_id IN ('.$qConvos.') '. 
+                        'AND msg_status.is_read=0 '.
+                        'AND msg_status.user_id='.$qUserId.' '. 
+                        'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
+                        'GROUP BY messages.conversation_id';
+            
+            if(($result = $this->database->query($queryStr)) !== false)
+            {
+                if($result->num_rows > 0)
+                {
+                    while(($rowData=$result->fetch_assoc()) != null)
+                    {
+                        $results[$rowData['conversation_id']] = $rowData['num_new'];
+                    }
+                }
+            }       
+        }
+
+        return $result;
+    }
 
 }
 

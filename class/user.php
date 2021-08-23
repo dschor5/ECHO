@@ -9,6 +9,14 @@ class User
     public function __construct($data)
     {
         $this->data = $data;
+        if(isset($data['conversations']))
+        {
+            $this->data['conversations'] = explode(',', $this->data['conversations']);
+        }
+        else
+        {
+            $this->data['conversations'] = array();
+        }
     }
 
     public function getId(): int
@@ -78,6 +86,10 @@ class User
         return $valid;
     }
 
+    public function getConversationList()
+    {
+        return $this->data['conversations'];
+    }
 }
 
 ?>

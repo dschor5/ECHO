@@ -27,9 +27,9 @@ class Conversation
     public function getParticipants(int $excludeUserId = -1) : array
     {
         $convos = array();
-        $ids = explode(',', $this->data['conversation_participants']);
-        $alias = explode(',', $this->data['conversation_alias']);
-        $usernames = explode(',', $this->data['conversation_usernames']);
+        $ids = explode(',', $this->data['participant_ids']);
+        $alias = explode(',', $this->data['participant_aliases']);
+        $usernames = explode(',', $this->data['participants_usernames']);
 
         for($i = 0; $i < count($ids); $i++)
         {
@@ -47,6 +47,15 @@ class Conversation
         }
 
         return $convos;
+    }
+
+    public function hasParticipantsOnBothSites() : boolean
+    {
+        if(isset($this->data['participants_both_sites']))
+        {
+            return $this->data['participants_both_sites'] == 2;
+        }
+        return true;
     }
 
     public function getDateCreated()
