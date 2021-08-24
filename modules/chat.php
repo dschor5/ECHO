@@ -252,6 +252,7 @@ class ChatModule extends DefaultModule
         }
 
         $lastMsg = time();
+        $prevNotifications = array();
 
         // Infinite loop processing data. 
         while(true)
@@ -274,9 +275,17 @@ class ChatModule extends DefaultModule
             $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
             if(count($notifications) > 0)
             {
-                echo "event: notification".PHP_EOL;
-                echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
-                $lastMsg = time();
+                $newNotifications = array_diff_assoc($notifications, $prevNotifications);
+                foreach($newNotifications as $convoId=>$numMsgs)
+                {
+                    echo "event: notification".PHP_EOL;
+                    echo 'data: '.json_encode(array(
+                        'conversation_id' => $convoId, 
+                        'num_messages'    => $numMsgs
+                    )).PHP_EOL.PHP_EOL;
+                    $lastMsg = time();
+                }
+                $prevNotifications = $notifications;
             }
             
 

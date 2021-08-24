@@ -93,6 +93,14 @@ evtSource.addEventListener("msg", function(event) {
     }
 });
 
+evtSource.addEventListener("notification", function(event) {
+    const data = JSON.parse(event.data);
+    var container = document.querySelector('#room-new-' + data.conversation_id);
+    if(container != null) {
+        container.textContent = '(' + data.num_messages + ')';
+    }
+});
+
 function compileMsg(data, before){
     var template = document.querySelector('#msg-sent-'.concat(data.source));
     if('content' in document.createElement('template'))
