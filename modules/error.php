@@ -14,7 +14,7 @@ class ErrorModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
-        return '';
+        return 'ERROR!';
     }
 }
 

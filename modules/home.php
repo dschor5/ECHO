@@ -1,7 +1,5 @@
 <?php
 
-require_once('modules/default.php');
-
 class HomeModule extends DefaultModule
 {
     public function __construct(&$user)

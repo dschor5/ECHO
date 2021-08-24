@@ -1,7 +1,5 @@
 <?php
 
-require_once('database/database.php');
-
 abstract class DefaultModule implements Module
 {
     protected $db;        // reference to database

@@ -101,14 +101,15 @@ class Main
     public function compile() 
     {
         global $config;
+        $validModules = $this->getValidModulesForUser($this->user);
 
         // Select current module. 
         $moduleName = 'home';
-        if(isset($_POST['action']) && in_array($_POST['action'], $this->getValidModulesForUser($this->user)))
+        if(isset($_POST['action']) && in_array($_POST['action'], $validModules))
         {
             $moduleName = $_POST['action'];
         }
-        else if(isset($_GET['action']) && in_array($_GET['action'], $this->getValidModulesForUser($this->user)))
+        else if(isset($_GET['action']) && in_array($_GET['action'], $validModules))
         {
             $moduleName = $_GET['action'];
         }

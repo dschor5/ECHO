@@ -1,8 +1,5 @@
 <?php
 
-require_once('index.php');
-require_once('modules/default.php');
-
 class FileModule implements Module
 {
     private $user;

@@ -341,7 +341,7 @@ class ChatModule extends DefaultModule
         if($this->user->isAdmin())
         {
             $this->addHeaderMenu('User Settings', 'users');
-            $this->addHeaderMenu('Mission Settings', 'mission');
+            $this->addHeaderMenu('Mission Settings', 'settings');
         }
 
         

@@ -1,8 +1,5 @@
 <?php
 
-require_once('index.php');
-require_once('modules/default.php');
-
 class UsersModule extends DefaultModule
 {
     public function __construct(&$user)
@@ -63,7 +60,7 @@ class UsersModule extends DefaultModule
         $this->addJavascript('users');
 
         $this->addHeaderMenu('Chat', 'chat');
-        $this->addHeaderMenu('Mission Settings', 'mission');
+        $this->addHeaderMenu('Mission Settings', 'settings');
 
         return $this->listUsers();
     }
