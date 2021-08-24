@@ -25,7 +25,7 @@ class User
 
         if(array_key_exists($name, $this->data)) 
         {
-            if(str_starts_with($this->data[$name], 'is_')
+            if(str_starts_with($this->data[$name], 'is_'))
             {
                 $result = ($this->data[$name] == 1);
             }
