@@ -42,7 +42,7 @@ class User
     {
         global $mission;
         $location = $mission['home_planet'];
-        if($this->isCrew())
+        if($this->is_crew)
         {
             $location = $mission['away_planet'];
         }
