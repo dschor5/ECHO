@@ -60,7 +60,7 @@ class HomeModule extends DefaultModule
                     'last_login' => date('Y-m-d H:i:s', time())
                 );
         
-                if ($usersDao->update($newData, $this->user->getId()) !== false)
+                if ($usersDao->update($newData, $this->user->user_id) !== false)
                 {
                     Main::setSiteCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
                     $response['login'] = true;

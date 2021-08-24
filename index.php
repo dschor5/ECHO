@@ -82,7 +82,7 @@ class Main
 
         if($this->user != null) 
         {
-            if($this->user->isAdmin())
+            if($this->user->is_admin)
             {
                 $validModules = $config['modules_admin'];
             }

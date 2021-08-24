@@ -48,7 +48,7 @@ class UsersModule extends DefaultModule
     {
         $this->addCss('common');
         $this->addCss('settings');
-        if($this->user->isCrew())
+        if($this->user->is_crew)
         {
             $this->addCss('chat-hab');
         }
@@ -74,7 +74,7 @@ class UsersModule extends DefaultModule
 
         $user_id = $_POST['user_id'] ?? 0;
 
-        if($user_id > 0 && $user_id != $this->user->getId())
+        if($user_id > 0 && $user_id != $this->user->user_id)
         {
             if($usersDao->update(array('password_reset'=>1), $user_id) !== true)
             {
@@ -100,7 +100,7 @@ class UsersModule extends DefaultModule
 
         $userId = $_POST['user_id'] ?? 0;
 
-        if($userId > 0 && $userId != $this->user->getId())
+        if($userId > 0 && $userId != $this->user->user_id)
         {
             // Delete associated images. 
             if($usersDao->deleteUser($userId) !== true)
@@ -233,24 +233,24 @@ class UsersModule extends DefaultModule
                 '/%text%/'=>'Edit'
             ));
 
-            if($this->user->getId() != $id)
+            if($this->user->user_id != $id)
             {
                 $tools[] = Main::loadTemplate('link-js.txt', array(
-                    '/%onclick%/'=>'confirmAction(\'deleteuser\', '.$id.', \''.$user->getUsername().'\')', 
+                    '/%onclick%/'=>'confirmAction(\'deleteuser\', '.$id.', \''.$user->username.'\')', 
                     '/%text%/'=>'Delete'
                 ));
                 $tools[] = Main::loadTemplate('link-js.txt', array(
-                    '/%onclick%/'=>'confirmAction(\'resetuser\', '.$id.', \''.$user->getUsername().'\')', 
+                    '/%onclick%/'=>'confirmAction(\'resetuser\', '.$id.', \''.$user->username.'\')', 
                     '/%text%/'=>'Reset Password'
                 ));
             }
 
             $list->addRow(array(
                 'id' => $id,
-                'username' => $user->getUsername(),
-                'alias' => $user->getAlias(),
-                'is_crew' => $user->isCrew() ? $mission['role_hab'] : $mission['role_mcc'],
-                'is_admin' => $user->isAdmin() ? 'Yes' : 'No',
+                'username' => $user->username,
+                'alias' => $user->alias,
+                'is_crew' => $user->is_crew ? $mission['role_hab'] : $mission['role_mcc'],
+                'is_admin' => $user->is_admin ? 'Yes' : 'No',
                 'tools' => join(', ', $tools),
             ));
         }

@@ -83,7 +83,7 @@ abstract class DefaultModule implements Module
         if($this->user != null)
         {
             $userLocation = $this->user->getLocation();
-            $username = $this->user->getAlias().' ('.$this->user->getUsername().')';
+            $username = $this->user->alias.' ('.$this->user->username.')';
         }
 
         return Main::loadTemplate('header.txt', array(
@@ -111,7 +111,6 @@ abstract class DefaultModule implements Module
         
         // Only allow requests from this server. 
         header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
-        //header('Access-Control-Allow-Origin: *');
 
         if(in_array($subaction, $this->subJsonRequests))
         {
@@ -161,8 +160,11 @@ abstract class DefaultModule implements Module
         }
     }
 
-    public abstract function compileJson(string $subaction): array;
+    
     public abstract function compileHtml(string $subaction): string;
+    
+    public abstract function compileJson(string $subaction) : array;
+    
     public function compileStream()
     {
         return;

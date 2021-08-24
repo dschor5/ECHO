@@ -32,7 +32,7 @@ class ChatModule extends DefaultModule
         
         $conversationsDao = ConversationsDao::getInstance();
         // Caches all conversations for this user. This is used later to create the navication.
-        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
         
         if(isset($conversations[$conversationId]))
         {
@@ -81,8 +81,8 @@ class ChatModule extends DefaultModule
         {
             $messagesDao = MessagesDao::getInstance();
             $messages = $messagesDao->getMessagesReceived(
-                $this->conversation->getId(), $this->user->getId(), 
-                $this->user->isCrew(), $time->getTime(), intval($msgId), 10);
+                $this->conversation->getId(), $this->user->user_id, 
+                $this->user->is_crew, $time->getTime(), intval($msgId), 10);
             
             $response['success'] = true;
             $response['messages'] = array();
@@ -124,7 +124,7 @@ class ChatModule extends DefaultModule
                 $fileExt = 'mkv';
                 $fileMime = 'audio/webm';
             }
-            $fileName = $this->user->getUsername().'_'.date('YmdHis').'.'.$fileExt;
+            $fileName = $this->user->username.'_'.date('YmdHis').'.'.$fileExt;
         }
         
         $fileSize  = intval($_FILES['data']['size'] ?? 0);
@@ -165,13 +165,13 @@ class ChatModule extends DefaultModule
         else
         {
             $msgData = array(
-                'user_id' => $this->user->getId(),
+                'user_id' => $this->user->user_id,
                 'conversation_id' => $this->conversation->getId(),
                 'text' => '',
                 'type' => Message::FILE,
                 'sent_time' => $currTime->getTime(),
-                'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew(), false),
-                'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew(), false),
+                'recv_time_hab' => $currTime->getTime(true, !$this->user->is_crew, false),
+                'recv_time_mcc' => $currTime->getTime(true, $this->user->is_crew, false),
             );
 
             $fileData = array(
@@ -214,13 +214,13 @@ class ChatModule extends DefaultModule
         if(strlen($msgText) > 0)
         {
             $msgData = array(
-                'user_id' => $this->user->getId(),
+                'user_id' => $this->user->user_id,
                 'conversation_id' => $this->conversation->getId(),
                 'text' => $msgText,
                 'type' => Message::TEXT,
                 'sent_time' => $currTime->getTime(),
-                'recv_time_hab' => $currTime->getTime(true, !$this->user->isCrew(), false),
-                'recv_time_mcc' => $currTime->getTime(true, $this->user->isCrew(), false),
+                'recv_time_hab' => $currTime->getTime(true, !$this->user->is_crew, false),
+                'recv_time_mcc' => $currTime->getTime(true, $this->user->is_crew, false),
             );
             
             if(($messageId = $messagesDao->sendMessage($msgData)) !== false)
@@ -240,7 +240,7 @@ class ChatModule extends DefaultModule
     {
         $messagesDao = MessagesDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
         $conversationIds = array_keys($conversations);
 
         // Block invalid access. 
@@ -260,7 +260,7 @@ class ChatModule extends DefaultModule
             $time = new DelayTime();
             $timeStr = $time->getTime();
             
-            $messages = $messagesDao->getNewMessages($this->conversation->getId(), $this->user->getId(), $this->user->isCrew(), $timeStr);
+            $messages = $messagesDao->getNewMessages($this->conversation->getId(), $this->user->user_id, $this->user->is_crew, $timeStr);
             if(count($messages) > 0)
             {
                 foreach($messages as $msgId => $msg)
@@ -272,7 +272,7 @@ class ChatModule extends DefaultModule
             }
 
             
-            $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
+            $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->user_id, $this->user->is_crew, $timeStr);
             if(count($notifications) > 0)
             {
                 $newNotifications = array_diff_assoc($notifications, $prevNotifications);
@@ -325,7 +325,7 @@ class ChatModule extends DefaultModule
 
         $this->addCss('common');
         $this->addCss('chat');
-        if($this->user->isCrew())
+        if($this->user->is_crew)
         {
             $this->addCss('chat-hab');
         }
@@ -338,7 +338,7 @@ class ChatModule extends DefaultModule
         $this->addJavascript('media');
         $this->addJavascript('time');
         
-        if($this->user->isAdmin())
+        if($this->user->is_admin)
         {
             $this->addHeaderMenu('User Settings', 'users');
             $this->addHeaderMenu('Mission Settings', 'settings');
@@ -351,12 +351,12 @@ class ChatModule extends DefaultModule
 
         $messages = $messagesDao->getMessagesReceived(
             $this->conversation->getId(), 
-            $this->user->getId(), 
-            $this->user->isCrew(), 
+            $this->user->user_id, 
+            $this->user->is_crew, 
             $time->getTime());
-        $participantsDao->updateLastRead($this->conversation->getId(), $this->user->getId(), $time->getTime());
-        //$messagesDao->getNewMessages($this->conversation->getId(), $this->user->getId(), $this->user->isCrew(), $time->getTime());
-        $totalMsgs = $messagesDao->getNumMsgInCombo($this->conversation->getId(), $this->user->isCrew(), $time->getTime());
+        $participantsDao->updateLastRead($this->conversation->getId(), $this->user->user_id, $time->getTime());
+        
+        $totalMsgs = $messagesDao->getNumMsgInCombo($this->conversation->getId(), $this->user->is_crew, $time->getTime());
 
         $messagesStr = '';
         foreach($messages as $message)
@@ -365,8 +365,8 @@ class ChatModule extends DefaultModule
         }
 
         return Main::loadTemplate('chat.txt', 
-            array('/%username%/'=>$this->user->getUsername(),
-                  '/%delay_src%/' => $this->user->isCrew() ? $mission['hab_name'] : $mission['mcc_name'],
+            array('/%username%/'=>$this->user->username,
+                  '/%delay_src%/' => $this->user->is_crew ? $mission['hab_name'] : $mission['mcc_name'],
                   '/%time_mcc%/' => $time->getTime(),
                   '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
@@ -414,12 +414,12 @@ class ChatModule extends DefaultModule
     private function getConversationList(): string 
     {
         $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
+        $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
         
         $content = '';
         foreach($conversations as $convo)
         {
-            $participants = $convo->getParticipants($this->user->getId());
+            $participants = $convo->getParticipants($this->user->user_id);
             if(count($participants) > 1 || $convo->getId() == 1)
             {
                 $name = $convo->getName();

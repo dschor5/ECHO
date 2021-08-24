@@ -19,23 +19,23 @@ class User
         }
     }
 
-    public function getId(): int
+    public function __get($name) : mixed
     {
-        return $this->data['user_id'];
-    }
+        $result = null;
 
-    public function getUsername(): string
-    {
-        return $this->data['username'];
-    }
-
-    public function getAlias(): string
-    {
-        if(strlen($this->data['alias']) == 0)
+        if(array_key_exists($name, $this->data)) 
         {
-            return $this->getUsername();
+            if(str_starts_with($this->data[$name], 'is_')
+            {
+                $result = ($this->data[$name] == 1);
+            }
+            else
+            {
+                $result = $this->data[$name];
+            }
         }
-        return $this->data['alias'];
+
+        return $result;
     }
 
     public function getLocation(): string
@@ -47,21 +47,6 @@ class User
             $location = $mission['away_planet'];
         }
         return $location;
-    }
-
-    public function isAdmin():bool
-    {
-        return ($this->data['is_admin'] == 1);
-    }
-
-    public function isCrew(): bool
-    {
-        return ($this->data['is_crew'] == 1);
-    }
-
-    public function isResetPasswordRequired() : bool
-    {
-        return ($this->data['password_reset'] == 1);
     }
 
     public function isValidPassword(string $password): bool
@@ -84,11 +69,6 @@ class User
         }
 
         return $valid;
-    }
-
-    public function getConversationList()
-    {
-        return $this->data['conversations'];
     }
 }
 

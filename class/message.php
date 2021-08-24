@@ -77,7 +77,7 @@ class Message
         }
 
         // If authored by this user
-        if($userPerspective->getId() == $this->data['user_id'])
+        if($userPerspective->user_id == $this->data['user_id'])
         {
             $msgData['source'] = 'usr';
         }
@@ -158,12 +158,12 @@ class Message
             '/%sent-time%/'        => $this->getTime('sent_time'),
             '/%recv-time-mcc%/'    => $this->getTime('recv_time_mcc'),
             '/%recv-time-hab%/'    => $this->getTime('recv_time_hab'),
-            '/%recv-time%/'        => $this->getRecvTime($userPerspective->isCrew(), $remoteStatus),
+            '/%recv-time%/'        => $this->getRecvTime($userPerspective->is_crew, $remoteStatus),
             '/%delivered-status%/' => $this->getMsgStatus(),
         );
         
         // If authored by this user
-        if($userPerspective->getId() == $this->data['user_id'])
+        if($userPerspective->user_id == $this->data['user_id'])
         {
             $template = 'chat-msg-sent-usr.txt';
         }
