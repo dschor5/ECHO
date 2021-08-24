@@ -182,6 +182,12 @@ class Main
         );*/
     }
 
+    public static function deleteCookie()
+    {
+        global $config;
+        setcookie($config['cookie_name'], null, -1, '/');
+    }
+
     public static function getCookieValue(string $key) 
     {
         return self::$cookie[$key] ?? null;

@@ -2,8 +2,7 @@
 
 class ChatModule extends DefaultModule
 {
-    private $conversationId;
-    private $conversation;
+    private $conversation = null;
 
     public function __construct(&$user)
     {
@@ -26,8 +25,11 @@ class ChatModule extends DefaultModule
         {
             $conversationId = intval(Main::getCookieValue('conversation_id'));
         }
+        else
+        {
+            $conversationId = 1;
+        }
         
-        $userConvos = $this->user->getConversationList();
         $conversationsDao = ConversationsDao::getInstance();
         // Caches all conversations for this user. This is used later to create the navication.
         $conversations = $conversationsDao->getConversationsByUserId($this->user->getId());
@@ -87,7 +89,7 @@ class ChatModule extends DefaultModule
 
             foreach($messages as $msg)
             {
-                $response['messages'][] = $msg->compileArray($this->user, $this->conersation->hasParticipantsOnBothSites());
+                $response['messages'][] = $msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
             }
         }
 
@@ -263,11 +265,12 @@ class ChatModule extends DefaultModule
                 foreach($messages as $msgId => $msg)
                 {
                     echo "event: msg".PHP_EOL;
-                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conersation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
+                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
 
+            
             $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->getId(), $this->user->isCrew(), $timeStr);
             if(count($notifications) > 0)
             {
@@ -275,11 +278,12 @@ class ChatModule extends DefaultModule
                 echo 'data: '.json_encode($notifications).PHP_EOL.PHP_EOL;
                 $lastMsg = time();
             }
+            
 
             // Send keep-alive message every 5 seconds of inactivity. 
             if($lastMsg + 1 <= time())
             {
-                echo ":\n";
+                echo ":".PHP_EOL.PHP_EOL;
                 $lastMsg = time();
             }
 
@@ -336,7 +340,11 @@ class ChatModule extends DefaultModule
         $messagesDao = MessagesDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
 
-        $messages = $messagesDao->getMessagesReceived($this->conversation->getId(), $this->user->getId(), $this->user->isCrew(), $time->getTime());
+        $messages = $messagesDao->getMessagesReceived(
+            $this->conversation->getId(), 
+            $this->user->getId(), 
+            $this->user->isCrew(), 
+            $time->getTime());
         $participantsDao->updateLastRead($this->conversation->getId(), $this->user->getId(), $time->getTime());
         //$messagesDao->getNewMessages($this->conversation->getId(), $this->user->getId(), $this->user->isCrew(), $time->getTime());
         $totalMsgs = $messagesDao->getNumMsgInCombo($this->conversation->getId(), $this->user->isCrew(), $time->getTime());

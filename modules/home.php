@@ -78,7 +78,7 @@ class HomeModule extends DefaultModule
         global $server;
 
         $this->user = null;
-        Main::setSiteCookie(array('sessionId'=>null,'username'=>null));
+        Main::deleteCookie();
         header('Location: '.$server['http'].$server['site_url']);
         return 'Logging out, please wait while you are redirected to the homepage.';
     }    
