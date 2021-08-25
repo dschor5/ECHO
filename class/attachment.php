@@ -8,6 +8,24 @@ class FileUpload
     public function __construct($data)
     {
         $this->data = $data; // requires union with corresponding msg_status
+        $this->data['size'] = $this->exists() ? filesize($this->getServerPath()) : 0;
+    }
+
+    public function __get(string $name) : mixed
+    {
+        $result = null;
+
+        if(array_key_exists($name, $this->data)) 
+        {
+            $result = $this->data[$name];
+        }
+
+        return $result;
+    }
+    
+    public function exists()
+    {
+        return file_exists($this->getServerPath());
     }
 
     public static function generateFilename()
@@ -23,11 +41,6 @@ class FileUpload
         return $filename;
     }
 
-    public function getOriginalName()
-    {
-        return $this->data['original_name'];
-    }
-
     public function getServerPath()
     {
         global $server;
@@ -35,24 +48,9 @@ class FileUpload
         return $server['host_address'].$config['uploads_dir'].'/'.$this->data['server_name']; 
     }
 
-    public function exists() : bool
-    {
-        return file_exists($this->getServerPath());
-    }
-
-    public function getSize() : int
-    {
-        $filesize = 0;
-        if($this->exists())
-        {
-            $filesize = filesize($this->getServerPath());
-        }
-        return $filesize;
-    }
-
     public function getHumanReadableSize() : string 
     {
-        $bytes = $this->getSize();
+        $bytes = $this->size;
         $human = '0 B';
         if($bytes > 0)
         {
@@ -63,15 +61,10 @@ class FileUpload
         return $human;
     }
 
-    public function getMimeType()
-    {
-        return $this->data['mime_type'];
-    }
-
     // Extracts first part of mimetype
     public function getTemplateType()
     {
-        $fileType = explode('/', $this->data['mime_type'], 2)[0];
+        $fileType = explode('/', $this->mime_type, 2)[0];
         if(!in_array($fileType, array('image', 'audio', 'video')))
         {
             $fileType = 'file';

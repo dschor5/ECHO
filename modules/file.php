@@ -37,7 +37,7 @@ class FileModule implements Module
         if($this->user != null)
         {
             $messageFileDao = MessageFileDao::getInstance();
-            $file = $messageFileDao->getFile($fileId, $this->user->getId());
+            $file = $messageFileDao->getFile($fileId, $this->user->user_id);
         }
 
         // Also catches the case where the user does not have 
@@ -50,9 +50,9 @@ class FileModule implements Module
         }
 
         $filepath = $file->getServerPath();
-        $mimeType = $file->getMimeType();
-        $origName = $file->getOriginalName();
-        $filesize = $file->getSize();
+        $mimeType = $file->mime_type;
+        $origName = $file->original_name;
+        $filesize = $file->size;
         $templateType = $file->getTemplateType();
 
         if(!isset($_GET['download']) && in_array($templateType, array('image', 'video', 'audio')))
