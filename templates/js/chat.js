@@ -274,7 +274,7 @@ var hasMoreMessages = true;
 
 $(document).ready(function() {
     
-
+    var scrollContainer = document.querySelector('#content');
     // Setup an event listener to poll for older messages.
     scrollContainer.addEventListener('scroll', function(event) {
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
