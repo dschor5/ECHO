@@ -94,16 +94,16 @@
 
         <template id="msg-audio">
             <audio class="msg-audio" controls preload="metadata">
-                <source class="file-location" type="%mime-type%">
-                Your browser does not support the audio format %mime-type%.
+                <source class="file-location">
+                Your browser does not support the audio format.
             </audio><br>
             Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
         </template>
 
         <template id="msg-video">
             <video class="msg-video" controls preload="metadata">
-                <source class="file-location" type="%mime-type%">
-                Your browser does not support the video format %mime-type%.
+                <source class="file-location">
+                Your browser does not support the video format.
             </video><br>
             Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
         </template>
