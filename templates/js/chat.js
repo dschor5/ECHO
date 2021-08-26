@@ -316,8 +316,6 @@ function loadPrevMsgs() {
                     hasMoreMessages = false;
                     console.log(resp.error);
                 }
-                oldMsgQueryInProgress = false;
-
                 if(child == null) {
                     // On-load scroll to the bottom to the newest messages
                     scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
@@ -328,6 +326,8 @@ function loadPrevMsgs() {
                         scrollContainer.style.padding = "0px";
                     }
                 }
+
+                oldMsgQueryInProgress = false;               
             },
             error: function(jqHR, textStatus, errorThrown) {
                 //location.href = BASE_URL + '/chat';
