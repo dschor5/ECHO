@@ -73,7 +73,13 @@ class ChatModule extends DefaultModule
 
     private function getPrevMessages()
     {
-        $msgId = $_POST['message_id'] ?? 0;
+        $msgId = PHP_INT_MAX;
+        $numMsgs = 20;
+        if(isset($_POST['message_id']) && intval($_POST['message_id']) > 0 && intval($_POST['message_id']) < PHP_INT_MAX) 
+        {
+            $msgId = intval($_POST['message_id']);
+            $numMsgs = 5;
+        }
         $time = new DelayTime();
         $response = array();
 
@@ -82,7 +88,7 @@ class ChatModule extends DefaultModule
             $messagesDao = MessagesDao::getInstance();
             $messages = $messagesDao->getMessagesReceived(
                 $this->conversation->getId(), $this->user->user_id, 
-                $this->user->is_crew, $time->getTime(), intval($msgId), 10);
+                $this->user->is_crew, $time->getTime(), $msgId, $numMsgs);
             
             $response['success'] = true;
             $response['messages'] = array();
@@ -345,7 +351,7 @@ class ChatModule extends DefaultModule
         }
 
         
-        
+        /*
         $messagesDao = MessagesDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
 
@@ -363,6 +369,7 @@ class ChatModule extends DefaultModule
         {
             $messagesStr .= $message->compileHtml($this->user, $this->conversation->hasParticipantsOnBothSites());
         }
+        */
 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->username,
@@ -372,7 +379,7 @@ class ChatModule extends DefaultModule
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversation->getId(),
                   '/%message-nav%/' => $this->getConvoNav($messages, $totalMsgs),
-                  '/%messages%/' => $messagesStr,
+                  '/%messages%/' => '',//$messagesStr,
                   '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
                   '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
                   '/%template-msg-sent-mcc%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),

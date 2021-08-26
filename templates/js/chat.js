@@ -285,13 +285,15 @@ $(document).ready(function() {
     });
 });
 
+$(document).ready(loadPrevMsgs());
+
 function loadPrevMsgs() {
     var scrollContainer = document.querySelector('#content');
     var target = document.querySelector('#msg-container');
     var child = target.querySelector('.msg');
+    var msgId = (child == null) ? -1 : child.getAttribute('id').substring(7);
 
-    if(child != null && hasMoreMessages) {
-        var msgId = child.getAttribute('id').substring(7);
+    if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
         $.ajax({
             url:  BASE_URL,
@@ -300,7 +302,7 @@ function loadPrevMsgs() {
                 action: 'chat',
                 subaction: 'prevMsgs',
                 conversation_id: $('#conversation_id').val(),
-                message_id: msgId
+                message_id: msgId,
             },
             dataType: 'json',
             success: function(resp) {
