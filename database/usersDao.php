@@ -64,7 +64,7 @@ class UsersDao extends Dao
 
         foreach(self::$cache as $cachedUser)
         {
-            if(strcmp($cachedUser->getUsername(), $username) === 0)
+            if(strcmp($cachedUser->username, $username) === 0)
             {
                 $user = $cachedUser;
                 break;
@@ -73,9 +73,11 @@ class UsersDao extends Dao
 
         if($user === false)
         {
+            $qUsername = '\''.$this->database->prepareStatement($username).'\'';
+
             $queryStr = 'SELECT users.*, GROUP_CONCAT(participants.conversation_id) AS conversations FROM users '. 
-            'JOIN participants ON users.user_id=participants.user_id '. 
-            'WHERE users.username=\''.$this->database->prepareStatement($username).'\'';
+                'JOIN participants ON users.user_id=participants.user_id '. 
+                'WHERE users.username='.$qUsername;
 
             if (($result = $this->database->query($queryStr)) !== false)
             {
