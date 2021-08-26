@@ -142,7 +142,7 @@
 #content {
     position: absolute;
     top: 40px;
-    left: calc(253px + 22px);
+    left: calc(250px + 22px);
     right: 22px;
     bottom: 100px;
     background: var(--content-back);
