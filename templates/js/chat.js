@@ -117,6 +117,7 @@ function compileMsg(data, before){
             var contentClone = template.content.cloneNode(true);
             try {
             contentClone.querySelector(".file-location").src = BASE_URL + "/file/" + data.message_id;
+            contentClone.querySelector(".file-location").type = data.mime_type;
             }
             catch(e) {}
             contentClone.querySelector("a").href = BASE_URL + "/file/" + data.message_id;

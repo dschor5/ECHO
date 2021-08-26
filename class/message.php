@@ -74,6 +74,7 @@ class Message
             $msgData['filename'] = $this->file->original_name;
             $msgData['filesize'] = $this->file->getHumanReadableSize();
             $msgData['type'] = $this->file->getTemplateType();
+            $msgData['mime_type'] = $this->file->mime_type;
         }
 
         // If authored by this user
