@@ -378,7 +378,7 @@ class ChatModule extends DefaultModule
                   '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversation->getId(),
-                  '/%message-nav%/' => $this->getConvoNav($messages, $totalMsgs),
+                  '/%message-nav%/' => '',//$this->getConvoNav($messages, $totalMsgs),
                   '/%messages%/' => '',//$messagesStr,
                   '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
                   '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
