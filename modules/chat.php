@@ -356,14 +356,7 @@ class ChatModule extends DefaultModule
                   '/%time_mcc%/' => $time->getTime(),
                   '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
-                  '/%convo_id%/' => $this->conversation->getId(),
-                  '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
-                  '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
-                  '/%template-msg-sent-mcc%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
-                  '/%template-msg-file%/' => Message::compileEmptyMsgTemplate('chat-msg-file.txt'),
-                  '/%template-msg-img%/' => Message::compileEmptyMsgTemplate('chat-msg-image.txt'),
-                  '/%template-msg-audio%/' => Message::compileEmptyMsgTemplate('chat-msg-audio.txt'),
-                  '/%template-msg-video%/' => Message::compileEmptyMsgTemplate('chat-msg-video.txt'),
+                  '/%convo_id%/' => $this->conversation->getId()
                 ));
     }
 
