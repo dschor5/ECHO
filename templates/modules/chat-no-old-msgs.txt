@@ -1,1 +1,0 @@
-Start of conversation <span id="convo-start-date">%convo_start_date%</span>.

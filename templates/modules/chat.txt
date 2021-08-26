@@ -41,70 +41,71 @@
         </template>
 
         <template id="msg-sent-usr">
-            <div id="msg-id-%message-id%" class="msg response">
-                <div class="msg-from">%author%</div>
-                <div class="msg-content">%message%</div>
+            <div class="msg response">
+                <div class="msg-from"></div>
+                <div class="msg-content"></div>
                 <div class="msg-status">
-                    <div class="msg-sent-time">SENT: %sent-time%</div>
-                    <div class="msg-recv-time-hab">RECV(HAB): %recv-time-hab%</div>
-                    <div class="msg-recv-time-mcc">RECV(MCC): %recv-time-mcc%</div>
-                    <div class="msg-delivery-status">STATUS: %delivered-status%</div>
-                    <time curr="%curr-time%" recv="%recv-time-hab%" status="%delivered-status%"/>
+                    <div class="msg-sent-time"></div>
+                    <div class="msg-recv-time-hab"></div>
+                    <div class="msg-recv-time-mcc"></div>
+                    <div class="msg-delivery-status"></div>
+                    <time/>
                 </div>
             </div>
         </template>
 
         <template id="msg-sent-hab">
-            <div id="msg-id-%message-id%" class="msg">
+            <div class="msg">
                 <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class="msg-avatar"/>
-                <div class="msg-from">%author%</div>
-                <div class="msg-content">%message%</div>
+                <div class="msg-from"></div>
+                <div class="msg-content"></div>
                 <div class="msg-status">
-                    <div class="msg-sent-time">SENT: %sent-time%</div>
-                    <div class="msg-recv-time-hab">RECV(HAB): %recv-time-hab%</div>
-                    <div class="msg-recv-time-mcc">RECV(MCC): %recv-time-mcc%</div>
-                    <div class="msg-delivery-status">STATUS: %delivered-status%</div>
+                    <div class="msg-sent-time"></div>
+                    <div class="msg-recv-time-hab"></div>
+                    <div class="msg-recv-time-mcc"></div>
+                    <div class="msg-delivery-status"></div>
+                    <time/>
                 </div>
             </div>
         </template>
 
         <template id="msg-sent-mcc">
-            <div id="msg-id-%message-id%" class="msg">
+            <div class="msg">
                 <img src="%http%%site_url%/%templates_dir%/images/user-mcc.jpg" class="msg-avatar"/>
-                <div class="msg-from">%author%</div>
-                <div class="msg-content">%message%</div>
+                <div class="msg-from"></div>
+                <div class="msg-content"></div>
                 <div class="msg-status">
-                    <div class="msg-sent-time">SENT: %sent-time%</div>
-                    <div class="msg-recv-time-hab">RECV(HAB): %recv-time-hab%</div>
-                    <div class="msg-recv-time-mcc">RECV(MCC): %recv-time-mcc%</div>
-                    <div class="msg-delivery-status">STATUS: %delivered-status%</div>
+                    <div class="msg-sent-time"></div>
+                    <div class="msg-recv-time-hab"></div>
+                    <div class="msg-recv-time-mcc"></div>
+                    <div class="msg-delivery-status"></div>
                 </div>
             </div>
         </template>
 
         <template id="msg-file">
-            Attachment: <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>
+            Attachment: <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename"></span> (<span class="filesize"></span>)</a>
         </template>
 
         <template id="msg-image">
-            <img class="msg-image file-location" src="%http%%site_url%/file/%message-id%"><br>
-            Download <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>
+            <img class="msg-image file-location"><br>
+            Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
         </template>
 
         <template id="msg-audio">
-            <audio class="msg-audio file-location" controls preload="metadata">
-                <source src="%http%%site_url%/file/%message-id%"  type="%mime-type%">
+            <audio class="msg-audio" controls preload="metadata">
+                <source class="file-location" type="%mime-type%">
                 Your browser does not support the audio format %mime-type%.
             </audio><br>
-            Download <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>
+            Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
         </template>
 
         <template id="msg-video">
-            <video class="msg-video file-location" controls preload="metadata">
-                <source src="%http%%site_url%/file/%message-id%" type="%mime-type%">
+            <video class="msg-video" controls preload="metadata">
+                <source class="file-location" type="%mime-type%">
                 Your browser does not support the video format %mime-type%.
             </video><br>
-            Download <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>
+            Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
         </template>
     </div>
 

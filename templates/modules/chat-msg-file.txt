@@ -1,1 +1,0 @@
-Attachment: <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>
