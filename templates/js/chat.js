@@ -273,9 +273,7 @@ var oldMsgQueryInProgress = false;
 var hasMoreMessages = true;
 
 $(document).ready(function() {
-    // On-load scroll to the bottom to the newest messages
-    var scrollContainer = document.querySelector("#content");
-    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+    
 
     // Setup an event listener to poll for older messages.
     scrollContainer.addEventListener('scroll', function(event) {
@@ -319,9 +317,16 @@ function loadPrevMsgs() {
                     console.log(resp.error);
                 }
                 oldMsgQueryInProgress = false;
-                scrollContainer.scrollTo(0, child.offsetTop - 80);
-                if(!hasMoreMessages) {
-                    scrollContainer.style.padding = "0px";
+
+                if(child == null) {
+                    // On-load scroll to the bottom to the newest messages
+                    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+                }
+                else {
+                    scrollContainer.scrollTo(0, child.offsetTop - 80);
+                    if(!hasMoreMessages) {
+                        scrollContainer.style.padding = "0px";
+                    }
                 }
             },
             error: function(jqHR, textStatus, errorThrown) {
