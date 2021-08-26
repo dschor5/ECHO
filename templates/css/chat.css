@@ -3,7 +3,7 @@
     top: 40px;
     bottom: 0px;
     left: 22px;
-    width: 230px;
+    width: 233px;
     height: calc(100% - 60px);
     background: var(--background-dark);
     overflow-y: auto;
@@ -130,7 +130,7 @@
     bottom: 10px;
     height: 15px;
     left: 22px;
-    width: 250px;
+    width: 253px;
     color: var(--text-light-opaque);
     text-align: center;
 }
@@ -142,7 +142,7 @@
 #content {
     position: absolute;
     top: 40px;
-    left: calc(250px + 22px);
+    left: calc(253px + 22px);
     right: 22px;
     bottom: 100px;
     background: var(--content-back);
