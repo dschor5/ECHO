@@ -71,7 +71,7 @@ class Message
 
         if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
         {
-            $msgData['filename'] = $this->file->getOriginalName();
+            $msgData['filename'] = $this->file->original_name;
             $msgData['filesize'] = $this->file->getHumanReadableSize();
             $msgData['type'] = $this->file->getTemplateType();
         }
