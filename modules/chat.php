@@ -74,11 +74,11 @@ class ChatModule extends DefaultModule
     private function getPrevMessages()
     {
         $msgId = PHP_INT_MAX;
-        $numMsgs = 20;
+        $numMsgs = 25;
         if(isset($_POST['message_id']) && intval($_POST['message_id']) > 0 && intval($_POST['message_id']) < PHP_INT_MAX) 
         {
             $msgId = intval($_POST['message_id']);
-            $numMsgs = 5;
+            $numMsgs = 10;
         }
         $time = new DelayTime();
         $response = array();
@@ -350,27 +350,6 @@ class ChatModule extends DefaultModule
             $this->addHeaderMenu('Mission Settings', 'settings');
         }
 
-        
-        /*
-        $messagesDao = MessagesDao::getInstance();
-        $participantsDao = ParticipantsDao::getInstance();
-
-        $messages = $messagesDao->getMessagesReceived(
-            $this->conversation->getId(), 
-            $this->user->user_id, 
-            $this->user->is_crew, 
-            $time->getTime());
-        $participantsDao->updateLastRead($this->conversation->getId(), $this->user->user_id, $time->getTime());
-        
-        $totalMsgs = $messagesDao->getNumMsgInCombo($this->conversation->getId(), $this->user->is_crew, $time->getTime());
-
-        $messagesStr = '';
-        foreach($messages as $message)
-        {
-            $messagesStr .= $message->compileHtml($this->user, $this->conversation->hasParticipantsOnBothSites());
-        }
-        */
-
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->username,
                   '/%delay_src%/' => $this->user->is_crew ? $mission['hab_name'] : $mission['mcc_name'],
@@ -378,8 +357,6 @@ class ChatModule extends DefaultModule
                   '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversation->getId(),
-                  '/%message-nav%/' => '',//$this->getConvoNav($messages, $totalMsgs),
-                  '/%messages%/' => '',//$messagesStr,
                   '/%template-msg-sent-usr%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-usr.txt'),
                   '/%template-msg-sent-hab%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-hab.txt'),
                   '/%template-msg-sent-mcc%/' => Message::compileEmptyMsgTemplate('chat-msg-sent-mcc.txt'),
@@ -388,34 +365,6 @@ class ChatModule extends DefaultModule
                   '/%template-msg-audio%/' => Message::compileEmptyMsgTemplate('chat-msg-audio.txt'),
                   '/%template-msg-video%/' => Message::compileEmptyMsgTemplate('chat-msg-video.txt'),
                 ));
-    }
-
-    private function getConvoNav(array $msgsDisplayed, int $totalMsgs) : string
-    {
-        $content = '';
-
-        $firstMsg = null;
-        if(count($msgsDisplayed) > 0)
-        {
-            $firstMsg = array_values($msgsDisplayed)[0];
-        }
-
-        if($totalMsgs > 0)
-        {
-            if($firstMsg != null && $totalMsgs > count($msgsDisplayed))
-            {
-                $content = Main::loadTemplate('chat-load-old-msgs.txt');  
-            }
-            else
-            {
-                $content = Main::loadTemplate('chat-no-old-msgs.txt', 
-                    array(
-                        '/%convo_start_date%/' => $this->conversation->getDateCreated(),
-                    )); 
-            }
-        }
-
-        return $content;
     }
 
     private function getConversationList(): string 
