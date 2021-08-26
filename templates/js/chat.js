@@ -285,7 +285,7 @@ $(document).ready(function() {
     });
 });
 
-$(document).ready(loadPrevMsgs());
+$(document).ready(loadPrevMsgs);
 
 function loadPrevMsgs() {
     var scrollContainer = document.querySelector('#content');
