@@ -12,9 +12,25 @@ class ErrorModule extends DefaultModule
         return array();
     }
 
+    public function getHeader(): string
+    {
+        return '';
+    }
+
     public function compileHtml(string $subaction) : string
     {
-        return 'ERROR!';
+        $this->addCss('common');
+        $this->addCss('settings');
+        if($this->user->is_crew)
+        {
+            $this->addCss('chat-hab');
+        }
+        else
+        {
+            $this->addCss('chat-mcc');
+        }
+
+        return Main::loadTemplate('error.txt');
     }
 }
 

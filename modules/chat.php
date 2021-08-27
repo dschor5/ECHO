@@ -98,6 +98,8 @@ class ChatModule extends DefaultModule
                 $response['messages'][] = $msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
             }
         }
+        
+        $response['req'] = (count($messages) < $numMsgs) && ($msgId == PHP_INT_MAX);
 
         return $response;
     }

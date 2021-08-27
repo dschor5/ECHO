@@ -15,10 +15,10 @@ RewriteRule ^users index.php?action=users [QSA]
 RewriteRule ^preferences index.php?action=preferences [QSA]
 RewriteRule ^(file|css|js)/(.*) index.php?action=file&id=$2 [QSA]
 
-ErrorDocument 400 index.php?action=error
-ErrorDocument 403 index.php?action=error
-ErrorDocument 404 index.php?action=error
-ErrorDocument 500 index.php?action=error
+ErrorDocument 400 /index.php?action=error
+ErrorDocument 403 /index.php?action=error
+ErrorDocument 404 /index.php?action=error
+ErrorDocument 500 /index.php?action=error
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

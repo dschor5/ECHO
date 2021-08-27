@@ -37,7 +37,7 @@
         </div>
 
         <template id="msg-end">
-            Start of conversation. 
+            <p style="padding-top: 10px; text-align: center; font-style: italic;">Start of conversation. </p>
         </template>
 
         <template id="msg-sent-usr">

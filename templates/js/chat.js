@@ -1,10 +1,11 @@
 function sendTextMessage() {
+    // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
-
     if(newMsgText.length == 0) {
         return;
     }
     
+    // Send AJAX request to save the message. 
     $.ajax({
         url:  BASE_URL,
         type: "POST",
@@ -15,45 +16,26 @@ function sendTextMessage() {
             msgBody: newMsgText,
         },
         dataType: 'json',
-        success: function(resp) {
-            if(resp.success) {
-                $('#new-msg-text').val("");
-                console.log("Sent message_id=" + resp.message_id);
-            }
-            else {
-                console.log(resp.error);
-            }
-        },
-        error: function(jqHR, textStatus, errorThrown) {
-            //location.href = BASE_URL + '/chat';
-        },
+        success: handleAjaxNewMessage,
+        error: handleAjaxNewMessageError,
     });
 }
 
-function sendUpload(uploadType) {
-    $.ajax({
-        url:  BASE_URL + '/chat',
-        type: "POST",
-        data: {
-            subaction: 'upload',
-            type: uploadType,
-            conversation_id: $('#conversation_id').val(),
-            msgBody: newMsgText,
-        },
-        dataType: 'json',
-        success: function(resp) {
-            if(resp.success) {
-                closeModal();
-                console.log("Sent message_id=" + resp.message_id);
-            }
-            else {
-                console.log(resp.error);
-            }
-        },
-        error: function(jqHR, textStatus, errorThrown) {
-            //location.href = BASE_URL + '/chat';
-        },
-    });
+// Handle successful respond after sending a new messge or upload.
+function handleAjaxNewMessage(resp) {
+    if(resp.success) {
+        $('#new-msg-text').val("");
+        closeModal();
+        console.log("Sent message_id=" + resp.message_id);
+    }
+    else {
+        console.error(resp.error);
+    }
+}
+
+// Handle error respond after sending a new message or upload.
+function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
+    return;
 }
 
 
@@ -67,7 +49,13 @@ evtSource.onerror = function (err) {
     console.error("EventSource failed:", err);
 };
 
-evtSource.addEventListener("logout", function(event) {
+evtSource.addEventListener("logout", handleEventSourceLogout);
+evtSource.addEventListener("msg", handleEventSourceNewMessage);
+evtSource.addEventListener("notification", handleEventSourceNotification);
+
+
+
+function handleEventSourceLogout(event) {
     evtSource.close();
     $('#send-btn').prop('disabled', true);
     $('#file-btn').prop('disabled', true);
@@ -76,13 +64,13 @@ evtSource.addEventListener("logout", function(event) {
     $('#modal-logout').css('display', 'block');
     sleep(5000);
     location.href = BASE_URL;
-});
+}
 
-evtSource.addEventListener("msg", function(event) {
+function handleEventSourceNewMessage(event) {
     const data = JSON.parse(event.data);
     var scrollContainer = document.querySelector("#content");
     var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
-    compileMsg(data, false)
+    compileMsg(data, false);
     
     if(autoScroll < 200)
     {
@@ -91,15 +79,15 @@ evtSource.addEventListener("msg", function(event) {
             scrollTop: autoScroll.toString() + 'px'
         }, 250);
     }
-});
+}
 
-evtSource.addEventListener("notification", function(event) {
+function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
     var container = document.querySelector('#room-new-' + data.conversation_id);
     if(container != null) {
         container.textContent = '(' + data.num_messages + ')';
     }
-});
+}
 
 function compileMsg(data, before){
     var template = document.querySelector('#msg-sent-'.concat(data.source));
@@ -211,6 +199,7 @@ function uploadMedia(mediaType) {
 
     var formData = new FormData();
     formData.append("conversation_id", $('#conversation_id').val());
+    formData.append("action", "chat");
     formData.append("subaction", "upload");
 
     if(mediaType === 'video' || mediaType === 'audio') {
@@ -235,7 +224,7 @@ function uploadMedia(mediaType) {
 
     $.ajax({
         type: "POST",
-        url:  BASE_URL + '/chat',
+        url:  BASE_URL,
         async: true,
         data: formData,
         cache: false,
@@ -249,12 +238,8 @@ function uploadMedia(mediaType) {
             }
             return myXhr;
         },
-        success: function (data) {
-            closeModal();
-        },
-        error: function (error) {
-            // handle error
-        },
+        success: handleAjaxNewMessage,
+        error: handleAjaxNewMessageError,
     });
 }
 
@@ -322,10 +307,14 @@ function loadPrevMsgs() {
                     scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
                 }
                 else {
+                    // Scroll to where the user was on the page.
                     scrollContainer.scrollTo(0, child.offsetTop - 80);
-                    if(!hasMoreMessages) {
-                        scrollContainer.style.padding = "0px";
-                    }
+                }
+
+                if(!hasMoreMessages || resp.req) {
+                    scrollContainer.style.padding = "0px";
+                    hasMoreMessages = false;
+                    document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
                 }
 
                 oldMsgQueryInProgress = false;               
@@ -335,6 +324,4 @@ function loadPrevMsgs() {
             },
         });
     }
-
-    
 }
