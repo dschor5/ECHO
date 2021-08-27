@@ -104,8 +104,10 @@ function compileMsg(data, before){
             template = document.querySelector('#msg-' + data.type);
             var contentClone = template.content.cloneNode(true);
             try {
-            contentClone.querySelector(".file-location").src = BASE_URL + "/file/" + data.message_id;
-            contentClone.querySelector(".file-location").type = data.mime_type;
+            //contentClone.querySelector(".file-location").src = BASE_URL + "/file/" + data.message_id;
+            contentClone.querySelectorAll(".file-location").forEach(function(element) {
+                element.src = BASE_URL + "/file/" + data.message_id;
+            });
             }
             catch(e) {}
             contentClone.querySelector("a").href = BASE_URL + "/file/" + data.message_id;
@@ -210,6 +212,7 @@ function uploadMedia(mediaType) {
             return;
         }
         const blobMimeType = (recordedBlobs[0] || {}).type;
+        console.log(blobMimeType);
         const blob = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
         formData.append("data", blob, "recording");

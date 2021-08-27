@@ -94,7 +94,8 @@
 
         <template id="msg-audio">
             <audio class="msg-audio" controls preload="metadata">
-                <source class="file-location">
+                <source class="file-location" type="video/webm">
+                <source class="file-location" type="video/x-matroska">
                 Your browser does not support the audio format.
             </audio><br>
             Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
@@ -102,7 +103,8 @@
 
         <template id="msg-video">
             <video class="msg-video" controls preload="metadata">
-                <source class="file-location">
+                <source class="file-location" type="audio/webm">
+                <source class="file-location" type="audio/x-matroska">
                 Your browser does not support the video format.
             </video><br>
             Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
