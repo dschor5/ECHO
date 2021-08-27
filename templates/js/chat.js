@@ -193,15 +193,18 @@ function openFileModal() {
 }
 
 function uploadMedia(mediaType) {
-
+    // Reset progress bar. 
     $("#progress-wrp .progress-bar").css("width", "0%");
     $("#progress-wrp .status").text("0%");
 
+    // Create object to hold all the form data including the file 
+    // or media to be uploaded with the message.
     var formData = new FormData();
     formData.append("conversation_id", $('#conversation_id').val());
     formData.append("action", "chat");
     formData.append("subaction", "upload");
 
+    // For video messages create a new blob to transfer the data.
     if(mediaType === 'video' || mediaType === 'audio') {
         if(recordedBlobs === undefined) {
             return;
@@ -211,6 +214,7 @@ function uploadMedia(mediaType) {
         formData.append("type", mediaType);
         formData.append("data", blob, "recording");
     }
+    // Files can be transferred with the nominal fields. 
     else {
         const file = document.querySelector('#new-msg-file').files[0];
         if(file === undefined) {

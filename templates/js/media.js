@@ -26,6 +26,13 @@ function getSupportedMimeTypes() {
             selectedMimeType = options[i];
         }
     }
+
+    if(selectedMimeType == '') {
+        $('#audio-btn').prop('disabled', true);
+        $('#video-btn').prop('disabled', true);
+        console.error('No video/audio mime type supported by this browser.');
+    }
+
     return selectedMimeType;
 }
 
