@@ -1,0 +1,20 @@
+Mission:
+- Mission Name
+
+- MCC/HAB Info
+    - Name
+    - planet
+    - User role 
+    - Earth timezone 
+    - Remote day name?
+
+- Dates
+    - Mission start time
+    - Mission end time 
+
+- Delay
+    - Manual / Automatic
+    - Manual -> single delay entry # sec. 
+    - Automatic -> array of time + delay settings
+        -> Delay setting can be a number or equation in terms of t 
+        

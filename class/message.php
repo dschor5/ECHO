@@ -23,6 +23,22 @@ class Message
         }
     }
 
+    public function __get($name) : mixed 
+    {
+        $result = null;
+
+        if(array_key_exists($name, $this->data)) 
+        {
+            $result = $this->data[$name];
+        }
+        else if(strstr($name, '_time_') !== false)
+        {
+            
+        }
+
+        return $result;
+    }
+
     public function getId() : int
     {
         return $this->data['message_id'];

@@ -55,11 +55,18 @@ CREATE TABLE `msg_status` (
 
 CREATE TABLE `msg_files` (
   `message_id` int(10) UNSIGNED NOT NULL,
-  `server_name` varchar(64) NOT NULL,
-  `original_name` varchar(64) NOT NULL,
-  `mime_type` varchar(32) NOT NULL,
+  `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `original_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY(`message_id`),
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `mission_config` (
+  `name` varchar(32) COLLATE utf8_unicode_ci NOT NULL UNIQUE,
+  `value` text CHARACTER SET utf8 NOT NULL,
+  `type` enum('text','int','float','bool', 'datetime') COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY(`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
