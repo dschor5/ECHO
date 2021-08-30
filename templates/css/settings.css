@@ -14,6 +14,11 @@
     font-weight: bold;
 }
 
+.subheading {
+    font-size: 16px;
+    font-weight: bold;
+}
+
 #navigation {
     position: relative;
     width: 800px;
@@ -53,3 +58,52 @@
     margin-bottom: 20px;
 }
 
+
+#form-contents {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0px;
+    padding: 0px;
+    width: 800px;
+    border: 0px;
+}
+
+#form-contents label {
+    line-height: 12px;
+    margin-bottom: 5px;
+    padding-bottom: 0px;
+    color: #666;
+}
+
+#form-contents label::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+#form-contents input[type="text"], 
+#form-contents input[type="password"], 
+#form-contents input[type="file"],
+#form-contents select {
+    margin-top: 2px;
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 3px 10px;
+    line-height: 20px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 5px;
+    height: 30px;
+}
+
+#form-contents input[type='checkbox'] {
+    display: inline-block;
+}
+
+#form-contents input::after {
+    content: "";
+    clear: both;
+    display: table;
+}

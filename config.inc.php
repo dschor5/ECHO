@@ -54,8 +54,7 @@ $config['modules_user'] = array_merge($config['modules_public'], array(
 
 $config['modules_admin'] = array_merge($config['modules_user'], array(
     'users', 
-    'delay', 
-    'mission'
+    'settings'
 ));
 
 $config['cookie_name'] = 'website';

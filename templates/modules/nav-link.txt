@@ -1,0 +1,1 @@
+    <a href="%http%%site_url%/%url%"><span class="ui-icon ui-icon-%icon%"></span> %name%</a>

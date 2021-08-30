@@ -46,10 +46,8 @@ class UsersModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
-        $this->addTemplates('common.css', 'settings.css',
-        'jquery-ui.css', 'jquery-ui.structure.css', 'jquery-ui.theme.css', 
-        'jquery-3.6.0.min.js', 'jquery-ui.min.js', 'users.js');
-        
+        $this->addTemplates('settings.css', 'users.js');
+
         return $this->listUsers();
     }
 

@@ -15,8 +15,7 @@ abstract class DefaultModule implements Module
     {
         $this->user = &$user;
         $this->db = Database::getInstance();
-        $this->templateFiles = array(
-            ($this->user != null && $this->user->is_crew) ? 'chat-hab.css' : 'chat-mcc.css');
+        $this->templateFiles = array();
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array();
         $this->subStreamRequests = array();
@@ -32,6 +31,19 @@ abstract class DefaultModule implements Module
 
     private function getTemplates(): string
     {
+        // Add default templates
+        $defaults = array(
+            ($this->user != null && $this->user->is_crew) ? 'chat-hab.css' : 'chat-mcc.css',
+            'common.css',
+            'jquery-ui.css',
+            'jquery-ui.structure.css', 
+            'jquery-ui.theme.css', 
+            'jquery-3.6.0.min.js', 
+            'jquery-ui.min.js'
+        );
+
+        $this->templateFiles = array_merge($defaults, $this->templateFiles);
+
         $content = '';
         foreach($this->templateFiles as $file)
         {
@@ -72,7 +84,7 @@ abstract class DefaultModule implements Module
                     'name' => 'User Accounts', 
                     'icon' => 'person');
                 $navLinks[] = array(
-                    'url'  => 'mission', 
+                    'url'  => 'settings', 
                     'name' => 'Mission Settings',
                     'icon' => 'gear');
             }
@@ -89,9 +101,11 @@ abstract class DefaultModule implements Module
             {
                 if($action != $link['url'])
                 {
-                    $links .= '<a href="%http%%site_url%/'.$link['url'].'">'. 
-                        '<span class="ui-icon ui-icon-'.$link['icon'].'"></span>'. 
-                        $link['name'].'</a>'.PHP_EOL;
+                    $links .= Main::loadTemplate('nav-link.txt', array(
+                        '/%url%/'  => $link['url'],
+                        '/%name%/' => $link['name'],
+                        '/%icon%/' => $link['icon']
+                    ));
                 }
             }
         }

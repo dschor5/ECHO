@@ -252,7 +252,14 @@ class ChatModule extends DefaultModule
         $messagesDao = MessagesDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
         $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
-        $conversationIds = array_keys($conversations);
+        $conversationIds = array();
+        foreach($conversations as $convoId => $convo)
+        {
+            if($conversationIds != $convoId)
+            {
+                $conversationIds[] = $convoId;
+            }
+        }
 
         // Block invalid access. 
         if($this->conversation == null)
@@ -261,6 +268,9 @@ class ChatModule extends DefaultModule
             echo "data: session expired".PHP_EOL.PHP_EOL;
             return;
         }
+
+        // Sleep 0.5sec to avoid interfering with initial msg load.
+        usleep(500000);
 
         $lastMsg = time();
         $prevNotifications = array();
@@ -334,9 +344,7 @@ class ChatModule extends DefaultModule
 
         $time = new DelayTime();
 
-        $this->addTemplates('common.css', 'chat.css', 
-            'jquery-ui.css', 'jquery-ui.structure.css', 'jquery-ui.theme.css', 
-            'jquery-3.6.0.min.js', 'jquery-ui.min.js', 'chat.js', 'media.js', 'time.js');
+        $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->username,

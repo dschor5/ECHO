@@ -1,3 +1,22 @@
 <div id="content">
-    %content%
+    <div id="heading">
+        Mission Settings
+    </div>
+    
+    <div id="form-contents">
+        <div class="subheading">Mission Configuration</div>
+
+        <label for="name">Mission Name</label>
+        <input type="text" placeholder="Enter Mission Name" name="name" id="name" required>
+
+        <label for="start-date">Start Date</label>
+        <input type="text" placeholder="Select Mission Start Date" name="start-date" id="start-date" required>
+
+        <div class="subheading">Mission Control</div>
+
+        <div class="subheading">Analog Habitat</div>
+
+        <div class="subheading">Communicaiton Delay</div>
+
+    </div>
 </div>

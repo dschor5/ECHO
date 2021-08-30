@@ -1,10 +1,8 @@
 <div id="content">
     <div id="heading">
-        Registered Users
+        Mission Settings
     </div>
-    <div id="navigation">
-        <button type="button" class="top-button" onclick="getUser(0)">New User</button>
-    </div>
+    
     %content%
 </div>
 

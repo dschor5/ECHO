@@ -1,6 +1,6 @@
 <?php
 
-class MissionModule extends DefaultModule
+class PreferencesModule extends DefaultModule
 {
     public function __construct(&$user)
     {
@@ -16,12 +16,7 @@ class MissionModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
-        $this->addTemplates('common.css', 'settings.css',
-            'jquery-3.6.0.min.js', 'users.js');
-    
-
-        $this->addHeaderMenu('Chat', 'chat');
-        $this->addHeaderMenu('User Settings', 'users');
+        $this->addTemplates('settings.css', 'users.js');
 
         return '';
     }
