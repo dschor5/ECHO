@@ -20,7 +20,7 @@ class MissionConfig
         return self::$instance;
     }
 
-    public function __get(string $name) : mixed
+    public function __get(string $name)
     {
         $result = null;
 

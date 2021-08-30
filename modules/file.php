@@ -75,26 +75,26 @@ class FileModule implements Module
 
         $filepath = '/'.$extension.'/'.$filename;
 
-            if(!file_exists($config['templates_dir'].$filepath))
-            {
-                header("HTTP/1.1 404 Not Found");
-                exit();
-            }
+        if(!file_exists($config['templates_dir'].$filepath))
+        {
+            header("HTTP/1.1 404 Not Found");
+            exit();
+        }
 
-            switch($extension)
-            {
-                case 'css':
-                    header('Content-Type: text/css');
-                    break;
-                case 'js':
-                    header('Content-Type: text/javascript');
-                    break;
-                default:
-                    header('Content-Type: text/plain');
-                    break;
-            }
+        switch($extension)
+        {
+            case 'css':
+                header('Content-Type: text/css');
+                break;
+            case 'js':
+                header('Content-Type: text/javascript');
+                break;
+            default:
+                header('Content-Type: text/plain');
+                break;
+        }
 
-            echo Main::loadTemplate($filepath, array(), '');
+        echo Main::loadTemplate($filepath, array(), '');
     }
 }
 

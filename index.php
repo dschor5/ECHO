@@ -8,7 +8,7 @@ require_once('config.inc.php');
 try
 {
     // Force HTTPS. 
-    if ((str_starts_with($server['http'], 'https')) && 
+    if ((strstr($server['http'], 'https') !== false) && 
         (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off")) 
     {
         header('HTTP/1.1 301 Moved Permanently');

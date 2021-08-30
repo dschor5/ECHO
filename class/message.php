@@ -23,7 +23,7 @@ class Message
         }
     }
 
-    public function __get($name) : mixed 
+    public function __get($name)
     {
         $result = null;
 

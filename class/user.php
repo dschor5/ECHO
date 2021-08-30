@@ -19,13 +19,14 @@ class User
         }
     }
 
-    public function __get($name) : mixed
+    public function __get($name)
     {
         $result = null;
 
         if(array_key_exists($name, $this->data)) 
         {
-            if(str_starts_with($this->data[$name], 'is_'))
+            $pos = strpos($this->data[$name], 'is_');
+            if($pos !== false && $pos == 0)
             {
                 $result = ($this->data[$name] == 1);
             }

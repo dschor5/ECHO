@@ -11,7 +11,7 @@ class FileUpload
         $this->data['size'] = $this->exists() ? filesize($this->getServerPath()) : 0;
     }
 
-    public function __get(string $name) : mixed
+    public function __get(string $name)
     {
         $result = null;
 
