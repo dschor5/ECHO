@@ -16,8 +16,16 @@ function sendTextMessage() {
             msgBody: newMsgText,
         },
         dataType: 'json',
-        success: handleAjaxNewMessage,
-        error: handleAjaxNewMessageError,
+        success: function(resp) {
+            if(resp.success) {
+                $('#new-msg-text').val("");
+                closeModal();
+                console.info("Sent message_id=" + resp.message_id);
+            }
+            else {
+                console.error(resp.error);
+            }
+        },
     });
 }
 
@@ -29,6 +37,7 @@ function handleAjaxNewMessage(resp) {
         console.info("Sent message_id=" + resp.message_id);
     }
     else {
+
         console.error(resp.error);
     }
 }
@@ -145,7 +154,7 @@ function closeModal() {
     try { $('#progress-video').progressbar('widget').hide('highlight', 0); } catch(e) {}
     try { $('#progress-audio').progressbar('widget').hide('highlight', 0); } catch(e) {}
     try { $('#progress-file').progressbar('widget').hide('highlight', 0);  } catch(e) {}
-    $('.modal-response').hide();
+    $('.dialog-response').hide('fade', 0);
     try {
         stream.getTracks().forEach(function(track) {
             track.stop();
@@ -325,8 +334,19 @@ function uploadMedia(mediaType) {
             }
             return myXhr;
         },
-        success: handleAjaxNewMessage,
-        error: handleAjaxNewMessageError,
+        success: function(resp) {
+            if(resp.success) {
+                $('#new-msg-text').val("");
+                closeModal();
+                console.info("Sent message_id=" + resp.message_id);
+            }
+            else {
+                $('.dialog-response').text(resp.error);
+                $('.dialog-response').show('highlight');
+                $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
+                console.error(resp.error);
+            }
+        },
     });
 }
 
@@ -351,7 +371,7 @@ $(document).ready(function() {
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
             loadPrevMsgs();
         }
-    }, {passive: false});
+    }, {passive: true});
 });
 
 $(document).ready(loadPrevMsgs);

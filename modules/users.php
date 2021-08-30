@@ -49,10 +49,7 @@ class UsersModule extends DefaultModule
         $this->addTemplates('common.css', 'settings.css',
         'jquery-ui.css', 'jquery-ui.structure.css', 'jquery-ui.theme.css', 
         'jquery-3.6.0.min.js', 'jquery-ui.min.js', 'users.js');
-
-        $this->addHeaderMenu('Chat', 'chat');
-        $this->addHeaderMenu('Mission Settings', 'settings');
-
+        
         return $this->listUsers();
     }
 
@@ -82,11 +79,8 @@ class UsersModule extends DefaultModule
 
     private function deleteUser()
     {
-        global $server;
         $usersDao = UsersDao::getInstance();
-        $participantsDao = ParticipantsDao::getInstance();
-        $conversationsDao = ConversationsDao::getInstance();
-
+        
         $response = array('success'=>false, 'error'=>'');
 
         $userId = $_POST['user_id'] ?? 0;

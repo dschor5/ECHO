@@ -10,7 +10,6 @@ abstract class DefaultModule implements Module
     protected $subStreamRequests;
 
     private $templateFiles;
-    private $navLinks;
 
     public function __construct(&$user)
     {
@@ -18,15 +17,9 @@ abstract class DefaultModule implements Module
         $this->db = Database::getInstance();
         $this->templateFiles = array(
             ($this->user != null && $this->user->is_crew) ? 'chat-hab.css' : 'chat-mcc.css');
-        $this->navLinks = array();
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array();
         $this->subStreamRequests = array();
-    }
-
-    public function getPageTitle()
-    {
-        return 'Analog Comm Delay';
     }
 
     protected function addTemplates(string ...$newFile)
@@ -49,28 +42,58 @@ abstract class DefaultModule implements Module
         return $content;
     }
 
-    protected function addHeaderMenu(string $label, string $url)
-    {
-        $this->navLinks[$label] = $url;
-    }
-
     public function getHeader(): string
     {
-        // Add default logout option.
-        $this->navLinks['Logout'] = 'logout';
-
-        $links = '';
-        foreach($this->navLinks as $name => $url)
-        {
-            $links .= '<a href="%http%%site_url%/'.$url.'">'.$name.'</a>'.PHP_EOL;
-        }
-
         $userLocation = '';
         $username = '';
+        $links = '';
+        $navLinks = array();
+
         if($this->user != null)
         {
             $userLocation = $this->user->getLocation();
             $username = $this->user->alias.' ('.$this->user->username.')';
+
+            $navLinks[] = array(
+                'url'  => 'chat',
+                'name' => 'Chat',
+                'icon' => 'home'
+                );
+            $navLinks[] = array(
+                'url'  => 'preferences',
+                'name' => 'Preferences',
+                'icon' => 'pencil'
+                );
+
+            if($this->user->is_admin)
+            {
+                $navLinks[] = array(
+                    'url'  => 'users', 
+                    'name' => 'User Accounts', 
+                    'icon' => 'person');
+                $navLinks[] = array(
+                    'url'  => 'mission', 
+                    'name' => 'Mission Settings',
+                    'icon' => 'gear');
+            }
+
+            $navLinks[] = array(
+                'url'  => 'logout',
+                'name' => 'Logout',
+                'icon' => 'power'
+                );
+
+            $action = $_GET['action'] ?? '';
+
+            foreach($navLinks as $link)
+            {
+                if($action != $link['url'])
+                {
+                    $links .= '<a href="%http%%site_url%/'.$link['url'].'">'. 
+                        '<span class="ui-icon ui-icon-'.$link['icon'].'"></span>'. 
+                        $link['name'].'</a>'.PHP_EOL;
+                }
+            }
         }
 
         return Main::loadTemplate('header.txt', array(
@@ -124,7 +147,7 @@ abstract class DefaultModule implements Module
             $commDelay = Delay::getInstance();
 
             $replace = array(
-                '/%title%/'            => $this->getPageTitle(),
+                '/%title%/'            => $mission->name.' - Comms',
                 '/%content%/'          => $this->compileHtml($subaction),
                 '/%templates%/'        => $this->getTemplates(),
                 '/%header%/'           => $this->getHeader(),

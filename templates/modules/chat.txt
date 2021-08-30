@@ -123,6 +123,7 @@
     <div id="dialog-video" title="Record Video Message" class="dialog-body">
         <form method="POST">
             <p>Record and preview your message before sending.</p>
+            <div class="dialog-response"></div>
             <div class="media" style="margin-right: 2px;">Webcam <br> 
                 <video id="rec-video-player" src="" playsinline autoplay muted></video>
             </div>
@@ -136,6 +137,7 @@
     <div id="dialog-audio" title="Record Audio Message" class="dialog-body">
         <form method="POST">
             <p>Record and preview your message before sending.</p>
+            <div class="dialog-response"></div>
             <audio id="rec-audio-player" src="" playsinline autoplay muted></audio>
             <audio id="play-audio-player" src="" playsinline autoplay controls></audio>
         </form>
@@ -144,7 +146,7 @@
 
     <div id="dialog-file" title="Send File Attachment" class="dialog-body">
         <form method="POST">
-            <div class="modal-response" ></div>
+            <div class="dialog-response"></div>
             <input type="file" id="new-msg-file" name="new-msg-file"/>
             <p>Filetypes allowed: *.docx, *.xlsx, *.pptx, *.pdf, *.jpg, *.gif, *.png.</p>
             <p>Max file size: 10MB</p>

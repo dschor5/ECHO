@@ -337,12 +337,6 @@ class ChatModule extends DefaultModule
         $this->addTemplates('common.css', 'chat.css', 
             'jquery-ui.css', 'jquery-ui.structure.css', 'jquery-ui.theme.css', 
             'jquery-3.6.0.min.js', 'jquery-ui.min.js', 'chat.js', 'media.js', 'time.js');
-        
-        if($this->user->is_admin)
-        {
-            $this->addHeaderMenu('User Settings', 'users');
-            $this->addHeaderMenu('Mission Settings', 'settings');
-        }
 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->username,
