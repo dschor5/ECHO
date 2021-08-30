@@ -4,19 +4,88 @@
     </div>
     
     <div id="form-contents">
-        <div class="subheading">Mission Configuration</div>
 
-        <label for="name">Mission Name</label>
-        <input type="text" placeholder="Enter Mission Name" name="name" id="name" required>
+        <div class="form-box">
+            <div class="subheading">Mission Configuration</div>
 
-        <label for="start-date">Start Date</label>
-        <input type="text" placeholder="Select Mission Start Date" name="start-date" id="start-date" required>
+            <label for="name">Mission Name</label>
+            <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" required>
 
-        <div class="subheading">Mission Control</div>
+            <label for="date-start">Start Date</label>
+            <input type="text" placeholder="Select Mission Start Date" name="date-start" id="date-start" value="%date_start%" required>
 
-        <div class="subheading">Analog Habitat</div>
+            <label for="date-end">End Date</label>
+            <input type="text" placeholder="Select Mission Start Date" name="date-end" id="date-end" value="%date_end%" required>
+        </div>
 
-        <div class="subheading">Communicaiton Delay</div>
+        <div class="form-box">
+            <div class="subheading">Communicaiton Delay</div>
+        </div>
+
+        <div style="clear: both;"></div>
+
+        <div class="form-box">
+            <div class="subheading">Mission Control</div>
+
+            <label for="mcc_name">Name for Mission Control</label>
+            <input type="text" placeholder="Mission Control Name" name="mcc_name" id="mcc_name" value="%mcc_name%" required>
+
+            <label for="mcc_planet">Planet for Mission Control</label>
+            <input type="text" placeholder="Planet Name" name="mcc_planet" id="mcc_planet" value="%mcc_planet%" required>
+
+            <label for="mcc_user_role">User Role for Mission Control Operators</label>
+            <input type="text" placeholder="Role Name" name="mcc_user_role" id="mcc_user_role" value="%mcc_user_role%" required>
+
+            <label for="mcc_timezone">Timezone for Mission Control</label>
+            <select name="mcc_timezone" id="mcc_timezone">
+                %mcc_timezone%
+            </select>            
+        </div>
+
+        <div class="form-box">
+            <div class="subheading">Analog Habitat</div>
+
+            <label for="hab_name">Name for Analog Habitat</label>
+            <input type="text" placeholder="Habitat Name" name="hab_name" id="hab_name" value="%hab_name%" required>
+
+            <label for="hab_planet">Planet/Moon Name for Analog Habitat</label>
+            <input type="text" placeholder="Planet Name" name="hab_planet" id="hab_planet" value="%hab_planet%" required>
+
+            <label for="hab_user_role">User Role for Analog Astronauts</label>
+            <input type="text" placeholder="Role Name" name="hab_user_role" id="hab_user_role" value="%hab_user_role%" required>
+
+            <label for="hab_timezone">Timezone for Analog Simulation</label>
+            <select name="hab_timezone" id="hab_timezone">
+                %hab_timezone%
+            </select>
+        </div>
 
     </div>
 </div>
+
+<script>
+var fromDate = $('#date-start').datepicker({
+    defaultDate: '%date_start%',
+    dateFormat: 'yy-mm-dd'
+}).on('change', function() {
+    toDate.datepicker('option', 'minDate', getDate(this));
+}),
+toDate = $('#date-end').datepicker({
+    defaultDate: '%date_end%',
+    dateFormat: 'yy-mm-dd'
+}).on('change', function() {
+    fromDate.datepicker('option', 'maxDate', getDate(this));
+});
+
+function getDate(element) {
+    var date;
+    try {
+        date = $.datepicker.parseDate('yy-mm-dd', element.value);
+    }
+    catch(error) {
+        date = null;
+    }
+    return date;
+}
+
+</script>

@@ -16,7 +16,7 @@ class DelayTime
         if(self::$epochMet == null)
         {
             self::$timezone = new DateTimeZone($timezone);
-            $epoch = new DateTime($mission->epoch, self::$timezone);
+            $epoch = new DateTime($mission->date_start, self::$timezone);
             self::$epochMet = $epoch->getTimestamp();
         }
 
@@ -27,7 +27,7 @@ class DelayTime
     public static function getEpochUTC() : string
     {
         $mission = MissionConfig::getInstance();
-        $epoch = new DateTime($mission->epoch, new DateTimeZone('UTC'));
+        $epoch = new DateTime($mission->date_start, new DateTimeZone('UTC'));
         return $epoch->getTimestamp();
     }
 

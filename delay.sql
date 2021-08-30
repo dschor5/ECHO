@@ -71,7 +71,8 @@ CREATE TABLE `mission_config` (
 
 INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('name',            'string', 'Analog Mission Name'),
-('epoch',           'string', '2021-08-10 00:00:00'),
+('date_start',      'string', '2021-08-10 00:00:00'),
+('date_end',        'string', '2021-11-10 00:00:00'),
 ('mcc_name',        'string', 'Mission Control'),
 ('mcc_planet',      'string', 'Earth'),
 ('mcc_user_role',   'string', 'Mission Control'),

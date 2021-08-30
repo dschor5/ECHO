@@ -17,6 +17,7 @@
 .subheading {
     font-size: 16px;
     font-weight: bold;
+    padding-bottom: 15px;
 }
 
 #navigation {
@@ -102,8 +103,9 @@
     display: inline-block;
 }
 
-#form-contents input::after {
-    content: "";
-    clear: both;
-    display: table;
+.form-box {
+    width: calc(50% - 20px);
+    margin: 0px;
+    padding: 10px;
+    float: left;
 }

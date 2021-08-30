@@ -46,13 +46,39 @@ class SettingsModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
+        $mission = MissionConfig::getInstance();
         $this->addTemplates('settings.css', 'settings.js');
 
         $timezoneData = $this->getTimezoneList();
-        $timezone = '';
+        $mccTimezoneOptions = '';
+        $habTimezoneOptions = '';
+        foreach($timezoneData as $tz) 
+        {
+            $mccTimezoneOptions .= '<option value="'.$tz['timezone_id'].'">'.$tz['label'].'</option>';
+            if($mission->mcc_timezone == $tz['timezone_id'])
+            {
+                $mccTimezoneOptions .= '<option value="'.$tz['timezone_id'].'" selected="selected">'.$tz['label'].'</option>';
+            }
+            
+            $habTimezoneOptions .= '<option value="'.$tz['timezone_id'].'">'.$tz['label'].'</option>';
+            if($mission->hab_timezone == $tz['timezone_id'])
+            {
+                $habTimezoneOptions .= '<option value="'.$tz['timezone_id'].'" selected="selected">'.$tz['label'].'</option>';
+            }
+        }
         
         return Main::loadTemplate('settings.txt', array(
-            '/%timezones%/' => $timezone,
+            '/%name%/'          => $mission->name,
+            '/%date_start%/'    => substr($mission->date_start, 0, 10),
+            '/%date_end%/'      => substr($mission->date_end, 0, 10),
+            '/%mcc_name%/'      => $mission->mcc_name,
+            '/%mcc_planet%/'    => $mission->mcc_planet,
+            '/%mcc_user_role%/' => $mission->mcc_user_role,
+            '/%mcc_timezone%/'  => $mccTimezoneOptions,
+            '/%hab_name%/'      => $mission->hab_name,
+            '/%hab_planet%/'    => $mission->hab_planet,
+            '/%hab_user_role%/' => $mission->hab_user_role,
+            '/%hab_timezone%/'  => $habTimezoneOptions,
         ));
     }
 
