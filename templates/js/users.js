@@ -46,8 +46,8 @@ function editUser() {
         dataType: 'json',
         success: function(data) {
             if(data.success != true) {
-                $('div.modal-response').text(data.error);
-                $('div.modal-response').show();
+                $('div.dialog-response').text(data.error);
+                $('div.dialog-response').show();
             }
             else {
                 location.href = BASE_URL + '/users';
@@ -95,7 +95,7 @@ function deleteOrResetUser() {
 function closeModal() {
     $('#dialog-edit-user').dialog('widget').hide('highlight', 0);
     $('#dialog-confirm').dialog('widget').hide('highlight', 0);
-    $('div.modal-response').hide();
+    $('div.dialog-response').hide();
 }
 
 // Event handlers for closing modal.
@@ -105,7 +105,7 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 400,
+        height: 420,
         width: 400,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [

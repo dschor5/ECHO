@@ -2,13 +2,15 @@
     <div id="heading">
         Mission Settings
     </div>
-    
+    <div id="navigation">
+        <button type="button" class="top-button" onclick="getUser(0)">New User</button>
+    </div>
     %content%
 </div>
 
 <div id="dialog-edit-user" title="Edit User" class="dialog-body">
     <form method="POST">
-        <div class="modal-response"></div>
+        <div class="dialog-response"></div>
                 
         <input type="hidden" id="edit-user-id" value="">
 
