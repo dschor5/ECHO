@@ -4,7 +4,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 require_once('server.inc.php');
-require_once('mission.inc.php');
 
 $config = array();
 $config['debug'] = true;
@@ -84,10 +83,12 @@ require_once('class/time.php');
 require_once('class/message.php');
 require_once('class/user.php');
 require_once('class/list.php');
+require_once('class/mission.php');
 require_once('class/conversation.php');
 require_once('class/attachment.php');
 
 // Include database objects
+require_once('database/missionDao.php');
 require_once('database/usersDao.php');
 require_once('database/conversationsDao.php');
 require_once('database/participantsDao.php');

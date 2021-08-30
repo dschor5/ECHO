@@ -3,27 +3,24 @@
 error_reporting(E_ALL);
 header('Pragma: no-cache');
 
-require_once('mission.inc.php');
-date_default_timezone_set($mission['timezone_mcc']);
-
 require_once('config.inc.php');
-require_once('database/usersDao.php');
 
 try
 {
     // Force HTTPS. 
-    if ((str_starts_with($server['http'], 'https')) && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off")) {
+    if ((str_starts_with($server['http'], 'https')) && 
+        (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off")) 
+    {
         header('HTTP/1.1 301 Moved Permanently');
         header('Location: '.$server['http'].$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); 
         exit;
     }
 
-   $main = Main::getInstance();
-   $main->compile();
+   $main = Main::getInstance()->compile();
 }
 catch (Exception $e) 
 {
-    
+    var_dump($e);   
 }
 
 /**
@@ -52,6 +49,9 @@ class Main
      */
     private function __construct()
     {
+        $mission = MissionConfig::getInstance();
+        date_default_timezone_set($mission->mcc_timezone);
+
         $this->readCookie();
         $this->checkLogin();
     }
@@ -209,7 +209,6 @@ class Main
     {
         global $config;
         global $server;
-        global $mission;
 
         $template = file_get_contents($config['templates_dir'].'/'.$dir.$template);
 

@@ -65,9 +65,25 @@ CREATE TABLE `msg_files` (
 CREATE TABLE `mission_config` (
   `name` varchar(32) COLLATE utf8_unicode_ci NOT NULL UNIQUE,
   `value` text CHARACTER SET utf8 NOT NULL,
-  `type` enum('text','int','float','bool', 'datetime') COLLATE utf8_unicode_ci NOT NULL,
+  `type` enum('string','int','float','bool', 'datetime') COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY(`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
+('name',            'string', 'Analog Mission Name'),
+('epoch',           'string', '2021-08-10 00:00:00'),
+('mcc_name',        'string', 'Mission Control'),
+('mcc_planet',      'string', 'Earth'),
+('mcc_user_role',   'string', 'Mission Control'),
+('mcc_timezone',    'string', 'America/New_York'),
+('hab_name',        'string', 'Analog Habitat'),
+('hab_planet',      'string', 'Mars'),
+('hab_user_role',   'string', 'Astronaut'),
+('hab_timezone',    'string', 'America/Chicago'),
+('hab_day_name',    'string', 'Mission Sol'),
+('delay_is_manual', 'bool',   '1'),
+('delay_curr',      'int',    '0'),
+('delay_auto',      'text',   '');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
 (1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
@@ -78,7 +94,7 @@ INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`
 INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
 (1, 1, '0000-00-00 00:00:00');
 
-
+/* The following values are used for testing only and should not be deployed by default. */
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
 (2, 'user1', 'Flight Director', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 0, NULL, 1, ''),

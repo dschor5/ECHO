@@ -28,7 +28,7 @@
         }
     </style>
 
-%css_file%%js_file%</head>
+%templates%</head>
 
 <body>
 <center>

@@ -13,9 +13,6 @@ class FileModule implements Module
 
     public function compile() : string
     {
-        global $config;
-        global $mission;
-
         $id = $_GET['id'] ?? '';
         
         if(intval($id) > 0)

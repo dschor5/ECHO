@@ -40,9 +40,10 @@ class UsersDao extends Dao
 
         if($user == null)
         {
-            $queryStr = 'SELECT users.*, GROUP_CONCAT(participants.conversation_id) AS conversations FROM users '. 
-                        'JOIN participants ON users.user_id=participants.user_id '. 
-                        'WHERE users.user_id=\''.$this->database->prepareStatement($id).'\'';
+            $queryStr = 'SELECT users.*, ('. 
+                    'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
+                    'WHERE participants.user_id=users.user_id) AS conversations '. 
+                'FROM users WHERE users.user_id='.$id;
 
             if (($result = $this->database->query($queryStr)) !== false)
             {
@@ -54,7 +55,6 @@ class UsersDao extends Dao
                 }
             }
         }
-
         return $user;
     }
 
@@ -62,7 +62,7 @@ class UsersDao extends Dao
     {
         $user = false;
 
-        foreach(self::$cache as $cachedUser)
+        foreach(self::$cache as $userId => $cachedUser)
         {
             if(strcmp($cachedUser->username, $username) === 0)
             {
@@ -75,9 +75,10 @@ class UsersDao extends Dao
         {
             $qUsername = '\''.$this->database->prepareStatement($username).'\'';
 
-            $queryStr = 'SELECT users.*, GROUP_CONCAT(participants.conversation_id) AS conversations FROM users '. 
-                'JOIN participants ON users.user_id=participants.user_id '. 
-                'WHERE users.username='.$qUsername;
+            $queryStr = 'SELECT users.*, ('. 
+                    'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
+                    'WHERE participants.user_id=users.user_id) AS conversations '. 
+                'FROM users WHERE users.username='.$qUsername;
 
             if (($result = $this->database->query($queryStr)) !== false)
             {
@@ -148,10 +149,10 @@ class UsersDao extends Dao
 
             foreach($users as $otherUserId=>$user)
             {
-                if($newUserId != $user->getId())
+                if($newUserId != $user->user_id)
                 {
                     $newConvoData = array(
-                        'name' => $user->getAlias().'-'.$users[$newUserId]->getAlias(),
+                        'name' => $user->alias.'-'.$users[$newUserId]->alias,
                         'parent_conversation_id' => null,
                     );
                     $newConvoId = $conversationsDao->insert($newConvoData);

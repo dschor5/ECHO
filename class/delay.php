@@ -11,7 +11,7 @@ class Delay
 
     private function __construct()
     {
-        $this->currDelay = 60;
+        $this->currDelay = 0;
     }
 
     public static function getInstance()
@@ -23,13 +23,9 @@ class Delay
         return self::$instance;
     }
 
-    public function readConfig(string $filename): bool
-    {
-        return true;
-    }
-
     public function getDelay(): int
     {
+        $delay = MissionConfig::getInstance();
         return $this->currDelay;
     }
 

@@ -26,7 +26,7 @@ function handleAjaxNewMessage(resp) {
     if(resp.success) {
         $('#new-msg-text').val("");
         closeModal();
-        console.log("Sent message_id=" + resp.message_id);
+        console.info("Sent message_id=" + resp.message_id);
     }
     else {
         console.error(resp.error);
@@ -38,9 +38,9 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
     return;
 }
 
-
 const evtSource = new EventSource(BASE_URL + '/chat/refresh');
 
+/*
 evtSource.onopen = function () {
     console.info("EventSource connected.");
 };
@@ -48,21 +48,14 @@ evtSource.onopen = function () {
 evtSource.onerror = function (err) {
     console.error("EventSource failed:", err);
 };
+*/
 
 evtSource.addEventListener("logout", handleEventSourceLogout);
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 
-
-
 function handleEventSourceLogout(event) {
     evtSource.close();
-    $('#send-btn').prop('disabled', true);
-    $('#file-btn').prop('disabled', true);
-    $('#audio-btn').prop('disabled', true);
-    $('#video-btn').prop('disabled', true);
-    $('#modal-logout').css('display', 'block');
-    sleep(5000);
     location.href = BASE_URL;
 }
 
@@ -147,17 +140,12 @@ $(document).ready(function() {
     
 });
 
-$(document).ready(function() {
-    $('.modal').click( function(event) {
-        if($(event.target).attr('class') == 'modal') {
-            closeModal();
-        }
-    });
-});
-
 function closeModal() {
     // Common
-    $('div.modal-response').hide();
+    try { $('#progress-video').progressbar('widget').hide('highlight', 0); } catch(e) {}
+    try { $('#progress-audio').progressbar('widget').hide('highlight', 0); } catch(e) {}
+    try { $('#progress-file').progressbar('widget').hide('highlight', 0);  } catch(e) {}
+    $('.modal-response').hide();
     try {
         stream.getTracks().forEach(function(track) {
             track.stop();
@@ -166,14 +154,7 @@ function closeModal() {
     catch (e) {} // Do nothing.
 
     // File
-    $('#modal-file').css('display', 'none');
     $('#new-msg-file').val("");
-    
-    // Video
-    $('#modal-video').css('display', 'none');
-
-    // Audio 
-    $('#modal-audio').css('display', 'none');
 
     // Media general
     try {
@@ -181,24 +162,120 @@ function closeModal() {
         playMediaPlayer.removeAttribute('src');
         window.URL.revokeObjectURL(mediaUrl);
     }
-    catch (e) {
-        console.log('Cannot revoke url.');
-    }
+    catch (e) {}
 
-    $("#progress-wrp .progress-bar").css("width", "0%");
-    $("#progress-wrp .status").text("0%");
+    $('#dialog-video').dialog('close');
+    $('#dialog-audio').dialog('close');
+    $('#dialog-file').dialog('close');
 }
 
 
 function openFileModal() {
-    $('#modal-file').css('display', 'block');
+    $('#dialog-file').dialog('open');
 }
 
-function uploadMedia(mediaType) {
-    // Reset progress bar. 
-    $("#progress-wrp .progress-bar").css("width", "0%");
-    $("#progress-wrp .status").text("0%");
 
+$(document).ready(function() {
+    // Video
+    $('#dialog-video').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        closeOnEscape: false,
+        height: 400,
+        width: 600,
+        position: { my: "center center", at: "center center-25%", of: window },
+        buttons: [
+            {
+                text: 'Start Recording',
+                id: 'video-record-btn',
+                click: function() { startRecording('video') },
+                icon: 'ui-icon-bullet'
+            },
+            {
+                text: 'Stop Recording',
+                id: 'video-stop-btn',
+                click: function() { stopRecording('video') },
+                icon: 'ui-icon-stop'
+            },
+            {
+                text: 'Send Video',
+                id: 'video-send-btn',
+                click: function() { uploadMedia('video') }
+            }
+        ],
+        modal: true,
+        close: closeModal
+    });
+
+    // Progress bar for uploads
+    $('#progress-video').progressbar({value: false});
+    $('#progress-video').progressbar('widget').hide('highlight', 0);
+
+    // Audio
+    $('#dialog-audio').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        closeOnEscape: false,
+        height: 300,
+        width: 600,
+        position: { my: "center center", at: "center center-25%", of: window },
+        buttons: [
+            {
+                text: 'Start Recording',
+                id: 'audio-record-btn',
+                click: function() { startRecording('audio') },
+                icon: 'ui-icon-bullet'
+            },
+            {
+                text: 'Stop Recording',
+                id: 'audio-stop-btn',
+                click: function() { stopRecording('audio') },
+                icon: 'ui-icon-stop'
+            },
+            {
+                text: 'Send Audio',
+                id: 'audio-send-btn',
+                click: function() { uploadMedia('audio') }
+            }
+        ],
+        modal: true,
+        close: closeModal
+    });    
+
+    // Progress bar for uploads
+    $('#progress-audio').progressbar({value: false});
+    $('#progress-audio').progressbar('widget').hide('highlight', 0);
+
+    // Files
+    $('#dialog-file').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        closeOnEscape: false,
+        height: 300,
+        width: 600,
+        position: { my: "center center", at: "center center-25%", of: window },
+        buttons: [
+            {
+                text: 'Send File',
+                id: 'file-send-btn',
+                click: function() { uploadMedia('file') }
+            }
+        ],
+        modal: true,
+        close: closeModal
+    });     
+
+    // Progress bar for uploads
+    $('#progress-file').progressbar({value: false});
+    $('#progress-file').progressbar('widget').hide('highlight', 0);
+});
+
+let progressBar;
+
+function uploadMedia(mediaType) {
     // Create object to hold all the form data including the file 
     // or media to be uploaded with the message.
     var formData = new FormData();
@@ -212,7 +289,7 @@ function uploadMedia(mediaType) {
             return;
         }
         const blobMimeType = (recordedBlobs[0] || {}).type;
-        console.log(blobMimeType);
+        //console.log(blobMimeType);
         const blob = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
         formData.append("data", blob, "recording");
@@ -229,6 +306,9 @@ function uploadMedia(mediaType) {
         formData.append("data", file, file.name);
     }
 
+    progressBar = $('#progress-' + mediaType)
+    $('#progress-' + mediaType).progressbar('widget').show('highlight', 0);
+
     $.ajax({
         type: "POST",
         url:  BASE_URL,
@@ -241,7 +321,7 @@ function uploadMedia(mediaType) {
         xhr: function () {
             var myXhr = $.ajaxSettings.xhr();
             if (myXhr.upload) {
-                myXhr.upload.addEventListener('progress', progressHandling, false);
+                myXhr.upload.addEventListener('progress', progressHandling, {active: false});
             }
             return myXhr;
         },
@@ -257,9 +337,7 @@ function progressHandling(event) {
     if (event.lengthComputable) {
         percent = Math.ceil(position / total * 100);
     }
-    // update progressbars classes so it fits your code
-    $("#progress-wrp .progress-bar").css("width", +percent + "%");
-    $("#progress-wrp .status").text(percent + "%");
+    progressBar.progressbar('value', percent);
 }
 
 var oldMsgQueryInProgress = false;
@@ -273,7 +351,7 @@ $(document).ready(function() {
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
             loadPrevMsgs();
         }
-    });
+    }, {passive: false});
 });
 
 $(document).ready(loadPrevMsgs);

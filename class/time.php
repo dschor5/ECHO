@@ -9,14 +9,14 @@ class DelayTime
 
     public function __construct(string $datetime = 'now', bool $mccTz=true)
     {
-        global $mission;
+        $mission = MissionConfig::getInstance();
 
-        $timezone = $mccTz ? $mission['timezone_mcc'] : $mission['timezone_hab'];
+        $timezone = $mccTz ? $mission->mcc_timezone : $mission->hab_timezone;
         
         if(self::$epochMet == null)
         {
             self::$timezone = new DateTimeZone($timezone);
-            $epoch = new DateTime($mission['time_epoch_hab'], self::$timezone);
+            $epoch = new DateTime($mission->epoch, self::$timezone);
             self::$epochMet = $epoch->getTimestamp();
         }
 
@@ -26,16 +26,16 @@ class DelayTime
 
     public static function getEpochUTC() : string
     {
-        global $mission;
-        $epoch = new DateTime($mission['time_epoch_hab'], new DateTimeZone('UTC'));
+        $mission = MissionConfig::getInstance();
+        $epoch = new DateTime($mission->epoch, new DateTimeZone('UTC'));
         return $epoch->getTimestamp();
     }
 
     // Return minutes for offset to UTC
     public static function getTimezoneOffset(bool $mccTz=true) : int 
     {   
-        global $mission;
-        $timezone = $mccTz ? $mission['timezone_mcc'] : $mission['timezone_hab'];
+        $mission = MissionConfig::getInstance();
+        $timezone = $mccTz ? $mission->mcc_timezone : $mission->hab_timezone;
         $met = new DateTime('now', new DateTimeZone($timezone));
         return $met->format('Z');
     }
@@ -70,7 +70,7 @@ class DelayTime
 
     private function formatForHab(int $met) : string 
     {
-        global $mission;
+        $mission = array('time_sec_per_day'=>24*60*60, 'time_day' => 'Mission Sol');
         
         // Format time diff
         $day = floor($met / $mission['time_sec_per_day']);

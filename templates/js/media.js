@@ -37,19 +37,15 @@ function getSupportedMimeTypes() {
 }
 
 async function openMediaModal(mediaType) {
-    $('#modal-' + mediaType).css('display', 'block');
-    recBtn = document.querySelector('#' + mediaType + '-record-btn');
-    stopBtn = document.querySelector('#' + mediaType + '-stop-btn');
-    sendBtn = document.querySelector('#' + mediaType + '-send-btn');
+    //$('#modal-' + mediaType).css('display', 'block');
+    $('#dialog-' + mediaType).dialog('open');
+    
     recMediaPlayer = document.querySelector('#rec-' + mediaType + '-player');
     playMediaPlayer = document.querySelector('#play-' + mediaType + '-player');
 
-    $("#progress-wrp .progress-bar").css("width", "0%");
-    $("#progress-wrp .status").text("0%");
-
-    recBtn.disabled = false;
-    stopBtn.disabled = true;
-    sendBtn.disabled = true;
+    $('#' + mediaType + '-record-btn').button("enable");
+    $('#' + mediaType + '-stop-btn').button("disable");
+    $('#' + mediaType + '-send-btn').button("disable");
     await initMediaStream(mediaType);
 }
 
@@ -81,10 +77,10 @@ async function initMediaStream(mediaType) {
 }
 
 function startRecording(mediaType) {
-    recBtn.disabled = true;
-    recBtn.style.color = '#993d3d';
-    stopBtn.disabled = false;
-    sendBtn.disabled = true;
+    $('#' + mediaType + '-record-btn').button("disable");
+    $('#' + mediaType + '-record-btn').css('color', '#993d3d');
+    $('#' + mediaType + '-stop-btn').button("enable");
+    $('#' + mediaType + '-send-btn').button("disable");
 
     recMediaPlayer.srcObject = stream;
 
@@ -119,16 +115,15 @@ function startRecording(mediaType) {
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+}
 
 async function stopRecording(mediaType) {
-    recBtn.disabled = false;
-    recBtn.style.color = '#000000';
-    stopBtn.disabled = true;
-    sendBtn.disabled = false;
+    $('#' + mediaType + '-record-btn').button("enable");
+    $('#' + mediaType + '-record-btn').css('color', '#555555');
+    $('#' + mediaType + '-stop-btn').button("disable");
+    $('#' + mediaType + '-send-btn').button("enable");
     mediaRecorder.stop();
     let dt = new Date();
-    console.log('Recorded: ' + (dt.getTime() - recDuration)/1000 + ' sec');
 
     await sleep(500);
 

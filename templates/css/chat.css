@@ -254,7 +254,7 @@
     margin-bottom: 2px;
 }
 
-.modal-footer-small {
+/*.modal-footer-small {
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     padding-top: 5px;
@@ -278,6 +278,7 @@
     background-color: #666;
     color: #FFF;
 }
+*/
 
 .new-msg-btn {
     height: 33px;
@@ -346,28 +347,28 @@
     display: table;
 }
 
-.modal-content {
+/*.modal-content {
     width: 600px;
     min-width: 600px;
     max-width: 600px;
-}
+}*/
 
-.modal-content .media {
+.media {
     display: inline-block;
     text-align: center;
     font-style: italic;
 }
 
-.modal-body .media video {
+#dialog-video video {
     border: 1px solid #000;
-    --width: 293px;
+    --width: 271px;
     width: var(--width);
     height: calc(var(--width) * 0.5625);
     background-color: #000;
     border-radius: 10px;
 }
 
-.modal-body audio {
+#dialog-audio audio {
     width: 100%;
     height: 50px;
     border-radius: 10px;

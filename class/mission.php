@@ -1,21 +1,21 @@
 <?php
 
-class Mission 
+class MissionConfig
 {
     private static $instance = null;
     private $data = array();
 
-    private function __construct(array $data)
+    private function __construct()
     {
         $missionDao = MissionDao::getInstance();
-        $this->data = $missionDao->loadSettings();
+        $this->data = $missionDao->readMissionConfig();
     }
 
     public static function getInstance()
     {
         if(self::$instance == null)
         {
-            self::$instance = new Mission();
+            self::$instance = new MissionConfig();
         }
         return self::$instance;
     }

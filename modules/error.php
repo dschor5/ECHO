@@ -19,17 +19,7 @@ class ErrorModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
-        $this->addCss('common');
-        $this->addCss('settings');
-        if($this->user->is_crew)
-        {
-            $this->addCss('chat-hab');
-        }
-        else
-        {
-            $this->addCss('chat-mcc');
-        }
-
+        $this->addTemplates('common.css', 'settings.css');
         return Main::loadTemplate('error.txt');
     }
 }

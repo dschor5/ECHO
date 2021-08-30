@@ -8,59 +8,34 @@
     %content%
 </div>
 
-<div class="modal" id="edit-user" tabindex="-1">
-    <div class="modal-dialog animate">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Edit User</div>
-                <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-response"></div>
+<div id="dialog-edit-user" title="Edit User" class="dialog-body">
+    <form method="POST">
+        <div class="modal-response"></div>
                 
-                <input type="hidden" id="edit-user-id" value="">
+        <input type="hidden" id="edit-user-id" value="">
 
-                <label for="username">Username</label>
-                <input type="text" placeholder="Enter Username" name="username" id="username" required>
+        <label for="username">Username</label>
+        <input type="text" placeholder="Enter Username" name="username" id="username" required>
 
-                <label for="alias">Name or Alias</label>
-                <input type="text" placeholder="Enter Alias / Name" name="alias" id="alias" required>
+        <label for="alias">Name or Alias</label>
+        <input type="text" placeholder="Enter Alias / Name" name="alias" id="alias" required>
 
-                <label for="is_crew">Analog Role</label>
-                <select id="is_crew" name="is_crew">
-                    <option value="1">%role_hab%</option>
-                    <option value="0">%role_mcc%</option>
-                </select>
+        <label for="is_crew">Analog Role</label>
+        <select id="is_crew" name="is_crew">
+            <option value="1">%role_hab%</option>
+            <option value="0">%role_mcc%</option>
+        </select>
 
-                <label for="is_admin">Software Role</label>
-                <select id="is_admin" name="is_admin">
-                    <option value="0">User</option>
-                    <option value="1">Admin</option>
-                </select>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" onclick="editUser()">Save Changes</button>
-                <button type="button" onclick="closeModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
+        <label for="is_admin">Software Role</label>
+        <select id="is_admin" name="is_admin">
+            <option value="0">User</option>
+            <option value="1">Admin</option>
+        </select>
+    </form>
 </div>
 
-<div class="modal" id="confirm-box" tabindex="-1">
-    <div class="modal-dialog animate">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title"></div>
-                <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-confirm-body"></div>
-            <input type="hidden" id="confirm-user-id" name="user_id" value="">
-            <input type="hidden" id="confirm-subaction" name="subaction" value="">
-            <div class="modal-footer">
-                <button type="button" onclick="deleteOrResetUser()">Yes</button>
-                <button type="button" onclick="closeModal()">No</button>
-            </div>
-        </div>
-    </div>
+<div id="dialog-confirm" title="" class="dialog-body">
+    <div class="modal-confirm-body"></div>
+    <input type="hidden" id="confirm-user-id" name="user_id" value="">
+    <input type="hidden" id="confirm-subaction" name="subaction" value="">    
 </div>

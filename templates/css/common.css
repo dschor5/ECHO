@@ -112,43 +112,8 @@ a:hover {
     background-color: var(--border-dark);
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0, 0, 0);
-    background-color: rgba(0, 0, 0, 0.6);
-}
 
-.modal-dialog {
-    position: relative;
-    width: auto;
-    margin: 0;
-    pointer-events: none;
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 5% auto 15% auto;
-    min-width: 200px;
-    max-width: 300px;
-    position: relative;
-    pointer-events: auto;
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 10px;
-}
-
-.modal-body {
-    color: #000;
-}
-
-.modal-response {
+.dialog-response {
     display: none;
     color: #FF0000;
     border: 1px solid #FF0000;
@@ -157,16 +122,17 @@ a:hover {
     margin-bottom: 10px;
 }
 
-.modal-body label {
+.dialog-body label {
     line-height: 12px;
     margin-bottom: 5px;
     padding-bottom: 0px;
     color: #666;
 }
 
-.modal-body input[type="text"], 
-.modal-body input[type="password"], 
-.modal-body select {
+.dialog-body input[type="text"], 
+.dialog-body input[type="password"], 
+.dialog-body input[type="file"],
+.dialog-body select {
     margin-top: 2px;
     margin-bottom: 10px;
     width: 100%;
@@ -179,82 +145,7 @@ a:hover {
     height: 30px;
 }
 
-.modal-body input[type='checkbox'] {
+
+.dialog-body input[type='checkbox'] {
     display: inline-block;
-}
-
-.modal-header {
-    border-bottom: 1px solid #e9ecef;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-    color: #000000;
-    font-size: 16pt;
-    font-weight: bold;
-}
-
-.modal-close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    font-size: 35px;
-    background: inherit;
-    border: 0px;
-    cursor: pointer;
-}
-
-.modal-close:hover, .modal-close:focus {
-    color: #c59504;
-}
-
-.modal-footer {
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    padding-top: 5px;
-    color: #000000;
-    font-size: 16pt;
-    font-weight: bold;
-    text-align: center;
-}
-
-.modal-footer button {
-    margin: 0px auto;
-    position: relative;
-    width: calc(50% - 5px);
-    border: 0px;
-    padding: 5px 0px;
-    height: 25px;
-    border-radius: 5px;
-    border: 1px solid #666;
-}
-
-.modal-footer button:hover {
-    background-color: #666;
-    color: #FFF;
-}
-
-/* Add Zoom Animation */
-
-.animate {
-    -webkit-animation: animatezoom 0.6s;
-    animation: animatezoom 0.6s;
-}
-
-@-webkit-keyframes animatezoom {
-    from {
-        -webkit-transform: scale(0);
-    }
-    to {
-        -webkit-transform: scale(1);
-    }
-}
-
-@keyframes animatezoom {
-    from {
-        transform: scale(0);
-    }
-    to {
-        transform: scale(1);
-    }
 }

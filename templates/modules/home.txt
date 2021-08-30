@@ -8,7 +8,7 @@
         <div id="owlt-label" class="sim-param-label">one-way-light-time</div>
         <div id="owlt-value" class="sim-param-value">%delay_time%</div>
 
-        <button type="button" id="current-delay-login" onclick="openLoginModal()">Login</button>
+        <button type="button" id="current-delay-login">Login</button>
     </div>
 </div>
 
@@ -17,29 +17,14 @@
 (b) <a href="https://mars.nasa.gov/resources/6453/valles-marineris-hemisphere-enhanced/">Mars Image Credits courtesy of NASA/JPL-Caltech</a>.</p>
 </div>
 
-<div class="modal" id="loginform" tabindex="-1">
-    <div class="modal-dialog animate">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Login to Server</div>
-                <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <form method="POST">
-                <div class="modal-body">
-                    <div class="modal-response"></div>
-                    <label for="uname">Username</label>
-                    <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
+<div id="dialog-login" title="Login to Server" class="dialog-body">
+    <form method="POST">
+        <div class="dialog-response"></div>
+    
+        <label for="uname">Username</label>
+        <input type="text" placeholder="Enter Username" name="uname" id="uname" autocomplete="username" required autofocus>
 
-                    <label for="upass">Password</label>
-                    <input type="password" placeholder="Enter Password" name="upass" id="upass" required>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="login-btn" onclick="login()">Login</button>
-                    <button type="button" onclick="closeModal()">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
+        <label for="upass">Password</label>
+        <input type="password" placeholder="Enter Password" name="upass" id="upass" autocomplete="current-password" required>
+    </form>
 </div>
-
-

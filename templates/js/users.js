@@ -15,7 +15,7 @@ function getUser(id) {
                 $('#alias').val(data.alias);
                 $('#is_admin').val(data.is_admin).change();
                 $('#is_crew').val(data.is_crew).change();
-                $('.modal-title').text('Edit User');
+                $('#dialog-edit-user').dialog({title: 'Edit User'});
             }
             else {
                 $('#edit-user-id').val(0);
@@ -23,9 +23,9 @@ function getUser(id) {
                 $('#alias').val('');
                 $('#is_admin').val(0).change();
                 $('#is_crew').val(1).change();
-                $('.modal-title').text('Create User');
+                $('#dialog-edit-user').dialog({title: 'Create User'});
             }
-            $('#edit-user').css('display', 'block');
+            $('#dialog-edit-user').dialog('open');
         }
     });
 }
@@ -60,15 +60,19 @@ function confirmAction(subaction, id, username) {
     $(document).ready(function() {
         $('#confirm-subaction').val(subaction);
         $('#confirm-user-id').val(id);
+
         if(subaction == 'deleteuser') {
-            $('.modal-title').text('Delete User');
+            $('#dialog-confirm').dialog({title: 'Delete User'});
             $('.modal-confirm-body').text("Are you sure you want to delete '" + username + "'?");
+            $('#confirm-btn').text('Delete User');
         }
         else {
-            $('.modal-title').text('Reset User Password');
+            $('#dialog-confirm').dialog({title: 'Reset User Password'});
             $('.modal-confirm-body').text("Are you sure you want to reset the password for '" + username + "'?");
+            $('#confirm-btn').text('Reset Password');
         }
-        $('#confirm-box').css('display', 'block');
+        
+        $('#dialog-confirm').dialog('open');
     });
 }
 
@@ -89,16 +93,54 @@ function deleteOrResetUser() {
 
 // Actions to execute when closing modal window.
 function closeModal() {
-    $('#edit-user').css('display', 'none');
-    $('#confirm-box').css('display', 'none');
+    $('#dialog-edit-user').dialog('widget').hide('highlight', 0);
+    $('#dialog-confirm').dialog('widget').hide('highlight', 0);
     $('div.modal-response').hide();
 }
 
 // Event handlers for closing modal.
 $(document).ready(function() {
-    $('.modal').click( function(event) {
-        if($(event.target).attr('class') == 'modal') {
-            closeModal();
-        }
+    $('#dialog-edit-user').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        closeOnEscape: false,
+        height: 400,
+        width: 400,
+        position: { my: "center center", at: "center center-25%", of: window },
+        buttons: [
+            {
+                text: 'Cancel',
+                click: function() { $(this).dialog('close'); }
+            },
+            {
+                text: 'Save User',
+                click: editUser
+            }
+        ],
+        modal: true,
     });
+
+    $('#dialog-confirm').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        closeOnEscape: false,
+        height: 200,
+        width: 400,
+        position: { my: "center center", at: "center center-25%", of: window },
+        buttons: [
+            {
+                text: 'Cancel',
+                click: function() { $(this).dialog('close'); }
+            },
+            {
+                text: 'OK',
+                id: 'confirm-btn',
+                click: deleteOrResetUser
+            }
+        ],
+        modal: true,
+    });
+
 });

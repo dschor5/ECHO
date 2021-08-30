@@ -33,10 +33,15 @@ class ChatModule extends DefaultModule
         $conversationsDao = ConversationsDao::getInstance();
         // Caches all conversations for this user. This is used later to create the navication.
         $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
-        
+
         if(isset($conversations[$conversationId]))
         {
             $this->conversation = $conversations[$conversationId];
+        }
+        // Needed in case the cookie value was deleted by the admin.
+        else
+        {
+            $this->conversation = $conversations[1];
         }
 
         Main::setSiteCookie(array('conversation_id'=>$conversationId));
@@ -191,7 +196,7 @@ class ChatModule extends DefaultModule
 
             if(($messageId = $messagesDao->sendMessage($msgData, $fileData)) !== false)
             {
-                $response = array(
+                $result = array(
                     'success' => true,
                     'message_id' => $messageId
                 );
@@ -200,8 +205,6 @@ class ChatModule extends DefaultModule
             {
                 $result['error'] = 'Database error.';
             }
-            
-            $result['success'] = true;
         }
 
         return $result;
@@ -327,24 +330,13 @@ class ChatModule extends DefaultModule
     public function compileHtml(string $subaction) : string
     {
         global $config;
-        global $mission;
+        $mission = MissionConfig::getInstance();
 
         $time = new DelayTime();
 
-        $this->addCss('common');
-        $this->addCss('chat');
-        if($this->user->is_crew)
-        {
-            $this->addCss('chat-hab');
-        }
-        else
-        {
-            $this->addCss('chat-mcc');
-        }
-        $this->addJavascript('jquery-3.6.0.min');
-        $this->addJavascript('chat');
-        $this->addJavascript('media');
-        $this->addJavascript('time');
+        $this->addTemplates('common.css', 'chat.css', 
+            'jquery-ui.css', 'jquery-ui.structure.css', 'jquery-ui.theme.css', 
+            'jquery-3.6.0.min.js', 'jquery-ui.min.js', 'chat.js', 'media.js', 'time.js');
         
         if($this->user->is_admin)
         {
@@ -354,7 +346,7 @@ class ChatModule extends DefaultModule
 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->username,
-                  '/%delay_src%/' => $this->user->is_crew ? $mission['hab_name'] : $mission['mcc_name'],
+                  '/%delay_src%/' => $this->user->is_crew ? $mission->hav_name : $mission->mcc_name,
                   '/%time_mcc%/' => $time->getTime(),
                   '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
@@ -366,7 +358,7 @@ class ChatModule extends DefaultModule
     {
         $conversationsDao = ConversationsDao::getInstance();
         $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
-        
+    
         $content = '';
         foreach($conversations as $convo)
         {

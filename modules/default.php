@@ -9,16 +9,15 @@ abstract class DefaultModule implements Module
     protected $subHtmlRequests;
     protected $subStreamRequests;
 
-    private $cssFiles;
-    private $jsFiles;
+    private $templateFiles;
     private $navLinks;
 
     public function __construct(&$user)
     {
         $this->user = &$user;
         $this->db = Database::getInstance();
-        $this->cssFiles = array();
-        $this->jsFiles = array();
+        $this->templateFiles = array(
+            ($this->user != null && $this->user->is_crew) ? 'chat-hab.css' : 'chat-mcc.css');
         $this->navLinks = array();
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array();
@@ -30,33 +29,21 @@ abstract class DefaultModule implements Module
         return 'Analog Comm Delay';
     }
 
-    protected function addCss(string $newCssFile)
+    protected function addTemplates(string ...$newFile)
     {
-        $this->cssFiles[] = $newCssFile;
-    }
-
-    public function getCss(): string
-    {
-        $content = '';
-        foreach($this->cssFiles as $file)
+        foreach($newFile as $f)
         {
-            $content .= "\t".Main::loadTemplate('css_file.txt', 
-                array('/%filename%/'=>$file)).PHP_EOL;
+            $this->templateFiles[] = $f;
         }
-        return $content;
     }
 
-    protected function addJavascript(string $newJsFile)
-    {
-        $this->jsFiles[] = $newJsFile;
-    }
-
-    public function getJavascript(): string
+    private function getTemplates(): string
     {
         $content = '';
-        foreach($this->jsFiles as $file)
+        foreach($this->templateFiles as $file)
         {
-            $content .= "\t".Main::loadTemplate('javascript_file.txt', 
+            $extension = substr($file, strrpos($file, '.') + 1);
+            $content .= "\t".Main::loadTemplate($extension.'_file.txt', 
                 array('/%filename%/'=>$file)).PHP_EOL;
         }
         return $content;
@@ -95,9 +82,10 @@ abstract class DefaultModule implements Module
 
     public function compile()
     {
-        global $mission;
         global $server;
         global $config;
+
+        $mission = MissionConfig::getInstance();
 
         $subaction = '';
         if(isset($_POST['subaction']) && $_POST['subaction'] != null)
@@ -138,20 +126,19 @@ abstract class DefaultModule implements Module
             $replace = array(
                 '/%title%/'            => $this->getPageTitle(),
                 '/%content%/'          => $this->compileHtml($subaction),
-                '/%css_file%/'         =>$this->getCss(),
-                '/%js_file%/'          =>$this->getJavascript(),
+                '/%templates%/'        => $this->getTemplates(),
                 '/%header%/'           => $this->getHeader(),
-                '/%home_planet%/'      => $mission['home_planet'],
-                '/%away_planet%/'      => $mission['away_planet'],
+                '/%home_planet%/'      => $mission->mcc_planet,
+                '/%away_planet%/'      => $mission->hab_planet,
                 '/%delay_distance%/'   => $commDelay->getDistanceStr(),
                 '/%delay_time%/'       => $commDelay->getDelayStr(),
-                '/%mission_name%/'     => $mission['name'],
+                '/%mission_name%/'     => $mission->name,
                 '/%year%/'             => date('Y'),
                 '/%random%/'           => rand(1, 100000),
                 '/%epoch%/'            => DelayTime::getEpochUTC(),
-                '/%time_sec_per_day%/' => $mission['time_sec_per_day'],
-                '/%time_day%/'         => $mission['time_day'],
-                '/%hab_time_format%/'  => $mission['time_hab_format'] ? 'true' : 'false',
+                '/%time_sec_per_day%/' => 24*60*60, // TODO
+                '/%time_day%/'         => $mission->hab_day_name,
+                '/%hab_time_format%/'  => 'true', // TODO
                 '/%timezone_mcc_offset%/'  => DelayTime::getTimezoneOffset(true),
                 '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffset(false),
             );

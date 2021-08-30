@@ -120,98 +120,39 @@
         <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage()">SEND</button>
     </div>
     
-    <div class="modal" id="modal-video" tabindex="-1">
-        <div class="modal-dialog animate">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">Record Video Message</div>
-                    <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
-                </div>
-                <form method="POST">
-                    <div class="modal-body">
-                        <p>Record and preview your message before sending.</p>
-                        <div class="media" style="margin-right: 2px;">Webcam <br> <video id="rec-video-player" src="" playsinline autoplay muted></video></div>
-                        <div class="media" style="margin-left: 2px;">Preview <br> <video id="play-video-player" src="" playsinline autoplay></video></div>
-                        <div id="progress-wrp">
-                            <div class="progress-bar"></div>
-                            <div class="status">0%</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer-small">
-                        <button type="button" id="video-record-btn" onclick="startRecording('video')"><span class="symbol-small">&#11044;</span> Start Recording</button>
-                        <button type="button" id="video-stop-btn" onclick="stopRecording('video')"><span class="symbol">&#xE074;</span> Stop Recording</button>
-                        <!--<button type="button" id="video-play-btn" onclick="playRecording('video')"><span class="symbol">&#xE072;</span> Play Preview</button>-->
-                        <button type="button" id="video-send-btn" onclick="uploadMedia('video')" disabled>Send Video</button>
-                    </div>
-                </form>
+    <div id="dialog-video" title="Record Video Message" class="dialog-body">
+        <form method="POST">
+            <p>Record and preview your message before sending.</p>
+            <div class="media" style="margin-right: 2px;">Webcam <br> 
+                <video id="rec-video-player" src="" playsinline autoplay muted></video>
             </div>
-        </div>
+            <div class="media" style="margin-left: 2px;">Preview <br> 
+                <video id="play-video-player" src="" playsinline autoplay></video>
+            </div>
+        </form>
+        <div id="progress-video"><div class="progress-label-video"></div></div>
     </div>
 
-    <div class="modal" id="modal-audio" tabindex="-1">
-        <div class="modal-dialog animate">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">Record Audio Message</div>
-                    <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
-                </div>
-                <form method="POST">
-                    <div class="modal-body">
-                        <p>Record and preview your message before sending.</p>
-                        <audio id="rec-audio-player" src="" playsinline autoplay muted></audio>
-                        <audio id="play-audio-player" src="" playsinline autoplay controls></audio>
-                        <div id="progress-wrp">
-                            <div class="progress-bar"></div>
-                            <div class="status">0%</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer-small">
-                        <button type="button" id="audio-record-btn" onclick="startRecording('audio')"><span class="symbol-small">&#11044;</span> Record</button>
-                        <button type="button" id="audio-stop-btn" onclick="stopRecording('audio')"><span class="symbol">&#xE074;</span> Stop</button>
-                        <!--<button type="button" id="audio-play-btn" disabled><span class="symbol">&#xE072;</span> Play</button>-->
-                        <button type="button" id="audio-send-btn" onclick="uploadMedia('audio')" disabled>Send Audio</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div id="dialog-audio" title="Record Audio Message" class="dialog-body">
+        <form method="POST">
+            <p>Record and preview your message before sending.</p>
+            <audio id="rec-audio-player" src="" playsinline autoplay muted></audio>
+            <audio id="play-audio-player" src="" playsinline autoplay controls></audio>
+        </form>
+        <div id="progress-audio"><div class="progress-label-audio"></div></div>
     </div>
 
-    <div class="modal" id="modal-file" tabindex="-1">
-        <div class="modal-dialog animate">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">Select File to Send</div>
-                    <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
-                </div>
-                <form method="POST">
-                    <div class="modal-body">
-                        <div class="modal-response" ></div>
-                        <input type="file" id="new-msg-file" name="new-msg-file" style="width: 600px;"/>
-                        <p>Filetypes allowed: *.docx, *.xlsx, *.pptx, *.pdf, *.jpg, *.gif, *.png.</p>
-                        <p>Max file size: 10MB</p>
-                        <div id="progress-wrp">
-                            <div class="progress-bar"></div>
-                            <div class="status">0%</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="file-send-btn" onclick="uploadMedia('file')" >Send File</button>
-                        <button type="button" onclick="closeModal()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div id="dialog-file" title="Send File Attachment" class="dialog-body">
+        <form method="POST">
+            <div class="modal-response" ></div>
+            <input type="file" id="new-msg-file" name="new-msg-file"/>
+            <p>Filetypes allowed: *.docx, *.xlsx, *.pptx, *.pdf, *.jpg, *.gif, *.png.</p>
+            <p>Max file size: 10MB</p>
+        </form>
+        <div id="progress-file"><div class="progress-label-fiel"></div></div>
+    </div>
+
+    <div id="dialog-logout" title="Session Expired" class="dialog-body">
+        Your session has expired. Please click here to login again.
     </div>
     
-    <div class="modal" id="modal-logout" tabindex="-1">
-        <div class="modal-dialog animate">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">Session Expired</div>
-                </div>
-                <div class="modal-body">
-                    Your session has expired.  Please relogin.
-                </div>
-            </div>
-        </div>
-    </div>

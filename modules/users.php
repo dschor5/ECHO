@@ -46,18 +46,9 @@ class UsersModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
-        $this->addCss('common');
-        $this->addCss('settings');
-        if($this->user->is_crew)
-        {
-            $this->addCss('chat-hab');
-        }
-        else
-        {
-            $this->addCss('chat-mcc');
-        }
-        $this->addJavascript('jquery-3.6.0.min');
-        $this->addJavascript('users');
+        $this->addTemplates('common.css', 'settings.css',
+        'jquery-ui.css', 'jquery-ui.structure.css', 'jquery-ui.theme.css', 
+        'jquery-3.6.0.min.js', 'jquery-ui.min.js', 'users.js');
 
         $this->addHeaderMenu('Chat', 'chat');
         $this->addHeaderMenu('Mission Settings', 'settings');
@@ -133,11 +124,11 @@ class UsersModule extends DefaultModule
         {
             $response['error'] = 'Invalid username. Min 4 characters.';
         }
-        elseif($user !== false && $user->getId() != $userId && $user->getUsername() == $username)
+        elseif($user !== false && $user->user_id != $userId && $user->username == $username)
         {
             $response['error'] = 'Username already in use.';
         }
-        elseif($user !== false && $user->isAdmin() != $isAdmin)
+        elseif($user !== false && $user->is_admin != $isAdmin)
         {
             $response['error'] = 'Cannot remove your own admin priviledges.';
         }
@@ -194,10 +185,10 @@ class UsersModule extends DefaultModule
             $response = array(
                 'success'  => true,
                 'user_id'  => $id,
-                'username' => $user->getUsername(),
-                'alias'    => $user->getAlias(),
-                'is_admin' => $user->isAdmin() ? 1 : 0,
-                'is_crew'  => $user->isCrew() ? 1 : 0,
+                'username' => $user->username,
+                'alias'    => $user->alias,
+                'is_admin' => $user->is_admin ? 1 : 0,
+                'is_crew'  => $user->is_crew ? 1 : 0,
             );
         }
 
@@ -206,7 +197,7 @@ class UsersModule extends DefaultModule
 
     private function listUsers() : string
     {
-        global $mission;
+        $mission = MissionConfig::getInstance();
 
         $sort = $_GET['sort'] ?? 'user_id';
         $order = $_GET['order'] ?? 'ASC';
@@ -249,7 +240,7 @@ class UsersModule extends DefaultModule
                 'id' => $id,
                 'username' => $user->username,
                 'alias' => $user->alias,
-                'is_crew' => $user->is_crew ? $mission['role_hab'] : $mission['role_mcc'],
+                'is_crew' => $user->is_crew ? $mission->hab_user_role : $mission->mcc_user_role,
                 'is_admin' => $user->is_admin ? 'Yes' : 'No',
                 'tools' => join(', ', $tools),
             ));
@@ -257,8 +248,8 @@ class UsersModule extends DefaultModule
 
         return Main::loadTemplate('users.txt', array(
             '/%content%/'=>$list->build(),
-            '/%role_mcc%/'=>$mission['role_mcc'],
-            '/%role_hab%/'=>$mission['role_hab'],
+            '/%role_mcc%/'=>$mission->mcc_user_role,
+            '/%role_hab%/'=>$mission->hab_user_role,
         ));
     }
 }

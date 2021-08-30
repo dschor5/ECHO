@@ -28,10 +28,11 @@ class HomeModule extends DefaultModule
 
     public function compileHtml(string $subaction) : string
     {
-        $this->addCss('common');
-        $this->addCss('login');
-        $this->addJavascript('jquery-3.6.0.min');
-        $this->addJavascript('login');
+        $this->addTemplates(
+            'jquery-3.6.0.min.js', 'jquery-ui.min.js', 'login.js', 
+            'common.css', 'login.css', 
+            'jquery-ui.css', 'jquery-ui.structure.css', 'jquery-ui.theme.css', 
+            );
 
         if($subaction == 'logout')
         {

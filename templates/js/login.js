@@ -1,27 +1,48 @@
 $(document).ready(function() {
-    // Register key-press event 
-    $('#uname, #upass').keypress( function(event) {
+    // Register action to open modal
+    $('#current-delay-login').click(function() {
+        $('#dialog-login').dialog('open');
+    });
+
+    // Register keypress event to submit login
+    $('#dialog-login #uname, #dialog-login #upass').keypress( function(event) {
         if(event.which == 13) {
             login();
         }
     });
 
-    // Register on-click to close modal when the user clicks outside the window.
-    $('.modal').click( function(event) {
-        if($(event.target).attr('class') == 'modal') {
-            closeModal();
+    // Modal options
+    $('#dialog-login').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        height: 280,
+        width: 400,
+        position: { my: "center center", at: "center center-25%", of: window },
+        buttons: [
+            {
+                text: 'Login',
+                click: login
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                    $(this).dialog('close');
+                }
+            }
+        ],
+        modal: true,
+        beforeClose: function(event, ui) {
+            $('#dialog-login .dialog-response').hide();
+            $('#dialog-login #uname').val('');
+            $('#dialog-login #upass').val('');
         }
     });
 });
 
-function openLoginModal() {
-    document.getElementById('loginform').style.display='block';
-    document.getElementById('uname').focus();
-}
-
 function login() {
-    var username = $('#uname').val();
-    var password = $('#upass').val();
+    var username = $('#dialog-login #uname').val();
+    var password = $('#dialog-login #upass').val();
     if(username != '' && password != '') {
         $.ajax({
             url:  BASE_URL,
@@ -37,21 +58,14 @@ function login() {
                     location.href = BASE_URL + '/chat';
                 }
                 else{
-                    $('div.modal-response').text('Invalid username or password.');
-                    $('div.modal-response').show();
+                    $('#dialog-login .dialog-response').text('Invalid username or password.');
+                    $('#dialog-login .dialog-response').show();
                 }
             },
         });
     }
     else{
-        $('div.modal-response').text('Invalid username or password.');
-        $('div.modal-response').show();
+        $('#dialog-login .dialog-response').text('Invalid username or password.');
+        $('#dialog-login .dialog-response').show();
     }
-}
-
-function closeModal() {
-    $('#loginform').css('display', 'none');
-    $('#uname').val('');
-    $('#upass').val('');
-    $('div.modal-response').hide();
 }

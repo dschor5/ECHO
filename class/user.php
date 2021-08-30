@@ -40,11 +40,11 @@ class User
 
     public function getLocation(): string
     {
-        global $mission;
-        $location = $mission['home_planet'];
+        $mission = MissionConfig::getInstance();
+        $location = $mission->mcc_planet;
         if($this->is_crew)
         {
-            $location = $mission['away_planet'];
+            $location = $mission->hab_planet;
         }
         return $location;
     }
