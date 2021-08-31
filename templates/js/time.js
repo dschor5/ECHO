@@ -27,7 +27,7 @@ function updateTime() {
     setTimeout(updateTime, 1000);
 }
 
-function formatTime(timeStr, mccOffset) {
+function formatTime(timeStr, mccOffset=USER_IN_MCC) {
     var dt;
     if(timeStr == null) {
         dt = new Date();
