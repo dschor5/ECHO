@@ -31,6 +31,9 @@
             <div id="delay_auto">
                 <label for="delay_auto_config">Piecewise Delay Definition in Sec</label>
                 %delay_auto%
+                <template id="delay_auto_template">
+                    %delay_auto_tmp%
+                </template>
             </div>
         </div>
 
@@ -102,33 +105,14 @@ function getDate(element) {
 
 $(document).ready(function () {
     $("body").on("click", ".add_delay_btn", function (e) {
-
-        //var index = 0;
-        var cloned_el = $(e.target).closest(".delay_config_row").clone(true);
-
-        $(e.target).closest(".delay_config_row").parent().last().append(cloned_el).find(".remove_node_btn_frm_field:not(:first)").prop("disabled", false);
-
-        //change id
-        //$(cloned_el)
-        //    .find(".delay_cfg")
-        //    .attr("id", "delay-cfg-" + index);
-
-        //$(cloned_el)
-        //    .find(".delay_met")
-        //    .attr("id", "delay-met-" + index);
-
-        console.log(cloned_el);
-        //count++;
-
-        $('body').find(".del_delay_btn:not(:first)").prop("disabled", false); 
-        $('body').find(".del_delay_btn").first().prop("disabled", true); 
-
-       // $('#delay-met-' + index).datepicker({ dateFormat: 'yy-mm-dd'});
-       $('.delay_cfg').datepicker({ dateFormat: 'yy-mm-dd'});
+        var template = document.querySelector('#delay_auto_template');
+        if('content' in document.createElement('template'))
+        {
+            var objClone = template.content.cloneNode(true);
+            objClone.find('.delay_met').uniqueId();
+            objClone.find('.delay_met').datepicker({ dateFormat: 'yy-mm-dd' });
+        }
     });
-
-
-    $('.delay_cfg').datepicker({ dateFormat: 'yy-mm-dd'});
 });
 
 $("body").on("click", ".del_delay_btn", function () {
