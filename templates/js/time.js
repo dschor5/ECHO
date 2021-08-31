@@ -36,14 +36,14 @@ function formatTime(timeStr, mccOffset=USER_IN_MCC) {
         dt = new Date(timeStr);
     }
     var offset = (mccOffset) ? TZ_MCC_OFFSET : TZ_HAB_OFFSET;
-    var mccMet = dt.getTime() + offset * 1000; // milliseconds
+    var ts = dt.getTime() + offset * 1000; // milliseconds
 
     // Format MCC date
-    dt.setTime(mccMet);
-    return dt.getUTCFullYear() + "-" + 
-        (dt.getUTCMonth()+1).toString().padStart(2, "0") + "-" + 
-        dt.getUTCDate().toString().padStart(2, "0") + " " +
-        dt.getUTCHours().toString().padStart(2, "0") + ":" + 
-        dt.getUTCMinutes().toString().padStart(2, "0") + ":" + 
-        dt.getUTCSeconds().toString().padStart(2, "0");          
+    dt.setTime(ts);
+    return dt.getFullYear() + "-" + 
+        (dt.getMonth()+1).toString().padStart(2, "0") + "-" + 
+        dt.getDate().toString().padStart(2, "0") + " " +
+        dt.getHours().toString().padStart(2, "0") + ":" + 
+        dt.getMinutes().toString().padStart(2, "0") + ":" + 
+        dt.getSeconds().toString().padStart(2, "0");          
 }
