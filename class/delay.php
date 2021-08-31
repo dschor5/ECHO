@@ -37,8 +37,9 @@ class Delay
     public function getDelayStr(): string
     {
         $delayStr = '';
-        $hrs = intdiv($this->currDelay, self::SEC_PER_HOUR);
-        $min = intdiv($this->currDelay - $hrs * self::SEC_PER_HOUR, self::SEC_PER_MIN);
+        $currDelay = $this->getDelay();
+        $hrs = intdiv($currDelay, self::SEC_PER_HOUR);
+        $min = intdiv($currDelay - $hrs * self::SEC_PER_HOUR, self::SEC_PER_MIN);
         $sec = $this->currDelay - $hrs * self::SEC_PER_HOUR - $min * self::SEC_PER_MIN;
 
         if($hrs > 0)
@@ -55,7 +56,7 @@ class Delay
 
     public function getDistance(): float
     {
-        return $this->currDelay * self::SPEED_OF_LIGHT_KM_P_SEC;
+        return $this->getDelay() * self::SPEED_OF_LIGHT_KM_P_SEC;
     }
 
     public function getDistanceStr(): string
