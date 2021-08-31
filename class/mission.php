@@ -9,13 +9,13 @@ class MissionConfig
 
     private function __construct()
     {
-        $this->lastQueryTime = time() - 2 * QUERY_TIMEOUT;
+        $this->lastQueryTime = time() - 2 * self::QUERY_TIMEOUT;
         $this->refreshData();
     }
 
     private function refreshData()
     {
-        if($this->lastQueryTime + QUERY_TIMEOUT < time())
+        if($this->lastQueryTime + self::QUERY_TIMEOUT < time())
         {
             $missionDao = MissionDao::getInstance();
             $this->data = $missionDao->readMissionConfig();
