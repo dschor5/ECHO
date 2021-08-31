@@ -348,7 +348,7 @@ class ChatModule extends DefaultModule
 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->username,
-                  '/%delay_src%/' => $this->user->is_crew ? $mission->hav_name : $mission->mcc_name,
+                  '/%delay_src%/' => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversation->getId()
                 ));

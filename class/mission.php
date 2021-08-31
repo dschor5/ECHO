@@ -24,8 +24,6 @@ class MissionConfig
     {
         $result = null;
 
-        var_dump($this->data);
-
         if(array_key_exists($name, $this->data))
         {
             switch($this->data[$name]['type'])
