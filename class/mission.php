@@ -19,6 +19,7 @@ class MissionConfig
         {
             $missionDao = MissionDao::getInstance();
             $this->data = $missionDao->readMissionConfig();
+            $this->lastQueryTime = time();
         }
     }
 
