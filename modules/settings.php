@@ -65,13 +65,30 @@ class SettingsModule extends DefaultModule
         if($mission->delay_is_manual)
         {
             $delayManual = intval($mission->delay_config);
-            $delayAuto   = '';
+            $delayAuto   = 
         }
         else
         {
-            $delayManual = 0;
-            $delayAuto   = 0;
+            $delayManual  = 0;
+            $delayOptions = json_decode($mission->delay_config);
+            $delayAuto    = '';
+            foreach($delayOptions as $id => $cfg)
+            {
+                $delayAuto .= Main::loadTemplate('delay-config.txt', array(
+                    '/%delay-met-id%/'    => 'id="delay-met-'.$id.'"',
+                    '/%delay-cfg-id%/'    => 'id="delay-cfg-'.$id.'"',
+                    '/%delay-met-value%/' => $cfg['met'],
+                    '/%delay-cfg-value%/' => $cfg['cfg'],
+                ));
+            }
         }
+
+        $delayAutoTemplate = Main::loadTemplate('delay-config.txt', array(
+            '/%delay-met-id%/'    => '',
+            '/%delay-cfg-id%/'    => '',
+            '/%delay-met-value%/' => '',
+            '/%delay-cfg-value%/' => '',
+        ));
         
         return Main::loadTemplate('settings.txt', array(
             '/%name%/'            => $mission->name,
@@ -87,7 +104,8 @@ class SettingsModule extends DefaultModule
             '/%hab_timezone%/'    => $habTimezoneOptions,
             '/%delay_is_manual%/' => $delayIsManualOptions,
             '/%delay_manual%/'    => $delayManual,
-            '/%auto_delay%/'      => $delayAuto,
+            '/%delay_auto%/'      => $delayAuto,
+            '/%delay_auto_tmp%/'  => $delayAutoTemplate,
         ));
     }
 

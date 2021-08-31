@@ -30,12 +30,7 @@
             </div>
             <div id="delay_auto">
                 <label for="delay_auto_config">Piecewise Delay Definition in Sec</label>
-                <div class="delay_config_row">
-                    <input type="text" class="delay_met" placeholder="" name="delay_time[]" style="width: 35%;">
-                    <input type="text" class="delay_cfg" placeholder="" name="delay_eq[]" style="width: 50%;">
-                    <button type="button" class="add_delay_btn"><span class="ui-icon ui-icon-plusthick"></span></button>
-                    <button type="button" class="del_delay_btn"><span class="ui-icon ui-icon-minusthick"></span></button>
-                </div>
+                
                 <template id="delay_template">
                     <div class="delay_config_row">
                         <input type="text" class="delay_met" placeholder="" name="delay_time[]" style="width: 35%;">
@@ -125,13 +120,13 @@ $(document).ready(function () {
       .closest(".delay_config_row")
       .last()
       .find(".delay_cfg")
-      .attr("id", "delay_config_" + index);
+      .attr("id", "delay-cfg-" + index);
 
     $(e.target)
       .closest(".delay_config_row")
       .last()
       .find(".delay_met")
-      .attr("id", "delay_met_" + index);
+      .attr("id", "delay-met-" + index);
 
     console.log(cloned_el);
     //count++;
