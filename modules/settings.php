@@ -110,7 +110,7 @@ class SettingsModule extends DefaultModule
             '/%delay_is_manual%/' => $delayIsManualOptions,
             '/%delay_manual%/'    => $delayManual,
             '/%delay_auto%/'      => $delayAuto,
-            //'/%delay_auto_tmp%/'  => $delayAutoTemplate,
+            '/%delay_auto_tmp%/'  => $delayAutoTemplate,
         ));
     }
 
