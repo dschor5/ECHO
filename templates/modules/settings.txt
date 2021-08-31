@@ -114,8 +114,8 @@ $(document).ready(function () {
             $('.delay_met').last().datepicker({ dateFormat: 'yy-mm-dd' });
         }
 
-        $('.del_delay_btn).prop('disabled', false);
-        $('.del_delay_btn).first().prop('disabled', true);
+        $('.del_delay_btn').prop('disabled', false);
+        $('.del_delay_btn').first().prop('disabled', true);
     });
 
     $('.delay_met').each( function() {
