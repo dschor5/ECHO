@@ -25,7 +25,11 @@ class Delay
 
     public function getDelay(): int
     {
-        $delay = MissionConfig::getInstance();
+        $mission = MissionConfig::getInstance();
+        if($mission->delay_is_manual)
+        {
+            $this->currDelay = intval($mission->delay_config);
+        }
         return $this->currDelay;
     }
 
