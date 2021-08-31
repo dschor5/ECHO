@@ -50,7 +50,7 @@ class Main
     private function __construct()
     {
         $mission = MissionConfig::getInstance();
-        date_default_timezone_set($mission->mcc_timezone);
+        date_default_timezone_set(new DateTimeZone("UTC"));
 
         $this->readCookie();
         $this->checkLogin();
