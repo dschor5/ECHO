@@ -1,7 +1,15 @@
 $(document).ready(setTimeout(updateTime, 1000));
 
 function updateTime() {
-    var mccDate = formatTime(null, true);        
+    var dt = new Date();
+    dt.setTime(dt.getTime() + TZ_MCC_OFFSET * 1000);
+
+    var mccDate = dt.getUTCFullYear() + "-" + 
+        (dt.getUTCMonth()+1).toString().padStart(2, "0") + "-" + 
+        dt.getUTCDate().toString().padStart(2, "0") + " " +
+        dt.getUTCHours().toString().padStart(2, "0") + ":" + 
+        dt.getUTCMinutes().toString().padStart(2, "0") + ":" + 
+        dt.getUTCSeconds().toString().padStart(2, "0");     
     $('#time-mcc-value').text(mccDate);   
 
     dt = new Date();
@@ -20,7 +28,15 @@ function updateTime() {
                     sec.toString().padStart(2, "0");
     }
     else {
-        habMet = formatTime('now', false);
+        var dt = new Date();
+        dt.setTime(dt.getTime() + TZ_HAB_OFFSET * 1000);
+
+        var mccDate = dt.getUTCFullYear() + "-" + 
+            (dt.getUTCMonth()+1).toString().padStart(2, "0") + "-" + 
+            dt.getUTCDate().toString().padStart(2, "0") + " " +
+            dt.getUTCHours().toString().padStart(2, "0") + ":" + 
+            dt.getUTCMinutes().toString().padStart(2, "0") + ":" + 
+            dt.getUTCSeconds().toString().padStart(2, "0");     
     }
     $('#time-hab-value').text(habDate);  
     
