@@ -129,15 +129,15 @@ $(document).ready(function () {
         $('#delay-met-' + index).datepicker({ dateFormat: 'yy-mm-dd'});
     });
 
-    
+
     $('#delay-met-0').datepicker({ dateFormat: 'yy-mm-dd'});
 });
 
 $("body").on("click", ".del_delay_btn", function () {
     $(this).closest(".delay_config_row").remove();
     console.log("success");
-  });
 });
+
 
 function showDelayOptions() {
     if($('#delay_is_manual').val() == '1') {
