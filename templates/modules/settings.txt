@@ -108,15 +108,11 @@ $(document).ready(function () {
         $(e.target).closest(".delay_config_row").parent().last().append(cloned_el).find(".remove_node_btn_frm_field:not(:first)").prop("disabled", false);
 
         //change id
-        $(e.target)
-            .closest(".delay_config_row")
-            .last()
+        $(cloned_el)
             .find(".delay_cfg")
             .attr("id", "delay-cfg-" + index);
 
-        $(e.target)
-            .closest(".delay_config_row")
-            .last()
+        $(cloned_el)
             .find(".delay_met")
             .attr("id", "delay-met-" + index);
 
