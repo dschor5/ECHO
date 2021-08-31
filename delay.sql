@@ -81,7 +81,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('hab_planet',      'string', 'Mars'),
 ('hab_user_role',   'string', 'Astronaut'),
 ('hab_timezone',    'string', 'America/Chicago'),
-('hab_day_name',    'string', 'Mission Sol'),
+('hab_day_name',    'string', 'Mission Day'),
 ('delay_is_manual', 'bool',   '1'),
 ('delay_config',    'string', '0');
 
