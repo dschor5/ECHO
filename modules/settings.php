@@ -65,7 +65,12 @@ class SettingsModule extends DefaultModule
         if($mission->delay_is_manual)
         {
             $delayManual = intval($mission->delay_config);
-            $delayAuto   = 
+            $delayAuto   = Main::loadTemplate('delay-config.txt', array(
+                '/%delay-met-id%/'    => 'id="delay-met-0"',
+                '/%delay-cfg-id%/'    => 'id="delay-cfg-0"',
+                '/%delay-met-value%/' => substr($mission->date_start, 0, 10),
+                '/%delay-cfg-value%/' => 0,
+            ));
         }
         else
         {
