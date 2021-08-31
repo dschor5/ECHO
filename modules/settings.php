@@ -91,7 +91,7 @@ class SettingsModule extends DefaultModule
         ));
     }
 
-    private function makeSelectOptions(string $value, string $label, bool $selected)
+    private function makeSelectOption(string $value, string $label, bool $selected)
     {
         return '<option value="'.$value.'" '.($selected ? 'selected="selected"' : '').'>'.$label.'</option>'.PHP_EOL;
     }
