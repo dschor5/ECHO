@@ -12,8 +12,8 @@
             <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" title="Name of mission that will be displayed on the top menu bar." required>
             
             <label for="date-start">Mission Start & End Dates</label>
-            <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;" title="Date when the mission starts.">
-            <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;" title="Date when the mission ends.">
+            <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;" title="Format YYYY-MM-DD">
+            <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;" title="Format YYYY-MM-DD">
         </div>
 
         <div class="form-box">
@@ -30,14 +30,9 @@
             </div>
             <div id="delay_auto">
                 <label for="delay_auto_config">Piecewise Delay Definition in Sec</label>
-                
+                %delay_auto%
                 <template id="delay_template">
-                    <div class="delay_config_row">
-                        <input type="text" class="delay_met" placeholder="" name="delay_time[]" style="width: 35%;">
-                        <input type="text" class="delay_cfg" placeholder="" name="delay_eq[]" style="width: 50%;">
-                        <button type="button" class="add_delay_btn"><span class="ui-icon ui-icon-plusthick"></span></button>
-                        <button type="button" class="del_delay_btn"><span class="ui-icon ui-icon-minusthick"></span></button>
-                    </div>
+                    %delay_auto_tmp%
                 </template>
             </div>
         </div>
@@ -141,6 +136,31 @@ $(document).ready(function () {
     $(this).closest(".delay_config_row").remove();
     console.log("success");
   });
+});
+
+$(document).ready(function() {
+    $('#delay_is_manual').selectmenu({
+        create: function(event, ui) {
+            if($(this).val() == '1') {
+                $('#delay_manual').css('display', 'block');
+                $('#delay_auto').css('display', 'none');
+            }
+            else {
+                $('#delay_manual').css('display', 'none');
+                $('#delay_auto').css('display', 'block');
+            }
+        },
+        change: function(event, ui) {
+            if($(this).val() == '1') {
+                $('#delay_manual').css('display', 'block');
+                $('#delay_auto').css('display', 'none');
+            }
+            else {
+                $('#delay_manual').css('display', 'none');
+                $('#delay_auto').css('display', 'block');
+            }
+        }
+    });
 });
 
 $(document).ready(function() {
