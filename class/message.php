@@ -59,18 +59,6 @@ class Message
         return ($this->getReceivedTime(!$this->data['is_crew']) <= $time->getTime()) ? 'Delivered' : 'Transit';
     }
 
-    private function getTime(string $name, $withTz=true) : string
-    {
-        $time = new DelayTime($this->data[$name]);
-        return $time->getTime(true, false);
-    }
-
-    private function getTimeUTC(string $name) : string
-    {
-        $time = new DelayTime($this->data[$name]);
-        return $time->getTimeUtc();
-    }
-
     public function compileArray(User &$userPerspective) : array
     {
         $msgData = array(
@@ -79,10 +67,11 @@ class Message
             'author'           => $this->data['alias'],
             'message'          => $this->data['text'],
             'type'             => self::TEXT,
-            'sent_time'        => $this->getTime('sent_time'),
-            'recv_time_mcc'    => $this->getTime('recv_time_mcc'),
-            'recv_time_hab'    => $this->getTime('recv_time_hab'),
+            'sent_time'        => $this->data['sent_time'],
+            'recv_time_mcc'    => $this->data['recv_time_mcc'],
+            'recv_time_hab'    => $this->data['recv_time_hab'],
             'delivered_status' => $this->getMsgStatus(),
+            'sent_from'        => $this->data['is_crew'],
         );
 
         if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())

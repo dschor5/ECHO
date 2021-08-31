@@ -118,9 +118,9 @@ function compileMsg(data, before){
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
         var msgStatus = msgClone.querySelector(".msg-status");
-        msgStatus.querySelector(".msg-sent-time").textContent = data.sent_time;
-        msgStatus.querySelector(".msg-recv-time-hab").textContent = data.recv_time_hab;
-        msgStatus.querySelector(".msg-recv-time-mcc").textContent = data.recv_time_mcc;
+        msgStatus.querySelector(".msg-sent-time").textContent = formatTime(data.sent_time, data.sent_from);
+        msgStatus.querySelector(".msg-recv-time-hab").textContent = formatTime(data.recv_time_hab, false);
+        msgStatus.querySelector(".msg-recv-time-mcc").textContent = formatTime(data.recv_time_mcc, true);
         msgStatus.querySelector(".msg-delivery-status").textContent = data.delivered_status;
 
         if(before) {

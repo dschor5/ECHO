@@ -1,17 +1,7 @@
 $(document).ready(setTimeout(updateTime, 1000));
 
 function updateTime() {
-    var dt = new Date();
-    var mccMet = dt.getTime() + TZ_MCC_OFFSET * 1000; // milliseconds
-
-    // Format MCC date
-    dt.setTime(mccMet);
-    var mccDate = dt.getUTCFullYear() + "-" + 
-                  (dt.getUTCMonth()+1).toString().padStart(2, "0") + "-" + 
-                  dt.getUTCDate().toString().padStart(2, "0") + " " +
-                  dt.getUTCHours().toString().padStart(2, "0") + ":" + 
-                  dt.getUTCMinutes().toString().padStart(2, "0") + ":" + 
-                  dt.getUTCSeconds().toString().padStart(2, "0");          
+    var mccDate = formatTime('now', true);        
     $('#time-mcc-value').text(mccDate);   
 
     dt = new Date();
@@ -30,17 +20,24 @@ function updateTime() {
                     sec.toString().padStart(2, "0");
     }
     else {
-        
-        habMet = (dt.getTime() + TZ_HAB_OFFSET * 1000); // milliseconds
-        dt.setTime(habMet);
-        habDate = dt.getUTCFullYear() + "-" + 
-                  (dt.getUTCMonth()+1).toString().padStart(2, "0") + "-" + 
-                  dt.getUTCDate().toString().padStart(2, "0") + " " +
-                  dt.getUTCHours().toString().padStart(2, "0") + ":" + 
-                  dt.getUTCMinutes().toString().padStart(2, "0") + ":" + 
-                  dt.getUTCSeconds().toString().padStart(2, "0");
+        habMet = formatTime('now', false);
     }
     $('#time-hab-value').text(habDate);  
     
     setTimeout(updateTime, 1000);
+}
+
+function formatTime(timeStr, mccOffset) {
+    var dt = new Date(timeStr);
+    var offset = (mccOffset) ? TZ_MCC_OFFSET : TZ_HAB_OFFSET;
+    var mccMet = dt.getTime() + offset * 1000; // milliseconds
+
+    // Format MCC date
+    dt.setTime(mccMet);
+    return dt.getUTCFullYear() + "-" + 
+        (dt.getUTCMonth()+1).toString().padStart(2, "0") + "-" + 
+        dt.getUTCDate().toString().padStart(2, "0") + " " +
+        dt.getUTCHours().toString().padStart(2, "0") + ":" + 
+        dt.getUTCMinutes().toString().padStart(2, "0") + ":" + 
+        dt.getUTCSeconds().toString().padStart(2, "0");          
 }
