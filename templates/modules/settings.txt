@@ -103,19 +103,19 @@ function getDate(element) {
 $(document).ready(function () {
     $("body").on("click", ".add_delay_btn", function (e) {
 
-        var index = $(this).uniqueId();
+        //var index = $(this).uniqueId();
         var cloned_el = $(e.target).closest(".delay_config_row").clone(true);
 
         $(e.target).closest(".delay_config_row").parent().last().append(cloned_el).find(".remove_node_btn_frm_field:not(:first)").prop("disabled", false);
 
         //change id
         $(cloned_el)
-            .find(".delay_cfg")
-            .attr("id", "delay-cfg-" + index);
+            .find(".delay_cfg").uniqueId();
+            //.attr("id", "delay-cfg-" + index);
 
         $(cloned_el)
-            .find(".delay_met")
-            .attr("id", "delay-met-" + index);
+            .find(".delay_met").uniqueId().datepicker({ dateFormat: 'yy-mm-dd'});;
+            //.attr("id", "delay-met-" + index);
 
         console.log(cloned_el);
         //count++;
@@ -123,7 +123,7 @@ $(document).ready(function () {
         $('body').find(".del_delay_btn:not(:first)").prop("disabled", false); 
         $('body').find(".del_delay_btn").first().prop("disabled", true); 
 
-        $('#delay-met-' + index).datepicker({ dateFormat: 'yy-mm-dd'});
+       // $('#delay-met-' + index).datepicker({ dateFormat: 'yy-mm-dd'});
     });
 
 
