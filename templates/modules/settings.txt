@@ -128,6 +128,7 @@ $(document).ready(function () {
 
     mets = document.querySelectorAll('.delay_met');
     mets.forEach(function(item) {
+        console.log(item);
         item.datepicker({
             dateFormat: 'yy-mm-dd'
         });
