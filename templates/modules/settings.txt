@@ -21,13 +21,12 @@
 
             <label for="delay_is_manual">Manual Delay</label>
             <select name="delay_is_manual" id="delay_is_manual">
-                <option value="1">Manual Delay Configuration</option>
-                <option value="0">Automatic Delay Configuration</option>
+                %delay_is_manual%
             </select>
 
             <div id="delay_manual">
-                <label for="manual_delay">Delay in Seconds</label>
-                <input type="text" placeholder="Manual Delay in Seconds" name="manual_delay" id="manual_delay" value="%manual_delay%" required>
+                <label for="delay_manual">Delay in Seconds</label>
+                <input type="text" placeholder="Manual Delay in Seconds" name="delay_manual" id="delay_manual" value="%delay_manual%" required>
             </div>
             <div id="delay_auto">
                 <label for="delay_auto_config">Piecewise Delay Definition in Sec</label>

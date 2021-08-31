@@ -54,32 +54,46 @@ class SettingsModule extends DefaultModule
         $habTimezoneOptions = '';
         foreach($timezoneData as $tz) 
         {
-            $mccTimezoneOptions .= '<option value="'.$tz['timezone_id'].'">'.$tz['label'].'</option>';
-            if($mission->mcc_timezone == $tz['timezone_id'])
-            {
-                $mccTimezoneOptions .= '<option value="'.$tz['timezone_id'].'" selected="selected">'.$tz['label'].'</option>';
-            }
-            
-            $habTimezoneOptions .= '<option value="'.$tz['timezone_id'].'">'.$tz['label'].'</option>';
-            if($mission->hab_timezone == $tz['timezone_id'])
-            {
-                $habTimezoneOptions .= '<option value="'.$tz['timezone_id'].'" selected="selected">'.$tz['label'].'</option>';
-            }
+            $mccTimezoneOptions .= makeSelectOption($tz['timezone_id'], $tz['label'], $mission->mcc_timezone == $tz['timezone_id']);
+            $habTimezoneOptions .= makeSelectOption($tz['timezone_id'], $tz['label'], $mission->hab_timezone == $tz['timezone_id']);
+        }
+
+        $delayIsManualOptions = 
+            makeSelectOption(1, 'Manual Delay Configuration', $mission->delay_is_manual).
+            makeSelectOption(0, 'Automatic Delay Configuration', !$mission->delay_is_manual);
+
+        if($mission->delay_is_manual)
+        {
+            $delayManual = intval($mission->delay_config);
+            $delayAuto   = '';
+        }
+        else
+        {
+            $delayManual = 0;
+            $delayAuto   = 0;
         }
         
         return Main::loadTemplate('settings.txt', array(
-            '/%name%/'          => $mission->name,
-            '/%date_start%/'    => substr($mission->date_start, 0, 10),
-            '/%date_end%/'      => substr($mission->date_end, 0, 10),
-            '/%mcc_name%/'      => $mission->mcc_name,
-            '/%mcc_planet%/'    => $mission->mcc_planet,
-            '/%mcc_user_role%/' => $mission->mcc_user_role,
-            '/%mcc_timezone%/'  => $mccTimezoneOptions,
-            '/%hab_name%/'      => $mission->hab_name,
-            '/%hab_planet%/'    => $mission->hab_planet,
-            '/%hab_user_role%/' => $mission->hab_user_role,
-            '/%hab_timezone%/'  => $habTimezoneOptions,
+            '/%name%/'            => $mission->name,
+            '/%date_start%/'      => substr($mission->date_start, 0, 10),
+            '/%date_end%/'        => substr($mission->date_end, 0, 10),
+            '/%mcc_name%/'        => $mission->mcc_name,
+            '/%mcc_planet%/'      => $mission->mcc_planet,
+            '/%mcc_user_role%/'   => $mission->mcc_user_role,
+            '/%mcc_timezone%/'    => $mccTimezoneOptions,
+            '/%hab_name%/'        => $mission->hab_name,
+            '/%hab_planet%/'      => $mission->hab_planet,
+            '/%hab_user_role%/'   => $mission->hab_user_role,
+            '/%hab_timezone%/'    => $habTimezoneOptions,
+            '/%delay_is_manual%/' => $delayIsManualOptions,
+            '/%delay_manual%/'    => $delayManual,
+            '/%auto_delay%/'      => $delayAuto,
         ));
+    }
+
+    private function makeSelectOptions(string $value, string $label, bool $selected)
+    {
+        return '<option value="'.$value.'" '.($selected ? 'selected="selected"' : '').'>'.$label.'</option>'.PHP_EOL;
     }
 
 }
