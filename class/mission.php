@@ -15,7 +15,8 @@ class MissionConfig
 
     private function refreshData()
     {
-        var_dump($this->lastQueryTime);
+        echo "event: debug".PHP_EOL;
+        echo "data: ".$this->lastQueryTime.' < '.time().PHP_EOL.PHP_EOL;
         if($this->lastQueryTime + self::QUERY_TIMEOUT < time())
         {
             $missionDao = MissionDao::getInstance();
