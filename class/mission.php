@@ -3,7 +3,7 @@
 class MissionConfig
 {
     private static $instance = null;
-    private static $lastQueryTime;
+    private $lastQueryTime;
     const QUERY_TIMEOUT = 60;
     private $data = array();
 
