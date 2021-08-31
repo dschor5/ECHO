@@ -276,7 +276,7 @@ class ChatModule extends DefaultModule
         $lastMsg = time();
         $prevNotifications = array();
         $prevDelay = -1;
-
+$mission = MissionConfig::getInstance();
         // Infinite loop processing data. 
         while(true)
         {
@@ -284,7 +284,7 @@ class ChatModule extends DefaultModule
             $timeStr = $time->getTime();
             
             echo "event: debug".PHP_EOL;
-            echo "data: ".$delayObj->lastQueryTime.' < '.time().PHP_EOL.PHP_EOL;
+            echo "data: ".$mission->lastQueryTime.' < '.time().PHP_EOL.PHP_EOL;
 
             $delay = $delayObj->getDelay();
             if($delay != $prevDelay)
