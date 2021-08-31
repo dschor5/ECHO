@@ -3,7 +3,6 @@
 class MissionDao extends Dao
 {
     private static $instance = null;
-    private static $cache = null;
 
     public static function getInstance()
     {
@@ -21,26 +20,22 @@ class MissionDao extends Dao
 
     public function readMissionConfig() : array
     {
-        if(self::$cache == null)
-        {
-            if(($result = $this->select('*','*')) !== false)
-            {   
-                if($result->num_rows > 0)
+        $missionData = array();
+        if(($result = $this->select('*','*')) !== false)
+        {   
+            if($result->num_rows > 0)
+            {
+                while(($data = $result->fetch_assoc()) != null)
                 {
-                    // Override cache
-                    self::$cache = array();
-                    while(($data = $result->fetch_assoc()) != null)
-                    {
-                        self::$cache[$data['name']] = array(
-                                'type'  => $data['type'],
-                                'value' => $data['value']
-                            );
-                    }
+                    $missionData[$data['name']] = array(
+                            'type'  => $data['type'],
+                            'value' => $data['value']
+                        );
                 }
             }
         }
 
-        return self::$cache;
+        return $missionData;
     }
 
     public function saveMissionConfig() : bool
