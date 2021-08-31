@@ -15,6 +15,7 @@ class MissionConfig
 
     private function refreshData()
     {
+        var_dump($this->lastQueryTime);
         if($this->lastQueryTime + self::QUERY_TIMEOUT < time())
         {
             $missionDao = MissionDao::getInstance();
