@@ -5,12 +5,30 @@ class SettingsModule extends DefaultModule
     public function __construct(&$user)
     {
         parent::__construct($user);
-        $this->subJsonRequests = array('validate', 'save');
+        $this->subJsonRequests = array('save');
         $this->subHtmlRequests = array('show');
     }
 
     public function compileJson(string $subaction): array
     {
+        $name = $_POST['name'] ?? '';
+        $date_start = $_POST['date_start'] ?? '0000-00-00';
+        $date_end = $_POST['date_end'] ?? '0000-00-00';
+        $mcc_name = $_POST['mcc_name'] ?? '';
+        $mcc_planet = $_POST['mcc_planet'] ?? '';
+        $mcc_user_role = $_POST['mcc_user_role'] ?? '';
+        $mcc_timezone = $_POST['mcc_timezone'];
+        $hab_name = $_POST['hab_name'] ?? '';
+        $hab_planet = $_POST['hab_planet'] ?? '';
+        $hab_user_role = $_POST['hab_user_role'] ?? '';
+        $hab_timezone = $_POST['hab_timezone'];
+        $delay_is_manual = $_POST['delay_is_manual'] ?? false;
+        
+        if(strlen($name) == 0) 
+        {
+            $response['error'] = 'Mission name cannot be empty.';
+        }
+        
         return array();
     }
 

@@ -176,8 +176,8 @@ abstract class DefaultModule implements Module
                 '/%time_sec_per_day%/' => 24*60*60, // TODO
                 '/%time_day%/'         => $mission->hab_day_name,
                 '/%hab_time_format%/'  => 'true', // TODO
-                '/%timezone_mcc_offset%/'  => DelayTime::getTimezoneOffset(true),
-                '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffset(false),
+                '/%timezone_mcc_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(true),
+                '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(false),
             );
 
             echo Main::loadTemplate('main.txt', $replace);
