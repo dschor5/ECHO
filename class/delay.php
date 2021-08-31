@@ -28,7 +28,7 @@ class Delay
         $mission = MissionConfig::getInstance();
         if($mission->delay_is_manual)
         {
-            $this->currDelay = floatvar($mission->delay_config);
+            $this->currDelay = floatval($mission->delay_config);
         }
         return $this->currDelay;
     }
