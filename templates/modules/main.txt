@@ -16,6 +16,7 @@
         const HAB_FORMAT  = %hab_time_format%;
         const TZ_MCC_OFFSET   = %timezone_mcc_offset%; // sec
         const TZ_HAB_OFFSET   = %timezone_hab_offset%; // sec
+        const USER_IS_CREW = %is_crew%;
     </script>
     <style>
         @font-face {
