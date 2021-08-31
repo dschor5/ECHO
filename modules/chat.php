@@ -283,6 +283,9 @@ class ChatModule extends DefaultModule
             $time = new DelayTime();
             $timeStr = $time->getTime();
             
+            echo "event: debug".PHP_EOL;
+            echo "data: ".$delayObj->lastQueryTime.' < '.time().PHP_EOL.PHP_EOL;
+
             $delay = $delayObj->getDelay();
             if($delay != $prevDelay)
             {

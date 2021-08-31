@@ -3,7 +3,7 @@
 class MissionConfig
 {
     private static $instance = null;
-    private $lastQueryTime;
+    public $lastQueryTime;
     const QUERY_TIMEOUT = 10;
     private $data = array();
 
@@ -15,8 +15,7 @@ class MissionConfig
 
     private function refreshData()
     {
-        echo "event: debug".PHP_EOL;
-        echo "data: ".$this->lastQueryTime.' < '.time().PHP_EOL.PHP_EOL;
+        
         if($this->lastQueryTime + self::QUERY_TIMEOUT < time())
         {
             $missionDao = MissionDao::getInstance();
