@@ -3,12 +3,23 @@
 class MissionConfig
 {
     private static $instance = null;
+    private static $lastQueryTime;
+    const QUERY_TIMEOUT = 60;
     private $data = array();
 
     private function __construct()
     {
-        $missionDao = MissionDao::getInstance();
-        $this->data = $missionDao->readMissionConfig();
+        $this->lastQueryTime = time() - 2 * QUERY_TIMEOUT;
+        $this->refreshData();
+    }
+
+    private function refreshData()
+    {
+        if($this->lastQueryTime + QUERY_TIMEOUT < time())
+        {
+            $missionDao = MissionDao::getInstance();
+            $this->data = $missionDao->readMissionConfig();
+        }
     }
 
     public static function getInstance()
@@ -23,6 +34,8 @@ class MissionConfig
     public function __get(string $name)
     {
         $result = null;
+
+        $this->refreshData();
 
         if(array_key_exists($name, $this->data))
         {

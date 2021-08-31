@@ -54,7 +54,7 @@
             <p>Name or accronym used to identify Mission Control. </p>
             <input type="text" placeholder="Mission Control Name" name="mcc_name" id="mcc_name" value="%mcc_name%" required>
 
-            <label for="mcc_planet">Planet for Mission Control</label>
+            <label for="mcc_planet">Location for Mission Control</label>
             <p>Name of planet where mission control is set.</p>
             <input type="text" placeholder="Planet Name" name="mcc_planet" id="mcc_planet" value="%mcc_planet%" required>
 
@@ -76,7 +76,7 @@
             <p>Name or accronym used to identify analog habitat. </p>
             <input type="text" placeholder="Habitat Name" name="hab_name" id="hab_name" value="%hab_name%" required>
 
-            <label for="hab_planet">Planet/Moon Name for Analog Habitat</label>
+            <label for="hab_planet">Location for Analog Habitat</label>
             <p>Name of planet where habitat is located.</p>
             <input type="text" placeholder="Planet Name" name="hab_planet" id="hab_planet" value="%hab_planet%" required>
 

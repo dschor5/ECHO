@@ -249,6 +249,7 @@ class ChatModule extends DefaultModule
 
     public function compileStream() 
     {
+        $delayObj = Delay::getInstance();
         $messagesDao = MessagesDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
         $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
@@ -274,6 +275,7 @@ class ChatModule extends DefaultModule
 
         $lastMsg = time();
         $prevNotifications = array();
+        $prevDelay = -1;
 
         // Infinite loop processing data. 
         while(true)
@@ -281,6 +283,15 @@ class ChatModule extends DefaultModule
             $time = new DelayTime();
             $timeStr = $time->getTime();
             
+            $delay = $delayObj->getDelay();
+            if($delay != $prevDelay)
+            {
+                echo "event: delay".PHP_EOL;
+                echo "data: ".json_encode(array('delay'=>$delayObj->getDelayStr(), 'distance'=>$delayObj->getDistanceStr())).PHP_EOL.PHP_EOL;
+                $lastMsg = time();
+                $prevDelay = $delay;
+            }
+
             $messages = $messagesDao->getNewMessages($this->conversation->getId(), $this->user->user_id, $this->user->is_crew, $timeStr);
             if(count($messages) > 0)
             {

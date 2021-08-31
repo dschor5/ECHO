@@ -62,10 +62,17 @@ evtSource.onerror = function (err) {
 evtSource.addEventListener("logout", handleEventSourceLogout);
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
+evtSource.addEventListener("delay", handleEventSourceDelay);
 
 function handleEventSourceLogout(event) {
     evtSource.close();
     location.href = BASE_URL;
+}
+
+function handleEventSourceDelay(event) {
+    const data = JSON.parse(event.data);
+    $('#owlt-value').text(data.delay);
+    $('#distance-value').text(data.distance);
 }
 
 function handleEventSourceNewMessage(event) {
