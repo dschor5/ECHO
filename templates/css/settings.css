@@ -73,14 +73,17 @@
 #form-contents label {
     line-height: 12px;
     margin-bottom: 5px;
-    padding-bottom: 0px;
-    color: #333;
+    margin-top: 5px;
+    padding: 0px;
+    font-weight: bold;
+    color: var(--background-dark);
 }
 
 #form-contents p {
     line-height: 10px;
     margin-bottom: 5px;
-    padding-bottom: 0px;
+    margin-top: 5px;
+    padding: 0px;
     color: #666;
 }
 
