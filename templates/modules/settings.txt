@@ -9,11 +9,11 @@
             <div class="subheading">Mission Configuration</div>
 
             <label for="name">Mission Name</label>
-            <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" required>
+            <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" title="Name of mission that will be displayed on the top menu bar." required>
             
             <label for="date-start">Mission Start & End Dates</label>
-            <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;">
-            <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;">
+            <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;" title="Date when the mission starts.">
+            <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;" title="Date when the mission ends.">
         </div>
 
         <div class="form-box">
@@ -26,11 +26,11 @@
             </select>
 
             <div id="delay_manual">
-                <label for="manual_delay">Mission Name</label>
+                <label for="manual_delay">Delay in Seconds</label>
                 <input type="text" placeholder="Manual Delay in Seconds" name="manual_delay" id="manual_delay" value="%manual_delay%" required>
             </div>
             <div id="delay_auto">
-                <label for="delay_auto_config">Piecewise Delay Definition</label>
+                <label for="delay_auto_config">Piecewise Delay Definition in Sec</label>
                 <div class="delay_config_row">
                     <input type="text" class="delay_met" placeholder="" name="delay_time[]" style="width: 35%;">
                     <input type="text" class="delay_cfg" placeholder="" name="delay_eq[]" style="width: 50%;">
@@ -147,6 +147,10 @@ $(document).ready(function () {
     $(this).closest(".delay_config_row").remove();
     console.log("success");
   });
+});
+
+$(document).ready(function() {
+    $( document ).tooltip();
 });
 
 </script>
