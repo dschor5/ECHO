@@ -183,8 +183,8 @@ class ChatModule extends DefaultModule
                 'text' => '',
                 'type' => Message::FILE,
                 'sent_time' => $currTime->getTime(),
-                'recv_time_hab' => $currTime->getTime(true, !$this->user->is_crew, false),
-                'recv_time_mcc' => $currTime->getTime(true, $this->user->is_crew, false),
+                'recv_time_hab' => $currTime->getTime(!$this->user->is_crew),
+                'recv_time_mcc' => $currTime->getTime($this->user->is_crew),
             );
 
             $fileData = array(
@@ -230,8 +230,8 @@ class ChatModule extends DefaultModule
                 'text' => $msgText,
                 'type' => Message::TEXT,
                 'sent_time' => $currTime->getTime(),
-                'recv_time_hab' => $currTime->getTime(true, !$this->user->is_crew, false),
-                'recv_time_mcc' => $currTime->getTime(true, $this->user->is_crew, false),
+                'recv_time_hab' => $currTime->getTime(!$this->user->is_crew),
+                'recv_time_mcc' => $currTime->getTime($this->user->is_crew),
             );
             
             if(($messageId = $messagesDao->sendMessage($msgData)) !== false)
@@ -349,8 +349,6 @@ class ChatModule extends DefaultModule
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'=>$this->user->username,
                   '/%delay_src%/' => $this->user->is_crew ? $mission->hav_name : $mission->mcc_name,
-                  '/%time_mcc%/' => $time->getTime(),
-                  '/%time_hab%/' => $time->getTime(false),
                   '/%chat_rooms%/' => $this->getConversationList(),
                   '/%convo_id%/' => $this->conversation->getId()
                 ));
