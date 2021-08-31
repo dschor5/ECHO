@@ -127,7 +127,7 @@ $(document).ready(function () {
     $('body').find(".del_delay_btn").first().prop("disabled", true); 
 
     mets = document.querySelectorAll('.delay_met');
-    mets.forEach(function(item)) {
+    mets.forEach(function(item) {
         item.datepicker({
             dateFormat: 'yy-mm-dd'
         });
