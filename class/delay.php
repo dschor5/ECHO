@@ -28,6 +28,7 @@ class Delay
         $mission = MissionConfig::getInstance();
         if($mission->delay_is_manual)
         {
+            var_dump($mission->delay_config);
             $this->currDelay = intval($mission->delay_config);
         }
         return $this->currDelay;
