@@ -10,16 +10,42 @@
 
             <label for="name">Mission Name</label>
             <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" required>
-
-            <label for="date-start">Start Date</label>
-            <input type="text" placeholder="Select Mission Start Date" name="date-start" id="date-start" value="%date_start%" required>
-
-            <label for="date-end">End Date</label>
-            <input type="text" placeholder="Select Mission Start Date" name="date-end" id="date-end" value="%date_end%" required>
+            
+            <label for="date-start">Mission Start & End Dates</label>
+            <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;">
+            <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;">
         </div>
 
         <div class="form-box">
             <div class="subheading">Communicaiton Delay</div>
+
+            <label for="delay_is_manual">Manual Delay</label>
+            <select name="delay_is_manual" id="delay_is_manual">
+                <option value="1">Manual Delay Configuration</option>
+                <option value="0">Automatic Delay Configuration</option>
+            </select>
+
+            <div id="delay_manual">
+                <label for="manual_delay">Mission Name</label>
+                <input type="text" placeholder="Manual Delay in Seconds" name="manual_delay" id="manual_delay" value="%manual_delay%" required>
+            </div>
+            <div id="delay_auto">
+                <label for="delay_auto_config">Piecewise Delay Definition</label>
+                <div class="delay_config_row">
+                    <input type="text" class="delay_met" placeholder="" name="delay_time[]" style="width: 35%;">
+                    <input type="text" class="delay_cfg" placeholder="" name="delay_eq[]" style="width: 50%;">
+                    <button type="button" class="add_delay_btn"><span class="ui-icon ui-icon-plusthick"></span></button>
+                    <button type="button" class="del_delay_btn"><span class="ui-icon ui-icon-minusthick"></span></button>
+                </div>
+                <template id="delay_template">
+                    <div class="delay_config_row">
+                        <input type="text" class="delay_met" placeholder="" name="delay_time[]" style="width: 35%;">
+                        <input type="text" class="delay_cfg" placeholder="" name="delay_eq[]" style="width: 50%;">
+                        <button type="button" class="add_delay_btn"><span class="ui-icon ui-icon-plusthick"></span></button>
+                        <button type="button" class="del_delay_btn"><span class="ui-icon ui-icon-minusthick"></span></button>
+                    </div>
+                </template>
+            </div>
         </div>
 
         <div style="clear: both;"></div>
@@ -64,13 +90,13 @@
 </div>
 
 <script>
-var fromDate = $('#date-start').datepicker({
+var fromDate = $('#date_start').datepicker({
     defaultDate: '%date_start%',
     dateFormat: 'yy-mm-dd'
 }).on('change', function() {
     toDate.datepicker('option', 'minDate', getDate(this));
 }),
-toDate = $('#date-end').datepicker({
+toDate = $('#date_end').datepicker({
     defaultDate: '%date_end%',
     dateFormat: 'yy-mm-dd'
 }).on('change', function() {
@@ -88,4 +114,43 @@ function getDate(element) {
     return date;
 }
 
+$(document).ready(function () {
+  $("body").on("click", ".add_delay_btn", function (e) {
+    var index = $(e.target).closest(".delay_config_row").length + 1;
+    var cloned_el = $(e.target).closest(".delay_config_row").clone(true);
+
+    $(e.target).closest(".delay_config_row").parent().last().append(cloned_el).find(".remove_node_btn_frm_field:not(:first)").prop("disabled", false);
+
+    //change id
+    $(e.target)
+      .closest(".delay_config_row")
+      .last()
+      .find(".delay_cfg")
+      .attr("id", "delay_config_" + index);
+
+    $(e.target)
+      .closest(".delay_config_row")
+      .last()
+      .find(".delay_met")
+      .attr("id", "delay_met_" + index);
+
+    console.log(cloned_el);
+    //count++;
+
+    $('body').find(".del_delay_btn:not(:first)").prop("disabled", false); 
+    $('body').find(".del_delay_btn").first().prop("disabled", true); 
+  });
+
+
+
+  $("body").on("click", ".del_delay_btn", function () {
+    $(this).closest(".delay_config_row").remove();
+    console.log("success");
+  });
+});
+
 </script>
+
+<!--
+https://bootstrapfriendly.com/blog/dynamically-add-or-remove-form-input-fields-using-jquery/
+-->

@@ -83,8 +83,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('hab_timezone',    'string', 'America/Chicago'),
 ('hab_day_name',    'string', 'Mission Sol'),
 ('delay_is_manual', 'bool',   '1'),
-('delay_curr',      'int',    '0'),
-('delay_auto',      'text',   '');
+('delay_config',    'string', '0');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
 (1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
