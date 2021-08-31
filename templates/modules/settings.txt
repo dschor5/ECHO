@@ -20,7 +20,7 @@
             <div class="subheading">Communicaiton Delay</div>
 
             <label for="delay_is_manual">Manual Delay</label>
-            <select name="delay_is_manual" id="delay_is_manual">
+            <select name="delay_is_manual" id="delay_is_manual" onchange="showDelayOptions()">
                 %delay_is_manual%
             </select>
 
@@ -138,30 +138,21 @@ $(document).ready(function () {
   });
 });
 
+function showDelayOptions() {
+    if($('#delay_is_manual').val() == '1') {
+        $('#delay_manual').css('display', 'block');
+        $('#delay_auto').css('display', 'none');
+    }
+    else {
+        $('#delay_manual').css('display', 'none');
+        $('#delay_auto').css('display', 'block');
+    }
+}
+
 $(document).ready(function() {
-    $('#delay_is_manual').selectmenu({
-        create: function(event, ui) {
-            if($(this).val() == '1') {
-                $('#delay_manual').css('display', 'block');
-                $('#delay_auto').css('display', 'none');
-            }
-            else {
-                $('#delay_manual').css('display', 'none');
-                $('#delay_auto').css('display', 'block');
-            }
-        },
-        change: function(event, ui) {
-            if($(this).val() == '1') {
-                $('#delay_manual').css('display', 'block');
-                $('#delay_auto').css('display', 'none');
-            }
-            else {
-                $('#delay_manual').css('display', 'none');
-                $('#delay_auto').css('display', 'block');
-            }
-        }
-    });
+    showDelayOptions();
 });
+
 
 $(document).ready(function() {
     $( document ).tooltip();
