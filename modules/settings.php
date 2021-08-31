@@ -54,13 +54,13 @@ class SettingsModule extends DefaultModule
         $habTimezoneOptions = '';
         foreach($timezoneData as $tz) 
         {
-            $mccTimezoneOptions .= makeSelectOption($tz['timezone_id'], $tz['label'], $mission->mcc_timezone == $tz['timezone_id']);
-            $habTimezoneOptions .= makeSelectOption($tz['timezone_id'], $tz['label'], $mission->hab_timezone == $tz['timezone_id']);
+            $mccTimezoneOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->mcc_timezone == $tz['timezone_id']);
+            $habTimezoneOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->hab_timezone == $tz['timezone_id']);
         }
 
         $delayIsManualOptions = 
-            makeSelectOption(1, 'Manual Delay Configuration', $mission->delay_is_manual).
-            makeSelectOption(0, 'Automatic Delay Configuration', !$mission->delay_is_manual);
+            $this->makeSelectOption(1, 'Manual Delay Configuration', $mission->delay_is_manual).
+            $this->makeSelectOption(0, 'Automatic Delay Configuration', !$mission->delay_is_manual);
 
         if($mission->delay_is_manual)
         {
