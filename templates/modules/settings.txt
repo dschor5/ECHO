@@ -113,7 +113,11 @@ $(document).ready(function () {
             $('.delay_met').last().uniqueId();
             $('.delay_met').last().datepicker({ dateFormat: 'yy-mm-dd' });
         }
-        
+    });
+
+    $('.delay_met').each( function() {
+        $(this).uniqueId();
+        $(this).datepicker({ dateFormat: 'yy-mm-dd' });
     });
 });
 
