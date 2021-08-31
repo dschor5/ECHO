@@ -109,8 +109,9 @@ $(document).ready(function () {
         if('content' in document.createElement('template'))
         {
             var objClone = template.content.cloneNode(true);
-            objClone.querySelector('.delay_met').datepicker({ dateFormat: 'yy-mm-dd' });
             document.querySelector('#delay_auto').appendChild(objClone);
+            $('.delay_met').last().uniqueId();
+            $('.delay_met').last().datepicker({ dateFormat: 'yy-mm-dd' });
         }
         
     });
