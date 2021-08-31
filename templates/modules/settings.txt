@@ -102,7 +102,8 @@ function getDate(element) {
 
 $(document).ready(function () {
     $("body").on("click", ".add_delay_btn", function (e) {
-        var index = $(e.target).closest(".delay_config_row").length + 1;
+
+        var index = $(this).uniqueId();
         var cloned_el = $(e.target).closest(".delay_config_row").clone(true);
 
         $(e.target).closest(".delay_config_row").parent().last().append(cloned_el).find(".remove_node_btn_frm_field:not(:first)").prop("disabled", false);
