@@ -49,7 +49,6 @@ class Main
      */
     private function __construct()
     {
-        $mission = MissionConfig::getInstance();
         date_default_timezone_set("UTC");
 
         $this->readCookie();
