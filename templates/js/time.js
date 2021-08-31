@@ -1,7 +1,7 @@
 $(document).ready(setTimeout(updateTime, 1000));
 
 function updateTime() {
-    var mccDate = formatTime('now', true);        
+    var mccDate = formatTime(null, true);        
     $('#time-mcc-value').text(mccDate);   
 
     dt = new Date();
@@ -28,7 +28,13 @@ function updateTime() {
 }
 
 function formatTime(timeStr, mccOffset) {
-    var dt = new Date(timeStr);
+    var dt;
+    if(timeStr == null) {
+        dt = new Date();
+    }
+    else {
+        dt = new Date(timeStr);
+    }
     var offset = (mccOffset) ? TZ_MCC_OFFSET : TZ_HAB_OFFSET;
     var mccMet = dt.getTime() + offset * 1000; // milliseconds
 

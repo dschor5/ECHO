@@ -160,10 +160,10 @@ abstract class DefaultModule implements Module
             // Configure communicaiton delay
             $commDelay = Delay::getInstance();
 
-            $isCrew = 'false';
+            $inMcc = 'true';
             if($this->user != null)
             {
-                $isCrew = ($this->user->is_crew) ? 'true' : 'false';
+                $inMcc = ($this->user->is_crew) ? 'false' : 'true';
             }
 
             $replace = array(
@@ -184,7 +184,7 @@ abstract class DefaultModule implements Module
                 '/%hab_time_format%/'  => 'true', // TODO
                 '/%timezone_mcc_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(true),
                 '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(false),
-                '/%is_crew%/'          => $isCrew,
+                '/%in_mcc%/'           => $inMcc,
             );
 
             echo Main::loadTemplate('main.txt', $replace);
