@@ -11,8 +11,9 @@
             <label for="name">Mission Name</label>
             <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" title="Name of mission that will be displayed on the top menu bar." required>
             
-            <label for="date-start">Mission Start & End Dates<br>
-            Dates according to MCC's timezone entered in YYYY-MM-DD format.</label>
+            <label for="date-start">Mission Start & End Dates</label>
+            <p>Dates when the crew will enter and leave the habitat.</p>
+            <p>Dates should be formatted as YYYY-MM-DD.</p>
             <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;" title="Format YYYY-MM-DD">
             <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;" title="Format YYYY-MM-DD">
         </div>
