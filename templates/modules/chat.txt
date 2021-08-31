@@ -19,7 +19,7 @@
             <div id="owlt-value" class="sim-param-value"></div>
 
             <div id="time-mcc-label" class="sim-param-label">Earth time:</div>
-            <div id="time-mcc-value" class="sim-param-value"</div>
+            <div id="time-mcc-value" class="sim-param-value"></div>
 
             <div id="time-hab-label" class="sim-param-label">Habitat time:</div>
             <div id="time-hab-value" class="sim-param-value"></div>
