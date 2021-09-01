@@ -9,27 +9,115 @@ class SettingsModule extends DefaultModule
         $this->subHtmlRequests = array('show');
     }
 
+    private function isValidDelayEquationOfTime(string $eq)
+    {
+        $eq = preg_replace('/\s+/', '', $test);
+
+        $number = '(?:\d+(?:[,.]\d+)?|pi|π|time)'; // What is a number
+        $functions = '(?:sinh?|cosh?|tanh?|abs|acosh?|asinh?|atanh?|exp|log10|deg2rad|rad2deg|sqrt|ceil|floor|round)'; // Allowed PHP functions
+        $operators = '[+\/*\^%-]'; // Allowed math operators
+        $regexp = '/^(('.$number.'|'.$functions.'\s*\((?1)+\)|\((?1)+\))(?:'.$operators.'(?2))?)+$/'; // Final regexp, heavily using recursive patterns
+        
+        return preg_match($regexp, $eq);
+    }
+
     public function compileJson(string $subaction): array
     {
-        $name = $_POST['name'] ?? '';
-        $date_start = $_POST['date_start'] ?? '0000-00-00';
-        $date_end = $_POST['date_end'] ?? '0000-00-00';
-        $mcc_name = $_POST['mcc_name'] ?? '';
-        $mcc_planet = $_POST['mcc_planet'] ?? '';
-        $mcc_user_role = $_POST['mcc_user_role'] ?? '';
-        $mcc_timezone = $_POST['mcc_timezone'];
-        $hab_name = $_POST['hab_name'] ?? '';
-        $hab_planet = $_POST['hab_planet'] ?? '';
-        $hab_user_role = $_POST['hab_user_role'] ?? '';
-        $hab_timezone = $_POST['hab_timezone'];
-        $delay_is_manual = $_POST['delay_is_manual'] ?? false;
-        
-        if(strlen($name) == 0) 
+        $response = array(
+            'success' => false, 
+            'error'   => array()
+        );
+
+        $data = array();
+
+        $STR_FMT    = '/^.+$/';
+        $DATE_FMT   = '/^[\d]{4}-[\d]{2}-[\d]{2}$/';
+        $BOOL_FMT   = '/^[0-1]$/';
+        $FLOAT_FMT  = '/^[\d]*[\.]?[\d]+$/';
+
+        // List of fields to validate automatically. 
+        $fields = array(
+            'name'          => array('name'=>'Mission Name',              'format'=>$STR_FMT),
+            'date_start'    => array('name'=>'Mission Start Date',        'format'=>$DATE_FMT),
+            'date_end'      => array('name'=>'Mission End Date',          'format'=>$DATE_FMT),
+            'mcc_name'      => array('name'=>'Mission Control Name',      'format'=>$STR_FMT),
+            'mcc_planet'    => array('name'=>'Mission Control Planet',    'format'=>$STR_FMT),
+            'mcc_user_role' => array('name'=>'Mission Control User Role', 'format'=>$STR_FMT),
+            'mcc_timezone'  => array('name'=>'Mission Control Timezone',  'format'=>$STR_FMT),
+            'hab_name'      => array('name'=>'Analog Habitat Name',       'format'=>$STR_FMT),
+            'hab_planet'    => array('name'=>'Analog Habitat Planet',     'format'=>$STR_FMT),
+            'hab_user_role' => array('name'=>'Analog Habitat User Role',  'format'=>$STR_FMT),
+            'hab_timezone'  => array('name'=>'Analog Habitat Timezone',   'format'=>$STR_FMT),
+            'delay_is_manual' => array('name'=>'Delay Configuration',     'format'=>$BOOL_FMT),
+        );
+
+        foreach($fields as $name => $validation)
         {
-            $response['error'] = 'Mission name cannot be empty.';
+            $temp = $_POST[$name] ?? '';
+            $temp = trim($temp);
+            if(strlen($temp) == 0)
+            {  
+                $response['error'][] = 'Field "'.$validation['name'].'" cannot be empty. ('.$temp.')';
+            }
+            elseif(!preg_match($validation['format'], $temp))
+            {
+                $response['error'][] = 'The format for "'.$validation['name'].'" is invalid. ('.$temp.')';
+            }
+            else
+            {
+                $data[$name] = $temp;
+            }
+        }
+
+        // Additional checks if all required fields are filled and the right format.
+        if(count($response['error']) == 0)
+        {
+            $data['date_start'] = $data['date_start'].' 00:00:00';
+            $data['date_end'] = $data['date_end'].' 23:59:59';
+            $dateStart = new DateTime($data['date_start']);
+            $dateEnd = new DateTime($data['date_end']);
+            if($dateStart->getTimestamp() > $dateEnd->getTimestamp()) 
+            {
+                $response['error'][] = 'The "Mission Start Date" cannot be after the "Mission End Date".';
+            }
+
+            $timezones = DateTimeZone::listIdentifiers();
+            if(!in_array($data['mcc_timezone'], $timezones))
+            {
+                $response['error'][] = 'Invalid "Mission Control Timezone" selected.';
+            }
+            if(!in_array($data['hab_timezone'], $timezones))
+            {
+                $response['error'][] = 'Invalid "Analog Habitat Timezone" selected.';
+            }
+        }
+
+        if(isset($data['delay_is_manual']) && $data['delay_is_manual'] == '1')
+        {
+            $temp = trim($_POST['delay_manual'] ?? '');
+            if(!preg_match($FLOAT_FMT, $temp))
+            {
+                $response['error'][] = 'Invalid "Manual Delay" entered. Only numbers allowed.';
+            }
+            else
+            {
+                $data['delay_config'] = floatval($temp);
+            }
+        }
+        elseif(isset($data['delay_is_manual']) && $data['delay_is_manual'] == '0')
+        {
+            
+        }
+
+        $response['success'] = count($response['error']) == 0;
+        if($response['success'])
+        {
+            $response['saved'] = 1;
+            $missionDao = MissionDao::getInstance();
+            $missionDao->updateMissionConfig($data);
         }
         
-        return array();
+        return $response;
     }
 
     private function getTimezoneList()
@@ -82,7 +170,7 @@ class SettingsModule extends DefaultModule
 
         if($mission->delay_is_manual)
         {
-            $delayManual = intval($mission->delay_config);
+            $delayManual = floatval($mission->delay_config);
             $delayAuto   = Main::loadTemplate('delay-config.txt', array(
                 '/%delay-met-id%/'    => 'id="delay-met-0"',
                 '/%delay-cfg-id%/'    => 'id="delay-cfg-0"',

@@ -3,7 +3,11 @@
         Mission Settings
     </div>
     
-    <div id="form-contents">
+    <form id="form-contents" method="POST">
+
+        <div class="form-row">
+            <div class="dialog-response"></div>
+        </div>
 
         <div class="subheading">Mission Configuration</div>
         <div class="form-row">
@@ -32,7 +36,7 @@
         <div class="subheading">Communicaiton Delay</div>
         
         <div class="form-row">
-            <label for="delay_is_manual">Manual Delay</label>
+            <label for="delay_is_manual">Delay Configuration</label>
             <div class="form-field">
                 <select name="delay_is_manual" id="delay_is_manual" onchange="showDelayOptions()">
                     %delay_is_manual%
@@ -55,7 +59,7 @@
                 </div>
             </div>
             <div id="delay_auto">
-                <label for="delay_auto_config">Piecewise Delay Definition in Sec</label>
+                <label for="delay_auto_config">Piecewise Delay Definition in Seconds</label>
                 <div class="form-field">
                     %delay_auto%
                 </div>
@@ -159,7 +163,12 @@
             </div>
         </div>
 
-    </div>
+        <div class="form-divider"></div>
+        <div class="form-row">
+            <button onclick="saveConfig()" type="button">Save Mission Configuration</button>
+        </div>
+
+    </form>
 </div>
 
 <script>
@@ -235,6 +244,8 @@ $(document).ready(function() {
 $(document).ready(function() {
     $( document ).tooltip();
 });
+
+
 
 </script>
 

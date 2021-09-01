@@ -38,9 +38,20 @@ class MissionDao extends Dao
         return $missionData;
     }
 
-    public function saveMissionConfig() : bool
+    public function updateMissionConfig(array $data) : bool
     {
-        return true;
+        $queryStr = 'UPDATE mission_config SET value = ( CASE ';
+        $qIn = array();
+        foreach($data as $name => $value) 
+        {
+            $qName = '\''.$this->database->prepareStatement($name).'\'';
+            $qIn[] = $qName;
+            $qValue = '\''.$this->database->prepareStatement($value).'\'';
+            $queryStr .= 'WHEN name='.$qName.' THEN '.$qValue.' ';
+        }
+        $queryStr .= 'END) WHERE name IN ('.implode(',', $qIn).')';
+
+        return ($this->database->query($queryStr) !== false);
     }
 }
 
