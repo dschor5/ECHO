@@ -6,6 +6,7 @@
     bottom: 0px;
     background-color: #CCC;
     padding: 10px;
+    overflow-y: scroll;
 }
 
 #heading {
@@ -18,6 +19,13 @@
     font-size: 16px;
     font-weight: bold;
     padding-bottom: 15px;
+}
+
+.form-divider {
+    border-bottom: 1px dashed #AAA;
+    width: 90%;
+    margin: 10px auto;
+    height: 1px;
 }
 
 #navigation {
@@ -113,11 +121,40 @@
     display: inline-block;
 }
 
+/*
 .form-box {
     width: calc(50% - 20px);
     margin: 0px;
     padding: 10px;
     float: left;
+}
+*/
+
+.form-row {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.form-row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.form-field {
+    width: 55%;
+    float: left;
+    margin-right: 10px;
+}
+
+.form-help {
+    width: 39%;
+    float: right;
+    font-size: 80%;
+    color: #666;
+    padding-top: 3px;
+    
+    
 }
 
 .add_delay_btn, .del_delay_btn {

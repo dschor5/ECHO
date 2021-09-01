@@ -5,90 +5,158 @@
     
     <div id="form-contents">
 
-        <div class="form-box">
-            <div class="subheading">Mission Configuration</div>
-
+        <div class="subheading">Mission Configuration</div>
+        <div class="form-row">
             <label for="name">Mission Name</label>
-            <p>Appearing on the login page and menu bar.</p>
-            <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" title="Name of mission that will be displayed on the top menu bar." required>
-            
-            <label for="date-start">Mission Start & End Dates</label>
-            <p>When the crew will enter/leave the habitat.</p>
-            <p>Dates should be formatted as YYYY-MM-DD.</p>
-            <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;" title="Format YYYY-MM-DD">
-            <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;" title="Format YYYY-MM-DD">
+            <div class="form-field">
+                <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" required>
+            </div>
+            <div class="form-help">
+                Appearing on the login page and menu bar.
+            </div>
         </div>
 
-        <div class="form-box">
-            <div class="subheading">Communicaiton Delay</div>
+        <div class="form-row">
+            <label for="date-start">Mission Start & End Dates</label>
+            <div class="form-field">
+                <input type="text" placeholder="" name="date_start" id="date_start" value="%date_start%" required style="width: 49%; margin-right: 2px;">
+                <input type="text" placeholder="" name="date_end"   id="date_end"   value="%date_end%"   required style="width: 49%;">
+            </div>
+            <div class="form-help">
+                When the crew will enter/leave the habitat.<br>
+                Dates should be formatted as YYYY-MM-DD.
+            </div>
+        </div>
 
+        <div class="form-divider"></div>
+        <div class="subheading">Communicaiton Delay</div>
+        
+        <div class="form-row">
             <label for="delay_is_manual">Manual Delay</label>
-            <p>Manual delay &rarr; Constant set by administrator.</p>
-            <p>Auto delay &rarr; Predefined as piece-wise function of time.</p>
-            <select name="delay_is_manual" id="delay_is_manual" onchange="showDelayOptions()">
-                %delay_is_manual%
-            </select>
+            <div class="form-field">
+                <select name="delay_is_manual" id="delay_is_manual" onchange="showDelayOptions()">
+                    %delay_is_manual%
+                </select>
+            </div>
+            <div class="form-help">
+                Manual delay &rarr; Constant set by administrator.<br>
+                Auto delay &rarr; Predefined as piece-wise function of time.
+            </div>
+        </div>
 
+        <div class="form-row">
             <div id="delay_manual">
                 <label for="delay_manual">Delay in Seconds</label>
-                <p>Constant used for the mission. Can be changed in real-time by an administrator. Though, messages in-transit will not be updated to use the new delay.</p>
-                <input type="text" placeholder="Manual Delay in Seconds" name="delay_manual" id="delay_manual" value="%delay_manual%" required>
+                <div class="form-field">
+                    <input type="text" placeholder="Manual Delay in Seconds" name="delay_manual" id="delay_manual" value="%delay_manual%" required>
+                </div>
+                <div class="form-help">
+                    Constant used for the mission. Can be changed in real-time by an administrator. Though, messages in-transit will not be updated to use the new delay.
+                </div>
             </div>
             <div id="delay_auto">
                 <label for="delay_auto_config">Piecewise Delay Definition in Sec</label>
-                <p>Delay defined as piece-wise function of time (t). </p>
-                <p>Valid operators include +, -, *, /, ^.</p>
-                %delay_auto%
+                <div class="form-field">
+                    %delay_auto%
+                </div>
+                <div class="form-help">
+                    Delay defined as piece-wise function of time (t). <br>
+                    Valid operators include +, -, *, /, ^.
+                </div>
                 <template id="delay_auto_template">
                     %delay_auto_tmp%
                 </template>
             </div>
         </div>
 
-        <div style="clear: both;"></div>
+        <div class="form-divider"></div>
+        <div class="subheading">Mission Control</div>
 
-        <div class="form-box">
-            <div class="subheading">Mission Control</div>
-
+        <div class="form-row">
             <label for="mcc_name">Name for Mission Control</label>
-            <p>Name or accronym used to identify Mission Control. </p>
-            <input type="text" placeholder="Mission Control Name" name="mcc_name" id="mcc_name" value="%mcc_name%" required>
-
-            <label for="mcc_planet">Location for Mission Control</label>
-            <p>Name of planet where mission control is set.</p>
-            <input type="text" placeholder="Planet Name" name="mcc_planet" id="mcc_planet" value="%mcc_planet%" required>
-
-            <label for="mcc_user_role">User Role for Mission Control Operators</label>
-            <p>Title given to mission control operators.</p>
-            <input type="text" placeholder="Role Name" name="mcc_user_role" id="mcc_user_role" value="%mcc_user_role%" required>
-
-            <label for="mcc_timezone">Timezone for Mission Control</label>
-            <p>Timezone used for mission control (e.g., ISS uses UTC)</p>
-            <select name="mcc_timezone" id="mcc_timezone">
-                %mcc_timezone%
-            </select>            
+            <div class="form-field">
+                <input type="text" placeholder="Mission Control Name" name="mcc_name" id="mcc_name" value="%mcc_name%" required>
+            </div>
+            <div class="form-help">
+                Name or accronym used to identify Mission Control.
+            </div>
         </div>
 
-        <div class="form-box">
-            <div class="subheading">Analog Habitat</div>
+        <div class="form-row">
+            <label for="mcc_planet">Location for Mission Control</label>
+            <div class="form-field">
+                <input type="text" placeholder="Planet Name" name="mcc_planet" id="mcc_planet" value="%mcc_planet%" required>
+            </div>
+            <div class="form-help">
+                Name of planet where mission control is set.
+            </div>
+        </div>
+            
+        <div class="form-row">
+            <label for="mcc_user_role">User Role for Mission Control Operators</label>
+            <div class="form-field">
+                <input type="text" placeholder="Role Name" name="mcc_user_role" id="mcc_user_role" value="%mcc_user_role%" required>
+            </div>
+            <div class="form-help">
+                Title given to mission control operators.
+            </div>
+        </div>
 
+        <div class="form-row">
+            <label for="mcc_timezone">Timezone for Mission Control</label>
+            <div class="form-field">
+                <select name="mcc_timezone" id="mcc_timezone">
+                    %mcc_timezone%
+                </select>
+            </div>
+            <div class="form-help">
+                Timezone used for mission control (e.g., ISS uses UTC)
+            </div>
+        </div>
+            
+        <div class="form-divider"></div>
+        <div class="subheading">Analog Habitat</div>
+
+        <div class="form-row">
             <label for="hab_name">Name for Analog Habitat</label>
-            <p>Name or accronym used to identify analog habitat. </p>
-            <input type="text" placeholder="Habitat Name" name="hab_name" id="hab_name" value="%hab_name%" required>
+            <div class="form-field">
+                <input type="text" placeholder="Habitat Name" name="hab_name" id="hab_name" value="%hab_name%" required>
+            </div>
+            <div class="form-help">
+                Name or accronym used to identify analog habitat.
+            </div>
+        </div>
 
+        <div class="form-row">
             <label for="hab_planet">Location for Analog Habitat</label>
-            <p>Name of planet where habitat is located.</p>
-            <input type="text" placeholder="Planet Name" name="hab_planet" id="hab_planet" value="%hab_planet%" required>
+            <div class="form-field">
+                <input type="text" placeholder="Planet Name" name="hab_planet" id="hab_planet" value="%hab_planet%" required>
+            </div>
+            <div class="form-help">
+                Name of planet where habitat is located.
+            </div>
+        </div>
 
-            <label for="hab_user_role">User Role for Analog Astronauts</label>
-            <p>Title given to habitat crew members.</p>
-            <input type="text" placeholder="Role Name" name="hab_user_role" id="hab_user_role" value="%hab_user_role%" required>
+        <div class="form-row">
+            <label for="hab_user_role">User Role for Analog Crew Members</label>
+            <div class="form-field">
+                <input type="text" placeholder="Role Name" name="hab_user_role" id="hab_user_role" value="%hab_user_role%" required>
+            </div>
+            <div class="form-help">
+                Title given to habitat crew members.
+            </div>
+        </div>
 
+        <div class="form-row">
             <label for="hab_timezone">Timezone for Analog Simulation</label>
-            <p>Timezone used for habitat simulation.</p>
-            <select name="hab_timezone" id="hab_timezone">
-                %hab_timezone%
-            </select>
+            <div class="form-field">
+                <select name="hab_timezone" id="hab_timezone">
+                    %hab_timezone%
+                </select>
+            </div>
+            <div class="form-help">
+                Timezone used at the habitat.
+            </div>
         </div>
 
     </div>
@@ -125,7 +193,7 @@ $(document).ready(function () {
         if('content' in document.createElement('template'))
         {
             var objClone = template.content.cloneNode(true);
-            document.querySelector('#delay_auto').appendChild(objClone);
+            document.querySelector('#delay_auto .form-field').appendChild(objClone);
             $('.delay_met').last().uniqueId();
             $('.delay_met').last().datepicker({ dateFormat: 'yy-mm-dd' });
         }
