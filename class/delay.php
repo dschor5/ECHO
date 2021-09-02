@@ -47,6 +47,7 @@ class Delay
                 $metObj = new DelayTime();
                 $config[$i]['eq'] = preg_replace('/time/', $metObj->getMet(), $config[$i]['eq']);
                 eval('$this->currDelay = '.$config[$i]['eq'].';');
+                $this->currDelay = max(0, $this->currDelay);
             } 
             catch (Exception $e) 
             {

@@ -194,7 +194,11 @@ class SettingsModule extends DefaultModule
         $response['success'] = count($response['error']) == 0;
         if($response['success'])
         {
-            $response['saved'] = 1;
+            $mission = MissionConfig::getInstance();
+            $data['date_start'] = DelayTime::convertTimestampTimezone(
+                $data['date_start'], $mission->hab_timezone, 'UTC');
+            $data['date_end'] = DelayTime::convertTimestampTimezone(
+                $data['date_end'], $mission->hab_timezone, 'UTC');
             $missionDao = MissionDao::getInstance();
             $missionDao->updateMissionConfig($data);
         }
@@ -323,11 +327,16 @@ class SettingsModule extends DefaultModule
             $mccTimezoneOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->mcc_timezone == $tz['timezone_id']);
             $habTimezoneOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->hab_timezone == $tz['timezone_id']);
         }
+
+        $missionStartDate = DelayTime::convertTimestampTimezone(
+            $mission->date_start, 'UTC', $mission->hab_timezone);
+        $missionEndDate = DelayTime::convertTimestampTimezone(
+            $mission->date_end, 'UTC', $mission->hab_timezone);
         
         return Main::loadTemplate('settings-mission.txt', array(
             '/%name%/'            => $mission->name,
-            '/%date_start%/'      => substr($mission->date_start, 0, 10),
-            '/%date_end%/'        => substr($mission->date_end, 0, 10),
+            '/%date_start%/'      => substr($missionStartDate, 0, 10),
+            '/%date_end%/'        => substr($missionEndDate, 0, 10),
             '/%mcc_name%/'        => $mission->mcc_name,
             '/%mcc_planet%/'      => $mission->mcc_planet,
             '/%mcc_user_role%/'   => $mission->mcc_user_role,

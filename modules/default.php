@@ -100,10 +100,12 @@ abstract class DefaultModule implements Module
                 );
 
             $action = $_GET['action'] ?? '';
+            $subaction = $_GET['subaction'] ?? '';
+            $currUrl = $action.(strlen($subaction) > 0 ? '/'.$subaction : '');
 
             foreach($navLinks as $link)
             {
-                if($action != $link['url'])
+                if($currUrl != $link['url'])
                 {
                     $links .= Main::loadTemplate('nav-link.txt', array(
                         '/%url%/'  => $link['url'],

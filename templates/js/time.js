@@ -16,7 +16,7 @@ function updateTime() {
     var habMet = 0;
     var habDate = "";
     if(HAB_FORMAT) {
-        habMet = (dt.getTime() - EPOCH_UTC.getTime() + TZ_HAB_OFFSET * 1000) / 1000; // seconds
+        habMet = (dt.getTime() - EPOCH_UTC.getTime()) / 1000; // seconds
         var day = Math.floor(habMet / SEC_PER_DAY);
         var hrs = Math.floor((habMet - day * SEC_PER_DAY) / 3600);
         var min = Math.floor((habMet - day * SEC_PER_DAY - hrs * 3600) / 60);
