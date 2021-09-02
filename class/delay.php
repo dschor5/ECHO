@@ -37,7 +37,7 @@ class Delay
             array_push($config, array('ts'=>'2100-01-01 00:00:00', 'eq'=>'0'));
 
             $i = 1;
-            while(!(strtotime($config[$i]['ts']) < time() && time() < strtotime($config[$i+1]['ts'])) && $i < count($config)-1)
+            while(!(strtotime($config[$i]['ts']) < time() && time() <= strtotime($config[$i+1]['ts'])) && $i < count($config)-1)
             {
                 $i++;
             }
