@@ -304,8 +304,10 @@ function uploadMedia(mediaType) {
         if(recordedBlobs === undefined) {
             return;
         }
-        const blobMimeType = (recordedBlobs[0] || {}).type;
-        //console.log(blobMimeType);
+        //const blobMimeType = (recordedBlobs[0] || {}).type;
+        
+        const blobMimeType = (mediaType == 'video') ? 'video/webm; codecs="vp8, opus"' : 'audio/ogg; codecs=opus';
+        console.log(blobMimeType);
         const blob = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
         formData.append("data", blob, "recording");

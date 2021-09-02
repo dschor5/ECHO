@@ -39,7 +39,7 @@ abstract class DefaultModule implements Module
             'jquery-ui.structure.css', 
             'jquery-ui.theme.css', 
             'jquery-3.6.0.min.js', 
-            'jquery-ui.min.js'
+            'jquery-ui.min.js',
         );
 
         $this->templateFiles = array_merge($defaults, $this->templateFiles);
@@ -71,12 +71,12 @@ abstract class DefaultModule implements Module
                 'name' => 'Chat',
                 'icon' => 'home'
                 );
-            $navLinks[] = array(
+            /*$navLinks[] = array(
                 'url'  => 'preferences',
                 'name' => 'Preferences',
                 'icon' => 'pencil'
                 );
-
+            */
             if($this->user->is_admin)
             {
                 $navLinks[] = array(
@@ -84,9 +84,13 @@ abstract class DefaultModule implements Module
                     'name' => 'User Accounts', 
                     'icon' => 'person');
                 $navLinks[] = array(
-                    'url'  => 'settings', 
+                    'url'  => 'settings/mission', 
                     'name' => 'Mission Settings',
                     'icon' => 'gear');
+                $navLinks[] = array(
+                    'url'  => 'settings/delay', 
+                    'name' => 'Delay Settings',
+                    'icon' => 'clock');
             }
 
             $navLinks[] = array(

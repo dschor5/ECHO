@@ -33,47 +33,6 @@
         </div>
 
         <div class="form-divider"></div>
-        <div class="subheading">Communicaiton Delay</div>
-        
-        <div class="form-row">
-            <label for="delay_is_manual">Delay Configuration</label>
-            <div class="form-field">
-                <select name="delay_is_manual" id="delay_is_manual" onchange="showDelayOptions()">
-                    %delay_is_manual%
-                </select>
-            </div>
-            <div class="form-help">
-                Manual delay &rarr; Constant set by administrator.<br>
-                Auto delay &rarr; Predefined as piece-wise function of time.
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div id="delay_manual">
-                <label for="delay_manual">Delay in Seconds</label>
-                <div class="form-field">
-                    <input type="text" placeholder="Manual Delay in Seconds" name="delay_manual" id="delay_manual" value="%delay_manual%" required>
-                </div>
-                <div class="form-help">
-                    Constant used for the mission. Can be changed in real-time by an administrator. Though, messages in-transit will not be updated to use the new delay.
-                </div>
-            </div>
-            <div id="delay_auto">
-                <label for="delay_auto_config">Piecewise Delay Definition in Seconds</label>
-                <div class="form-field">
-                    %delay_auto%
-                </div>
-                <div class="form-help">
-                    Delay defined as piece-wise function of time (t). <br>
-                    Valid operators include +, -, *, /, ^.
-                </div>
-                <template id="delay_auto_template">
-                    %delay_auto_tmp%
-                </template>
-            </div>
-        </div>
-
-        <div class="form-divider"></div>
         <div class="subheading">Mission Control</div>
 
         <div class="form-row">
@@ -165,90 +124,13 @@
 
         <div class="form-divider"></div>
         <div class="form-row">
-            <button onclick="saveConfig()" type="button">Save Mission Configuration</button>
+            <button onclick="saveConfig('mission')" type="button">Save Mission Configuration</button>
         </div>
 
     </form>
 </div>
 
 <script>
-var fromDate = $('#date_start').datepicker({
-    defaultDate: '%date_start%',
-    dateFormat: 'yy-mm-dd'
-}).on('change', function() {
-    toDate.datepicker('option', 'minDate', getDate(this));
-}),
-toDate = $('#date_end').datepicker({
-    defaultDate: '%date_end%',
-    dateFormat: 'yy-mm-dd'
-}).on('change', function() {
-    fromDate.datepicker('option', 'maxDate', getDate(this));
-});
-
-function getDate(element) {
-    var date;
-    try {
-        date = $.datepicker.parseDate('yy-mm-dd', element.value);
-    }
-    catch(error) {
-        date = null;
-    }
-    return date;
-}
-
-$(document).ready(function () {
-    $("body").on("click", ".add_delay_btn", function (e) {
-        var template = document.querySelector('#delay_auto_template');
-        if('content' in document.createElement('template'))
-        {
-            var objClone = template.content.cloneNode(true);
-            document.querySelector('#delay_auto .form-field').appendChild(objClone);
-            $('.delay_met').last().uniqueId();
-            $('.delay_met').last().datepicker({ dateFormat: 'yy-mm-dd' });
-        }
-
-        $('.del_delay_btn').prop('disabled', false);
-        $('.del_delay_btn').first().prop('disabled', true);
-    });
-
-    $('.delay_met').each( function() {
-        $(this).uniqueId();
-        $(this).datepicker({ dateFormat: 'yy-mm-dd' });
-    });
-    $('.del_delay_btn').prop('disabled', false);
-    $('.del_delay_btn').first().prop('disabled', true);
-});
-
-$("body").on("click", ".del_delay_btn", function () {
-    $(this).closest(".delay_config_row").remove();
-    console.log("success");
-});
-
-
-function showDelayOptions() {
-    if($('#delay_is_manual').val() == '1') {
-        $('#delay_manual').css('display', 'block');
-        $('#delay_auto').css('display', 'none');
-    }
-    else {
-        $('#delay_manual').css('display', 'none');
-        $('#delay_auto').css('display', 'block');
-    }
-}
-
-$(document).ready(function() {
-    showDelayOptions();
-});
-
-
-$(document).ready(function() {
-    $( document ).tooltip();
-});
-
-
-
+    fromDate = $('#date_start').datepicker('option', 'defaultDate', '%date_start%');
+    toDate = $('#date_start').datepicker('option', 'defaultDate', '%date_end%');
 </script>
-
-<!--
-https://bootstrapfriendly.com/blog/dynamically-add-or-remove-form-input-fields-using-jquery/
--->

@@ -163,3 +163,8 @@
     width: 20px;
     padding: 0px;
 }
+
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+}

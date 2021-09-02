@@ -16,14 +16,15 @@ $(document).ready(function() {
 
 function getSupportedMimeTypes() {
     const options = [
-        'video/webm;codecs=vp9,opus',
         'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=vp9,opus',
         'video/webm;codecs=h264,opus',
     ];
     let selectedMimeType = '';
     for(let i = 0; i < options.length; i++) {
         if(MediaRecorder.isTypeSupported(options[i])) {
             selectedMimeType = options[i];
+            break; // Only need one!
         }
     }
 
@@ -89,16 +90,18 @@ function startRecording(mediaType) {
     
     playMediaPlayer.pause();
 
-    recordingMimeType = mimeType;
+    recordingMimeType = 'video/webm';//mimeType;
     if(mediaType == 'audio') {
         recordingMimeType = 'audio/webm';
     }
 
     recordedBlobs = [];
     try {
-        mediaRecorder = new MediaRecorder(window.stream, {recordingMimeType});
+        let options = {mimeType: recordingMimeType};
+        mediaRecorder = new MediaRecorder(window.stream, options);
     }
     catch (e) {
+        console.log("Created MediaRecorder without mimeType specified.");
         try {
             mediaRecorder = new MediaRecorder(window.stream);
         }
@@ -131,6 +134,7 @@ async function stopRecording(mediaType) {
     playMediaPlayer.controls = true;
 
     const blobMimeType = (recordedBlobs[0] || {}).type;
+    console.log("Play " + blobMimeType);
     const superBuffer = new Blob(recordedBlobs, {type: blobMimeType});
     mediaUrl = window.URL.createObjectURL(superBuffer);
     playMediaPlayer.src = mediaUrl;

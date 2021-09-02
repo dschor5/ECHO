@@ -7,7 +7,7 @@ class DelayTime
     private $ts = 0;
 
     // Assumes all timestamps are provided in UTC format. 
-    public function __construct(string $datetime = 'now')
+    public function __construct(string $datetime = 'now', string $timezone = 'UTC')
     {
         $mission = MissionConfig::getInstance();
 
@@ -17,8 +17,15 @@ class DelayTime
             self::$epochMet = $epoch->getTimestamp();
         }
 
-        $time = new DateTime($datetime, new DateTimeZone('UTC'));
+        $time = new DateTime($datetime, new DateTimeZone($timezone));
         $this->ts = $time->getTimestamp();
+    }
+
+    public static function convertTimestampTimezone(string $timestamp, string $fromTz, string $toTz) : string
+    {
+        $ts = new DateTime($timestamp, new DateTimeZone($fromTz));
+        $ts->setTimezone(new DateTimeZone($toTz));
+        return $ts->format(self::DATE_FORMAT);
     }
 
     public static function getEpochUTC() : string
@@ -49,6 +56,11 @@ class DelayTime
         $timeStr = $time->format(self::DATE_FORMAT);
         
         return $timeStr;
+    }
+
+    public function getMet() : int
+    {
+        return $this->ts - self::getEpochUTC();
     }
 }
 

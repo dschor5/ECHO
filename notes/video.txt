@@ -35,3 +35,5 @@ poster="image" to load before video loads
 
 isTypeSupported | RecordRTC
 https://www.webrtc-experiment.com/RecordRTC/simple-demos/isTypeSupported.html
+
+Can we use the VLC media player to convert files via the command line on the server?

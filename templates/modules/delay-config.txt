@@ -1,6 +1,7 @@
 <div class="delay_config_row">
-    <input type="text" %delay-met-id% class="delay_met" placeholder="" name="delay_time[]" %delay-met-value% style="width: 35%;">
-    <input type="text" %delay-cfg-id% class="delay_cfg" placeholder="" name="delay_eq[]" %delay-cfg-value% style="width: 50%;">
+    <input type="text" %delay-date-id% class="delay_date" placeholder="" name="delay_date[]" value="%delay-date-value%" style="width: 22%;">
+    <input             %delay-time-id% class="delay_time" placeholder="" name="delay_time[]" value="%delay-time-value%" style="width: 20%;">
+    <input type="text" %delay-cfg-id% class="delay_cfg" placeholder="" name="delay_eq[]" value="%delay-cfg-value%" style="width: 40%;">
     <button type="button" class="add_delay_btn"><span class="ui-icon ui-icon-plusthick"></span></button>
     <button type="button" class="del_delay_btn"><span class="ui-icon ui-icon-minusthick"></span></button>
 </div>

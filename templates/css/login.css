@@ -67,11 +67,11 @@ h2 {
     font-size: 30px;
 }
 
-#credits {
+#credits, #credits a {
     position: relative;
-    background: #FF0000;
+    color: #666;
     min-width: 400px;
-    max-width: 800px;
+    max-width: 900px;
     margin: auto;
     bottom: 0px;
 }
