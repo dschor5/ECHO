@@ -56,7 +56,8 @@ class SettingsModule extends DefaultModule
         if(isset($_POST['delay_is_manual']) && $_POST['delay_is_manual'] == 'true')
         {
             $data['delay_is_manual'] = '1';
-            $temp = trim($_POST['delay_manual'] ?? '');
+            $temp = $_POST['delay_manual'] ?? '';
+            $temp = trim($temp)
             if(!preg_match($FLOAT_FMT, $temp))
             {
                 $response['error'][] = 'Invalid "Manual Delay" entered. Only numbers allowed.';
