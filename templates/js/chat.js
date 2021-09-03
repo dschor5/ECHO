@@ -170,7 +170,7 @@ function updateDeliveryStatus() {
         console.log("message-id=" + id + " is at " + percent);
         
         document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
-        if(recvTim <= currTime) {
+        if(recvTime <= currTime) {
 
             match.removeAttribute('status');
             
