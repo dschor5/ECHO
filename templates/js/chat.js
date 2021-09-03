@@ -115,7 +115,7 @@ function compileMsg(data, before){
         }
         var msgStatus = msgClone.querySelector(".msg-status");
         msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
-        msgStatus.querySelector("time").setAttribute('recv', data.recv_time);
+        msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
              
         msgStatus.querySelector(".msg-sent-time").textContent = formatTime(data.sent_time);
         msgStatus.querySelector(".msg-recv-time-hab").textContent = formatTime(data.recv_time_hab);
