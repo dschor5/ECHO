@@ -4,7 +4,7 @@ class Delay
 {
     private static $instance = null;
     private $currDelay = 0;
-    const SPEED_OF_LIGHT_KM_P_SEC = 299.792458;
+    const SPEED_OF_LIGHT_KM_P_SEC = 299792.458;
     const SEC_PER_MIN = 60;
     const SEC_PER_HOUR = 60 * 60;
 
