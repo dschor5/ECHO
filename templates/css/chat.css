@@ -183,6 +183,21 @@
     height: 50px;
 }
 
+.msg-progress-bar {
+    width: 100%;
+    background-color: #da8383;
+    padding: 3px;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+}
+
+.msg-progress-bar-fill {
+    display: block;
+    height: 22px;
+    background-color: #659cef;
+    border-radius: 3px;
+}
+
 #new-msg {
     position: absolute;
     bottom: 0px;
