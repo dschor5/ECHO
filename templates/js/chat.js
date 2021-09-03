@@ -117,9 +117,9 @@ function compileMsg(data, before){
         msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
         msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
              
-        msgStatus.querySelector(".msg-sent-time").textContent = formatTime(data.sent_time);
-        msgStatus.querySelector(".msg-recv-time-hab").textContent = formatTime(data.recv_time_hab);
-        msgStatus.querySelector(".msg-recv-time-mcc").textContent = formatTime(data.recv_time_mcc);
+        msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
+        msgStatus.querySelector(".msg-recv-time-hab").textContent = "HAB: " + formatTime(data.recv_time_hab);
+        msgStatus.querySelector(".msg-recv-time-mcc").textContent = "MCC: " + formatTime(data.recv_time_mcc);
         msgStatus.querySelector(".msg-delivery-status").textContent = data.delivered_status;
 
         if(before) {
