@@ -304,7 +304,7 @@ class ChatModule extends DefaultModule
                 }
                 $lastMsg = time();
             }
-            Logger::warning('Found '.count($messages), $ids);
+            //Logger::warning('Found '.count($messages), $ids);
 
             
             $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->user_id, $this->user->is_crew, $timeStr);
