@@ -137,7 +137,9 @@ function compileMsg(data, before){
     }
 }
 
-$(document).ready(function() {
+$(document).ready(setTimeout(updateDeliveryStatus, 1000));
+
+function updateDeliveryStatus() {
     var matches = document.querySelectorAll("time[status='Transit']");
     var currTime = new Date();
     var recvTime = null;
@@ -149,8 +151,8 @@ $(document).ready(function() {
             match.closests('.msg-delivery-status').textContent = 'Delivered!!!';
         }
     });
-    
-});
+    setTimeout(updateDeliveryStatus, 1000);
+}
 
 function closeModal() {
     // Common
