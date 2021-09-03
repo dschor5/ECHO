@@ -127,7 +127,7 @@
         <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')">&#128249;</button>
         <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')">&#127908;</button>
         <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()">&#128206;</button>
-        <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage()">SEND</button>
+        <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage()" onkeypress="checkKey(event)">SEND</button>
     </div>
     
     <div id="dialog-video" title="Record Video Message" class="dialog-body">

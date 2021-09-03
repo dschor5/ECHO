@@ -29,6 +29,14 @@ function sendTextMessage() {
     });
 }
 
+function checkKey(event) {
+    console.log("called");
+    if(event.keyCode == 13 && event.shiftKey) {
+        event.preventDefault();
+        sendTextMessage();
+    }
+}
+
 // Register keypress event to submit login
 $('#new-msg-text').keydown( function(event) {
     console.log(event);
