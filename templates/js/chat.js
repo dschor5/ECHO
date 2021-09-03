@@ -150,7 +150,8 @@ function updateDeliveryStatus() {
         if(recvTime.getTime() >= currTime.getTime()) {
             console.error("Updated status!");
             match.removeAttribute('status');
-            match.closest('.msg-delivery-status').textContent = 'Delivered!!!';
+            console.log(match.closest('.msg-delivery-status').textContent);
+            //match.closest('.msg-delivery-status').textContent = 'Delivered!!!';
         }
     });
     setTimeout(updateDeliveryStatus, 1000);
