@@ -116,11 +116,14 @@ function compileMsg(data, before){
         var msgStatus = msgClone.querySelector(".msg-status");
         msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
         msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
+        msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
+        
              
         msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
         msgStatus.querySelector(".msg-recv-time-hab").textContent = "HAB: " + formatTime(data.recv_time_hab);
         msgStatus.querySelector(".msg-recv-time-mcc").textContent = "MCC: " + formatTime(data.recv_time_mcc);
         msgStatus.querySelector(".msg-delivery-status").textContent = data.delivered_status;
+        msgStatus.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
         if(before) {
             var container = document.querySelector('#msg-container');
@@ -144,14 +147,12 @@ function updateDeliveryStatus() {
     var currTime = new Date();
     var recvTime = null;
     matches.forEach(function(match) {
-        console.log("hello");
         recvTime = new Date(match.getAttribute("recv"));
-        console.log(recvTime + " >= " + currTime);
         if(recvTime.getTime() >= currTime.getTime()) {
-            console.error("Updated status!");
             match.removeAttribute('status');
-            console.log(match.closest('.msg-delivery-status').textContent);
-            //match.closest('.msg-delivery-status').textContent = 'Delivered!!!';
+            let id = match.getAttribute('msg-id');
+            console.log("Updated status for message-id=" + id + "!");
+            document.querySelector('#status-msg-id-' + id).textContent = 'Delivered!!!';
         }
     });
     setTimeout(updateDeliveryStatus, 1000);
