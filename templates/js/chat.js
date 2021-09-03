@@ -169,15 +169,15 @@ function updateDeliveryStatus() {
         percent = 100.0 - (recvTime - currTime) / delay * 100.0;
         console.log("message-id=" + id + " is at " + percent);
         
-        document.querySelector('progress-fill-msg-id' + id).style.width = percent + '%';
+        document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTim <= currTime) {
 
             match.removeAttribute('status');
             
             console.log("Updated status for message-id=" + id + "!");
             document.querySelector('#status-msg-id-' + id).textContent = 'Delivered!!!';
-            document.querySelector('progress-msg-id' + id).style.display = 'none';
-            document.querySelector('progress-fill-msg-id' + id).style.display = 'none';
+            document.querySelector('#progress-msg-id' + id).style.display = 'none';
+            document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
         }
     });
     setTimeout(updateDeliveryStatus, 1000);
