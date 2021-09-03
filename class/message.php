@@ -7,6 +7,9 @@ class Message
     const AUDIO = 'audio';
     const VIDEO = 'video';
 
+    const MSG_STATUS_DELIVERED = 'Delivered';
+    const MSG_STATUS_TRANSIT = 'Transit';
+
     private $data;
     private $file;
 
@@ -56,23 +59,33 @@ class Message
     private function getMsgStatus() : string
     {
         $time = new DelayTime();
-        return ($this->getReceivedTime(!$this->data['is_crew']) <= $time->getTime()) ? 'Delivered' : 'Transit';
+        return ($this->getReceivedTime(!$this->data['is_crew']) <= $time->getTime()) ? self::MSG_STATUS_DELIVERED : self::MSG_STATUS_TRANSIT;
     }
 
-    public function compileArray(User &$userPerspective) : array
+    public function compileArray(User &$userPerspective, bool $remoteDest) : array
     {
         $msgData = array(
             'message_id'       => $this->data['message_id'],
             'user_id'          => $this->data['user_id'],
+            'is_crew'          => $this->data['is_crew'],
             'author'           => $this->data['alias'],
             'message'          => $this->data['text'],
             'type'             => self::TEXT,
-            'sent_time'        => $this->data['sent_time'],
-            'recv_time_mcc'    => $this->data['recv_time_mcc'],
-            'recv_time_hab'    => $this->data['recv_time_hab'],
+            'sent_time'        => $this->data['sent_time'].' GMT',
+            'recv_time_mcc'    => $this->data['recv_time_mcc'].' GMT',
+            'recv_time_hab'    => $this->data['recv_time_hab'].' GMT',
             'delivered_status' => $this->getMsgStatus(),
             'sent_from'        => $this->data['is_crew'],
         );
+
+        if($this->data['is_crew'] == $remoteDest)
+        {
+            $msgData['recv_time'] = $this->data['recv_time_mcc'].' GMT';
+        }
+        else
+        {
+            $msgData['recv_time'] = $this->data['recv_time_hab'].' GMT';
+        }
 
         if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
         {

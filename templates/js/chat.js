@@ -48,17 +48,6 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
 }
 
 const evtSource = new EventSource(BASE_URL + '/chat/refresh');
-
-/*
-evtSource.onopen = function () {
-    console.info("EventSource connected.");
-};
-  
-evtSource.onerror = function (err) {
-    console.error("EventSource failed:", err);
-};
-*/
-
 evtSource.addEventListener("logout", handleEventSourceLogout);
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
@@ -125,6 +114,9 @@ function compileMsg(data, before){
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
         var msgStatus = msgClone.querySelector(".msg-status");
+        msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
+        msgStatus.querySelector("time").setAttribute('recv', data.recv_time);
+             
         msgStatus.querySelector(".msg-sent-time").textContent = formatTime(data.sent_time);
         msgStatus.querySelector(".msg-recv-time-hab").textContent = formatTime(data.recv_time_hab);
         msgStatus.querySelector(".msg-recv-time-mcc").textContent = formatTime(data.recv_time_mcc);
@@ -147,11 +139,14 @@ function compileMsg(data, before){
 
 $(document).ready(function() {
     var matches = document.querySelectorAll("time[status='Transit']");
-    var sentTime = null;
+    var currTime = new Date();
     var recvTime = null;
     matches.forEach(function(match) {
-        sentTime = new Date(match.getAttribute("sent"));
         recvTime = new Date(match.getAttribute("recv"));
+        if(recvTime.getTime() <= currTime.getTime()) {
+            match.removeAttribute('status');
+            match.closests('.msg-delivery-status').textContent = 'Delivered!!!';
+        }
     });
     
 });
