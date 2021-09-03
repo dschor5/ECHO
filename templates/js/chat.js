@@ -146,8 +146,9 @@ function updateDeliveryStatus() {
     matches.forEach(function(match) {
         console.log("hello");
         recvTime = new Date(match.getAttribute("recv"));
-        console.log(recvTime + " <= " + currTime);
+        console.log(recvTime + " >= " + currTime);
         if(recvTime.getTime() >= currTime.getTime()) {
+            console.warning("Updated status!");
             match.removeAttribute('status');
             match.closests('.msg-delivery-status').textContent = 'Delivered!!!';
         }
