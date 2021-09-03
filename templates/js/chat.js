@@ -29,22 +29,12 @@ function sendTextMessage() {
     });
 }
 
-function checkKey(event) {
-    console.log("called");
+function detectShiftEnter(event) {
     if(event.keyCode == 13 && event.shiftKey) {
         event.preventDefault();
         sendTextMessage();
     }
 }
-
-// Register keypress event to submit login
-$('#new-msg-text').keydown( function(event) {
-    console.log(event);
-    if(event.which == 13 && event.shiftKey) {
-        event.preventDefault();
-        sendTextMessage();
-    }
-});
 
 // Handle successful respond after sending a new messge or upload.
 function handleAjaxNewMessage(resp) {
