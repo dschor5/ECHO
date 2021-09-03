@@ -143,6 +143,7 @@ $(document).ready(function() {
     var recvTime = null;
     matches.forEach(function(match) {
         recvTime = new Date(match.getAttribute("recv"));
+        console.log(recvTime + " <= " + currTime);
         if(recvTime.getTime() <= currTime.getTime()) {
             match.removeAttribute('status');
             match.closests('.msg-delivery-status').textContent = 'Delivered!!!';
