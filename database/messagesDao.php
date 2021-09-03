@@ -141,10 +141,10 @@ class MessagesDao extends Dao
             $messageIds = '('.implode(', ', array_keys($messages)).')';
             $messageStatusDao = MessageStatusDao::getInstance();
             $messageStatusDao->update(array('is_read'=>'1'), 'user_id='.$qUserId.' AND message_id IN '.$messageIds);
-        }
 
-        $participantsDao = ParticipantsDao::getInstance();
-        $participantsDao->updateLastRead($convoId, $userId, $toDate);
+            $participantsDao = ParticipantsDao::getInstance();
+            $participantsDao->updateLastRead($convoId, $userId, $toDate);
+        }
         
         $this->endTransaction();
         
