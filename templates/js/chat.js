@@ -148,7 +148,8 @@ function updateDeliveryStatus() {
     var recvTime = null;
     matches.forEach(function(match) {
         recvTime = new Date(match.getAttribute("recv"));
-        if(recvTime.getTime() >= currTime.getTime()) {
+        if(recvTime.getTime() <= currTime.getTime()) {
+
             match.removeAttribute('status');
             let id = match.getAttribute('msg-id');
             console.log("Updated status for message-id=" + id + "!");
