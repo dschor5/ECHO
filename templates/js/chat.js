@@ -121,7 +121,7 @@ function compileMsg(data, before){
             msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
             msgStatus.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
             msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
-            msgStatus.querySelector(".msg-progress-bar").style.display = "block";
+            msgStatus.querySelector('#progress-msg-id' + data.message_id).style.display = "block";
         }
              
         msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
