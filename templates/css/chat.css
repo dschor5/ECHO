@@ -52,8 +52,8 @@
     margin-left: 10px;
     float: left;
     text-align: center;
-    border: 1px solid #8e9be7;
-    color: #8e9be7;
+    border: 1px solid var(--text-light-bright);
+    color: var(--text-light-bright);
     background-color: #222222;
     padding-top: 5px;
     padding-bottom: 5px;

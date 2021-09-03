@@ -1,7 +1,7 @@
     <div id="navigation">
         <div id="room-container" class="navigation-container">
             <div class="navigation-title">
-                Conversation
+                Conversations
             </div>
             <div id="rooms">
                 %chat_rooms%
