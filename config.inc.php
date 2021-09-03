@@ -10,6 +10,7 @@ $config['debug'] = true;
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
+$config['log_file'] = 'site.log';
 
 // Extension => Mime Type
 $config['uploads_allowed'] = array(
@@ -77,6 +78,7 @@ require_once('modules/error.php');
 require_once('database/databaseException.php');
 
 // Include classes
+require_once('class/log.php');
 require_once('class/delay.php');
 require_once('class/time.php');
 require_once('class/message.php');

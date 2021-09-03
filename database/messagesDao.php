@@ -62,6 +62,7 @@ class MessagesDao extends Dao
         {
             $messageId = false;
             $this->endTransaction(false);
+            Logger::warning('messagesDao::sendMessage failed.', $e);
         }
         $this->database->disableQueryException();
 
@@ -229,6 +230,7 @@ class MessagesDao extends Dao
         catch (Exception $e) 
         {
             $this->endTransaction(false);
+            Logger::warning('messagesDao::getMessagesReceived failed.', $e);
         }
         $this->database->disableQueryException();
 

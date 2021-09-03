@@ -2,7 +2,7 @@
 
 error_reporting(E_ALL);
 header('Pragma: no-cache');
-
+date_default_timezone_set("UTC");
 require_once('config.inc.php');
 
 try
@@ -15,12 +15,11 @@ try
         header('Location: '.$server['http'].$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); 
         exit;
     }
-
-   $main = Main::getInstance()->compile();
+    $main = Main::getInstance()->compile();
 }
 catch (Exception $e) 
 {
-    var_dump($e);   
+    Logger::error("Main::compile()", $e);
 }
 
 /**
@@ -49,8 +48,6 @@ class Main
      */
     private function __construct()
     {
-        date_default_timezone_set("UTC");
-
         $this->readCookie();
         $this->checkLogin();
     }

@@ -176,6 +176,7 @@ class UsersDao extends Dao
         catch(DatabaseException $e)
         {
             $this->endTransaction(false);
+            Logger::warning('usersDao::createNewUser', $e);
         }
 
         $this->database->disableQueryException();
@@ -206,6 +207,7 @@ class UsersDao extends Dao
         catch(Exception $e)
         {
             $this->endTransaction(false);
+            Logger::warning('usersDao::deleteUser', $e);
         }
         $this->database->disableQueryException();
 

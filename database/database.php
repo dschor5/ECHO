@@ -59,6 +59,11 @@ class Database
         return self::$instance;
     }
 
+    public function __destruct()
+    {
+        $this->db->close();
+    }
+
     /*
        PUBLIC getErr
        PURPOSE: Gets the last error message to occur

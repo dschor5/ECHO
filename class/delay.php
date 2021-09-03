@@ -45,6 +45,7 @@ class Delay
         } 
         catch (Exception $e) 
         {
+            Logger::warning("Could not parse equation", $config[$i]['eq']);
             $this->currDelay = 0;
         }
         return $this->currDelay;
