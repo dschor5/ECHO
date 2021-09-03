@@ -79,7 +79,6 @@ require_once('database/databaseException.php');
 
 // Include classes
 require_once('class/log.php');
-Logger::warning('test');
 require_once('class/delay.php');
 require_once('class/time.php');
 require_once('class/message.php');

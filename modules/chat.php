@@ -293,15 +293,18 @@ class ChatModule extends DefaultModule
             }
 
             $messages = $messagesDao->getNewMessages($this->conversation->getId(), $this->user->user_id, $this->user->is_crew, $timeStr);
+            $ids = array();
             if(count($messages) > 0)
             {
                 foreach($messages as $msgId => $msg)
                 {
+                    $ids[] = $msgId;
                     echo "event: msg".PHP_EOL;
                     echo 'data: '.json_encode($msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
+            Logger::warning('Found '.count($messages), $ids);
 
             
             $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->user_id, $this->user->is_crew, $timeStr);
