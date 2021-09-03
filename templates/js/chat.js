@@ -118,8 +118,8 @@ function compileMsg(data, before){
         msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
         msgStatus.querySelector("time").setAttribute('sent',   data.sent_time);
         msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
-        msgStatus.querySelector(".msg-progress-bar").setAttribute('progress-msg-id',   data.message_id);
-        msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('progress-fill-msg-id',   data.message_id);
+        msgStatus.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
+        msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
         
              
         msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
