@@ -79,6 +79,7 @@
                     <div class="msg-recv-time-hab"></div>
                     <div class="msg-recv-time-mcc"></div>
                     <div class="msg-delivery-status"></div>
+                    <time/>
                 </div>
             </div>
         </template>
