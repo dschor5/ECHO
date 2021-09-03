@@ -104,7 +104,7 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
-        $qFromDate = 'SUBTIME(CAST('.$qToDate.' AS DATETIME), \'00:00:03\')';
+        $qFromDate = 'SUBTIME(CAST('.$qToDate.' AS DATETIME), \'00:00:01\')';
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_crew, msg_status.is_read, '.
