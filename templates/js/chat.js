@@ -180,7 +180,6 @@ function updateDeliveryStatus() {
         document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
             match.removeAttribute('status');            
-            console.log("Updated status for message-id=" + id + "!");
             document.querySelector('#status-msg-id-' + id).textContent = 'Delivered!!!';
             document.querySelector('#progress-msg-id' + id).style.display = 'none';
             document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
