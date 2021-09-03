@@ -1,4 +1,3 @@
-var msgCounter = 0;
 function sendTextMessage() {
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
@@ -19,8 +18,7 @@ function sendTextMessage() {
         dataType: 'json',
         success: function(resp) {
             if(resp.success) {
-                msgCounter = msgCounter + 1;
-                $('#new-msg-text').val("Test #" + msgCounter);
+                $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
             }
