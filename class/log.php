@@ -20,7 +20,7 @@ class Logger
 
     public static function warning($message, $context=null)
     {
-        if(self::$levelThreshold > Logger::WARNING)
+        if(self::$levelThreshold < Logger::WARNING)
         {
             return;
         }
@@ -29,7 +29,7 @@ class Logger
 
     public static function debug($message, $context=null)
     {
-        if(self::$levelThreshold > Logger::DEBUG)
+        if(self::$levelThreshold < Logger::DEBUG)
         {
             return;
         }
