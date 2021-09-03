@@ -29,6 +29,13 @@ function sendTextMessage() {
     });
 }
 
+// Register keypress event to submit login
+$('#new-msg-text').keypress( function(event) {
+    if(event.which == 13 && event.shiftKey) {
+        sendTextMessage();
+    }
+});
+
 // Handle successful respond after sending a new messge or upload.
 function handleAjaxNewMessage(resp) {
     if(resp.success) {
