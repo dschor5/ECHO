@@ -169,7 +169,6 @@ function updateDeliveryStatus() {
         
         delay = recvTime - sentTime;
         percent = 100.0 - (recvTime - currTime) / delay * 100.0;
-        console.log("message-id=" + id + " is at " + percent);
         
         document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
