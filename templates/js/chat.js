@@ -144,6 +144,7 @@ function updateDeliveryStatus() {
     var currTime = new Date();
     var recvTime = null;
     matches.forEach(function(match) {
+        console.log("hello");
         recvTime = new Date(match.getAttribute("recv"));
         console.log(recvTime + " <= " + currTime);
         if(recvTime.getTime() <= currTime.getTime()) {
