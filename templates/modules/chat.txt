@@ -50,6 +50,9 @@
                     <div class="msg-recv-time-mcc"></div>
                     <div class="msg-delivery-status"></div>
                     <time/>
+                    <div class="msg-progress-bar">
+                        <span class="msg-progress-bar-fill"></span>
+                    </div>
                 </div>
             </div>
         </template>

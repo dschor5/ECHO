@@ -116,7 +116,10 @@ function compileMsg(data, before){
         var msgStatus = msgClone.querySelector(".msg-status");
         msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
         msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
+        msgStatus.querySelector("time").setAttribute('send',   data.send_time);
         msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
+        msgStatus.querySelector(".msg-progress-bar").setAttribute('progress-msg-id',   data.message_id);
+        msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('progress-fill-msg-id',   data.message_id);
         
              
         msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
@@ -144,16 +147,36 @@ $(document).ready(setTimeout(updateDeliveryStatus, 1000));
 
 function updateDeliveryStatus() {
     var matches = document.querySelectorAll("time[status='Transit']");
-    var currTime = new Date();
-    var recvTime = null;
+    var currTimeObj = new Date();
+    var currTime = currTimeObj.getTime();
+    var recvTimeObj = null;
+    var recvTime = 0;
+    var sendTimeObj = null;
+    var sendTime = 0;
+    var delay;
+    var percent = 0;
+    var id = 0;
     matches.forEach(function(match) {
-        recvTime = new Date(match.getAttribute("recv"));
-        if(recvTime.getTime() <= currTime.getTime()) {
+        id = match.getAttribute('msg-id');
+        
+        recvTimeObj = new Date(match.getAttribute("recv"));
+        recvTime = recvTimeObj.getTime();
+        
+        sendTimeObj = new Date(match.getAttribute("send"));
+        sendTime = sendTimeObj.getTime();
+        
+        delay = recvTime - sentTime;
+        percent = (delay - currTime) * 100.0 / delay;
+        
+        document.querySelector('progress-fill-msg-id' + id).style.width = percent + '%';
+        if(recvTim <= currTime) {
 
             match.removeAttribute('status');
-            let id = match.getAttribute('msg-id');
+            
             console.log("Updated status for message-id=" + id + "!");
             document.querySelector('#status-msg-id-' + id).textContent = 'Delivered!!!';
+            document.querySelector('progress-msg-id' + id).style.display = 'none';
+            document.querySelector('progress-fill-msg-id' + id).style.display = 'none';
         }
     });
     setTimeout(updateDeliveryStatus, 1000);
