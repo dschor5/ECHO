@@ -31,6 +31,7 @@ function sendTextMessage() {
 
 // Register keypress event to submit login
 $('#new-msg-text').keydown( function(event) {
+    console.log(event);
     if(event.which == 13 && event.shiftKey) {
         event.preventDefault();
         sendTextMessage();
