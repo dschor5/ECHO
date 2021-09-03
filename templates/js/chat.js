@@ -113,15 +113,15 @@ function compileMsg(data, before){
             contentClone.querySelector(".filesize").textContent = data.filesize;
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
+        var msgStatus = msgClone.querySelector(".msg-status");
         if(data.delivered_status != 'Delivered') {
-            var msgStatus = msgClone.querySelector(".msg-status");
             msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
             msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
             msgStatus.querySelector("time").setAttribute('sent',   data.sent_time);
             msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
             msgStatus.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
             msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
-            msgStatus.querySelector('#progress-msg-id' + data.message_id).style.display = "block";
+            msgStatus.querySelector('.msg-progress-bar').style.display = "block";
         }
              
         msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
