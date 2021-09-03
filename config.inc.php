@@ -11,7 +11,6 @@ $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
 $config['log_file'] = 'log.html';
-Logger::warning('test');
 
 // Extension => Mime Type
 $config['uploads_allowed'] = array(
@@ -80,6 +79,7 @@ require_once('database/databaseException.php');
 
 // Include classes
 require_once('class/log.php');
+Logger::warning('test');
 require_once('class/delay.php');
 require_once('class/time.php');
 require_once('class/message.php');
