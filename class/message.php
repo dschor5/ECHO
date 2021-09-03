@@ -78,7 +78,7 @@ class Message
             'sent_from'        => $this->data['is_crew'],
         );
 
-        if($this->data['is_crew'] == $remoteDest)
+        if(boolval($this->data['is_crew']) == $remoteDest)
         {
             $msgData['recv_time'] = $this->data['recv_time_mcc'].' GMT';
         }
