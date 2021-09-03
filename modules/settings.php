@@ -57,14 +57,15 @@ class SettingsModule extends DefaultModule
         {
             $data['delay_is_manual'] = '1';
             $temp = $_POST['delay_manual'] ?? '';
-            $temp = trim($temp)
+            $temp = trim($temp);
             if(!preg_match($FLOAT_FMT, $temp))
             {
                 $response['error'][] = 'Invalid "Manual Delay" entered. Only numbers allowed.';
             }
             else
             {
-                $data['delay_config'] = floatval($temp);
+                $time = new DelayTime();
+                $delayConfig = array(array('ts'=>$time->getTime(), 'eq'=>floatval($temp)));
             }
         }
         elseif(isset($_POST['delay_is_manual']) && $_POST['delay_is_manual'] == 'false')
@@ -265,7 +266,8 @@ class SettingsModule extends DefaultModule
 
         if($mission->delay_is_manual)
         {
-            $delayManual = floatval($mission->delay_config);
+            $delayOptions = json_decode($mission->delay_config, true);
+            $delayManual = floatval($delayOptions[0]['eq']);
 
             $delayAuto = Main::loadTemplate('delay-config.txt', array(
                 '/%delay-date-id%/'    => 'id="delay-date-0"',

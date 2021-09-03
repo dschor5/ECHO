@@ -26,34 +26,26 @@ class Delay
     public function getDelay(): float
     {
         $mission = MissionConfig::getInstance();
-        if($mission->delay_is_manual)
+        $config = json_decode($mission->delay_config, true);
+        array_unshift($config, array('ts'=>'2000-00-00 00:00:00', 'eq'=>'0'));
+        array_push($config, array('ts'=>'2100-01-01 00:00:00', 'eq'=>'0'));
+
+        $i = 1;
+        while(!(strtotime($config[$i]['ts']) < time() && time() <= strtotime($config[$i+1]['ts'])) && $i < count($config)-1)
         {
-            $this->currDelay = floatval($mission->delay_config);
+            $i++;
         }
-        else
+
+        try 
         {
-            $config = json_decode($mission->delay_config, true);
-            array_unshift($config, array('ts'=>'2000-00-00 00:00:00', 'eq'=>'0'));
-            array_push($config, array('ts'=>'2100-01-01 00:00:00', 'eq'=>'0'));
-
-            $i = 1;
-            while(!(strtotime($config[$i]['ts']) < time() && time() <= strtotime($config[$i+1]['ts'])) && $i < count($config)-1)
-            {
-                $i++;
-            }
-
-            try 
-            {
-                $metObj = new DelayTime();
-                $config[$i]['eq'] = preg_replace('/time/', $metObj->getMet(), $config[$i]['eq']);
-                eval('$this->currDelay = '.$config[$i]['eq'].';');
-                $this->currDelay = max(0, $this->currDelay);
-            } 
-            catch (Exception $e) 
-            {
-                $this->currDelay = 0;
-            }
-            
+            $metObj = new DelayTime();
+            $config[$i]['eq'] = preg_replace('/time/', $metObj->getMet(), $config[$i]['eq']);
+            eval('$this->currDelay = '.$config[$i]['eq'].';');
+            $this->currDelay = max(0, $this->currDelay);
+        } 
+        catch (Exception $e) 
+        {
+            $this->currDelay = 0;
         }
         return $this->currDelay;
     }
