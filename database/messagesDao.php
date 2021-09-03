@@ -104,7 +104,7 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
-        $qFromDate = 'SUBTIME(CAST('.$qToDate.' AS DATETIME), \'00:00:01\')';
+        $qFromDate = 'SUBTIME(CAST('.$qToDate.' AS DATETIME), \'00:00:03\')';
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_crew, msg_status.is_read, '.
@@ -117,8 +117,8 @@ class MessagesDao extends Dao
                     'WHERE messages.conversation_id='.$qConvoId.' '.
                         'AND msg_status.is_read=0 '.    
                         'AND (messages.'.$qRefTime.' BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
-                    'ORDER BY messages.'.$qRefTime.' '.
-                    'LIMIT '.$qOffset.', 100';
+                    'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
+                    'LIMIT '.$qOffset.', 25';
         
         $messages = array();
 
@@ -194,7 +194,7 @@ class MessagesDao extends Dao
                     'WHERE messages.conversation_id='.$qConvoId.' '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
                         'AND messages.message_id < '.$qlastMsgId.' '.
-                    'ORDER BY messages.'.$qRefTime.' DESC '.
+                    'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
                     'LIMIT 0, '.$numMsgs;
         
         $messages = array();
