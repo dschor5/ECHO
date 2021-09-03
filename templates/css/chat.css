@@ -184,17 +184,20 @@
 }
 
 .msg-progress-bar {
+    display: none;
     width: 100%;
-    background-color: #da8383;
+    background-color: var(--background-dark);
+    /*
     padding: 3px;
     border-radius: 3px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+    */
 }
 
 .msg-progress-bar-fill {
     display: block;
-    height: 22px;
-    background-color: #659cef;
+    height: 2px;
+    background-color: var(--text-light-opaque);
     border-radius: 3px;
 }
 

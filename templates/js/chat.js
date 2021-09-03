@@ -113,14 +113,16 @@ function compileMsg(data, before){
             contentClone.querySelector(".filesize").textContent = data.filesize;
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
-        var msgStatus = msgClone.querySelector(".msg-status");
-        msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
-        msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
-        msgStatus.querySelector("time").setAttribute('sent',   data.sent_time);
-        msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
-        msgStatus.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
-        msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
-        
+        if(data.delivered_status != 'Delivered') {
+            var msgStatus = msgClone.querySelector(".msg-status");
+            msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
+            msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
+            msgStatus.querySelector("time").setAttribute('sent',   data.sent_time);
+            msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
+            msgStatus.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
+            msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
+            msgStatus.querySelector(".msg-progress-bar").style.display = "block";
+        }
              
         msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
         msgStatus.querySelector(".msg-recv-time-hab").textContent = "HAB: " + formatTime(data.recv_time_hab);
@@ -171,9 +173,7 @@ function updateDeliveryStatus() {
         
         document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
-
-            match.removeAttribute('status');
-            
+            match.removeAttribute('status');            
             console.log("Updated status for message-id=" + id + "!");
             document.querySelector('#status-msg-id-' + id).textContent = 'Delivered!!!';
             document.querySelector('#progress-msg-id' + id).style.display = 'none';
