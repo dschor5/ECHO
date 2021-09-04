@@ -18,6 +18,8 @@ function sendTextMessage() {
         dataType: 'json',
         success: function(resp) {
             if(resp.success) {
+                compileMsg(resp, false);
+                scrollToBottom();
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
@@ -27,6 +29,11 @@ function sendTextMessage() {
             }
         },
     });
+}
+
+function scrollToBottom() {
+    var scrollContainer = document.querySelector("#content");
+    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
 }
 
 function detectShiftEnter(event) {
@@ -98,6 +105,7 @@ function compileMsg(data, before){
     var template = document.querySelector('#msg-sent-'.concat(data.source));
     if('content' in document.createElement('template'))
     {
+        console.log(data);
         var msgClone = template.content.cloneNode(true);
         msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
         msgClone.querySelector(".msg-from").textContent = data.author + "(" + data.message_id + ")";
@@ -319,7 +327,30 @@ $(document).ready(function() {
     // Progress bar for uploads
     $('#progress-file').progressbar({value: false});
     $('#progress-file').progressbar('widget').hide('highlight', 0);
+
+   // Files
+   $('#dialog-image').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        closeOnEscape: false,
+        position: { my: "center center", at: "center center", of: window },
+        modal: true,
+    });
+
 });
+
+function showImage(origImg) {
+    var img = document.getElementById('large-msg-img');
+    let ratio = 0.8 * Math.min(window.innerWidth / origImg.naturalWidth, 
+                         window.innerHeight / origImg.naturalHeight);
+    img.width = ratio*origImg.naturalWidth*0.95;
+    img.height = ratio*origImg.naturalHeight*0.95;
+    img.src = origImg.src;
+    $('#dialog-image').dialog('option', 'width', ratio*origImg.naturalWidth);
+    $('#dialog-image').dialog('option', 'height', ratio*origImg.naturalHeight + 35);
+    $('#dialog-image').dialog('open');
+}
 
 let progressBar;
 
@@ -377,6 +408,8 @@ function uploadMedia(mediaType) {
         },
         success: function(resp) {
             if(resp.success) {
+                compileMsg(resp, false);
+                scrollToBottom();
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
@@ -450,7 +483,7 @@ function loadPrevMsgs() {
                 }
                 if(child == null) {
                     // On-load scroll to the bottom to the newest messages
-                    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+                    scrollToBottom();
                 }
                 else {
                     // Scroll to where the user was on the page.

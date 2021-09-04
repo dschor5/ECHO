@@ -98,7 +98,7 @@
         </template>
 
         <template id="msg-image">
-            <img class="msg-image file-location"><br>
+            <img class="msg-image file-location" onclick="showImage(this)"><br>
             Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
         </template>
 
@@ -166,5 +166,9 @@
 
     <div id="dialog-logout" title="Session Expired" class="dialog-body">
         Your session has expired. Please click here to login again.
+    </div>
+
+    <div id="dialog-image" title="Image Attachment" class="dialog-body">
+        <center><img id="large-msg-img" src="#"></center>
     </div>
     

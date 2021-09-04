@@ -45,7 +45,7 @@ class MessagesDao extends Dao
                     $msgStatusData[] = array(
                         'message_id' => $messageId,
                         'user_id' => $userId,
-                        'is_read' => 0,
+                        'is_read' => ($userId == $msgData['user_id']),
                     );
                 }
                 $messageStatusDao->insertMultiple($msgStatusData);

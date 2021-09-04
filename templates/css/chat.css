@@ -173,13 +173,20 @@
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.6);
 }
 
-.msg-image, .msg-video {
-    width: calc(100% - 50px);
+.msg-image {
+    height: 150px;
+    border-radius: 10px;
+}
+
+.msg-video {
+    width: calc(80% - 50px);
+    height: auto;
     border-radius: 10px;
 }
 
 .msg-audio {
-    width: calc(100% - 50px);
+    width: calc(80% - 50px);
+    height: auto;
     height: 50px;
 }
 

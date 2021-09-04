@@ -196,10 +196,16 @@ class ChatModule extends DefaultModule
 
             if(($messageId = $messagesDao->sendMessage($msgData, $fileData)) !== false)
             {
-                $result = array(
-                    'success' => true,
-                    'message_id' => $messageId
-                );
+                $fileData['message_id'] = $messageId;
+                $newMsg = new Message(array_merge(
+                    $msgData, 
+                    $fileData, 
+                    array('username' => $this->user->username, 
+                          'alias' => $this->user->alias, 
+                          'is_crew' => $this->user->is_crew, 
+                          'success'=>true)));
+                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $result = array_merge(array('success' => true), $newMsgData);
             }
             else
             {
@@ -236,10 +242,17 @@ class ChatModule extends DefaultModule
             
             if(($messageId = $messagesDao->sendMessage($msgData)) !== false)
             {
-                $response = array(
-                    'success' => true,
-                    'message_id' => $messageId
-                );
+                
+                $newMsg = new Message(
+                    array_merge(
+                    $msgData, 
+                    array('message_id' => $messageId,
+                          'username' => $this->user->username, 
+                          'alias' => $this->user->alias, 
+                          'is_crew' => $this->user->is_crew, 
+                          'success'=>true)));
+                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $response = array_merge(array('success' => true), $newMsgData);
             }
 
         }
@@ -300,11 +313,12 @@ class ChatModule extends DefaultModule
                 {
                     $ids[] = $msgId;
                     echo "event: msg".PHP_EOL;
+                    echo "id: ".$msgId.PHP_EOL;
                     echo 'data: '.json_encode($msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
-            //Logger::warning('Found '.count($messages), $ids);
+            Logger::warning('Found '.count($messages), $ids);
 
             
             $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->user_id, $this->user->is_crew, $timeStr);
