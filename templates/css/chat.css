@@ -161,6 +161,8 @@
     width: 80%;
     float: left;
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
 }
 
 .msg-avatar {
