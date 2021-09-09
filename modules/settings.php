@@ -6,7 +6,7 @@ class SettingsModule extends DefaultModule
     {
         parent::__construct($user);
         $this->subJsonRequests = array('save_mission', 'save_delay');
-        $this->subHtmlRequests = array('mission', 'delay');
+        $this->subHtmlRequests = array('mission', 'delay', 'data');
     }
 
     private function isValidDelayEquationOfTime(string $eq)
@@ -17,8 +17,6 @@ class SettingsModule extends DefaultModule
         $functions = '(?:sinh?|cosh?|tanh?|abs|acosh?|asinh?|atanh?|exp|log10|deg2rad|rad2deg|sqrt|ceil|floor|round)'; // Allowed PHP functions
         $operators = '[+\/*\^%-]'; // Allowed math operators
         $regexp = '/^(('.$number.'|'.$functions.'\s*\((?1)+\)|\((?1)+\))(?:'.$operators.'(?2))?)+$/'; // Final regexp, heavily using recursive patterns
-        
-        
 
         return preg_match($regexp, $eq);
     }
@@ -248,12 +246,21 @@ class SettingsModule extends DefaultModule
         {
             $content = $this->editMissionSettings();
         }
-        else
+        elseif($subaction == 'delay')
         {
             $content = $this->editDelaySettings();
         }
+        elseif($subaction == 'data')
+        {
+            $content = $this->dataManagementSettings();
+        }
 
         return $content;
+    }
+
+    private function dataManagementSettings() : string 
+    {
+        return '';
     }
 
     private function editDelaySettings() : string

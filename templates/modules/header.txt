@@ -4,7 +4,7 @@
         </div>
         <div style="float: right; margin-right: 20px;">
             <div class="dropdown">
-              <button class="dropbtn">%username%<span style="font-weight: bold;">&nbsp;&#8801;</span></button>
+              <button class="dropbtn">%alias% (%username%)<span style="font-weight: bold;">&nbsp;&#8801;</span></button>
               <div class="dropdown-content">
                 %links%
               </div>

@@ -76,7 +76,7 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
-    private function getPrevMessages()
+    private function getPrevMessages() : array
     {
         $msgId = PHP_INT_MAX;
         $numMsgs = 25;
@@ -109,7 +109,7 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
-    private function uploadFile()
+    private function uploadFile() : array
     {
         global $config;
         global $server;
@@ -216,7 +216,7 @@ class ChatModule extends DefaultModule
         return $result;
     }
 
-    private function textMessage()
+    private function textMessage() : array
     {
         $messagesDao = MessagesDao::getInstance();
         $currTime = new DelayTime();

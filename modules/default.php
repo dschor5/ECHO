@@ -58,13 +58,15 @@ abstract class DefaultModule implements Module
     {
         $userLocation = '';
         $username = '';
+        $alias = '';
         $links = '';
         $navLinks = array();
 
         if($this->user != null)
         {
             $userLocation = $this->user->getLocation();
-            $username = $this->user->alias.' ('.$this->user->username.')';
+            $alias        = $this->user->alias;
+            $username     = $this->user->username;
 
             $navLinks[] = array(
                 'url'  => 'chat',
@@ -91,6 +93,10 @@ abstract class DefaultModule implements Module
                     'url'  => 'settings/delay', 
                     'name' => 'Delay Settings',
                     'icon' => 'clock');
+                $navLinks[] = array(
+                    'url'  => 'settings/data',
+                    'name' => 'Data Management',
+                    'icon' => 'document');
             }
 
             $navLinks[] = array(
@@ -117,9 +123,10 @@ abstract class DefaultModule implements Module
         }
 
         return Main::loadTemplate('header.txt', array(
-            '/%links%/' => $links,
+            '/%links%/'         => $links,
             '/%user_location%/' => $userLocation,
-            '/%username%/' => $username,
+            '/%alias%/'         => $alias,
+            '/%username%/'      => $username,
         ));
     }
 
