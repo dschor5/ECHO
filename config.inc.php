@@ -10,7 +10,7 @@ $config['debug'] = true;
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
-$config['log_file'] = 'templates/css/log.css';
+$config['log_file'] = 'uploads/analog.log';
 
 // Extension => Mime Type
 $config['uploads_allowed'] = array(
