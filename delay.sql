@@ -16,7 +16,7 @@ CREATE TABLE `conversations` (
   `conversation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `parent_conversation_id` int(11) UNSIGNED NULL DEFAULT NULL,
-  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `last_message` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`conversation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -83,7 +83,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('hab_timezone',    'string', 'America/Chicago'),
 ('hab_day_name',    'string', 'Mission Day'),
 ('delay_is_manual', 'bool',   '1'),
-('delay_config',    'string', '0');
+('delay_config',    'string', '[{"ts":"2021-01-01 00:00:00","eq":0}]');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
 (1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
