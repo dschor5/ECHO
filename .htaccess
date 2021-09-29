@@ -1,7 +1,7 @@
 RewriteEngine On
 RewriteBase /
 
-RewriteMatch 404 /\.git
+RewriteRule \.git error
 RewriteRule config.inc.php error
 RewriteRule server.inc.php error
 RewriteRule mission.inc.php error
