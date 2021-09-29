@@ -12,7 +12,14 @@ try
         (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off")) 
     {
         header('HTTP/1.1 301 Moved Permanently');
-        header('Location: '.$server['http'].$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); 
+        if(isset($_SERVER['HTTP_HOST']))
+        {
+            header('Location: '.$server['http'].$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']); 
+        }
+        else
+        {
+            header('Location: '.$server['http'].$_SERVER['site_url'].'/'.$_SERVER['REQUEST_URI']);
+        }
         exit;
     }
     $main = Main::getInstance()->compile();
