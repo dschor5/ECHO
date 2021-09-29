@@ -18,7 +18,7 @@ try
         }
         else
         {
-            header('Location: '.$server['http'].$_SERVER['site_url'].'/'.$_SERVER['REQUEST_URI']);
+            header('Location: '.$server['http'].$_SERVER['site_url']);
         }
         exit;
     }
