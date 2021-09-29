@@ -156,7 +156,7 @@
     border: 2px solid #dedede;
     background-color: #f1f1f1;
     border-radius: 10px;
-    padding: 10px;
+    padding: 10px 10px 0px 10px;
     margin: 10px;
     width: 80%;
     float: left;
@@ -192,22 +192,43 @@
     height: 50px;
 }
 
+.msg-status {
+    width: 100%;
+    height: 15px;
+    font-size: 8pt;
+    color: #666;
+  }
+
+.msg-more-info {
+    display: none;
+}
+
+.msg-delivery-status {
+    font-size: 8pt;
+    text-align: right;
+    font-family: Arial;
+    float: right; 
+    position: relative;
+    top: 1px;
+}
+
 .msg-progress-bar {
     display: none;
-    width: 100%;
-    background-color: var(--background-dark);
-    /*
-    padding: 3px;
+    width: calc(100% - 350px);
+    float: left;
+    height: 3px;
+    position: relative;
+    top: 5px;
+    border: 1px solid #888;
+    margin-right: 5px;
     border-radius: 3px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
-    */
-}
+  }
 
 .msg-progress-bar-fill {
     display: block;
-    height: 2px;
-    background-color: var(--text-light-opaque);
-    border-radius: 3px;
+    background-color: #888;
+    height: 3px;
+    width: 0%;
 }
 
 #new-msg {

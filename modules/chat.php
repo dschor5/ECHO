@@ -8,9 +8,15 @@ class ChatModule extends DefaultModule
     {
         parent::__construct($user);
         
-        $this->subJsonRequests = array('send', 'upload', 'prevMsgs');
-        $this->subHtmlRequests = array('group');
-        $this->subStreamRequests = array('refresh');
+        $this->subJsonRequests = array(
+            'send' => 'textMessage', 
+            'upload'   => 'uploadFile',
+            'prevMsgs' => 'getPrevMessages'
+        );
+        $this->subHtmlRequests = array(
+            'default' => 'showChat'
+        );
+        $this->subStreamRequests = array('refresh' => 'compileStream');
         $conversationId = 1;
 
         if(isset($_POST['conversation_id']) && intval($_POST['conversation_id']) > 0)
@@ -54,19 +60,7 @@ class ChatModule extends DefaultModule
         if($this->conversation != null)
         {
             $response['conversation_id'] = $this->conversation->getId();
-
-            if($subaction == 'send')
-            {
-                $response = $this->textMessage();
-            }
-            elseif($subaction == 'upload')
-            {
-                $response = $this->uploadFile();
-            }
-            elseif($subaction == 'prevMsgs')
-            {
-                $response = $this->getPrevMessages();
-            }
+            $response = array_merge($response, parent::compileJson($subaction));
         }
         else
         {
@@ -76,7 +70,7 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
-    private function getPrevMessages() : array
+    protected function getPrevMessages() : array
     {
         $msgId = PHP_INT_MAX;
         $numMsgs = 25;
@@ -109,7 +103,7 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
-    private function uploadFile() : array
+    protected function uploadFile() : array
     {
         global $config;
         global $server;
@@ -167,9 +161,9 @@ class ChatModule extends DefaultModule
         {
             $result['error'] = 'Invalid file type uploaded. (Extension)';
         }
-        else if($fileSize <= 0 || $fileSize > 10485760)
+        else if($fileSize <= 0 || $fileSize > FileUpload::getMaxUploadSize())
         {
-            $result['error'] = 'Invalid file size (0 < size < 10485760)';
+            $result['error'] = 'Invalid file size (0 < size < '.FileUpload::getMaxUploadSize().')';
         }
         else if(!move_uploaded_file($_FILES['data']['tmp_name'], $fullPath))
         {
@@ -216,7 +210,7 @@ class ChatModule extends DefaultModule
         return $result;
     }
 
-    private function textMessage() : array
+    public function textMessage() : array
     {
         $messagesDao = MessagesDao::getInstance();
         $currTime = new DelayTime();
@@ -318,8 +312,6 @@ class ChatModule extends DefaultModule
                 }
                 $lastMsg = time();
             }
-            Logger::warning('Found '.count($messages), $ids);
-
             
             $notifications = $messagesDao->getMsgNotifications($conversationIds, $this->user->user_id, $this->user->is_crew, $timeStr);
             if(count($notifications) > 0)
@@ -381,7 +373,9 @@ class ChatModule extends DefaultModule
             array('/%username%/'=>$this->user->username,
                   '/%delay_src%/' => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%chat_rooms%/' => $this->getConversationList(),
-                  '/%convo_id%/' => $this->conversation->getId()
+                  '/%convo_id%/' => $this->conversation->getId(),
+                  '/%max_upload_size%/' => FileUpload::getHumanReadableSize(FileUpload::getMaxUploadSize()),
+                  '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                 ));
     }
 

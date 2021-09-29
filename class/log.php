@@ -46,8 +46,12 @@ class Logger
         {
             $logEntry .= ' '.json_encode($context);
         }
-        
-        error_log($logEntry.PHP_EOL, self::ERROR_LOG_DEST, $server['host_address'].$config['log_file']);
+
+        $folder = $server['host_address'].$config['logs_dir'];
+        if(is_writeable($folder))
+        {
+            error_log($logEntry.PHP_EOL, self::ERROR_LOG_DEST, $folder.'/'.$config['log_file']);
+        }
     }
 }
 

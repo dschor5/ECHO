@@ -3,6 +3,7 @@
 class DelayTime
 {
     const DATE_FORMAT = 'Y-m-d H:i:s';
+    const DATE_FORMAT_JS = 'Y-m-d\TH:i:s.000\Z';
     private static $epochMet = 0;
     private $ts = 0;
 
@@ -56,6 +57,12 @@ class DelayTime
         $timeStr = $time->format(self::DATE_FORMAT);
         
         return $timeStr;
+    }
+
+    public static function convertTsForJs(string $tsStr) : string
+    {
+        $ts = new DateTime($tsStr);
+        return $ts->format(self::DATE_FORMAT_JS);
     }
 
     public function getMet() : int

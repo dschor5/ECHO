@@ -5,22 +5,23 @@ class PreferencesModule extends DefaultModule
     public function __construct(&$user)
     {
         parent::__construct($user);
-        $this->subJsonRequests = array('validate', 'save');
-        $this->subHtmlRequests = array('show');
+        $this->subJsonRequests = array(
+            'save' => 'saveUserSettings'
+        );
+        $this->subHtmlRequests = array(
+            'default' => 'editUserSettings'
+        );
     }
 
-    public function compileJson(string $subaction): array
+    protected function saveUserSettings() : array
     {
         return array();
     }
 
-    public function compileHtml(string $subaction) : string
+    protected function editUserSettings() : string 
     {
-        $this->addTemplates('settings.css', 'users.js');
-
         return '';
     }
-
 }
 
 ?>

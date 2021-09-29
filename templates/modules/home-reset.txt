@@ -1,0 +1,30 @@
+<h1>%mission_name%</h1>
+<h2>Communication System</h2>
+
+<div id="current-delay" style="background-image: url('%http%%site_url%/%templates_dir%/images/background-home.jpg');">
+    <div id="current-delay-container">
+        <div id="distance-label" class="sim-param-label">distance between planets</div>
+        <div id="distance-value" class="sim-param-value">%delay_distance%</div>
+        <div id="owlt-label" class="sim-param-label">one-way-light-time</div>
+        <div id="owlt-value" class="sim-param-value">%delay_time%</div>
+
+        <button type="button" id="current-delay-login">Login</button>
+    </div>
+</div>
+
+<div id="credits">
+<p>Image credits: (a) <a href="https://www.nasa.gov/image-feature/goddard/2021/summer-solstice-in-the-northern-hemisphere">Earth Image courtesy of NASA/DSCOVR EPIC</a>, 
+(b) <a href="https://mars.nasa.gov/resources/6453/valles-marineris-hemisphere-enhanced/">Mars Image Credits courtesy of NASA/JPL-Caltech</a>.</p>
+</div>
+
+<div id="dialog-login" title="Reset Password for %username%" class="dialog-body">
+    <form method="POST">
+        <div class="dialog-response"></div>
+
+        <label for="upass1">Enter new password</label>
+        <input type="password" placeholder="Enter Password" name="upass1" id="upass1" autocomplete="off" required>
+
+        <label for="upass2">Re-enter new password</label>
+        <input type="password" placeholder="Enter Password" name="upass2" id="upass2" autocomplete="off" required>
+    </form>
+</div>

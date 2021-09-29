@@ -101,6 +101,11 @@
     display: table;
 }
 
+.form-row .form-button {
+    width: 100%;
+    padding: 10px;
+}
+
 #form-contents input[type="text"], 
 #form-contents input[type="password"], 
 #form-contents input[type="file"],

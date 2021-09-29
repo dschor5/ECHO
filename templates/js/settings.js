@@ -27,14 +27,14 @@ function saveConfig(subaction){
     });
 
     $.ajax({
-        url:  BASE_URL,
+        url:  BASE_URL + "/admin",
         type: "POST",
         data: dataObj,
         dataType: 'json',
         success: function(resp) {
             if(resp.success) {
                 $('.dialog-response').hide('highlight');
-                location.href = BASE_URL + '/settings/' + subaction;
+                location.href = BASE_URL + '/admin/' + subaction;
             }
             else {
                 console.log(resp.success);

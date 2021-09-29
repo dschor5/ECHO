@@ -10,7 +10,8 @@ $config['debug'] = true;
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
-$config['log_file'] = 'uploads/analog.log';
+$config['logs_dir'] = 'logs';
+$config['log_file'] = 'analog.log';
 
 // Extension => Mime Type
 $config['uploads_allowed'] = array(
@@ -44,7 +45,6 @@ $config['uploads_allowed'] = array(
 $config['modules_public'] = array(
     'home',
     'error',
-    'login',
     'file'
 );
 
@@ -53,9 +53,8 @@ $config['modules_user'] = array_merge($config['modules_public'], array(
     'preferences'
 ));
 
-$config['modules_admin'] = array_merge($config['modules_user'], array(
-    'users', 
-    'settings'
+$config['modules_admin'] = array_merge($config['modules_user'], array( 
+    'admin'
 ));
 
 $config['cookie_name'] = 'website';

@@ -82,19 +82,19 @@ abstract class DefaultModule implements Module
             if($this->user->is_admin)
             {
                 $navLinks[] = array(
-                    'url'  => 'users', 
+                    'url'  => 'admin/users', 
                     'name' => 'User Accounts', 
                     'icon' => 'person');
                 $navLinks[] = array(
-                    'url'  => 'settings/mission', 
+                    'url'  => 'admin/mission', 
                     'name' => 'Mission Settings',
                     'icon' => 'gear');
                 $navLinks[] = array(
-                    'url'  => 'settings/delay', 
+                    'url'  => 'admin/delay', 
                     'name' => 'Delay Settings',
                     'icon' => 'clock');
                 $navLinks[] = array(
-                    'url'  => 'settings/data',
+                    'url'  => 'admin/data',
                     'name' => 'Data Management',
                     'icon' => 'document');
             }
@@ -147,10 +147,12 @@ abstract class DefaultModule implements Module
             $subaction = $_GET['subaction'];
         }
         
+        Logger::error($subaction);
+
         // Only allow requests from this server. 
         header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
-        if(in_array($subaction, $this->subJsonRequests))
+        if(array_key_exists($subaction, $this->subJsonRequests))
         {
             header('Content-Type: application/json');
             $response = $this->compileJson($subaction);
@@ -161,7 +163,7 @@ abstract class DefaultModule implements Module
             }
             echo json_encode($response);
         }
-        elseif(in_array($subaction, $this->subStreamRequests))
+        elseif(array_key_exists($subaction, $this->subStreamRequests))
         {
             header('Content-Type: text/event-stream');
             $this->compileStream();
@@ -203,11 +205,45 @@ abstract class DefaultModule implements Module
             echo Main::loadTemplate('main.txt', $replace);
         }
     }
+    
+    public function compileHtml(string $subaction): string
+    {
+        $ret = '';
 
+        if(array_key_exists($subaction, $this->subHtmlRequests))
+        {
+            $ret = call_user_func(array($this, $this->subHtmlRequests[$subaction]));
+        }
+        elseif(array_key_exists('default', $this->subHtmlRequests))
+        {
+            $ret = call_user_func(array($this, $this->subHtmlRequests['default']));
+        }
+        else
+        {
+            header("HTTP/1.1 404 Not Found");
+        }
+
+        return $ret;
+    }
     
-    public abstract function compileHtml(string $subaction): string;
-    
-    public abstract function compileJson(string $subaction) : array;
+    public function compileJson(string $subaction) : array
+    {
+        $ret = array();
+
+        if(array_key_exists($subaction, $this->subJsonRequests))
+        {
+            $ret = call_user_func(array($this, $this->subJsonRequests[$subaction]));
+           
+            //$ret = $this->{$this->subJsonRequests[$subaction]}();
+        }
+        else
+        {
+            $ret['success'] = false;
+            $ret['error'] = 'Unknown request.';
+        }
+
+        return $ret;
+    }
     
     public function compileStream()
     {

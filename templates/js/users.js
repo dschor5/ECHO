@@ -1,7 +1,7 @@
 // Get user information to edit profile.
 function getUser(id) {
     $.ajax({
-        url: BASE_URL + '/users',
+        url: BASE_URL + '/admin',
         type: 'POST',
         data: {
             subaction: 'getuser',        
@@ -33,7 +33,7 @@ function getUser(id) {
 // Process request to edit user profile. 
 function editUser() {
     $.ajax({
-        url: BASE_URL + '/users',
+        url: BASE_URL + '/admin',
         type: 'POST',
         data: {
             subaction: 'edituser',
@@ -50,7 +50,7 @@ function editUser() {
                 $('div.dialog-response').show();
             }
             else {
-                location.href = BASE_URL + '/users';
+                location.href = BASE_URL + '/admin/users';
             }
         }
     });
@@ -78,7 +78,7 @@ function confirmAction(subaction, id, username) {
 
 function deleteOrResetUser() {
     $.ajax({
-        url: BASE_URL + '/users',
+        url: BASE_URL + '/admin',
         type: 'POST',
         data: {
             subaction: $('#confirm-subaction').val(),        
@@ -86,7 +86,7 @@ function deleteOrResetUser() {
         },
         dataType: 'json',
         success: function() {
-            location.href = BASE_URL + '/users';
+            location.href = BASE_URL + '/admin/users';
         }
     });
 }

@@ -1,0 +1,61 @@
+<div id="content">
+    <div id="heading">
+        Data Management
+    </div>
+    
+    <div id="form-contents">
+        <div class="subheading">Save Conversations</div>
+        <div class="form-row">
+            <label for="name">Conversations</label>
+            <div class="form-field">
+                <button type="button" class="form-button" onclick="downloadSql()">Save Log of All Conversations</button>
+            </div>
+            <div class="form-help">
+                Opens a new window with a transcript of all conversations with timestamps 
+                that can be downloaded, printed, or otherwise saved for post-mission analysis. 
+            </div>
+        </div>
+        <div class="form-row">
+            <label for="name">Attachments</label>
+            <div class="form-field">
+                <button type="button" class="form-button" onclick="downloadFiles()">Save TAR File of All Attachments</button>
+            </div>
+            <div class="form-help">
+                Creates a TAR file to download a copy of all audio, video, and other attachments sent in each conversation.
+                Please be patient as this operation may take a few minutes if there is a large number of files.
+            </div>
+        </div>
+
+        <div class="form-divider"></div>
+        <div class="subheading">Backup Database</div>
+        <div class="form-row">
+            <label for="name">SQL Backup</label>
+            <div class="form-field">
+                <button type="button" class="form-button" onclick="downloadSql()">Download SQL Backup</button>
+            </div>
+            <div class="form-help">
+                Download a copy of the MySQL data for backup purposes.
+            </div>
+        </div>
+
+
+        <div class="form-divider"></div>
+        <div class="subheading">Reset Application</div>
+        <div class="form-row">
+            <label for="name">Dalete All Data</label>
+            <div class="form-field">
+                <button type="button" class="form-button" onclick="clearData()">Delete All Data</button>
+            </div>
+            <div class="form-help">
+                Clear all messages (text, audio, video, and files) and delete non-admin user 
+                accounts to reset the application for a new analog mission. <br>
+                <span style="color: red;">WARNING:</span> This step is irreversible.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dialog-confirm" title="Delete All Data" class="dialog-body">
+    <div class="modal-confirm-body">Are you sure you want to delete all messages 
+    and user accounts (except admin accounts)?</div> 
+</div>

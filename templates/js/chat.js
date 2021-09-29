@@ -118,11 +118,13 @@ function compileMsg(data, before){
             var contentClone = template.content.cloneNode(true);
             try {
             //contentClone.querySelector(".file-location").src = BASE_URL + "/file/" + data.message_id;
-            contentClone.querySelectorAll(".file-location").forEach(function(element) {
-                element.src = BASE_URL + "/file/" + data.message_id;
-            });
+                contentClone.querySelectorAll(".file-location").forEach(function(element) {
+                    element.src = BASE_URL + "/file/" + data.message_id;
+                });
             }
-            catch(e) {}
+            catch(e) {
+                // Do nothing.
+            }
             contentClone.querySelector("a").href = BASE_URL + "/file/" + data.message_id;
             contentClone.querySelector(".filename").textContent = data.filename;
             contentClone.querySelector(".filesize").textContent = data.filesize;
@@ -138,11 +140,9 @@ function compileMsg(data, before){
             msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
             msgStatus.querySelector('.msg-progress-bar').style.display = "block";
         }
-             
-        msgStatus.querySelector(".msg-sent-time").textContent = "SENT: " + formatTime(data.sent_time);
-        msgStatus.querySelector(".msg-recv-time-hab").textContent = "HAB: " + formatTime(data.recv_time_hab);
-        msgStatus.querySelector(".msg-recv-time-mcc").textContent = "MCC: " + formatTime(data.recv_time_mcc);
-        msgStatus.querySelector(".msg-delivery-status").textContent = data.delivered_status;
+        
+        msgStatus.querySelector(".msg-delivery-status").textContent = 
+            '[Sent: ' + formatTime(data.sent_time) + ', Recv: ' + formatTime(data.recv_time) + ', ' + data.delivered_status + ']';
         msgStatus.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
         if(before) {
@@ -184,11 +184,12 @@ function updateDeliveryStatus() {
         
         delay = recvTime - sentTime;
         percent = 100.0 - (recvTime - currTime) / delay * 100.0;
-        
+
         document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
             match.removeAttribute('status');            
-            document.querySelector('#status-msg-id-' + id).textContent = 'Delivered!!!';
+            document.querySelector('#status-msg-id-' + id).textContent = 
+                '[Sent: ' + formatTime(sentTime) + ', Recv: ' + formatTime(recvTime) + ', Delivered]';
             document.querySelector('#progress-msg-id' + id).style.display = 'none';
             document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
         }
