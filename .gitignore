@@ -7,4 +7,4 @@ uploads/*
 .htaccess-1n1
 update.php
 phpinfo.php
-
+logs/*
