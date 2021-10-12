@@ -52,7 +52,7 @@
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get(string $name) : mixed
+    public function __get(string $name)
     {
         $result = null;
 
