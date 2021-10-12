@@ -30,7 +30,7 @@ class Conversation
         {
             $this->data['num_participants'] = count($data['num_participants']);
         }
-        
+
         $this->data['participants_both_sites'] = true;
         if(isset($data['participants_both_sites']))
         {
@@ -83,7 +83,7 @@ class Conversation
             {
                 // Assign the value depending on whether there is an alias. 
                 $participants[intval($ids[$i])] = (strlen($alias[$i]) == 0) ?
-                    $username[$i] : $alias[$i];
+                    $usernames[$i] : $alias[$i];
             }
         }
 
