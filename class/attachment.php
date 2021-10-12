@@ -122,14 +122,12 @@
     }
 
     /**
-     * Parse PHP.ini filesize parameter into bytes. The input is mixed
-     * because it must handle bytes without units (int) and larger 
-     * types (string) that have a letter denoting the byte prefix multiplier. 
+     * Parse PHP.ini filesize parameter into bytes. 
      * 
-     * @param mixed $size String/int representation of the size. 
+     * @param string $size Representation of the size. 
      * @return int Number of bytes.
      */
-    private static function parseSize(mixed $size) : int
+    private static function parseSize(string $size) : int
     {
         // Remove non-unit characters from the size.
         $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); 
