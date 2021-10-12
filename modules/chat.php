@@ -94,7 +94,7 @@ class ChatModule extends DefaultModule
 
             foreach($messages as $msg)
             {
-                $response['messages'][] = $msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $response['messages'][] = $msg->compileArray($this->user, $this->conversation->participants_both_sites);
             }
         }
         
@@ -198,7 +198,7 @@ class ChatModule extends DefaultModule
                           'alias' => $this->user->alias, 
                           'is_crew' => $this->user->is_crew, 
                           'success'=>true)));
-                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->participants_both_sites);
                 $result = array_merge(array('success' => true), $newMsgData);
             }
             else
@@ -245,7 +245,7 @@ class ChatModule extends DefaultModule
                           'alias' => $this->user->alias, 
                           'is_crew' => $this->user->is_crew, 
                           'success'=>true)));
-                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->participants_both_sites);
                 $response = array_merge(array('success' => true), $newMsgData);
             }
 
@@ -308,7 +308,7 @@ class ChatModule extends DefaultModule
                     $ids[] = $msgId;
                     echo "event: msg".PHP_EOL;
                     echo "id: ".$msgId.PHP_EOL;
-                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
+                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conversation->participants_both_sites)).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }

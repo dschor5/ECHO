@@ -15,14 +15,27 @@ class Conversation
     private $data;
 
     /**
-     * Conversation constructor. Appends object data with the field num_participants 
-     * that counts the number of people belonging to this chat. 
+     * Conversation constructor. 
+     * 
+     * Appends object data with the field num_participants (int) and flag denoting 
+     * whether the conversation has participants at both sites (MCC & HAB).
      * @param array $data Row from 'msg_files' database table. 
      */
     public function __construct($data)
     {
         $this->data = $data;
-        $this->data['num_participants'] = count($this->data['participant_ids']);
+
+        $this->data['num_participants'] = 1;
+        if(isset($data['num_participants']))
+        {
+            $this->data['num_participants'] = count($data['num_participants']);
+        }
+        
+        $this->data['participants_both_sites'] = true;
+        if(isset($data['participants_both_sites']))
+        {
+            $this->data['participants_both_sites'] = (2 == $this->data['participants_both_sites']);
+        }
     }
 
     /**
@@ -75,22 +88,6 @@ class Conversation
         }
 
         return $participants;
-    }
-
-    /**
-     * Returns true if the conversation has participants both at the HAB and MCC. 
-     * If the corresponding field was not precomputed in the SQL query, then assume
-     * the answer is TRUE as that is safer in terms of enforcing comm delays. 
-     * 
-     * @return bool True if participants at both MCC and HAB. 
-     */
-    public function hasParticipantsOnBothSites() : bool
-    {
-        if(isset($this->data['participants_both_sites']))
-        {
-            return $this->data['participants_both_sites'] == 2;
-        }
-        return true;
     }
 }
 
