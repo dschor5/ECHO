@@ -69,7 +69,7 @@ class Database
         {
             Logger::error('Could not connect to database.', 
                 array('user'=>$user, 'dbname'=>$dbname, 'host'=>$hostname, 
-                      'error'=>mysqli_connect_error());
+                      'error'=>mysqli_connect_error()));
         }
     }
 
