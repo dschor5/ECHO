@@ -123,7 +123,7 @@ class UsersDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $messagesDao = MessagesDao::getInstance();
         
-        $this->database->enableQueryException();
+        $this->database->queryExceptionEnabled(true);
 
         try
         {
@@ -179,7 +179,7 @@ class UsersDao extends Dao
             Logger::warning('usersDao::createNewUser', $e);
         }
 
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return $result;
     }    
@@ -190,7 +190,7 @@ class UsersDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
 
-        $this->database->enableQueryException();
+        $this->database->queryExceptionEnabled(true);
         try 
         {
             $this->startTransaction();
@@ -209,7 +209,7 @@ class UsersDao extends Dao
             $this->endTransaction(false);
             Logger::warning('usersDao::deleteUser', $e);
         }
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return $result;
     }

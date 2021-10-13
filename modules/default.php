@@ -154,11 +154,6 @@ abstract class DefaultModule implements Module
         {
             header('Content-Type: application/json');
             $response = $this->compileJson($subaction);
-            if($config['debug'])
-            {
-                $db = Database::getInstance();
-                $response['debug'] = $db->getErr();
-            }
             echo json_encode($response);
         }
         elseif(array_key_exists($subaction, $this->subStreamRequests))

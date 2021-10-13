@@ -2,48 +2,83 @@
 
 require_once('config.inc.php');
 
-/*
-   CLASS: Database
-   PURPOSE: This is the main object in the database
-           layer.  It runs all queries and manages all
-           database abstraction objects (dao's)
-
-   NOTE: If you would like this script to run with a different
-   database structure, all you should need to rewrite is this file
-   the dao.php and the result.php files.
-
-*/
+/**
+ * Database wrapper that handles connection and queries. 
+ * All Database Abstraction Objects (DAOs) use this connection
+ * to interact with the database. 
+ * 
+ * @link https://github.com/dschor5/AnalogDelaySite
+ */
 class Database
 {
-    private $db = null;            // private: this is the mysql database reference.
-    private $daos = array();    // private: an array of already constructed dao's
-    private $error = '';        // private: if theres an error, it will be in here.
-    private $errorQuery = '';    // private: if theres an error, the original query will be in here.
-    private $errorTrace = '';    // private: if theres an error, the debug trace will be in here.
-    public $query_count = 0;    // public: keeps track of the number of queries
-    public $query_time = 0;    // public: keeps track of the total time taken.
-    private $throwException = false;
+    /**
+     * Reference to databsae object. 
+     * @access private
+     * @var mysqli 
+     */
+    private $db = null;
 
+    /**
+     * Count number of queries executed.
+     * @access private
+     * @var int
+     */
+    private $query_count;    
+
+    /**
+     * Cumulative time spent executing queries. 
+     * @access private
+     * @var int
+     */
+    private $query_time;
+
+    /**
+     * If true, throw an Exception for database errors. Otherwise just log errors. 
+     * @access private
+     * @var bool
+     */
+    private $throwException;
+
+    /**
+     * Singleton instance of Database object.
+     * @access private
+     * @var Object
+     */
     private static $instance = null;
 
-    /*
-       PUBLIC: Database
-       PURPOSE: Constructor
-       @param $user
-       @param $pass
-       @param $dbname
-       @param $hostname
-       @return Database object
+    /**
+     * Constructor. Initialize connection to the database. 
+     * 
+     * @param string $user Username for database connection
+     * @param string $pass Password for database connection
+     * @param string $dbname Database name
+     * @param string $hostname Hostname where database is stored
      */
     private function __construct(string $user, string $pass, string $dbname, string $hostname)
     {
+        // Initialize variables
+        $this->query_count = 0;
+        $this->query_time = 0;
+        $this->throwException = false;
+        
+        // Establish databse connection.
         $this->db = new mysqli($hostname, $user, $pass, $dbname);
+
+        // Log error if the connection fails. 
         if(mysqli_connect_errno())
         {
-            echo "No Connection ".mysqli_connect_error();
+            Logger::error('Could not connect to database.', 
+                array('user'=>$user, 'dbname'=>$dbname, 'host'=>$hostname), 
+                      'error'=>mysqli_connect_error());
         }
     }
 
+    /**
+     * Returns singleton instance of Database object. 
+     * 
+     * @global $database 
+     * @return MissionConfig object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -59,107 +94,80 @@ class Database
         return self::$instance;
     }
 
+    /**
+     * Destructor closes database connection.
+     */
     public function __destruct()
     {
         $this->db->close();
     }
 
-    /*
-       PUBLIC getErr
-       PURPOSE: Gets the last error message to occur
-       @return string $error
-    */
-    public function getErr()
-    {
-        return ($this->error == '')? false : array('query'=>$this->errorQuery,'error'=>$this->error,'trace'=>$this->errorTrace);
-    }
-
-
-    /*
-       PUBLIC: getDao
-       PURPOSE: Gets the database abstraction object
-               corresponding to the table specified.
-               Typically each table has its own dao which
-               implements specific functions for that table.
-
-       @return dao object resource
+    /**
+     * Flag to enable throwing an exception if a query fails instead
+     * of just logging an error. 
+     * 
+     * This is used to simplify the code in scenarios requiring multiple
+     * sequential queries to succeed. For instance, when creating a new
+     * user the system will:
+     * - Add a row to the users table and get the user_id. 
+     * - Create new conversations as needed and get the conversation_id. 
+     * - Use the conversation_id and user_id to add participants. 
+     * The exception is less elegant (because it does not handle each 
+     * special case), but it simplifies the code. The risk associated
+     * with the broad handling of the exception is accepteed because 
+     * these are operations that are not expected to fail.
+     * 
+     * @param bool $state Enable (true) or disable (false) exceptions.
      */
-    public function &getDao(string $dao) : Dao
+    public function queryExceptionEnabled(bool $state)
     {
-        global $config;
-        $false=false;
-
-        // check to see if the dao has already been
-        // created, and if not, create it.
-        if (!isset($this->daos[$dao]))
-        {
-            if (!in_array($dao,$config['db_tables']))
-                return $false;
-
-            require_once strtolower($dao)."Dao.php";
-
-            //make sure that the dao specified actually exists,
-            //and instantiate it
-            if (class_exists($dao.'Dao'))
-            {
-                $className=$dao.'Dao';
-                $this->daos[$dao] = new $className($this);
-            }
-            else
-            {
-                $this->error = 'Invalid DAO Requested';
-                return $false;
-            }
-        }
-
-        //spit the dao back to the user.
-        return $this->daos[$dao];
+        $this->throwException = $state;
     }
 
-    public function enableQueryException()
-    {
-        $this->throwException = true;
-    }
-
-    public function disableQueryException()
-    {
-        $this->throwException = true;
-    }
-
-    /* PRIVATE: query
-           PURPOSE: Runs an actual query and (if needed) creates
-                   a result object to return.
-
-           NOTE:    This function is not really private, but it is
-                   meant to be accessed ONLY by the Dao's.  If you
-                   use this function outside of a dao, it defeats
-                   the purpose of having a database abstraction layer.
-
-           @param:  string $query   - the actual query to run
-           @param:  int $keepResult - an optional flag.  If set,
-                             a result object will be returned
-           @return: boolean/Result (depending on flag above)
+    /**
+     * Run a database query and return the result. 
+     * While public, the intent is to only use this function within the 
+     * Database Abstraction Objects (DAOs).
+     * 
+     * @param string $queryStr Query string to execute. 
+     * @return array Result from query.
      */
     public function query(string $queryStr) 
     {
-        $time_start = $this->getmicrotime();
+        // Track time required to execute the query
+        $time_start = microtime(true);
         $result = $this->db->query($queryStr);
-        $time_end = $this->getmicrotime();
-            
-        $this->query_time+= $time_end - $time_start;
+        $time_end = microtime(true);
+    
+        // Update debugging variables
+        $this->query_time += $time_end - $time_start;
         $this->query_count++;
 
-        // Store errors for debugging.
+        // Log all database errors. 
         if ($result === false || $this->db->error != '')
         {
-            $this->errorQuery = $queryStr;
-            $this->error =  $this->db->error;
-            $this->errorTrace = debug_backtrace();
-            
+            Logger::error('Query failed.', array(
+                'query'  => $queryStr,
+                'error'  => $this->db->error,
+                'trace'  => debug_backtrace(),
+                'qtime'  => $this->query_time,
+                'qcount' => $this->query_count,
+            ));
+
+            // If enabled, throw an exception. 
             if($this->throwException)
             {
                 throw new DatabaseException($queryStr, $this->db->error);
             }
+        }
+        // If it was not an error, track queries for debugging purposes. 
+        else
+        {
+            Logger::debug('Query', array(
+                'query'  => $queryStr,
+                'qtime'  => $this->query_time,
+                'qcount' => $this->query_count,
+            ));
         }
 
         //if we need to keep the result, create
@@ -167,47 +175,36 @@ class Database
         return $result;
     }
 
-
-    /* PUBLIC:  prepareStatement
-       PURPOSE: This function is meant to prepare a string for use in
-                a database query.  It is very important to use this to
-                clean any data before issuing a query in order to prevent
-                an end user from constructing malicious input designed to
-                mess up the database.
-
-       @param:  string value
-       @return: string cleanvalue
+    /**
+     * Sanitize string to be used as part of a database query to 
+     * avoid malicious attacks. 
+     * 
+     * @param string $value Value to sanitize. 
+     * @return string Sanitized value. 
      */
     public function prepareStatement(string $value): string
     {
         return $this->db->real_escape_string(stripslashes($value));
     }
 
-
-    /* PRIVATE: getmicrotime
-       PURPOSE: Gets the current time in microsecconds since epoch
-       @return: float microseconds
+    /**
+     * Get the id of the last row inserted. 
+     * Only relevnat for tables with an auto_increment unique id. 
+     * Intended to be used by the DAOs only. 
+     * 
+     * @return int ID for last row inserted.
      */
-    public function getMicrotime()
-    {
-        $time = microtime();
-        return substr($time,11).substr($time,1,9);
-    }
-
-
-    /* PRIVATE: insert_id
-       PURPOSE: Gets the last ID inserted.  Used when a table has auto_increment.
-
-       NOTE:    Once again, this is not really a private function, but it should
-               NOT be accessed outside of a DAO.
-
-       @return: int lastInsertedId
-    */
     public function getLastInsertId()
     {
         return $this->db->insert_id;
     }
 
+    /**
+     * Returns the number of rows affected by a query. 
+     * Intended to be used by the DAOs only. 
+     * 
+     * @return int Number of rows affected by a query.
+     */
     public function getNumRowsAffected()
     {
         return $this->db->affected_rows;

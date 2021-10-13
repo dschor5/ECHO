@@ -25,7 +25,7 @@ class MessagesDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
 
-        $this->database->enableQueryException();
+        $this->database->queryExceptionEnabled(true);
         try 
         {
             $this->startTransaction();
@@ -64,7 +64,7 @@ class MessagesDao extends Dao
             $this->endTransaction(false);
             Logger::warning('messagesDao::sendMessage failed.', $e);
         }
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return $messageId;
     }
@@ -199,7 +199,7 @@ class MessagesDao extends Dao
         
         $messages = array();
 
-        $this->database->enableQueryException();
+        $this->database->queryExceptionEnabled(true);
         try
         {
             $this->startTransaction();
@@ -232,7 +232,7 @@ class MessagesDao extends Dao
             $this->endTransaction(false);
             Logger::warning('messagesDao::getMessagesReceived failed.', $e);
         }
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return array_reverse($messages, true);
     }

@@ -38,6 +38,7 @@
     /**
      * FileUpload constructor. Appends object with field 'size' that
      * contains the size of the file in bytes.
+     * 
      * @param array $data Row from 'msg_files' database table. 
      */
     public function __construct($data)
@@ -49,6 +50,7 @@
     /**
      * Accessor for FileUpload fields. Returns value stored in the field $name 
      * or null if the field does not exist. 
+     * 
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
@@ -59,6 +61,10 @@
         if(array_key_exists($name, $this->data)) 
         {
             $result = $this->data[$name];
+        }
+        else
+        {
+            Logger::warning('FileUpload __get("'.$name.'")', $this->data);
         }
 
         return $result;

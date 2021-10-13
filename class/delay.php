@@ -3,6 +3,19 @@
 /**
  * Delay object used to parse/interpret the user configurable comms delay.
  * 
+ * The delays are stored in the 'mission_config.delay_config' field as 
+ * a JSON encoded array where each entry contains a timestamp and expression
+ * to calculate the delay. For instance, the following example says that 
+ * for the first minute in 2021, the delay is 0sec, but after that it will 
+ * increase to 10sec. 
+ *      [
+ *          {'ts':'2021-01-01 00:00:00', 'eq':0}, 
+ *          {'ts':'2021-01-01 00:01:00', 'eq':10}, 
+ *      ]
+ * Note, the field 'mission_config.delay_is_manual' is only used to select the 
+ * appropriate GUI menu, and thus it is not part of the delay calculation
+ * in this class. 
+ * 
  * Implementation Notes:
  * - Singleton implementation.
  * - This class does not validate the delay expressions. It is assumed that

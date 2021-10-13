@@ -2,16 +2,13 @@
 
 require_once("database/database.php");
 
-/* ABSTRACT CLASS: Dao
-
-   PURPOSE: This class is a base class for all Database Abstraction Objects
-            It contains a few basic methods for executing common queries.
-
-   NOTE:    If you are ever rewriting this for another type of database,
-            its important that you maintain the same interface.
+/**
+ * Abstract base class containing common properties/functionality for all 
+ * Database Abstraction Objects (DAO). 
  */
 abstract class Dao
 {
+
     protected $database = null;  // Database resource
     private $name     = null;    // Table name
     private $id       = null;    // Name to be used as index (by default, 'id')
@@ -20,39 +17,35 @@ abstract class Dao
     const SEARCH_ALL = 1;
     const SEARCH_PHRASE = 2;
 
-    /* PUBLIC: Dao
-    PURPOSE: Constructor.
-    @param: Database $database - reference to the database object (database.php)
-    @param: The name of the table this Dao represents
-    @param: The field to use as the 'ID' (id by default)
-    */
-    protected function __construct(string $name, string $id = 'id')
+    /**
+     * Constructor. Initializes the name of the database table and the primary id. 
+     * 
+     * @param string $name Name of database table represented by this DAO. 
+     * @param string|null $id Field name used as primary id. 
+     */
+    protected function __construct(string $name, ?string $id=null)
     {
         $this->database = Database::getInstance();
         $this->name     = $name;
         $this->id       = $id;
     }
 
-
-    /* PUBLIC: startTransaction
-    PURPOSE: Begins a transaction (duh..)
-    @return void;
-    */
+    /**
+     * Start/End transaction methods used to group transactions as an atomic operation. 
+     */
     public function startTransaction()
     {
         $this->database->query('START TRANSACTION',0);
     }
 
-
-    /* PUBLIC: endTransaction
-    PURPOSE: ends a transaction and either commits the changes or rolls them back
-        depending on the specified parameter (defaults to commit if not specified)
-    @param boolean commit
-    @return void
-    */
+    /**
+     * Start/End transaction methods used to group transactions as an atomic operation. 
+     * 
+     * @param boolean $commit True to commit operation. False to rollback changes.
+     */
     public function endTransaction($commit=true)
     {
-        $this->database->query(($commit)?'COMMIT;':'ROLLBACK;');
+        $this->database->query(($commit) ? 'COMMIT;' : 'ROLLBACK;');
     }
 
 
@@ -64,20 +57,28 @@ abstract class Dao
 
     @return boolean - true on success, false on failure.
     */
+
+    /** 
+     * Drop a field from the table. 
+     * 
+     * @param string|int If an int is provided, then treat it as the unique id
+     *                   to drop. Otherwise, assume it is the WHERE clause. 
+     */
     public function drop($id = '*')
     {
-
+        // Build query for this table. 
         $query = "delete from `{$this->name}`";
 
-        // we know which exact entry we want.
+        // If the id (int) is provided, then delete that row only. 
         if (intval($id) > 0)
+        {
             $query .= " where `{$this->id}` = '$id'";
-
-        // we have been given a where clause to go by.
-        // if $id == '*' then we want everything in the table.
+        }
+        // Otherwise, assume it is a WHERE clause to apply in the operation. 
         else if ($id != '*')
+        {
             $query .= " where ".$id;
-
+        }
 
         return $this->database->query($query, false);
     }

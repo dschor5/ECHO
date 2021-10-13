@@ -2,6 +2,23 @@
 
 require_once('database/usersDao.php');
 
+/**
+ * User objects a user/account registered with the system. 
+ * Encapsulates 'users' row from database.
+ * 
+ * Table Structure: 'mission_config'
+ * - user_id        (string)   Unique ID given to the user. 
+ * - username       (string)   Username associated with the account
+ * - password       (string)   Encrypted password
+ * - session_id     (string)   Session ID to track logged in users
+ * - is_admin       (bool)     True if the user has administrative priviledges
+ * - is_crew        (bool)     True if the user is a crew member (in the habitat)
+ * - last_login     (datetime) Date/time of last logging
+ * - password_reset (bool)     True to force password reset on next login
+ * - preferences    (string)   JSON string to store user preferences
+ * 
+ * Implementation Notes:
+ */
 class User
 {
     private $data;
@@ -25,6 +42,8 @@ class User
 
         if(array_key_exists($name, $this->data)) 
         {
+            // If the field starts with 'is_', then treat it as a bool
+            // where 1=TRUE and 0=FALSE. 
             $pos = strpos($this->data[$name], 'is_');
             if($pos !== false && $pos == 0)
             {
@@ -35,33 +54,59 @@ class User
                 $result = $this->data[$name];
             }
         }
+        else
+        {
+            Logger::warning('User __get("'.$name.'")', $this->data);
+        }
 
         return $result;
     }
 
+    /**
+     * Returns a string describing the planet/celestial body where
+     * the user resides (e.g., Earth for MCC or Mars for the Habitat).
+     * 
+     * @return string Planet/celestial body where user resides.
+     */
     public function getLocation(): string
     {
+        // Read config for planet names.
         $mission = MissionConfig::getInstance();
-        $location = $mission->mcc_planet;
-        if($this->is_crew)
-        {
-            $location = $mission->hab_planet;
-        }
-        return $location;
+        // Return planet name based on user's location. 
+        return ($this->is_crew) ? $mission->hab_planet : $mission->mcc_planet;
     }
 
+    /**
+     * Returns true if the given password matches the one in the database.
+     * 
+     * @param string $password Password entered by the user at login. 
+     * @return bool True if the password matches what's stored in the database.
+     */
     public function isValidPassword(string $password): bool
     {
         return (md5($password) == $this->data['password']);
     }
 
-    public function createNewSession()
+    /**
+     * Generates and returns a unique session ID to use. 
+     * 
+     * @return string Session ID.
+     */
+    public function createNewSession() : string
     {
-        $this->data['session_id'] = dechex(rand(0,time())).dechex(rand(0,time())).dechex(rand(0,time()));
+        $this->data['session_id'] = dechex(rand(0,time())).
+            dechex(rand(0,time())).dechex(rand(0,time()));
         return $this->data['session_id'];
     }
 
-    public function isValidSession($cmpKey)
+    /**
+     * Returns true if the given session id matches the one in the 
+     * database for this user. 
+     * 
+     * @param string $cmpKey Session ID to validate.
+     * @return bool Returns true if it is a valid session ID.
+     */
+    public function isValidSession(string $cmpKey) : bool
     {
         $valid=false;
         if ($cmpKey == $this->data['session_id'])

@@ -4,6 +4,23 @@
  * Conversation objects represent one conversation within the chat application.
  * Encapsulates 'conversations' row from database. 
  * 
+ * Table Structure: 'conversations'
+ * - conversation_id         (int)      Unique ID for the conversation
+ * - name                    (string)   Name given to this conversation
+ * - parent_conversation_id  (int)      If using nested threads, this points to 
+ *                                      the parent conversation
+ * - date_created            (datetime) Date when the conversation was created
+ * - last_message            (datetime) when the last message was sent
+ * 
+ * Additional Fields:
+ * - participant_ids         (string)   CSV of participant ids for this convo
+ * - participant_usernames   (string)   CSV of participant usernames for this convo
+ * - participant_aliases     (string)   CSV of participant aliases for this convo
+ * - num_participants        (int)      Number of participants in this convo
+ * - participants_both_sites (bool)     True if convo has users in both MCC and HAB
+ * 
+ * Note: The nth entry in the participant_* fields all correspond to the same account.
+ * 
  * @link https://github.com/dschor5/AnalogDelaySite
  */
 class Conversation
@@ -20,18 +37,26 @@ class Conversation
      * 
      * Appends object data with the field num_participants (int) and flag denoting 
      * whether the conversation has participants at both sites (MCC & HAB).
+     * 
      * @param array $data Row from 'msg_files' database table. 
      */
     public function __construct(array $data)
     {
         $this->data = $data;
 
+        // Count number of participants linked to this conversation.
         $this->data['num_participants'] = 1;
         if(isset($data['num_participants']))
         {
             $this->data['num_participants'] = count($data['num_participants']);
         }
 
+        // The field 'participants_both_sites' counts the number of unique 
+        // users.is_crew entries for this conversation. Given that is_crew is
+        // a boolean, there can only be two possible values:
+        // - participants_both_sites=1 - Convo made up of only MCC or only HAB users.
+        // - participants_both_sites=2 - Convo made up of both MCC and HAB users.
+        // If not set, it is safer to assume both sites to enforce the comms delay. 
         $this->data['participants_both_sites'] = true;
         if(isset($data['participants_both_sites']))
         {
@@ -42,6 +67,7 @@ class Conversation
     /**
      * Accessor for Conversation fields. Returns value stored in the field $name 
      * or null if the field does not exist. 
+     * 
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
@@ -52,6 +78,10 @@ class Conversation
         if(array_key_exists($name, $this->data)) 
         {
             $result = $this->data[$name];
+        }
+        else
+        {
+            Logger::warning('Conversation __get("'.$name.'")', $this->data);
         }
 
         return $result;

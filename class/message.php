@@ -43,6 +43,7 @@ class Message
 
     /**
      * Data from 'messages' database table. 
+     * 
      * @access private
      * @var array
      */
@@ -50,20 +51,24 @@ class Message
 
     /**
      * Attachment associated with this message.
+     * 
      * @access private
      * @var FileUpload|null
      */
     private $file;
 
     /**
-     * Constructor. 
+     * Message Constructor. If the message contains an attachment, this will
+     * also build the FileUpload object.
      *
-     * @param array $data
+     * @param array $data Row from 'messages' database table. 
      */
     public function __construct(array $data)
     {
-        $this->data = $data; // requires union with corresponding msg_status
+        $this->data = $data;
         $this->file = null;
+
+        // If the message contains an attachment, load teh corresponding fields. 
         if($this->data['type'] != self::TEXT)
         {
             $this->file = new FileUpload(
@@ -73,6 +78,13 @@ class Message
         }
     }
 
+    /**
+     * Accessor for Message fields. Returns value stored in the field $name 
+     * or null if the field does not exist. 
+     * 
+     * @param string $name Name of field being requested. 
+     * @return mixed Value contained by the field requested. 
+     */
     public function __get($name)
     {
         $result = null;
@@ -81,17 +93,22 @@ class Message
         {
             $result = $this->data[$name];
         }
-        else if(strstr($name, '_time_') !== false)
+        else
         {
-            
+            Logger::warning('Message __get("'.$name.'")', $this->data);
         }
 
         return $result;
     }
 
-    private function getReceivedTime(bool $isCrew) : string
+    /**
+     * Get the message received time.
+     * 
+     * @param bool $useHabTime Flag to select HAB or MCC time.
+     */
+    private function getReceivedTime(bool $useHabTime) : string
     {
-        if($isCrew)
+        if($useHabTime)
         {
             return $this->data['recv_time_hab'];
         }
