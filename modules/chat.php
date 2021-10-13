@@ -59,12 +59,12 @@ class ChatModule extends DefaultModule
 
         if($this->conversation != null)
         {
-            $response['conversation_id'] = $this->conversation->getId();
+            $response['conversation_id'] = $this->conversation->conversation_id;
             $response = array_merge($response, parent::compileJson($subaction));
         }
         else
         {
-            $response['error'] = 'User cannot access conversation_id='.$this->conversation->getId();
+            $response['error'] = 'User cannot access conversation_id='.$this->conversation->conversation_id;
         }
 
         return $response;
@@ -86,7 +86,7 @@ class ChatModule extends DefaultModule
         {
             $messagesDao = MessagesDao::getInstance();
             $messages = $messagesDao->getMessagesReceived(
-                $this->conversation->getId(), $this->user->user_id, 
+                $this->conversation->conversation_id, $this->user->user_id, 
                 $this->user->is_crew, $time->getTime(), $msgId, $numMsgs);
             
             $response['success'] = true;
@@ -94,7 +94,7 @@ class ChatModule extends DefaultModule
 
             foreach($messages as $msg)
             {
-                $response['messages'][] = $msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $response['messages'][] = $msg->compileArray($this->user, $this->conversation->participants_both_sites);
             }
         }
         
@@ -173,7 +173,7 @@ class ChatModule extends DefaultModule
         {
             $msgData = array(
                 'user_id' => $this->user->user_id,
-                'conversation_id' => $this->conversation->getId(),
+                'conversation_id' => $this->conversation->conversation_id,
                 'text' => '',
                 'type' => Message::FILE,
                 'sent_time' => $currTime->getTime(),
@@ -198,7 +198,7 @@ class ChatModule extends DefaultModule
                           'alias' => $this->user->alias, 
                           'is_crew' => $this->user->is_crew, 
                           'success'=>true)));
-                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->participants_both_sites);
                 $result = array_merge(array('success' => true), $newMsgData);
             }
             else
@@ -226,7 +226,7 @@ class ChatModule extends DefaultModule
         {
             $msgData = array(
                 'user_id' => $this->user->user_id,
-                'conversation_id' => $this->conversation->getId(),
+                'conversation_id' => $this->conversation->conversation_id,
                 'text' => $msgText,
                 'type' => Message::TEXT,
                 'sent_time' => $currTime->getTime(),
@@ -245,7 +245,7 @@ class ChatModule extends DefaultModule
                           'alias' => $this->user->alias, 
                           'is_crew' => $this->user->is_crew, 
                           'success'=>true)));
-                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites());
+                $newMsgData = $newMsg->compileArray($this->user, $this->conversation->participants_both_sites);
                 $response = array_merge(array('success' => true), $newMsgData);
             }
 
@@ -299,7 +299,7 @@ class ChatModule extends DefaultModule
                 $prevDelay = $delay;
             }
 
-            $messages = $messagesDao->getNewMessages($this->conversation->getId(), $this->user->user_id, $this->user->is_crew, $timeStr);
+            $messages = $messagesDao->getNewMessages($this->conversation->conversation_id, $this->user->user_id, $this->user->is_crew, $timeStr);
             $ids = array();
             if(count($messages) > 0)
             {
@@ -308,7 +308,7 @@ class ChatModule extends DefaultModule
                     $ids[] = $msgId;
                     echo "event: msg".PHP_EOL;
                     echo "id: ".$msgId.PHP_EOL;
-                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conversation->hasParticipantsOnBothSites())).PHP_EOL.PHP_EOL;
+                    echo 'data: '.json_encode($msg->compileArray($this->user, $this->conversation->participants_both_sites)).PHP_EOL.PHP_EOL;
                 }
                 $lastMsg = time();
             }
@@ -373,7 +373,7 @@ class ChatModule extends DefaultModule
             array('/%username%/'=>$this->user->username,
                   '/%delay_src%/' => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%chat_rooms%/' => $this->getConversationList(),
-                  '/%convo_id%/' => $this->conversation->getId(),
+                  '/%convo_id%/' => $this->conversation->conversation_id,
                   '/%max_upload_size%/' => FileUpload::getHumanReadableSize(FileUpload::getMaxUploadSize()),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                 ));
@@ -388,9 +388,9 @@ class ChatModule extends DefaultModule
         foreach($conversations as $convo)
         {
             $participants = $convo->getParticipants($this->user->user_id);
-            if(count($participants) > 1 || $convo->getId() == 1)
+            if(count($participants) > 1 || $convo->conversation_id == 1)
             {
-                $name = $convo->getName();
+                $name = $convo->name;
             }
             else
             {
@@ -398,9 +398,9 @@ class ChatModule extends DefaultModule
             }
             
             $content .= Main::loadTemplate('chat-rooms.txt', array(
-                '/%room_id%/'   => $convo->getId(),
+                '/%room_id%/'   => $convo->conversation_id,
                 '/%room_name%/' => $name,
-                '/%selected%/'  => ($convo->getId() == $this->conversation->getId()) ? 'room-selected' : '',
+                '/%selected%/'  => ($convo->conversation_id == $this->conversation->conversation_id) ? 'room-selected' : '',
             ));
         }
 
