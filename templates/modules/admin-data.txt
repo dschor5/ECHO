@@ -44,7 +44,7 @@
         <div class="form-row">
             <label for="name">Dalete All Data</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="clearData()">Delete All Data</button>
+                <button type="button" class="form-button" onclick="confirmDelete()">Delete All Data</button>
             </div>
             <div class="form-help">
                 Clear all messages (text, audio, video, and files) and delete non-admin user 

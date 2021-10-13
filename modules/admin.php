@@ -559,7 +559,7 @@ class AdminModule extends DefaultModule
 
     protected function editDataManagement() : string 
     {
-        $this->addTemplates('settings.css', 'data.js');
+        $this->addTemplates('settings.css', 'data-management.js');
         return Main::loadTemplate('admin-data.txt');
     }
 
@@ -569,20 +569,18 @@ class AdminModule extends DefaultModule
         global $config;
         global $server;
 
-        $r = array();
-
         $messagesDao = MessagesDao::getInstance();
-        //$messagesDao->clearMessages();
+        $messagesDao->clearMessages();
         $files = scandir($server['host_address'].$config['uploads_dir']);
         foreach($files as $f)
         {
-            if($f != '.' && $f != '..')
+            if($f != '.' && $f != '..' && $f != 'dummy.txt')
             {
-                $r[] = $f;
+                unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
         }
 
-        return $r;
+        return array('success' => true);
     }
 
     protected function backupSqlDatabase() : array 
