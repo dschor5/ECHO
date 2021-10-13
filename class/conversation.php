@@ -21,7 +21,7 @@ class Conversation
      * whether the conversation has participants at both sites (MCC & HAB).
      * @param array $data Row from 'msg_files' database table. 
      */
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
 
@@ -44,7 +44,7 @@ class Conversation
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get(string $name)
+    public function __get(string $name) : mixed 
     {
         $result = null;
 

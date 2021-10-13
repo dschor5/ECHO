@@ -13,7 +13,7 @@ class Message
     private $data;
     private $file;
 
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data; // requires union with corresponding msg_status
         $this->file = null;

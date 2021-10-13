@@ -2,6 +2,8 @@
 
 /**
  * Logger class to track errors, warnings, and debugging information. 
+ * Log entries are recorded as:
+ *      YYYY-MM-DD HH:MM:SS [LOG_TYPE] Message <JSON encoded context>
  *
  * Implementation Notes:
  * - Implemented as a wrapper for the PHP error_log() function. 
@@ -57,18 +59,23 @@ class Logger
     }
 
     /**
-     * Log ERROR level message. 
+     * Log an ERROR level message. Always recorded.
      *
-     * @param [type] $message
-     * @param [type] $context
-     * @return void
+     * @param string $message Message to log.
+     * @param string|null $context Optional array to encode with the msg.
      */
-    public static function error($message, $context=null)
+    public static function error(string $message, ?string $context=null)
     {
         self::logMessage('ERROR', $message, $context);
     }
 
-    public static function warning($message, $context=null)
+    /**
+     * Log an WARNING level message. Recorded based on threshold setting.
+     *
+     * @param string $message Message to log.
+     * @param string|null $context Optional array to encode with the msg.
+     */    
+    public static function warning(string $message, ?string $context=null)
     {
         if(self::$levelThreshold < Logger::WARNING)
         {
@@ -77,6 +84,12 @@ class Logger
         self::logMessage('WARNING', $message, $context);
     }
 
+    /**
+     * Log an DEBUG level message. Recorded based on threshold setting.
+     *
+     * @param string $message Message to log.
+     * @param string|null $context Optional array to encode with the msg.
+     */        
     public static function debug(string $message, ?array $context=null)
     {
         if(self::$levelThreshold < Logger::DEBUG)
@@ -86,17 +99,30 @@ class Logger
         self::logMessage('DEBUG', $message, $context);
     }
 
-    private static function logMessage($type, $message, $context)
+    /**
+     * Wrapper for error log. Note that it assumes it can write to the logs_dir. 
+     *
+     * @param string $type Type of error. 
+     * @param string $message Message to log.
+     * @param string|null $context Optional array to encode with the msg.
+     * @global $config 
+     * @global $server
+     */
+    private static function logMessage(string $type, string $message, ?string $context)
     {
         global $config;
         global $server;
         
+        // Format log entry
         $logEntry = date(self::DATE_FORMAT).' ['.$type.'] '.$message;
+
+        // If provided, JSON encode the $context array.
         if($context != null)
         {
             $logEntry .= ' '.json_encode($context);
         }
 
+        // If the file is writeable, then log the message. 
         $folder = $server['host_address'].$config['logs_dir'];
         if(is_writeable($folder))
         {
