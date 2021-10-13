@@ -2,7 +2,7 @@
 
 /**
  * FileUpload objects represent any file attached to a message on the chat. 
- * This can include images, files, video, or audio. 
+ * Encapsulates 'msg_files' row from database.
  * 
  * Implementation Notes:
  * - Files uploaded are renamed with a unique id of numeric characters

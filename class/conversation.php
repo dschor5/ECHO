@@ -2,6 +2,7 @@
 
 /**
  * Conversation objects represent one conversation within the chat application.
+ * Encapsulates 'conversations' row from database. 
  * 
  * @link https://github.com/dschor5/AnalogDelaySite
  */
@@ -44,7 +45,7 @@ class Conversation
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get(string $name) : string|int|float|bool|null|array  
+    public function __get(string $name)
     {
         $result = null;
 
