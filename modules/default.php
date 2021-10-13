@@ -146,8 +146,6 @@ abstract class DefaultModule implements Module
         {
             $subaction = $_GET['subaction'];
         }
-        
-        Logger::error($subaction);
 
         // Only allow requests from this server. 
         header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
