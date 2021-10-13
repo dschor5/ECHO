@@ -68,7 +68,7 @@ class Database
         if(mysqli_connect_errno())
         {
             Logger::error('Could not connect to database.', 
-                array('user'=>$user, 'dbname'=>$dbname, 'host'=>$hostname), 
+                array('user'=>$user, 'dbname'=>$dbname, 'host'=>$hostname, 
                       'error'=>mysqli_connect_error());
         }
     }
