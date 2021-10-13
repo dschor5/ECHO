@@ -1,10 +1,12 @@
 <?php 
 
 /**
- * Singleton Delay object used to parse/interpret the user configurable comms delay.
+ * Delay object used to parse/interpret the user configurable comms delay.
  * 
  * Implementation Notes:
- * - This class does not validate the 
+ * - Singleton implementation.
+ * - This class does not validate the delay expressions. It is assumed that
+ *   the validation is done when saving the settings in the admin module. 
  * 
  * @link https://github.com/dschor5/AnalogDelaySite
  */
@@ -13,7 +15,7 @@ class Delay
     /**
      * Singleton instance of Delay object.
      * @access private
-     * @var Delay
+     * @var Object
      */
     private static $instance = null;
 
