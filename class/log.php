@@ -62,9 +62,9 @@ class Logger
      * Log an ERROR level message. Always recorded.
      *
      * @param string $message Message to log.
-     * @param string|null $context Optional array to encode with the msg.
+     * @param array|null $context Optional array to encode with the msg.
      */
-    public static function error(string $message, ?string $context=null)
+    public static function error(string $message, ?array $context=null)
     {
         self::logMessage('ERROR', $message, $context);
     }
@@ -73,9 +73,9 @@ class Logger
      * Log an WARNING level message. Recorded based on threshold setting.
      *
      * @param string $message Message to log.
-     * @param string|null $context Optional array to encode with the msg.
+     * @param array|null $context Optional array to encode with the msg.
      */    
-    public static function warning(string $message, ?string $context=null)
+    public static function warning(string $message, ?array $context=null)
     {
         if(self::$levelThreshold < Logger::WARNING)
         {
@@ -88,7 +88,7 @@ class Logger
      * Log an DEBUG level message. Recorded based on threshold setting.
      *
      * @param string $message Message to log.
-     * @param string|null $context Optional array to encode with the msg.
+     * @param array|null $context Optional array to encode with the msg.
      */        
     public static function debug(string $message, ?array $context=null)
     {

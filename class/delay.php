@@ -40,6 +40,14 @@ class Delay
     private $currDelay = 0;
 
     /**
+     * Unit timestamp of the last time the delay was calculated. 
+     * Used for caching/refreshing the delay. 
+     * @access private
+     * @var double
+     */
+    private $lastCheck = 0;
+
+    /**
      * Constant speed of light in km/s to calculate distance from delay. 
      * Source: https://en.wikipedia.org/wiki/Speed_of_light
      * @access private
@@ -61,12 +69,22 @@ class Delay
      */
     const SEC_PER_HOUR = 3600;
 
+    /**
+     * Delay cache timeout in seconds. 
+     * Default value of 1sec was used to match the refresh rate 
+     * for the time display on the chat application.
+     * @access private
+     * @var double
+     */
+    const CACHE_TIMEOUT = 1.0;
+
     /** 
      * Private constructor that initializes to no comms delay. 
      */
     private function __construct()
     {
         $this->currDelay = 0;
+        $this->lastCheck = 0;
     }
 
     /**
@@ -87,14 +105,30 @@ class Delay
      * Get the current communication delay in seconds. 
      * 
      * Implementation notes:
+     * - Caches value to avoid finding the curr delay and 
+     *   evaluating the expression multiple times per page load. 
      * - Parses the database entry describing the delays. 
-     * - Finds what delay equation to apply at this time. 
+     * - Prepend and append dummy entries to the list
+     *   [
+     *      {'ts':'2000-01-01 00:00:00', 'eq':0},  <-- DUMMY ENTRY IN THE PAST
+     *      {'ts':'2021-01-01 00:00:00', 'eq':0}, 
+     *      {'ts':'2021-01-01 00:01:00', 'eq':10},
+     *      {'ts':'2100-01-01 00:00:00', 'eq':0},  <-- DUMMY ENTRY IN THE FUTURE
+     *   ]
+     * - Find index into the array where:
+     *      list[$i]['ts'] < currentTime() < list[$i+1]['ts']
      * - Evaluates the delay expression. 
      * 
      * @return float Delay in seconds.
      */
     public function getDelay(): float
     {
+        // If the cached valud is still vaid return it. 
+        if(microtime(true) - $this->lastCheck < Delay::CACHE_TIMEOUT)
+        {
+            return $this->currDelay;
+        }
+
         // Get the current mission configuration and parse the delay field. 
         $mission = MissionConfig::getInstance();
         $config = json_decode($mission->delay_config, true);
@@ -104,8 +138,10 @@ class Delay
         array_push($config, array('ts'=>'2100-01-01 00:00:00', 'eq'=>'0'));
 
         // Find which entry in the delay configuration applies to the curent time. 
-        $i = 1;
-        while(!(strtotime($config[$i]['ts']) < time() && time() <= strtotime($config[$i+1]['ts'])) && $i < count($config)-1)
+        $i = 0;
+        while(!(strtotime($config[$i]['ts']) < time() && 
+            time() <= strtotime($config[$i+1]['ts'])) && 
+            $i < count($config)-1)
         {
             $i++;
         }
@@ -120,6 +156,7 @@ class Delay
             eval('$this->currDelay = '.$config[$i]['eq'].';');
             // Ensure the delay >= 0. 
             $this->currDelay = max(0, $this->currDelay);
+            $this->lastCheck = microtime(true);
         } 
         catch (Exception $e) 
         {

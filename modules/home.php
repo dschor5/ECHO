@@ -1,10 +1,20 @@
 <?php
 
+/**
+ * HomeModule manages main screen, login, and logout. 
+ */
 class HomeModule extends DefaultModule
 {
-    public function __construct(&$user)
+    /**
+     * Constructor. 
+     *
+     * @param User|null $user Current logged in user or null. 
+     */
+    public function __construct(?User &$user)
     {
         parent::__construct($user);
+
+        // Acceptable request types. 
         $this->subJsonRequests = array(
             'reset' => 'resetPassword',
             'login' => 'login'
@@ -16,11 +26,22 @@ class HomeModule extends DefaultModule
         );
     }
 
+    /**
+     * Return page header.
+     *
+     * @return string
+     */
     public function getHeader() : string
     {
         return '';
     }
 
+    /**
+     * Compile page. 
+     *
+     * @param string $subaction 
+     * @return string
+     */
     public function compileHtml(string $subaction): string
     {
         global $server;
@@ -43,6 +64,11 @@ class HomeModule extends DefaultModule
         return $this->showHomepage();
     }
 
+    /**
+     * Returns 
+     *
+     * @return string
+     */
     protected function checkLogin() : string 
     {
         global $server;
@@ -55,29 +81,55 @@ class HomeModule extends DefaultModule
         return 'RESET';
     }
 
+    /**
+     * Show page ot reset the user password. 
+     *
+     * @return string HTML page. 
+     */
     protected function showResetPage() : string
     {
         $this->addTemplates('login-reset.js', 'login.css');
         return Main::loadTemplate('home-reset.txt', array('/%username%/' => $this->user->username));
     }
 
+    /**
+     * Show homepage. 
+     *
+     * @return string HTML page
+     */
     protected function showHomepage() : string
     {
         $this->addTemplates('login.js', 'login.css');
         return Main::loadTemplate('home.txt', array());
     }
 
+    /**
+     * Handle AJAX request to reset the user password. 
+     * Returns success=true if the user password was successfully changed. 
+     * 
+     * Password rules enforced:
+     * - Min 8 characters
+     * - 1+ uppercase character
+     * - 1+ lowercase character
+     * - 1+ number
+     * - 1+ symbol
+     *
+     * @return array Associative array for JSON response.
+     */
     protected function resetPassword() : array
     {
         global $config;
         $response = array('success' => false);
 
+        // If the two user passwords are set. 
         if(isset($_POST['password1']) && isset($_POST['password2']))
         {
+            // Passwords must be equal.
             if($_POST['password1'] != $_POST['password2'])
             {
                 $response['message'] = 'Passwords do not match.';
             }
+            // Passwords must be at least 8 chars long.
             else if(strlen($_POST['password1']) < 8)
             {
                 $response['message'] = 'Password must be at least 8 characters long.';
@@ -99,6 +151,7 @@ class HomeModule extends DefaultModule
                 }
                 else
                 {
+                    // Update user password. 
                     $usersDao = UsersDao::getInstance();
                     if($this->user !== false)
                     {
@@ -107,6 +160,8 @@ class HomeModule extends DefaultModule
                             'password_reset' => 0
                         );
                         $usersDao->update($newData, $this->user->user_id);
+
+                        // Delete the current cookie and force the user to login again.
                         Main::deleteCookie();
                         $response['success'] = true;
                     }
@@ -117,18 +172,28 @@ class HomeModule extends DefaultModule
         return $response;
     }
 
+    /**
+     * Handle AJAX request to reset the user password. 
+     * Returns success=true if the username & password are found in the database.
+     * 
+     * @return array Associative array for JSON response.
+     */
     protected function login() : array
     {
         global $config;
         $response = array('login' => false);
 
+        // Check that the username and password were submitted.
         if(isset($_POST['uname']) && isset($_POST['upass']))
         {
+            // Get the user by that name. 
             $usersDao = UsersDao::getInstance();
             $user = $usersDao->getByUsername($_POST['uname']);
 
+            // Check if the password provided matches what the user account.
             if($user !== false && $user->isValidPassword($_POST['upass']))
             {
+                // If so, crease a new session and update the database.
                 $this->user = $user;
                 $sessionId = $user->createNewSession();
                 $newData = array(
@@ -147,6 +212,11 @@ class HomeModule extends DefaultModule
         return $response;
     }
 
+    /**
+     * Logout and delete the session cookie. 
+     *
+     * @return string Message to be display while redirecting. 
+     */
     protected function logout() : string
     {
         global $server;

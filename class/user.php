@@ -21,11 +21,25 @@ require_once('database/usersDao.php');
  */
 class User
 {
+    /**
+     * Data from 'mission_config' database table. 
+     * @access private
+     * @var array
+     */
     private $data;
 
+    /**
+     * User constructor. 
+     * 
+     * Appends object data with the field conversations (array) containing
+     * an array of conversation ids that the user belongs to. 
+     * 
+     * @param array $data Row from 'msg_files' database table. 
+     */
     public function __construct($data)
     {
         $this->data = $data;
+
         if(isset($data['conversations']))
         {
             $this->data['conversations'] = explode(',', $this->data['conversations']);
@@ -36,6 +50,13 @@ class User
         }
     }
 
+    /**
+     * Accessor for User fields. Returns value stored in the field $name 
+     * or null if the field does not exist. 
+     * 
+     * @param string $name Name of field being requested. 
+     * @return mixed Value contained by the field requested. 
+     */
     public function __get($name)
     {
         $result = null;
