@@ -7,7 +7,7 @@ CREATE TABLE `users` (
   `is_admin` tinyint(1) NOT NULL,
   `is_crew` tinyint(1) NOT NULL,
   `last_login` datetime DEFAULT NULL,
-  `password_reset` tinyint(1) NOT NULL DEFAULT '1',
+  `is_password_reset` tinyint(1) NOT NULL DEFAULT '1',
   `preferences` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -85,7 +85,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('delay_is_manual', 'bool',   '1'),
 ('delay_config',    'string', '[{"ts":"2021-01-01 00:00:00","eq":0}]');
 
-INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
+INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
 (1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
@@ -96,7 +96,7 @@ INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
 
 /* The following values are used for testing only and should not be deployed by default. */
 
-INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `password_reset`, `preferences`) VALUES
+INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
 (2, 'user1', 'Flight Director', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 0, NULL, 1, ''),
 (3, 'user2', 'Blueberry', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 1, NULL, 1, ''),
 (4, 'user3', 'Tangirine', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 1, NULL, 1, '');

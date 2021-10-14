@@ -9,12 +9,46 @@ require_once("database/database.php");
 abstract class Dao
 {
 
-    protected $database = null;  // Database resource
-    private $name     = null;    // Table name
-    private $id       = null;    // Name to be used as index (by default, 'id')
+    /**
+     * Reference to database connection. 
+     * @access protected
+     * @var Database
+     */
+    protected $database; 
 
+    /**
+     * Name of table represented by this DAO.
+     * @access private
+     * @var string
+     */
+    private $name;
+
+    /**
+     * Name of primary id for the table.
+     * @access private
+     * @var string
+     */
+    private $id;
+
+    /**
+     * Search for any of these keyrods. 
+     * @access private
+     * @var int
+     */
     const SEARCH_ANY = 0;
+
+    /**
+     * Search for all of these keywords. 
+     * @access private
+     * @var int
+     */
     const SEARCH_ALL = 1;
+
+    /**
+     * Search for exact phrase. 
+     * @access private
+     * @var int
+     */
     const SEARCH_PHRASE = 2;
 
     /**
@@ -48,23 +82,15 @@ abstract class Dao
         $this->database->query(($commit) ? 'COMMIT;' : 'ROLLBACK;');
     }
 
-
-    /* PUBLIC: Drop
-    PURPOSE: Drops the specified entries from the table
-    @param: $id - a string (or int) specifying either the "where" clause or
-             or the ID of the field(s) to drop.  By default, deletes everything
-             (be careful)
-
-    @return boolean - true on success, false on failure.
-    */
-
     /** 
      * Drop a field from the table. 
      * 
      * @param string|int If an int is provided, then treat it as the unique id
-     *                   to drop. Otherwise, assume it is the WHERE clause. 
+     *                   to drop. Otherwise, assume it is the WHERE clause.
+     *                   Default to '*' which would drop all rows.
+     * @return bool True on success 
      */
-    public function drop($id = '*')
+    public function drop($id = '*') : bool
     {
         // Build query for this table. 
         $query = "delete from `{$this->name}`";
@@ -83,40 +109,44 @@ abstract class Dao
         return $this->database->query($query, false);
     }
 
-
-    /* PUBLIC: select
-    PURPOSE: Runs a select query to get a list of entries (in a result object)
-    @param: string $what     - Which fields do you want? (* for all)
-    @param: string $where    - A where clause (* for all) or integer ID
-    @param: string $sort     - Which field to sort on? By default sort on the ID field specified above.
-    @param: string $sort     - Which way to sort Ascending or Descending (ASC or DESC respectively)
-    @param: int $limit_start - Allows you to get just a subselection of the results,
-                  eg, 10 starts the result listing after the 10th matching entry
-    @param: int $limit_count - How many results to return (ie n results after the $limit_start)
-
-    @return Result object
-    */
-    public function select($what = '*',$where = '*',$sort = '', $order = 'ASC',$limit_start = null,$limit_count = null)
+    /**
+     * Select / query this database table. 
+     * 
+     * @param string $what Fields to select from this table. Default to '*' for all. 
+     * @param string $where Where clause to select rows from the table. 
+     *                      If an int is provided, then treat it as the unique id
+     *                      to drop. Otherwise, assume it is the WHERE clause.
+     *                      Default to '*' which would select all rows.
+     * @param string|array $sort  Name of field(s) to sort results by.
+     * @param string|array $order 'ASC' or 'DSC' order to sort each of the $sort fields.
+     * @param int $limist_start Select subset of matched rows. 
+     *                      Limit start is the index of the first row to return. 
+     *                      Default to null which means use database default.
+     * @param int $limit_count Select number of rows to return. 
+     *                      Default to null which means use database default.
+     * @return array Associative array of database rows returned.                       
+     */
+    public function select($what = '*', $where = '*', $sort = '', $order = 'ASC', 
+        $limit_start = null, $limit_count = null)
     {
-
+        // Form query string for this table. 
         $query = "select $what from `{$this->name}`";
 
-        // we know exactly which ID we want...
+        // Integer where clause means select by primary id. 
         if (intval($where) > 0)
         {
             $query .= " where `{$this->id}` = '$where'";
         }
-
-        // we have been given a where clause to go by.
-        // if $where == '*' then we want everything in the table.
-        else if ($where != '*')
+        // Otherwise, if where clause is not a wildcard, assume it is a well 
+        // constructed database statement.
+        elseif ($where != '*')
         {
             $query .= " where " . $where;
         }
 
         if (is_array($sort))
         {
-            if (count($sort)>0)
+            if (count($sort) > 0)
             {
                 $query .= ' order by ';
             }
@@ -132,7 +162,7 @@ abstract class Dao
             }
 
         } 
-        else if ($sort != '')
+        elseif ($sort != '')
         {
             $query .= " order by `{$sort}` $order";
         }

@@ -7,15 +7,15 @@ require_once('database/usersDao.php');
  * Encapsulates 'users' row from database.
  * 
  * Table Structure: 'mission_config'
- * - user_id        (string)   Unique ID given to the user. 
- * - username       (string)   Username associated with the account
- * - password       (string)   Encrypted password
- * - session_id     (string)   Session ID to track logged in users
- * - is_admin       (bool)     True if the user has administrative priviledges
- * - is_crew        (bool)     True if the user is a crew member (in the habitat)
- * - last_login     (datetime) Date/time of last logging
- * - password_reset (bool)     True to force password reset on next login
- * - preferences    (string)   JSON string to store user preferences
+ * - user_id           (string)   Unique ID given to the user. 
+ * - username          (string)   Username associated with the account
+ * - password          (string)   Encrypted password
+ * - session_id        (string)   Session ID to track logged in users
+ * - is_admin          (bool)     True if the user has administrative priviledges
+ * - is_crew           (bool)     True if the user is a crew member (in the habitat)
+ * - last_login        (datetime) Date/time of last logging
+ * - is_password_reset (bool)     True to force password reset on next login
+ * - preferences       (string)   JSON string to store user preferences
  * 
  * Implementation Notes:
  */

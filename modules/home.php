@@ -51,7 +51,7 @@ class HomeModule extends DefaultModule
         }
         elseif($subaction == 'checkLogin')
         {
-            if($this->user->password_reset == 1)
+            if($this->user->is_password_reset)
             {
                 return $this->showResetPage();
             }
@@ -157,7 +157,7 @@ class HomeModule extends DefaultModule
                     {
                         $newData = array(
                             'password' => md5($_POST['password1']),
-                            'password_reset' => 0
+                            'is_password_reset' => 0
                         );
                         $usersDao->update($newData, $this->user->user_id);
 
