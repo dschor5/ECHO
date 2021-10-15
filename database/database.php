@@ -97,7 +97,7 @@ class Database
     /**
      * Destructor closes database connection.
      */
-    public function __destruct()
+    public function __destruct() : void
     {
         $this->db->close();
     }
@@ -119,7 +119,7 @@ class Database
      * 
      * @param bool $state Enable (true) or disable (false) exceptions.
      */
-    public function queryExceptionEnabled(bool $state)
+    public function queryExceptionEnabled(bool $state) : void
     {
         $this->throwException = $state;
     }
@@ -157,7 +157,7 @@ class Database
             // If enabled, throw an exception. 
             if($this->throwException)
             {
-                throw new DatabaseException($queryStr, $this->db->error);
+                throw new Exception($queryStr);
             }
         }
         // If it was not an error, track queries for debugging purposes. 

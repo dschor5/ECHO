@@ -173,7 +173,7 @@ class UsersDao extends Dao
             $this->endTransaction(true);
             $result = true;
         }
-        catch(DatabaseException $e)
+        catch(Exception $e)
         {
             $this->endTransaction(false);
             Logger::warning('usersDao::createNewUser', $e);
