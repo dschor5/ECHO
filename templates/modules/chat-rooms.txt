@@ -1,7 +1,11 @@
                 <div class="room %selected%">
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                     <div class="room-plus">%add-thread%</div>
+=======
+                    <div class="room-plus">+</div>
+>>>>>>> Stashed changes
 =======
                     <div class="room-plus">+</div>
 >>>>>>> Stashed changes
