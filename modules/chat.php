@@ -11,7 +11,8 @@ class ChatModule extends DefaultModule
         $this->subJsonRequests = array(
             'send' => 'textMessage', 
             'upload'   => 'uploadFile',
-            'prevMsgs' => 'getPrevMessages'
+            'prevMsgs' => 'getPrevMessages',
+            'newThread' => 'createNewThread'
         );
         $this->subHtmlRequests = array(
             'default' => 'showChat'
@@ -68,6 +69,12 @@ class ChatModule extends DefaultModule
         }
 
         return $response;
+    }
+
+    protected function createNewThread() : array
+    {
+        // Receive a name. If success, return new thread id and let the javascript load that page. 
+        // This should check if it is a unique name. 
     }
 
     protected function getPrevMessages() : array

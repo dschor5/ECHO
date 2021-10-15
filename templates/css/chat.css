@@ -66,14 +66,29 @@
     background-color: rgb(255, 255, 255, 0.2);
 }
 
-#rooms a {
+/*#rooms a {
     border: 1px solid var(--text-light-bright);
     color: var(--text-light-bright);
+}*/
+
+.room a {
+    color: inherit;
 }
 
-#rooms a:hover {
+.room a:hover {
+    color: inherit;
+}
+
+.room:hover {
     background: var(--text-light-bright);
     color: #DDDDDD;
+}
+
+.room-plus {
+    width: 10px;
+    float: right;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #rooms::-webkit-scrollbar {
