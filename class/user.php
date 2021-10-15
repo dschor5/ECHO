@@ -1,7 +1,5 @@
 <?php
 
-require_once('database/usersDao.php');
-
 /**
  * User objects a user/account registered with the system. 
  * Encapsulates 'users' row from database.

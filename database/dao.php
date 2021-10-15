@@ -1,7 +1,5 @@
 <?php
 
-require_once("database/database.php");
-
 /**
  * Abstract base class containing common properties/functionality for all 
  * Database Abstraction Objects (DAO). 

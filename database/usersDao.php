@@ -1,9 +1,5 @@
 <?php
 
-require_once("database/dao.php");
-require_once("class/user.php");
-require_once("database/result.php");
-
 class UsersDao extends Dao
 {
     private static $instance = null;

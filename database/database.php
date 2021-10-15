@@ -1,7 +1,5 @@
 <?php
 
-require_once('config.inc.php');
-
 /**
  * Database wrapper that handles connection and queries. 
  * All Database Abstraction Objects (DAOs) use this connection
