@@ -73,37 +73,12 @@
 
 .room a {
     color: inherit;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 }
 
 .room a:hover {
     color: inherit;
 }
 
-=======
-}
-
-=======
-}
-
->>>>>>> Stashed changes
-=======
-}
-
->>>>>>> Stashed changes
-.room a:hover {
-    color: inherit;
-}
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 .room:hover {
     background: var(--text-light-bright);
     color: #DDDDDD;
@@ -114,18 +89,6 @@
     float: right;
     padding-left: 5px;
     padding-right: 5px;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-    border: 1px solid red;
->>>>>>> Stashed changes
-=======
-    border: 1px solid red;
->>>>>>> Stashed changes
-=======
-    border: 1px solid red;
->>>>>>> Stashed changes
 }
 
 #rooms::-webkit-scrollbar {

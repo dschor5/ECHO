@@ -1,17 +1,5 @@
                 <div class="room %selected%">
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
                     <div class="room-plus">%add-thread%</div>
-=======
-                    <div class="room-plus">+</div>
->>>>>>> Stashed changes
-=======
-                    <div class="room-plus">+</div>
->>>>>>> Stashed changes
-=======
-                    <div class="room-plus">+</div>
->>>>>>> Stashed changes
                     <a href="%http%%site_url%/chat/%room_id%">
                         %room_name% <span id="room-new-%room_id%"></span>
                     </a>
