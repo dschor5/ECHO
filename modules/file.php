@@ -8,7 +8,6 @@ class FileModule implements Module
     public function __construct(&$user)
     {
         $this->user = &$user;
-        $this->db = Database::getInstance();
     }
 
     public function compile() : string

@@ -128,7 +128,7 @@ class Database
      * Database Abstraction Objects (DAOs).
      * 
      * @param string $queryStr Query string to execute. 
-     * @return array Result from query.
+     * @return mysqli_result|bool Result from query or bool if not keeping results.
      */
     public function query(string $queryStr) 
     {

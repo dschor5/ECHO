@@ -175,7 +175,7 @@ class MessagesDao extends Dao
         return $numMsgs;
     }
 
-    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
+    public function getOldMessages(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
@@ -230,7 +230,7 @@ class MessagesDao extends Dao
         catch (Exception $e) 
         {
             $this->endTransaction(false);
-            Logger::warning('messagesDao::getMessagesReceived failed.', $e);
+            Logger::warning('messagesDao::getOldMessages failed.', $e);
         }
         $this->database->queryExceptionEnabled(false);
 

@@ -1,11 +1,36 @@
 <?php
 
+/**
+ * Abstract class to define an applicaiton module defining 
+ * a specific group of user interactions. 
+ * 
+ * 
+ */
 abstract class DefaultModule implements Module
 {
-    protected $db;        // reference to database
+    /**
+     * Referenced to logged in user. 
+     * @access protected
+     * @var User
+     */
     protected $user;
 
+    /**
+     * Associative array linking valid asynchronous javascript requests
+     * to their respective function handlers. 
+     * Example: array(ajaxRequest => functionName)
+     * @access protected
+     * @var array
+     */
     protected $subJsonRequests;
+
+    /**
+     * Associative array linking valid asynchronous javascript requests
+     * to their respective function handlers. 
+     * Example: array(ajaxRequest => functionName)
+     * @access protected
+     * @var array
+     */
     protected $subHtmlRequests;
     protected $subStreamRequests;
 
@@ -14,13 +39,19 @@ abstract class DefaultModule implements Module
     public function __construct(&$user)
     {
         $this->user = &$user;
-        $this->db = Database::getInstance();
         $this->templateFiles = array();
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array();
         $this->subStreamRequests = array();
     }
 
+    /**
+     * Add css or javascript templates to load with this module. 
+     * Subsequent functions will use the extension to load the 
+     * corresponding template. 
+     *
+     * @param string ...$newFile One or more filenames. 
+     */
     protected function addTemplates(string ...$newFile)
     {
         foreach($newFile as $f)
@@ -29,9 +60,14 @@ abstract class DefaultModule implements Module
         }
     }
 
+    /**
+     * Get all the css and javascript files to load with the current page. 
+     *
+     * @return string HTML function calls to load css and javascript files. 
+     */
     private function getTemplates(): string
     {
-        // Add default templates
+        // Add default templates used by all modules. 
         $defaults = array(
             ($this->user != null && $this->user->is_crew) ? 'chat-hab.css' : 'chat-mcc.css',
             'common.css',
@@ -42,8 +78,10 @@ abstract class DefaultModule implements Module
             'jquery-ui.min.js',
         );
 
+        // Merge the default and custom lists together. 
         $this->templateFiles = array_merge($defaults, $this->templateFiles);
 
+        // Apply the corresponding template depending on the file extension. 
         $content = '';
         foreach($this->templateFiles as $file)
         {
@@ -54,6 +92,11 @@ abstract class DefaultModule implements Module
         return $content;
     }
 
+    /**
+     * Get 
+     *
+     * @return string
+     */
     public function getHeader(): string
     {
         $userLocation = '';
@@ -241,6 +284,31 @@ abstract class DefaultModule implements Module
     public function compileStream()
     {
         return;
+    }
+
+    /**
+     * Send Event from the server. 
+     *
+     * @param string|null $name Name of event. If null, assume it is a keep alive message.
+     * @param array|null $data  Data to send with the event. 
+     * @param integer|null $id Unique id given to the event (or null if not applicable).
+     * @return integer
+     */
+    protected function sendEventStream(?string $name, ?array $data = null, int $id = null)
+    {
+        if($name == null)
+        {
+            echo ':'.PHP_EOL.PHP_EOL;
+        }
+        else
+        {
+            echo 'event: '.$name.PHP_EOL;
+            if($id != null) 
+            {
+                echo 'id: '.$id.PHP_EOL;
+            }
+            echo 'data: '.json_encode($data).PHP_EOL.PHP_EOL;
+        }
     }
 }
 
