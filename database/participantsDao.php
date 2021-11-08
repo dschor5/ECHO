@@ -2,9 +2,25 @@
 
 class ParticipantsDao extends Dao
 {
+    /**
+     * Singleton instance for ParticipantsDao object.
+     * @access private
+     * @var ConversationsDao
+     **/
     private static $instance = null;
+
+    /**
+     * Cache participants queries into an associative array arranged by conversation id. 
+     * @access private
+     * @var array 
+     **/
     private static $cache = array();
 
+    /**
+     * Returns singleton instance of this object. 
+     * 
+     * @return Delay object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -14,6 +30,9 @@ class ParticipantsDao extends Dao
         return self::$instance;
     }
 
+    /**
+     * Private constructor to prevent multiple instances of this object.
+     **/
     protected function __construct()
     {
         parent::__construct('participants');

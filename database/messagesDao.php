@@ -2,8 +2,18 @@
 
 class MessagesDao extends Dao
 {
+    /**
+     * Singleton instance for MessageDao object.
+     * @access private
+     * @var ConversationsDao
+     **/
     private static $instance = null;
 
+    /**
+     * Returns singleton instance of this object. 
+     * 
+     * @return Delay object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -13,11 +23,21 @@ class MessagesDao extends Dao
         return self::$instance;
     }
 
+    /**
+     * Private constructor to prevent multiple instances of this object.
+     **/
     protected function __construct()
     {
-        parent::__construct('messages');
+        parent::__construct('messages', 'message_id');
     }
 
+    /**
+     * Write new message to the database. 
+     *
+     * @param array $msgData Associative array with message fields. 
+     * @param array $fileData Associative array with file attachment fields.
+     * @return int|bool New message id on success. False otherwise. 
+     **/
     public function sendMessage(array $msgData, array $fileData=array())
     {
         $messageStatusDao = MessageStatusDao::getInstance();
@@ -25,6 +45,7 @@ class MessagesDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
 
+        
         $this->database->queryExceptionEnabled(true);
         try 
         {

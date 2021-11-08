@@ -1,10 +1,36 @@
 <?php
 
+/**
+ * Data Abstraction Object for the Conversations table. Implements custom 
+ * queries to search and update conversations as needed. 
+ * 
+ * Implementation Notes:
+ * - 
+ * 
+ * 
+ * @link https://github.com/dschor5/AnalogDelaySite
+ */
 class ConversationsDao extends Dao
 {
+    /**
+     * Singleton instance for ConversationsDao object.
+     * @access private
+     * @var ConversationsDao
+     **/
     private static $instance = null;
+
+    /**
+     * Cache to avoid multiple queries for conversation data. 
+     * @access private
+     * @var array 
+     **/
     private static $cache = array();
 
+    /**
+     * Returns singleton instance of this object. 
+     * 
+     * @return Delay object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -14,11 +40,19 @@ class ConversationsDao extends Dao
         return self::$instance;
     }
 
+    /**
+     * Private constructor to prevent multiple instances of this object.
+     **/
     protected function __construct()
     {
         parent::__construct('conversations');
     }
 
+    /**
+     * Used when creating a new user to grant them access to all the global conversations. 
+     * 
+     * @return List of all global conversations. 
+     **/
     public function getGlobalConvos()
     {
         $convos = array();
@@ -39,6 +73,18 @@ class ConversationsDao extends Dao
         return $convos;
     }
 
+    /**
+     * Get all conversations associated with a particular user Id.
+     *
+     * Implementation notes:
+     * - For each conversations, include a CSV list of user_ids, usernames, and alias, 
+     *   as well as an indicator of whether the convo includes participants on both 
+     *   the analog and MCC. These fields are expected by the Conversation object to 
+     *   avoid having to perfom separate queries. 
+     *
+     * @param int $userId 
+     * @return array Converation objects.
+     */
     public function getConversationsByUserId(int $userId)
     {
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';

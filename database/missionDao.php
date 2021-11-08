@@ -2,8 +2,18 @@
 
 class MissionDao extends Dao
 {
+    /**
+     * Singleton instance for MissionDao object.
+     * @access private
+     * @var ConversationsDao
+     **/
     private static $instance = null;
 
+    /**
+     * Returns singleton instance of this object. 
+     * 
+     * @return Delay object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -13,6 +23,9 @@ class MissionDao extends Dao
         return self::$instance;
     }
 
+    /**
+     * Private constructor to prevent multiple instances of this object.
+     **/
     protected function __construct()
     {
         parent::__construct('mission_config');

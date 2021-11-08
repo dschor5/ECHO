@@ -2,10 +2,29 @@
 
 class UsersDao extends Dao
 {
+    /**
+     * Singleton instance for UsersDao object.
+     * @access private
+     * @var ConversationsDao
+     **/
     private static $instance = null;
+
+    /**
+     * Cache users retrieved from database into an associative array 
+     * arranged by user id. 
+     * @access private
+     * @var array 
+     **/
     private static $cache = array();
+
+
     private static $cacheFull = false;
 
+    /**
+     * Returns singleton instance of this object. 
+     * 
+     * @return Delay object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -15,15 +34,14 @@ class UsersDao extends Dao
         return self::$instance;
     }
 
+    /**
+     * Private constructor to prevent multiple instances of this object.
+     **/
     protected function __construct()
     {
         parent::__construct('users', 'user_id');
     }
 
-    public function getByIds(array $ids) : array
-    {
-        // Build 
-    }
 
     public function getById(int $id)
     {
