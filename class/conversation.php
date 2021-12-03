@@ -91,7 +91,7 @@ class Conversation
      * Get the an associative array of user_id => alias/username for all 
      * the participants in this conversation. Where, the alias is used unless
      * it is empty in which case the list defaults to the username. 
-     * Optional, explude a given user id from the results. 
+     * Optional, exclude a given user id from the results. 
      * 
      * @param int $excludeUserId Used id to exclude from the list. Default none=-1.
      * @return array Associative array with user_id => alias/usernames. 

@@ -590,6 +590,16 @@ class AdminModule extends DefaultModule
 
     protected function saveConversationText() : array
     {
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversations = $conversationsDao->getAllConversations();
+
+        foreach($conversations as $convoId => $convo)
+        {
+            $participants = $convo->getParticipants();
+            
+            
+        }
+
         return array();
     }
 
