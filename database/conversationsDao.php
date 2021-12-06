@@ -90,9 +90,10 @@ class ConversationsDao extends Dao
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
 
         $queryStr = 'SELECT conversations.*, '.
-                        'GROUP_CONCAT( participants.user_id) AS participant_ids, '.
-                        'GROUP_CONCAT( users.username) AS participant_usernames, '.
-                        'GROUP_CONCAT( users.alias) AS participants_aliases, '.
+                    'GROUP_CONCAT( participants.user_id) AS participants_id, '.
+                    'GROUP_CONCAT( users.username) AS participants_username, '.
+                    'GROUP_CONCAT( users.alias) AS participants_alias, '.
+                    'GROUP_CONCAT( users.is_crew) AS participants_is_crew, '.
                         'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
                     'FROM conversations '.
                     'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
@@ -134,9 +135,10 @@ class ConversationsDao extends Dao
     public function getAllConversations()
     {
         $queryStr = 'SELECT conversations.*, '.
-                        'GROUP_CONCAT( participants.user_id) AS participant_ids, '.
-                        'GROUP_CONCAT( users.username) AS participant_usernames, '.
-                        'GROUP_CONCAT( users.alias) AS participants_aliases, '.
+                        'GROUP_CONCAT( participants.user_id) AS participants_id, '.
+                        'GROUP_CONCAT( users.username) AS participants_username, '.
+                        'GROUP_CONCAT( users.alias) AS participants_alias, '.
+                        'GROUP_CONCAT( users.is_crew) AS participants_is_crew, '.
                         'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
                     'FROM conversations '.
                     'JOIN participants ON conversations.conversation_id = participants.conversation_id '.

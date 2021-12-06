@@ -701,7 +701,8 @@ class ChatModule extends DefaultModule
             }
             else
             {
-                $name = 'Private: '.array_pop($participants);
+                $userInfo = array_pop($participants);
+                $name = 'Private: '.(strlen($userInfo['alias']) != 0) ? $userInfo['alias'] : $userInfo['username'];
             }
             
             // Apply the template

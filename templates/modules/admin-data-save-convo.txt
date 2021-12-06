@@ -1,0 +1,30 @@
+<div class="conversation">
+    <div class="convo-info">
+        <div>
+            <span class="convo-info-label">Conversation:</span>
+            <span class="convo-info-data">%name% (id=%id%)</span>
+        </div>
+
+        <div>
+            <span class="convo-info-label">Participants:</span>
+            <span class="convo-info-data">%participants%</span>
+        </div>
+
+        <div>
+            <span class="convo-info-label">Time Reference:</span>
+            <span class="convo-info-data">%timeref%</span>
+        </div>
+    </div>
+    
+    <table>
+        <tr>
+            <th>Id</th>
+            <th>From</th>
+            <th>Sent timestamp</th>
+            <th>Recv timestamp</th>
+            <th>Message</th>
+        </tr>
+%messages%
+    </table>
+
+</div>

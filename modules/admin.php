@@ -18,7 +18,7 @@ class AdminModule extends DefaultModule
             // Data Management
             'clear'        => 'clearMissionData', 
             'backupsql'    => 'backupSqlDatabase', 
-            'saveconvo'    => 'saveConversationText',
+            //'saveconvo'    => 'saveConversationText',
             'savefiles'    => 'saveConversationFiles',
         );
 
@@ -32,7 +32,8 @@ class AdminModule extends DefaultModule
             // Data Management
             'data'         => 'editDataManagement',
             // Default
-            'default'      => 'editMissionSettings'
+            'default'      => 'editMissionSettings',
+            'saveconvo'    => 'saveConversationText'
         );
     }
 
@@ -588,19 +589,60 @@ class AdminModule extends DefaultModule
         return array();
     }
 
-    protected function saveConversationText() : array
+    protected function saveConversationText() : string
     {
         $conversationsDao = ConversationsDao::getInstance();
+        $messagesDao = MessagesDao::getInstance();
+        $missionConfig = MissionConfig::getInstance();
+        
         $conversations = $conversationsDao->getAllConversations();
+        
+        $mccStr = $missionConfig->mcc_planet;
+        $habStr = $missionConfig->hab_planet;
 
+        $offset = 0;
+        $numMsgs = 20;
+        
+        $convoStr = '';
         foreach($conversations as $convoId => $convo)
         {
-            $participants = $convo->getParticipants();
+            $convoParticipants = $convo->getParticipants();
+            $participantsStr = '';
+            foreach($convoParticipants as $participant)
+            {
+                $participantsStr .= Main::loadTemplate('admin-data-save-user.txt', 
+                    array('/%username%/' => $participant['username'],
+                          '/%alias%/'    => $participant['alias'],
+                          '/%home%/'     => ($participant['is_crew'] ? $habStr : $mccStr)
+                    ));
+            }
             
-            
+            $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
+                array('/%name%/'         => $convo->name,
+                      '/%id%/'           => $convoId,
+                      '/%participants%/' => $participantsStr
+                ));
+
+            $offset = 0;
+            $messages = $messagesDao->getMessagesForConvo($convoId, true, $offset, $numMsgs);
+            while(count($messages) > 0)
+            {
+                foreach($messages as $msg)
+                {
+                    $convoStr .= Main::loadTemplate('admin-data-save-msg.txt', 
+                        array('/%id%/'        => $msg->message_id,
+                              '/%from-user%/' => ,
+                              '/%sent-time%/' => ,
+                              '/%recv-time%/' => ,
+                              '/%msg%/'       =>
+                        ));
+                }
+                $offset += $numMsgs;
+                $messages = $messagesDao->getMessagesForConvo($convoId, true, $offset, $numMsgs);
+            }
         }
 
-        return array();
+        return $convoStr;
     }
 
     protected function saveConversationFiles() : array

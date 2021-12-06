@@ -315,6 +315,35 @@ class MessagesDao extends Dao
         $this->endTransaction();
     }
 
+    public function getMessagesForConvo(int $convoId, bool $isCrew, int $offset, int $numMsgs) : array
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        
+        $queryStr = 'SELECT messages.*, '. 
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                    'FROM messages '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'WHERE messages.conversation_id='.$qConvoId.' '.
+                    'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
+                    'LIMIT '.$offset.', '.$numMsgs;
+        
+        $messages = array();
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                while(($rowData=$result->fetch_assoc()) != null)
+                {
+                    $messages[$rowData['message_id']] = new Message($rowData);
+                }
+            }
+        }
+     
+        return $messages;
+    }
+
 }
 
 ?>

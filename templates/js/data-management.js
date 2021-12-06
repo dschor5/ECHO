@@ -1,3 +1,23 @@
+function downloadConvos() {
+    $.ajax({
+        url: BASE_URL + '/admin',
+        type: 'POST',
+        data: {
+            subaction: 'saveconvo',
+        },
+        dataType: 'json',
+        success: function(data) {
+            if(data.success != true) {
+                $('div.dialog-response').text(data.error);
+                $('div.dialog-response').show();
+            }
+            else {
+                location.href = BASE_URL + '/admin/data';
+            }
+        }
+    });    
+}
+
 function confirmDelete() {
     $('#dialog-confirm').dialog('open');
 }

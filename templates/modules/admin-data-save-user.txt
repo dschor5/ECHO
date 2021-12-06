@@ -1,0 +1,3 @@
+<span style="font-weight: bold;">User:</span> %username%, 
+<span style="font-weight: bold;">Alias:</span> %alias%, 
+<span style="font-weight: bold;">Base:</span> %home%<br/>

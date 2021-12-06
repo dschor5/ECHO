@@ -138,6 +138,18 @@ class Message
         return $ret;
     }
 
+    public function compileTable(bool $crewPerspective) : string
+    {
+
+        return Main::loadTemplate('admin-data-save-msg.txt', 
+            array('/%id%/'        => $this->data['message_id'],
+                  '/%from-user%/' => $this->data['alias'],
+                  '/%sent-time%/' => DelayTime::convertT,
+                  '/%recv-time%/' => ,
+                  '/%msg%/'       =>
+            ));
+    }
+
     /**
      * Return associative array with message contents to display on the chat applicaiton.
      *

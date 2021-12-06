@@ -13,12 +13,13 @@
  * - last_message            (datetime) when the last message was sent
  * 
  * Additional Fields:
- * - participant_ids         (string)   CSV of participant ids for this convo
- * - participant_usernames   (string)   CSV of participant usernames for this convo
- * - participant_aliases     (string)   CSV of participant aliases for this convo
+ * - participants_id         (string)   CSV of participant ids for this convo
+ * - participants_username   (string)   CSV of participant usernames for this convo
+ * - participants_alias      (string)   CSV of participant aliases for this convo
+ * - participants_is_crew    (bool)     CSV of participants is_crew field for this convo
  * - num_participants        (int)      Number of participants in this convo
  * - participants_both_sites (bool)     True if convo has users in both MCC and HAB
- * 
+  * 
  * Note: The nth entry in the participant_* fields all correspond to the same account.
  * 
  * @link https://github.com/dschor5/AnalogDelaySite
@@ -102,9 +103,10 @@ class Conversation
         $participants = array();
 
         // Split comma separated entries from the database.
-        $ids = explode(',', $this->data['participant_ids']);
-        $alias = explode(',', $this->data['participants_aliases']);
-        $usernames = explode(',', $this->data['participant_usernames']);
+        $ids = explode(',', $this->data['participants_id']);
+        $alias = explode(',', $this->data['participants_alias']);
+        $usernames = explode(',', $this->data['participants_username']);
+        $isCrew = explode(',', $this->data['participants_is_crew']);
 
         // Iterate through each entry. 
         for($i = 0; $i < count($ids); $i++)
@@ -113,13 +115,18 @@ class Conversation
             if(intval($ids[$i]) != $excludeUserId)
             {
                 // Assign the value depending on whether there is an alias. 
-                $participants[intval($ids[$i])] = (strlen($alias[$i]) == 0) ?
-                    $usernames[$i] : $alias[$i];
+                $participants[intval($ids[$i])] = 
+                    array('username' => $usernames[$i],
+                          'alias'    => $alias[$i],
+                          'is_crew'  => $isCrew[$i]
+                    );
             }
         }
 
         return $participants;
     }
+
+    
 }
 
 ?>
