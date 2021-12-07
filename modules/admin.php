@@ -595,6 +595,9 @@ class AdminModule extends DefaultModule
         $messagesDao = MessagesDao::getInstance();
         $missionConfig = MissionConfig::getInstance();
         
+        $isCrew = true;
+        $tz = $missionConfig->hab_timezone;
+
         $conversations = $conversationsDao->getAllConversations();
         
         $mccStr = $missionConfig->mcc_planet;
@@ -617,29 +620,30 @@ class AdminModule extends DefaultModule
                     ));
             }
             
-            $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
-                array('/%name%/'         => $convo->name,
-                      '/%id%/'           => $convoId,
-                      '/%participants%/' => $participantsStr
-                ));
-
+            $msgStr = '';
             $offset = 0;
-            $messages = $messagesDao->getMessagesForConvo($convoId, true, $offset, $numMsgs);
+            $messages = $messagesDao->getMessagesForConvo($convoId, $isCrew, $offset, $numMsgs);
+            if(count($messages) == 0)
+            {
+                $msgStr = '<tr><td colspan="5">No messages</td></tr>';
+            }
             while(count($messages) > 0)
             {
                 foreach($messages as $msg)
                 {
-                    $convoStr .= Main::loadTemplate('admin-data-save-msg.txt', 
-                        array('/%id%/'        => $msg->message_id,
-                              '/%from-user%/' => ,
-                              '/%sent-time%/' => ,
-                              '/%recv-time%/' => ,
-                              '/%msg%/'       =>
-                        ));
+                    $msgStr .= $msg->compileTable($convoParticipants, $isCrew, $tz);
                 }
                 $offset += $numMsgs;
-                $messages = $messagesDao->getMessagesForConvo($convoId, true, $offset, $numMsgs);
+                $messages = $messagesDao->getMessagesForConvo($convoId, $isCrew, $offset, $numMsgs);
             }
+
+            $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
+                array('/%name%/'         => $convo->name,
+                      '/%id%/'           => $convoId,
+                      '/%participants%/' => $participantsStr,
+                      '/%messages%/'     => $msgStr,
+                      '/%timeref%/'      => $tz
+                ));
         }
 
         return $convoStr;

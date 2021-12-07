@@ -138,15 +138,22 @@ class Message
         return $ret;
     }
 
-    public function compileTable(bool $crewPerspective) : string
+    public function compileTable(array &$participants, bool $crewPerspective, string $tz) : string
     {
+        $perspective = $crewPerspective ? 'recv_time_hab' : 'recv_time_mcc';
+
+        $msg = $this->data['text'];
+        if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
+        {
+            $msg = $this->file->original_name.' ('.$this->file->getSize().')';
+        }
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%id%/'        => $this->data['message_id'],
-                  '/%from-user%/' => $this->data['alias'],
-                  '/%sent-time%/' => DelayTime::convertT,
-                  '/%recv-time%/' => ,
-                  '/%msg%/'       =>
+                  '/%from-user%/' => $participants[$this->data['user_id']]['alias'],
+                  '/%sent-time%/' => DelayTime::convertTimestampTimezone($this->data['sent_time'], 'UTC', $tz),
+                  '/%recv-time%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
+                  '/%msg%/'       => $msg,
             ));
     }
 
