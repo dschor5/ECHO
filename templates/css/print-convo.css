@@ -1,0 +1,68 @@
+body, html {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 0px;
+    padding: 0px;
+    background-color: #FFF;
+    height: 100%;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#canvas {
+    position: absolute;
+    background-color: #FFF;
+    color: #000;
+    height: 100%;
+    text-align: left;
+    width: 100%;
+    max-width: 1200px;
+    flex-grow: 1;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    min-width: 600px;
+}
+
+#header {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 40px;
+    box-shadow: 0px 4px 30px 0px rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+}
+
+#header-title {
+    position: absolute;
+    left: 35px;
+    font-size: 14pt;
+    height: 40px;
+    line-height: 40px;
+    font-weight: bold;
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+}
+
+.conversation td, .conversation th{
+    border: 1px solid black;
+    padding: 3px;
+}
+
+.conversation {
+    margin-bottom: 20px;
+    width: 100%;
+}

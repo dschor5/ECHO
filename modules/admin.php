@@ -646,7 +646,13 @@ class AdminModule extends DefaultModule
                 ));
         }
 
-        return $convoStr;
+        $convoStr = Main::loadTemplate('admin-data-save-main.txt', 
+            array(
+                '/%content%/' => $convoStr,
+            ));
+
+        echo $convoStr;
+        exit();
     }
 
     protected function saveConversationFiles() : array

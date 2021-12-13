@@ -1,3 +1,6 @@
-<span style="font-weight: bold;">User:</span> %username%, 
-<span style="font-weight: bold;">Alias:</span> %alias%, 
-<span style="font-weight: bold;">Base:</span> %home%<br/>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+        <td class="convo-info-value">%username%</td>
+        <td class="convo-info-value">%alias%</td>
+        <td class="convo-info-value">%home%</td>        
+    </tr>
