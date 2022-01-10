@@ -104,11 +104,11 @@ class Logger
      *
      * @param string $type Type of error. 
      * @param string $message Message to log.
-     * @param string|null $context Optional array to encode with the msg.
+     * @param array|null $context Optional array to encode with the msg.
      * @global $config 
      * @global $server
      */
-    private static function logMessage(string $type, string $message, ?string $context)
+    private static function logMessage(string $type, string $message, ?array $context)
     {
         global $config;
         global $server;

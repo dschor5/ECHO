@@ -128,6 +128,7 @@ class Conversation
 
     public function archiveConvo(ZipArchive &$zip, bool $mccPerspective) : bool
     {
+        $success = true;
         $messagesDao = MessagesDao::getInstance();
         $missionConfig = MissionConfig::getInstance();
         
@@ -153,7 +154,7 @@ class Conversation
                 ));
         }
         
-        $folderName = sprintf('%05d', $this->conversation_id).'-convo';
+        $folderName = sprintf('%05d', $this->conversation_id).'-conversation';
         $zip->addEmptyDir($folderName);
 
         $msgStr = '';
@@ -163,27 +164,40 @@ class Conversation
         {
             $msgStr = '<tr><td colspan="5">No messages</td></tr>';
         }
-        while(count($messages) > 0)
+        while(count($messages) > 0 && $success)
         {
             foreach($messages as $msg)
             {
-                $msgStr .= $msg->archiveMessage($zip, $folderName, $convoParticipants, $isCrew, $tz);
+                $msgResponse = $msg->archiveMessage($zip, $folderName, $convoParticipants, $isCrew, $tz);
+                if($msgResponse === false)
+                {
+                    $success = false;
+                    break;
+                }
+                else
+                {
+                    $msgStr .= $msgResponse;
+                }
             }
             $offset += $numMsgs;
             $messages = $messagesDao->getMessagesForConvo($this->conversation_id, $isCrew, $offset, $numMsgs);
         }
 
-        $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
-            array('/%name%/'           => $this->name,
-                    '/%id%/'           => $this->conversation_id,
-                    '/%participants%/' => $participantsStr,
-                    '/%messages%/'     => $msgStr,
-                    '/%timeref%/'      => $tz
-            ));
+        if($success)
+        {
+            $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
+                array('/%name%/'           => $this->name,
+                        '/%id%/'           => $this->conversation_id,
+                        '/%participants%/' => $participantsStr,
+                        '/%messages%/'     => $msgStr,
+                        '/%timeref%/'      => $tz
+                ));
 
-        $fileName = $folderName.'.html';
+            $fileName = $folderName.'.html';
+            $success = $zip->addFromString($fileName, $convoStr);
+        }
 
-        return $zip->addFromString($fileName, $convoStr);
+        return $success;
     }
     
 }

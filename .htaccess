@@ -15,7 +15,7 @@ RewriteRule ^chat index.php?action=chat [QSA]
 RewriteRule ^admin/(.*) index.php?action=admin&subaction=$1 [QSA]
 RewriteRule ^admin index.php?action=admin [QSA]
 RewriteRule ^preferences index.php?action=preferences [QSA]
-RewriteRule ^(file|css|js)/(.*) index.php?action=file&id=$2 [QSA]
+RewriteRule ^(file|css|js|archive)/(.*) index.php?action=file&subaction=$1&id=$2 [QSA]
 
 ErrorDocument 400 /index.php?action=error
 ErrorDocument 403 /index.php?action=error

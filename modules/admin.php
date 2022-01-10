@@ -18,7 +18,7 @@ class AdminModule extends DefaultModule
             // Data Management
             'clear'        => 'clearMissionData', 
             'backupsql'    => 'backupSqlDatabase', 
-            
+            'saveconvo'    => 'saveArchive'            
         );
 
         $this->subHtmlRequests = array(
@@ -32,7 +32,6 @@ class AdminModule extends DefaultModule
             'data'         => 'editDataManagement',
             // Default
             'default'      => 'editMissionSettings',
-            'saveconvo'    => 'saveArchive'
         );
     }
 
@@ -583,39 +582,105 @@ class AdminModule extends DefaultModule
         return array('success' => true);
     }
 
+    /**
+     * Create a backup of the MySQL database. 
+     *
+     * @return array 
+     */
     protected function backupSqlDatabase() : array 
-    {
-        return array();
-    }
-
-    protected function saveArchive(bool $mccPerspective = true) : string
     {
         global $config;
         global $server;
+        
+        $response = array(
+            'success' => false,
+        );
+
+        $sqlFilename = 'archive-'.DelayTime::convertTsForFile('now').'.sql';
+        $filePath    = $server['host_address'].$config['logs_dir'].'/'.$sqlFilename;
+
+        $command = 'mysqldump --opt -h'.$server['db_host'].
+                                  ' -u'.$server['db_user'].
+                                  ' -p'.$server['db_pass'].
+                                  ' '.$server['db_name'].
+                                  ' > '.$filePath;
+        exec($command, $output, $worked);
+
+        if($worked != 0)
+        {
+            Logger::warning('admin::backupSqlDatabase failed to create "'.$sqlFilename.'"', 
+                array('output'=>$output, 'worked'=>$worked));
+        }
+        else
+        {
+            Logger::debug('admin::backupSqlDatabase finished for "'.$sqlFilename.'"');
+            $response = array(
+                'success' => true,
+                'filename' => $sqlFilename,
+                'filesize' => FileUpload::getHumanReadableSize(filesize($filePath))
+            );
+        }
+
+        return $response;
+    }
+
+    protected function saveArchive(bool $mccPerspective = true) : array
+    {
+        global $config;
+        global $server;
+        
+        $zipFilename = 'archive-'.DelayTime::convertTsForFile('now').'.zip';
+        $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$zipFilename;
+
+        Logger::debug('admin::saveArchive started for "'.$zipFilename.'"');
+        $startTime = microtime(true);
+
+        $response = array(
+            'success' => true, 
+            'time'    => 0, 
+            'error'   => '', 
+            'file'    => $zipFilename,
+            'size'    => 0,
+        );
+
         $conversationsDao = ConversationsDao::getInstance();
         $conversations = $conversationsDao->getAllConversations();
         
-        $zipFilename = $server['host_address'].$config['logs_dir'].'/'.DelayTime::convertTsForFile('now').'.zip';
-
         $zip = new ZipArchive();
-        Logger::debug('admin::saveArchive started for "'.$zipFilename.'"');
-        if(!$zip->open($zipFilename, ZipArchive::CREATE)) 
+        if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
         {
             Logger::warning('admin::saveArchive failed to create "'.$zipFilename.'"');
-            exit();
         }      
-        
-        foreach($conversations as $convoId => $convo)
+        else
         {
-            if(!$convo->archiveConvo($zip, $mccPerspective))
+            foreach($conversations as $convoId => $convo)
             {
-                Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
+                if(!$convo->archiveConvo($zip, $mccPerspective))
+                {
+                    Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
+                    $response['success'] = false;
+                    break;
+                }
+            }
+            $zip->close();
+            $response['time'] = microtime(true) - $startTime;
+            
+
+            if($response['success'])
+            {
+                $response['size'] = FileUpload::getHumanReadableSize(filesize($zipFilepath));
+            }
+            else
+            {
+                unlink($zipFilepath);
+                $response['error'] = 'Failed to create archive. See system log for details.';
             }
         }
+        
+        Logger::debug('admin::saveArchive finished for "'.$zipFilename.
+            '" ('.$response['size'].') in '.$response['time'].' sec.');
 
-        $zip->close();
-        Logger::debug('admin::saveArchive finished for "'.$zipFilename.'"');
-        exit();
+        return $response;
     }
 }
 

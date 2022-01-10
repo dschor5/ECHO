@@ -138,7 +138,7 @@ class Message
         return $ret;
     }
 
-    public function compileTable(array &$participants, bool $crewPerspective, string $tz) : string
+    public function archiveMessage(ZipArchive &$zip, string $folder, array &$participants, bool $crewPerspective, string $tz) 
     {
         $perspective = $crewPerspective ? 'recv_time_hab' : 'recv_time_mcc';
 
@@ -146,6 +146,15 @@ class Message
         if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
         {
             $msg = $this->file->original_name.' ('.$this->file->getSize().')';
+
+            $filepath = $this->file->getServerPath();
+            $filename = $folder.'/'.sprintf('%05d', $this->message_id).'-'.$this->file->original_name;
+
+            if(!$zip->addFile($filepath, $filename))
+            {
+                Logger::warning('message::archiveMessage failed to add file '.$filepath.' as '.$filename.'.');
+                return false;
+            }
         }
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
