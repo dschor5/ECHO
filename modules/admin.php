@@ -18,8 +18,7 @@ class AdminModule extends DefaultModule
             // Data Management
             'clear'        => 'clearMissionData', 
             'backupsql'    => 'backupSqlDatabase', 
-            //'saveconvo'    => 'saveConversationText',
-            'savefiles'    => 'saveConversationFiles',
+            
         );
 
         $this->subHtmlRequests = array(
@@ -33,7 +32,7 @@ class AdminModule extends DefaultModule
             'data'         => 'editDataManagement',
             // Default
             'default'      => 'editMissionSettings',
-            'saveconvo'    => 'saveConversationText'
+            'saveconvo'    => 'saveArchive'
         );
     }
 
@@ -447,7 +446,7 @@ class AdminModule extends DefaultModule
             {
                 global $admin;
                 $fields['user_id'] = null;
-                $fields['password'] = md5($admin['default_password']);
+                $fields['password'] = User::encryptPassword($admin['default_password']);
                 $fields['is_password_reset'] = 1;
                 
                 if($usersDao->createNewUser($fields) === true)
@@ -589,75 +588,34 @@ class AdminModule extends DefaultModule
         return array();
     }
 
-    protected function saveConversationText() : string
+    protected function saveArchive(bool $mccPerspective = true) : string
     {
+        global $config;
+        global $server;
         $conversationsDao = ConversationsDao::getInstance();
-        $messagesDao = MessagesDao::getInstance();
-        $missionConfig = MissionConfig::getInstance();
-        
-        $isCrew = true;
-        $tz = $missionConfig->hab_timezone;
-
         $conversations = $conversationsDao->getAllConversations();
         
-        $mccStr = $missionConfig->mcc_planet;
-        $habStr = $missionConfig->hab_planet;
+        $zipFilename = $server['host_address'].$config['logs_dir'].'/'.DelayTime::convertTsForFile('now').'.zip';
 
-        $offset = 0;
-        $numMsgs = 20;
+        $zip = new ZipArchive();
+        Logger::debug('admin::saveArchive started for "'.$zipFilename.'"');
+        if(!$zip->open($zipFilename, ZipArchive::CREATE)) 
+        {
+            Logger::warning('admin::saveArchive failed to create "'.$zipFilename.'"');
+            exit();
+        }      
         
-        $convoStr = '';
         foreach($conversations as $convoId => $convo)
         {
-            $convoParticipants = $convo->getParticipants();
-            $participantsStr = '';
-            foreach($convoParticipants as $participant)
+            if(!$convo->archiveConvo($zip, $mccPerspective))
             {
-                $participantsStr .= Main::loadTemplate('admin-data-save-user.txt', 
-                    array('/%username%/' => $participant['username'],
-                          '/%alias%/'    => $participant['alias'],
-                          '/%home%/'     => ($participant['is_crew'] ? $habStr : $mccStr)
-                    ));
+                Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
             }
-            
-            $msgStr = '';
-            $offset = 0;
-            $messages = $messagesDao->getMessagesForConvo($convoId, $isCrew, $offset, $numMsgs);
-            if(count($messages) == 0)
-            {
-                $msgStr = '<tr><td colspan="5">No messages</td></tr>';
-            }
-            while(count($messages) > 0)
-            {
-                foreach($messages as $msg)
-                {
-                    $msgStr .= $msg->compileTable($convoParticipants, $isCrew, $tz);
-                }
-                $offset += $numMsgs;
-                $messages = $messagesDao->getMessagesForConvo($convoId, $isCrew, $offset, $numMsgs);
-            }
-
-            $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
-                array('/%name%/'         => $convo->name,
-                      '/%id%/'           => $convoId,
-                      '/%participants%/' => $participantsStr,
-                      '/%messages%/'     => $msgStr,
-                      '/%timeref%/'      => $tz
-                ));
         }
 
-        $convoStr = Main::loadTemplate('admin-data-save-main.txt', 
-            array(
-                '/%content%/' => $convoStr,
-            ));
-
-        echo $convoStr;
+        $zip->close();
+        Logger::debug('admin::saveArchive finished for "'.$zipFilename.'"');
         exit();
-    }
-
-    protected function saveConversationFiles() : array
-    {
-        return array();
     }
 }
 

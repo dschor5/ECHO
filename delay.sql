@@ -2,7 +2,7 @@ CREATE TABLE `users` (
   `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
   `alias` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
+  `password` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `session_id` varchar(60) COLLATE utf8_unicode_ci DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL,
   `is_crew` tinyint(1) NOT NULL,
@@ -86,7 +86,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('delay_config',    'string', '[{"ts":"2021-01-01 00:00:00","eq":0}]');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
-(1, 'admin', 'Admin', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
+(1, 'admin', 'Admin', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
 (1, 'Mission Chat', NULL, '2021-07-23 14:57:49', '0000-00-00 00:00:00');
@@ -97,9 +97,9 @@ INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
 /* The following values are used for testing only and should not be deployed by default. */
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
-(2, 'user1', 'Flight Director', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 0, NULL, 1, ''),
-(3, 'user2', 'Blueberry', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 1, NULL, 1, ''),
-(4, 'user3', 'Tangirine', '5ebe2294ecd0e0f08eab7690d2a6ee69', NULL, 0, 1, NULL, 1, '');
+(2, 'user1', 'Flight Director', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 0, NULL, 1, ''),
+(3, 'user2', 'Blueberry', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 1, NULL, 1, ''),
+(4, 'user3', 'Tangirine', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 1, NULL, 1, '');
 
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES

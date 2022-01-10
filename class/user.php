@@ -103,7 +103,19 @@ class User
      */
     public function isValidPassword(string $password): bool
     {
-        return (md5($password) == $this->data['password']);
+        return (User::encryptPassword($password) == $this->data['password']);
+    }
+
+    /**
+     * Encrypt a password.
+     *
+     * @param string $password
+     * @return string Encrypted password
+     */
+    public static function encryptPassword(string $password) : string
+    {
+        // Select the appropriate hash funciton for your application. 
+        return hash('sha256', $password);
     }
 
     /**

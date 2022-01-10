@@ -102,7 +102,7 @@
 
         <template id="msg-image">
             <img class="msg-image file-location" onclick="showImage(this)"><br>
-            Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
+            %download-link%
         </template>
 
         <template id="msg-audio">
@@ -111,7 +111,7 @@
                 <source class="file-location" type="video/x-matroska">
                 Your browser does not support the audio format.
             </audio><br>
-            Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
+            %download-link%
         </template>
 
         <template id="msg-video">
@@ -120,7 +120,7 @@
                 <source class="file-location" type="audio/x-matroska">
                 Your browser does not support the video format.
             </video><br>
-            Download <a href="#"><span class="filename"></span> (<span class="filesize"></span>)</a>
+            %download-link%
         </template>
     </div>
 

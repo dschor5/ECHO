@@ -152,11 +152,11 @@ class HomeModule extends DefaultModule
                 else
                 {
                     // Update user password. 
-                    $usersDao = UsersDao::getInstance();
                     if($this->user !== false)
                     {
+                        $usersDao = UsersDao::getInstance();
                         $newData = array(
-                            'password' => md5($_POST['password1']),
+                            'password' => User::encryptPassword($_POST['password1']),
                             'is_password_reset' => 0
                         );
                         $usersDao->update($newData, $this->user->user_id);

@@ -344,6 +344,22 @@ class MessagesDao extends Dao
         return $messages;
     }
 
+    public function countMessagesInConvo(int $convoId) : int
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+
+        $queryStr = 'SELECT COUNT(*) FROM messages WHERE messages.conversation_id='.$qConvoId;
+
+        $count = 0;
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            $count = intval($result->fetch_assoc());
+        }
+
+        return $count;
+    }
+
 }
 
 ?>

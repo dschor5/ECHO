@@ -1,25 +1,50 @@
-<table class="conversation" cellspacing="0" cellpadding="0">
-    <tr>
-        <th colspan="2" class="convo-info-label">Conversation:</th>
-        <td colspan="3" class="convo-info-value">%name% (id=%id%)</td>
-    </tr>
-    <tr>
-        <th colspan="2" class="convo-info-label">Participants:</th>
-        <th class="convo-info-label">User</td>
-        <th class="convo-info-label">Alias</td>
-        <th class="convo-info-label">Base</td>        
-    </tr>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>%title%</title>
+    <meta charset="UTF-8" />
+    <meta name="keywords" content="human spaceflight, analog mission, communication delay" />
+    <meta name="description" content="Emulator for Interplanetary Human Spaceflight" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="%http%%site_url%/%templates_dir%/images/favicon.ico"/>
+    <link rel="stylesheet" type="text/css" href="%http%%site_url%/css/print-convo.css" />
+</head>
+
+<body>
+<center>
+<div id="canvas">
+    <div id="container">
+
+        <table class="conversation" cellspacing="0" cellpadding="0">
+            <tr>
+                <th colspan="2" class="convo-info-label">Conversation:</th>
+                <td colspan="3" class="convo-info-value">%name% (id=%id%)</td>
+            </tr>
+            <tr>
+                <th colspan="2" class="convo-info-label">Participants:</th>
+                <th class="convo-info-label">User</td>
+                <th class="convo-info-label">Alias</td>
+                <th class="convo-info-label">Base</td>        
+            </tr>
 %participants%    
-    <tr>
-        <th colspan="2" class="convo-info-label">Time Reference:</th>
-        <td colspan="3" class="convo-info-value">%timeref%</td>
-    </tr>
-    <tr>
-        <th width="5%">Id</th>
-        <th width="15%">From</th>
-        <th width="15%">Sent timestamp</th>
-        <th width="15%">Recv timestamp</th>
-        <th width="50%">Message</th>
-    </tr>
+            <tr>
+                <th colspan="2" class="convo-info-label">Time Reference:</th>
+                <td colspan="3" class="convo-info-value">%timeref%</td>
+            </tr>
+            <tr>
+                <th width="5%">Id</th>
+                <th width="15%">From</th>
+                <th width="15%">Sent timestamp</th>
+                <th width="15%">Recv timestamp</th>
+                <th width="50%">Message</th>
+            </tr>
 %messages%
-</table>
+        </table>
+
+    </div>
+</div>
+</center>
+
+</body>
+</html>

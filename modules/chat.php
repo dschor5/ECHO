@@ -255,15 +255,17 @@ class ChatModule extends DefaultModule
         // TODO: Can we support more multimedia types?
         elseif($fileType == Message::VIDEO)
         {
-            $fileName = $this->user->username.'_'.date('YmdHis').'.'.$fileExt;
             $fileExt  = 'mkv';
             $fileMime = 'video/webm';
+            $dt = new DateTime('NOW');
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
         }
         elseif($fileType == Message::AUDIO)
         {
-            $fileName = $this->user->username.'_'.date('YmdHis').'.'.$fileExt;
             $fileExt  = 'mkv';
             $fileMime = 'audio/webm';
+            $dt = new DateTime('NOW');
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
         }
         
         // Get the file size regardless of the type. 
@@ -677,6 +679,8 @@ class ChatModule extends DefaultModule
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
                   '/%max_upload_size%/'    => FileUpload::getHumanReadableSize(FileUpload::getMaxUploadSize()),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
+                  '/%download-link%/'      => Main::loadTemplate('download-link.txt', 
+                                              array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),
                 ));
     }
 
