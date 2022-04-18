@@ -2,6 +2,7 @@
             <td>%id%</td>
             <td>%from-user%</td>
             <td>%sent-time%</td>
-            <td>%recv-time%</td>
+            <td>%recv-time-mcc%</td>
+            <td>%recv-time-hab%</td>
             <td>%msg%</td>
         </tr>

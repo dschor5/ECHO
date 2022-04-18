@@ -1,0 +1,23 @@
+- Earth local time 
+- mkv as open standard
+- Archive of missions
+- Cleanup for new mission
+- Backup?
+    - Check with John and Derik
+- Safari for iPad
+    - Could we select a different video/audio standard?
+- Search feeature?
+
+- First week in October
+- 2-3 times per user
+- Subjective opinions of the crew
+- Specific quesitons to rate subjectively or on scale
+
+- 1 hour of inactivity
+- Max file size with UND server
+
+ffmpeg -i video-mkv.mkv -r 32 video.mp4
+--> Selects frame rate for conversion
+
+https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+--> How to set constraints for initial video capture

@@ -19,24 +19,29 @@
         <table class="conversation" cellspacing="0" cellpadding="0">
             <tr>
                 <th colspan="2" class="convo-info-label">Conversation:</th>
-                <td colspan="3" class="convo-info-value">%name% (id=%id%)</td>
+                <td colspan="4" class="convo-info-value">%name% (id=%id%)</td>
             </tr>
             <tr>
                 <th colspan="2" class="convo-info-label">Participants:</th>
                 <th class="convo-info-label">User</td>
                 <th class="convo-info-label">Alias</td>
-                <th class="convo-info-label">Base</td>        
+                <th class="convo-info-label" colspan="2">Base</td>        
             </tr>
 %participants%    
             <tr>
-                <th colspan="2" class="convo-info-label">Time Reference:</th>
-                <td colspan="3" class="convo-info-value">%timeref%</td>
+                <th colspan="2" class="convo-info-label">MCC Time Reference:</th>
+                <td colspan="4" class="convo-info-value">%timeref-mcc%</td>
             </tr>
             <tr>
-                <th width="5%">Id</th>
-                <th width="15%">From</th>
-                <th width="15%">Sent timestamp</th>
-                <th width="15%">Recv timestamp</th>
+                <th colspan="2" class="convo-info-label">HAB Time Reference:</th>
+                <td colspan="4" class="convo-info-value">%timeref-hab%</td>
+            </tr>
+            <tr>
+                <th width="6%">Id</th>
+                <th width="11%">From</th>
+                <th width="11%">Sent timestamp (author)</th>
+                <th width="11%">Recv timestamp (MCC)</th>
+                <th width="11%">Recv timestamp (HAB)</th>
                 <th width="50%">Message</th>
             </tr>
 %messages%

@@ -1,0 +1,22 @@
+https://code.tutsplus.com/tutorials/how-to-use-sessions-and-session-variables-in-php--cms-31839
+
+https://stackoverflow.com/questions/520237/how-do-i-expire-a-php-session-after-30-minutes
+
+
+DELETE FROM messages;
+ALTER TABLE tablename AUTO_INCREMENT = 1
+DELETE FROM users WHERE ??? -> all but user_id=1
+DELETE FROM conversations WHERE ??? -> all but conversation_id=1
+
+
+DELETE FROM messages;
+ALTER TABLE messages AUTO_INCREMENT = 1;
+DELETE FROM users WHERE user_id > 1;
+DELETE FROM conversations WHERE conversation_id > 1;
+UPDATE conversations SET X WHERE conversation_id=1; ????
+UPDATE mission_config to DEFAULTS?????
+Delete all files. 
+
+
+
+TRUNCATE wont work for InnoDB folders. 

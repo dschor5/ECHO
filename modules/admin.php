@@ -624,7 +624,7 @@ class AdminModule extends DefaultModule
         return $response;
     }
 
-    protected function saveArchive(bool $mccPerspective = true) : array
+    protected function saveArchive() : array
     {
         global $config;
         global $server;
@@ -655,7 +655,7 @@ class AdminModule extends DefaultModule
         {
             foreach($conversations as $convoId => $convo)
             {
-                if(!$convo->archiveConvo($zip, $mccPerspective))
+                if(!$convo->archiveConvo($zip))
                 {
                     Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
                     $response['success'] = false;
