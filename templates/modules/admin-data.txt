@@ -6,32 +6,46 @@
     <div id="form-contents">
         <div class="subheading">Save Conversations</div>
         <div class="form-row">
-            <label for="name">Conversations</label>
+            <label for="name">Archive Timezone</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="downloadConvos()">Save Log of All Conversations</button>
+                <select name="archive_timezone" id="archive_timezone">
+                    %timezones%
+                </select>
             </div>
             <div class="form-help">
-                Opens a new window with a transcript of all conversations with timestamps 
-                that can be downloaded, printed, or otherwise saved for post-mission analysis. 
-            </div>
-        </div>
-        <div class="form-row">
-            <label for="name">Attachments</label>
-            <div class="form-field">
-                <button type="button" class="form-button" onclick="downloadFiles()">Save TAR File of All Attachments</button>
-            </div>
-            <div class="form-help">
-                Creates a TAR file to download a copy of all audio, video, and other attachments sent in each conversation.
-                Please be patient as this operation may take a few minutes if there is a large number of files.
+                Select the timezone to use for all messages
             </div>
         </div>
 
+        <div class="form-row">
+            <label for="name">Conversations</label>
+            <div class="form-field">
+                <button type="button" class="form-button" onclick="downloadConvos()">Create Archive</button>
+                <div id="archive_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating archive...</div>
+                <div id="archive_download"></div>
+            </div>
+            <div class="form-help">
+                Create a zip file containing a copy of all conversations and attachments. When downloading, select 
+                whether to show the receive time from the perspective of Mission Control or the Habitat. 
+                <br/>
+                File structure:
+                <div>&nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> archive-YYYY-MM-DDTHH-MM-SS.zip</div>
+                <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-conversation</div>
+                <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment1.jpg</div>
+                <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment2.pdf</div>
+                <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-conversation.html</div>
+                Where CCCCC and MMMMM refer to the unique conversation and message ids respectively.
+            </div>
+        </div>
+        
         <div class="form-divider"></div>
         <div class="subheading">Backup Database</div>
         <div class="form-row">
             <label for="name">SQL Backup</label>
             <div class="form-field">
                 <button type="button" class="form-button" onclick="downloadSql()">Download SQL Backup</button>
+                <div id="sql_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating SQL backup...</div>
+                <div id="sql_download"></div>
             </div>
             <div class="form-help">
                 Download a copy of the MySQL data for backup purposes. Note that the filename and all timestamps therein are in the UTC timezone.

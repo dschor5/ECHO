@@ -161,7 +161,8 @@ class Message
             array('/%id%/'        => $this->data['message_id'],
                   '/%from-user%/' => $participants[$this->data['user_id']]['alias'],
                   '/%sent-time%/' => DelayTime::convertTimestampTimezone($this->data['sent_time'], 'UTC', $tz),
-                  '/%recv-time%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
+                  '/%recv-time-mcc%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
+                  '/%recv-time-hab%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
                   '/%msg%/'       => $msg,
             ));
     }

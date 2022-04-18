@@ -1,0 +1,142 @@
+Submarine operations
+
+How engaging it is. That will riase the stakes for the delay. 
+- Want people to be invested, so more anxiety in the impact of delays. 
+
+Party gamdes
+- Keep talking and nobody explodes
+    - One side has an instruction manual
+    - The other has to tell teh team how to disarm it. 
+    - Each team has half of the problem to solve
+    - Lots of waiting...
+- Wordle
+    - Ground and analog - come up with lists and collaborate?
+- Timer adds element of pressure
+    - 
+
+- Cognitive bias - have 
+
+CODE
+- Why did Greg's picture not show up?
+- Rename admin
+- Have a reply on a particular message?
+    - Nest messages (like WhatsApp)
+- Quality of life - send a message. Progress bar on response? Awknowledgement of message being read?
+- Why didn't Brawerman's message not show up initially?
+
+- Reciprocal tasks (each end facilitates something). 
+- What are the stakes?
+- Types of games?
+    - Role playing games?
+      - Eg. Ground control is a GM, players are astronauts. 
+      - Eg., Matrix games (https://www.matrixgames.com/forums/viewforum.php?f=10441)
+      - Benefit:
+        - Less formalize structure. 
+- Robot rally
+    - Still a turn based game. 
+    - Teams are somewhat independent, but all teh action happens at the same time
+    - Similar to COAL Express
+    - https://boardgamegeek.com/boardgame/18/roborally 
+- Sherlock Holmes 
+    - Cooperative game 
+    - https://coopboardgames.com/cooperative-board-game-reviews/sherlock-holmes-consulting-detective-review
+- Party game - murder mystery
+    - Free form, can use any medium
+    - 
+
+- https://www.reddit.com/r/tabletopgamedesign/comments/4gkpcd/delayed_turn_mechanic_help/
+
+- Two rooms in a boom
+  - One person is a bomber and one is something else. 
+  - Have a room structure already (virtually and physically)
+  - Can switch chat rooms?
+
+
+- Lots of small games happening in parallel
+  - Tic-tac-toe, battleship, hangman, etc... many parallel games
+  - Adds cognitive loading
+  - 
+- Codenames
+  - Exchange info
+  - Needs coordination between two sides
+
+- Trivial persuit
+  - 
+
+- Dungeons and Dragons
+  - Free form
+
+- Party games
+  - Playdoh, trivia, sketch
+  - Telestrations
+    - Keep mechanics (complete next drawing in 30 sec)
+  - Put a plastic applyance in your mouth that stretches your mouth and other person has to guess what you said. 
+- Just give them games and fiugre out how to play that over a delay
+  - They have ot figure out how to do this over the tool and write a procedure
+  - How well was completing this task over this medium?
+  - At the end of it, they have to write instructions on how to play over the tool
+    - At teh end, you cna compare/contrast/critique instructions of how to play the game over a delay
+  - Common ice breaker games?
+  - How to solve a puzzle over the tool?
+
+- Story Cubes
+  - Roll combinations of dice to get idea to write a story
+  - Free flowing, no time limit, no turn order
+  - 
+
+
+- Two parallel games
+  - One game within the analog
+  - One game over delay
+
+- Save state of a video game and send it for them to continue playing
+
+- Figure out how to play a selection of board games and write a report
+- Write a creative story
+  - Both have content that has to flow back and forth
+  - Can compare between groups
+  - Create a story in text
+  - Recreate a radio skit from teh 1930s
+  - Reenact your favourite episode of the simpsons
+  - Make a game about space exploration
+  - How to prioritize these X things 
+    - Argue and agree on teh list
+    - Argue about hows and whys
+  - Sketch and create a video?
+  - Debate a topic (Debaters Radio Show)
+  - Give them a really long task list to see how far they get
+  - Content moderators for a couple of days
+    - Give them lots of crap to say if it is valid/fake/etc
+  - Ikea furniture
+  - Make a music video about your mission
+    - Audio, picture, some text/discussion
+  - Make a mission patch
+    - Have to agree, share drawings, etc. 
+  - Make a terrible children's book
+    - P is for terodactile
+  - Scavengerhunt
+    - Find something within the analog
+      - Personal item, smaller than a grapefruit that is blue. 
+      - Whoever timestamps it first wins that challenge
+      - Collect as many as you can for a given category
+  - Regular checkins every X minutes or finish a step (whatever is faster)
+
+- Give them 3-5 questions for them to write a report
+
+- Lego
+  - Built on one side
+  - Not built on the other
+  - Figure out how to replicate it
+
+- Ideas:
+  - Creative process
+  - Some sort of problem solving
+  
+
+- Measures of performance
+  - Surveys
+  - If it builds a product then you need something else
+    - Evaluated by someone else
+  - Correlation between lag and pinging servers
+    - Demand for throughput vs actual throughput
+  - 

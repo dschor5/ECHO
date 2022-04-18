@@ -126,15 +126,13 @@ class Conversation
         return $participants;
     }
 
-    public function archiveConvo(ZipArchive &$zip, bool $mccPerspective) : bool
+    public function archiveConvo(ZipArchive &$zip) : bool
     {
         $success = true;
         $messagesDao = MessagesDao::getInstance();
         $missionConfig = MissionConfig::getInstance();
         
         $isCrew = true;
-        $tz = $mccPerspective ? $missionConfig->mcc_timezone : $missionConfig->hab_timezone;
-
         
         $mccStr = $missionConfig->mcc_planet;
         $habStr = $missionConfig->hab_planet;
@@ -190,7 +188,8 @@ class Conversation
                         '/%id%/'           => $this->conversation_id,
                         '/%participants%/' => $participantsStr,
                         '/%messages%/'     => $msgStr,
-                        '/%timeref%/'      => $tz
+                        '/%timeref-mcc%/'  => $missionConfig->mcc_timezone,
+                        '/%timeref-hab%/'  => $missionConfig->hab_timezone
                 ));
 
             $fileName = $folderName.'.html';
