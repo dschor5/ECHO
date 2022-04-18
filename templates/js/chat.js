@@ -457,6 +457,8 @@ function loadPrevMsgs() {
     var child = target.querySelector('.msg');
     var msgId = (child == null) ? -1 : child.getAttribute('id').substring(7);
 
+    console.log(msgId);
+
     if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
         $.ajax({

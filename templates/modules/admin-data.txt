@@ -8,7 +8,7 @@
         <div class="form-row">
             <label for="name">Conversations</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="downloadSql()">Save Log of All Conversations</button>
+                <button type="button" class="form-button" onclick="downloadConvos()">Save Log of All Conversations</button>
             </div>
             <div class="form-help">
                 Opens a new window with a transcript of all conversations with timestamps 
@@ -34,7 +34,7 @@
                 <button type="button" class="form-button" onclick="downloadSql()">Download SQL Backup</button>
             </div>
             <div class="form-help">
-                Download a copy of the MySQL data for backup purposes.
+                Download a copy of the MySQL data for backup purposes. Note that the filename and all timestamps therein are in the UTC timezone.
             </div>
         </div>
 
@@ -44,7 +44,7 @@
         <div class="form-row">
             <label for="name">Dalete All Data</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="clearData()">Delete All Data</button>
+                <button type="button" class="form-button" onclick="confirmDelete()">Delete All Data</button>
             </div>
             <div class="form-help">
                 Clear all messages (text, audio, video, and files) and delete non-admin user 

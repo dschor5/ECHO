@@ -2,8 +2,18 @@
 
 class MessagesDao extends Dao
 {
+    /**
+     * Singleton instance for MessageDao object.
+     * @access private
+     * @var ConversationsDao
+     **/
     private static $instance = null;
 
+    /**
+     * Returns singleton instance of this object. 
+     * 
+     * @return Delay object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -13,11 +23,21 @@ class MessagesDao extends Dao
         return self::$instance;
     }
 
+    /**
+     * Private constructor to prevent multiple instances of this object.
+     **/
     protected function __construct()
     {
-        parent::__construct('messages');
+        parent::__construct('messages', 'message_id');
     }
 
+    /**
+     * Write new message to the database. 
+     *
+     * @param array $msgData Associative array with message fields. 
+     * @param array $fileData Associative array with file attachment fields.
+     * @return int|bool New message id on success. False otherwise. 
+     **/
     public function sendMessage(array $msgData, array $fileData=array())
     {
         $messageStatusDao = MessageStatusDao::getInstance();
@@ -25,7 +45,8 @@ class MessagesDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
 
-        $this->database->enableQueryException();
+        
+        $this->database->queryExceptionEnabled(true);
         try 
         {
             $this->startTransaction();
@@ -64,7 +85,7 @@ class MessagesDao extends Dao
             $this->endTransaction(false);
             Logger::warning('messagesDao::sendMessage failed.', $e);
         }
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return $messageId;
     }
@@ -175,7 +196,7 @@ class MessagesDao extends Dao
         return $numMsgs;
     }
 
-    public function getMessagesReceived(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
+    public function getOldMessages(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
@@ -199,7 +220,7 @@ class MessagesDao extends Dao
         
         $messages = array();
 
-        $this->database->enableQueryException();
+        $this->database->queryExceptionEnabled(true);
         try
         {
             $this->startTransaction();
@@ -230,9 +251,9 @@ class MessagesDao extends Dao
         catch (Exception $e) 
         {
             $this->endTransaction(false);
-            Logger::warning('messagesDao::getMessagesReceived failed.', $e);
+            Logger::warning('messagesDao::getOldMessages failed.', $e);
         }
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return array_reverse($messages, true);
     }
@@ -292,6 +313,51 @@ class MessagesDao extends Dao
             )
         );
         $this->endTransaction();
+    }
+
+    public function getMessagesForConvo(int $convoId, bool $isCrew, int $offset, int $numMsgs) : array
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        
+        $queryStr = 'SELECT messages.*, '. 
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                    'FROM messages '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'WHERE messages.conversation_id='.$qConvoId.' '.
+                    'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
+                    'LIMIT '.$offset.', '.$numMsgs;
+        
+        $messages = array();
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                while(($rowData=$result->fetch_assoc()) != null)
+                {
+                    $messages[$rowData['message_id']] = new Message($rowData);
+                }
+            }
+        }
+     
+        return $messages;
+    }
+
+    public function countMessagesInConvo(int $convoId) : int
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+
+        $queryStr = 'SELECT COUNT(*) FROM messages WHERE messages.conversation_id='.$qConvoId;
+
+        $count = 0;
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            $count = intval($result->fetch_assoc());
+        }
+
+        return $count;
     }
 
 }

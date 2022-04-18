@@ -1,26 +1,73 @@
 <?php
 
+/**
+ * Abstract class to define an applicaiton module defining 
+ * a specific group of user interactions. 
+ * 
+ * 
+ */
 abstract class DefaultModule implements Module
 {
-    protected $db;        // reference to database
+    /**
+     * Referenced to logged in user. 
+     * @access protected
+     * @var User
+     */
     protected $user;
 
+    /**
+     * Associative array linking valid asynchronous javascript requests
+     * to their respective function handlers. 
+     * Example: array(ajaxRequest => functionName)
+     * @access protected
+     * @var array
+     */
     protected $subJsonRequests;
+
+    /**
+     * Associative array linking valid asynchronous javascript requests
+     * to their respective function handlers. 
+     * Example: array(htmlRequest => functionName)
+     * @access protected
+     * @var array
+     */
     protected $subHtmlRequests;
+
+    /**
+     * Associative array linking valid event stream requests to their
+     * respective function handlers. 
+     * Example: array(streamRequest => functionName)
+     * @access protected
+     * @var array
+     */
     protected $subStreamRequests;
 
+    /**
+     * Array of CSS and JS files to load with the current HTML page. 
+     * @access protected
+     * @var array
+     */
     private $templateFiles;
 
+    /**
+     * Default module constructor. 
+     */
     public function __construct(&$user)
     {
         $this->user = &$user;
-        $this->db = Database::getInstance();
         $this->templateFiles = array();
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array();
         $this->subStreamRequests = array();
     }
 
+    /**
+     * Add css or javascript templates to load with this module. 
+     * Subsequent functions will use the extension to load the 
+     * corresponding template. 
+     *
+     * @param string ...$newFile One or more filenames. 
+     */
     protected function addTemplates(string ...$newFile)
     {
         foreach($newFile as $f)
@@ -29,9 +76,14 @@ abstract class DefaultModule implements Module
         }
     }
 
+    /**
+     * Get all the css and javascript files to load with the current page. 
+     *
+     * @return string HTML function calls to load css and javascript files. 
+     */
     private function getTemplates(): string
     {
-        // Add default templates
+        // Add default templates used by all modules. 
         $defaults = array(
             ($this->user != null && $this->user->is_crew) ? 'chat-hab.css' : 'chat-mcc.css',
             'common.css',
@@ -42,8 +94,10 @@ abstract class DefaultModule implements Module
             'jquery-ui.min.js',
         );
 
+        // Merge the default and custom lists together. 
         $this->templateFiles = array_merge($defaults, $this->templateFiles);
 
+        // Apply the corresponding template depending on the file extension. 
         $content = '';
         foreach($this->templateFiles as $file)
         {
@@ -54,66 +108,62 @@ abstract class DefaultModule implements Module
         return $content;
     }
 
+    /**
+     * Compile HTML for application top menu that contains the name of the 
+     * mission, name of logged in user, and menu of options for the user. 
+     * 
+     * @return string HTML for top menu bar. 
+     */
     public function getHeader(): string
     {
-        $userLocation = '';
-        $username = '';
-        $alias = '';
-        $links = '';
+        // Default info for current user: 
+        $userPlanet = ''; 
+        $userName     = ''; 
+        $userAlias        = ''; 
+
+        // Associative array for each navigation link. 
+        // - Links to appear in the order in which they are added to the array.
+        // - Each link contains:
+        //      - url  - Relative path from $server['site_url']
+        //      - name - Name to display for each link
+        //      - icon - Name of jquery icon used
         $navLinks = array();
 
         if($this->user != null)
         {
-            $userLocation = $this->user->getLocation();
-            $alias        = $this->user->alias;
-            $username     = $this->user->username;
+            // Assign info for logged in user
+            $userPlanet = $this->user->getLocation();
+            $userAlias  = $this->user->alias;
+            $userName   = $this->user->username;
 
-            $navLinks[] = array(
-                'url'  => 'chat',
-                'name' => 'Chat',
-                'icon' => 'home'
-                );
-            /*$navLinks[] = array(
-                'url'  => 'preferences',
-                'name' => 'Preferences',
-                'icon' => 'pencil'
-                );
-            */
+            // Default links for all users. 
+            $navLinks[] = array('url' => 'chat',        'name' => 'Chat',        'icon' => 'home');
+            $navLinks[] = array('url' => 'preferences', 'name' => 'Preferences', 'icon' => 'pencil');
+            
+            // Links for admin users only
             if($this->user->is_admin)
             {
-                $navLinks[] = array(
-                    'url'  => 'admin/users', 
-                    'name' => 'User Accounts', 
-                    'icon' => 'person');
-                $navLinks[] = array(
-                    'url'  => 'admin/mission', 
-                    'name' => 'Mission Settings',
-                    'icon' => 'gear');
-                $navLinks[] = array(
-                    'url'  => 'admin/delay', 
-                    'name' => 'Delay Settings',
-                    'icon' => 'clock');
-                $navLinks[] = array(
-                    'url'  => 'admin/data',
-                    'name' => 'Data Management',
-                    'icon' => 'document');
+                $navLinks[] = array('url' => 'admin/users',   'name' => 'User Accounts',    'icon' => 'person');
+                $navLinks[] = array('url' => 'admin/mission', 'name' => 'Mission Settings', 'icon' => 'gear');
+                $navLinks[] = array('url' => 'admin/delay',   'name' => 'Delay Settings',   'icon' => 'clock');
+                $navLinks[] = array('url' => 'admin/data',    'name' => 'Data Management',  'icon' => 'document');
             }
 
-            $navLinks[] = array(
-                'url'  => 'logout',
-                'name' => 'Logout',
-                'icon' => 'power'
-                );
+            // Add logout option for all users
+            $navLinks[] = array('url' => 'logout', 'name' => 'Logout', 'icon' => 'power');
 
-            $action = $_GET['action'] ?? '';
+            // Build url for current path. 
+            $action    = $_GET['action'] ?? '';
             $subaction = $_GET['subaction'] ?? '';
-            $currUrl = $action.(strlen($subaction) > 0 ? '/'.$subaction : '');
+            $currUrl   = $action.(strlen($subaction) > 0 ? '/'.$subaction : '');
 
+            // Build every link. Skip if it mathes the current path. 
+            $htmlLinks = '';
             foreach($navLinks as $link)
             {
                 if($currUrl != $link['url'])
                 {
-                    $links .= Main::loadTemplate('nav-link.txt', array(
+                    $htmlLinks .= Main::loadTemplate('nav-link.txt', array(
                         '/%url%/'  => $link['url'],
                         '/%name%/' => $link['name'],
                         '/%icon%/' => $link['icon']
@@ -123,10 +173,10 @@ abstract class DefaultModule implements Module
         }
 
         return Main::loadTemplate('header.txt', array(
-            '/%links%/'         => $links,
-            '/%user_location%/' => $userLocation,
-            '/%alias%/'         => $alias,
-            '/%username%/'      => $username,
+            '/%links%/'         => $htmlLinks,
+            '/%user_location%/' => $userPlanet,
+            '/%alias%/'         => $userAlias,
+            '/%username%/'      => $userName,
         ));
     }
 
@@ -146,8 +196,6 @@ abstract class DefaultModule implements Module
         {
             $subaction = $_GET['subaction'];
         }
-        
-        Logger::error($subaction);
 
         // Only allow requests from this server. 
         header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
@@ -156,11 +204,6 @@ abstract class DefaultModule implements Module
         {
             header('Content-Type: application/json');
             $response = $this->compileJson($subaction);
-            if($config['debug'])
-            {
-                $db = Database::getInstance();
-                $response['debug'] = $db->getErr();
-            }
             echo json_encode($response);
         }
         elseif(array_key_exists($subaction, $this->subStreamRequests))
@@ -248,6 +291,31 @@ abstract class DefaultModule implements Module
     public function compileStream()
     {
         return;
+    }
+
+    /**
+     * Send Event from the server. 
+     *
+     * @param string|null $name Name of event. If null, assume it is a keep alive message.
+     * @param array|null $data  Data to send with the event. 
+     * @param integer|null $id Unique id given to the event (or null if not applicable).
+     * @return integer
+     */
+    protected function sendEventStream(?string $name, ?array $data = null, int $id = null)
+    {
+        if($name == null)
+        {
+            echo ':'.PHP_EOL.PHP_EOL;
+        }
+        else
+        {
+            echo 'event: '.$name.PHP_EOL;
+            if($id != null) 
+            {
+                echo 'id: '.$id.PHP_EOL;
+            }
+            echo 'data: '.json_encode($data).PHP_EOL.PHP_EOL;
+        }
     }
 }
 

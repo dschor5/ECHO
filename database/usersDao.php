@@ -1,15 +1,30 @@
 <?php
 
-require_once("database/dao.php");
-require_once("class/user.php");
-require_once("database/result.php");
-
 class UsersDao extends Dao
 {
+    /**
+     * Singleton instance for UsersDao object.
+     * @access private
+     * @var ConversationsDao
+     **/
     private static $instance = null;
+
+    /**
+     * Cache users retrieved from database into an associative array 
+     * arranged by user id. 
+     * @access private
+     * @var array 
+     **/
     private static $cache = array();
+
+
     private static $cacheFull = false;
 
+    /**
+     * Returns singleton instance of this object. 
+     * 
+     * @return Delay object
+     */
     public static function getInstance()
     {
         if(self::$instance == null)
@@ -19,15 +34,14 @@ class UsersDao extends Dao
         return self::$instance;
     }
 
+    /**
+     * Private constructor to prevent multiple instances of this object.
+     **/
     protected function __construct()
     {
         parent::__construct('users', 'user_id');
     }
 
-    public function getByIds(array $ids) : array
-    {
-        // Build 
-    }
 
     public function getById(int $id)
     {
@@ -123,7 +137,7 @@ class UsersDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $messagesDao = MessagesDao::getInstance();
         
-        $this->database->enableQueryException();
+        $this->database->queryExceptionEnabled(true);
 
         try
         {
@@ -173,13 +187,13 @@ class UsersDao extends Dao
             $this->endTransaction(true);
             $result = true;
         }
-        catch(DatabaseException $e)
+        catch(Exception $e)
         {
             $this->endTransaction(false);
             Logger::warning('usersDao::createNewUser', $e);
         }
 
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return $result;
     }    
@@ -190,7 +204,7 @@ class UsersDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
 
-        $this->database->enableQueryException();
+        $this->database->queryExceptionEnabled(true);
         try 
         {
             $this->startTransaction();
@@ -209,7 +223,7 @@ class UsersDao extends Dao
             $this->endTransaction(false);
             Logger::warning('usersDao::deleteUser', $e);
         }
-        $this->database->disableQueryException();
+        $this->database->queryExceptionEnabled(false);
 
         return $result;
     }

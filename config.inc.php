@@ -70,11 +70,9 @@ $config['db_tables'] = array(
 // include some files that we need to run.
 require_once('database/database.php');
 require_once('database/dao.php');
-require_once('database/result.php');
 require_once('modules/interface.php');
 require_once('modules/default.php');
 require_once('modules/error.php');
-require_once('database/databaseException.php');
 
 // Include classes
 require_once('class/log.php');

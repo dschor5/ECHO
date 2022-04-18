@@ -1,14 +1,43 @@
-function deleteOrResetUser() {
+function downloadConvos() {
     $.ajax({
-        url: BASE_URL + '/users',
+        url: BASE_URL + '/admin',
         type: 'POST',
         data: {
-            subaction: $('#confirm-subaction').val(),        
-            user_id: $('#confirm-user-id').val(),        
+            subaction: 'saveconvo',
         },
         dataType: 'json',
-        success: function() {
-            location.href = BASE_URL + '/users';
+        success: function(data) {
+            if(data.success != true) {
+                $('div.dialog-response').text(data.error);
+                $('div.dialog-response').show();
+            }
+            else {
+                location.href = BASE_URL + '/admin/data';
+            }
+        }
+    });    
+}
+
+function confirmDelete() {
+    $('#dialog-confirm').dialog('open');
+}
+
+function clearData() {
+    $.ajax({
+        url: BASE_URL + '/admin',
+        type: 'POST',
+        data: {
+            subaction: 'clear',
+        },
+        dataType: 'json',
+        success: function(data) {
+            if(data.success != true) {
+                $('div.dialog-response').text(data.error);
+                $('div.dialog-response').show();
+            }
+            else {
+                location.href = BASE_URL + '/admin/data';
+            }
         }
     });
 }

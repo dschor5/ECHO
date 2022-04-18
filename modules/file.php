@@ -3,31 +3,36 @@
 class FileModule implements Module
 {
     private $user;
-    private $db;
 
     public function __construct(&$user)
     {
         $this->user = &$user;
-        $this->db = Database::getInstance();
     }
 
     public function compile() : string
     {
+        $subaction = $_GET['subaction'] ?? '';
         $id = $_GET['id'] ?? '';
         
         if(intval($id) > 0)
         {
             $this->getFileUpload($id);
         }
-        else 
+        else if($subaction == 'archive')
         {
+            // Download archive file
+            $this->downloadArchive($id);
+        }
+        else
+        {
+            // Parse JS or CSS file
             $this->parseFile($id);
         }
 
         exit();
     }
 
-    private function getFileUpload($fileId)
+    private function getFileUpload(int $fileId)
     {
         $file = false;
 
@@ -67,7 +72,7 @@ class FileModule implements Module
         readfile($filepath);
     }
 
-    private function parseFile($filename)
+    private function parseFile(string $filename)
     {
         global $config;
 
@@ -95,6 +100,26 @@ class FileModule implements Module
         }
 
         echo Main::loadTemplate($filepath, array(), '');
+    }
+
+    private function downloadArchive(string $filename)
+    {
+        global $config;
+        global $server;
+
+        $filepath = $server['host_address'].$config['logs_dir'].'/'.$filename;
+        $filesize = filesize($filepath);
+
+        if(!file_exists($filepath))
+        {
+            header("HTTP/1.1 404 Not Found");
+            exit();
+        }
+
+        header('Content-Disposition: attachment; filename='.basename($filename));
+        header('Content-Length: ' . $filesize);
+        header("Content-Type: ".mime_content_type($filepath));
+        readfile($filepath);
     }
 }
 

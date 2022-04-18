@@ -18,8 +18,7 @@ class AdminModule extends DefaultModule
             // Data Management
             'clear'        => 'clearMissionData', 
             'backupsql'    => 'backupSqlDatabase', 
-            'saveconvo'    => 'saveConversationText',
-            'savefiles'    => 'saveConversationFiles',
+            'saveconvo'    => 'saveArchive'            
         );
 
         $this->subHtmlRequests = array(
@@ -32,7 +31,7 @@ class AdminModule extends DefaultModule
             // Data Management
             'data'         => 'editDataManagement',
             // Default
-            'default'      => 'editMissionSettings'
+            'default'      => 'editMissionSettings',
         );
     }
 
@@ -372,7 +371,7 @@ class AdminModule extends DefaultModule
 
         if($user_id > 0 && $user_id != $this->user->user_id)
         {
-            if($usersDao->update(array('password_reset'=>1), $user_id) !== true)
+            if($usersDao->update(array('is_password_reset'=>1), $user_id) !== true)
             {
                 $response['error'] = 'Failed to reset user password (user_id='.$user_id.').';
             } 
@@ -446,8 +445,8 @@ class AdminModule extends DefaultModule
             {
                 global $admin;
                 $fields['user_id'] = null;
-                $fields['password'] = md5($admin['default_password']);
-                $fields['password_reset'] = 1;
+                $fields['password'] = User::encryptPassword($admin['default_password']);
+                $fields['is_password_reset'] = 1;
                 
                 if($usersDao->createNewUser($fields) === true)
                 {
@@ -559,7 +558,7 @@ class AdminModule extends DefaultModule
 
     protected function editDataManagement() : string 
     {
-        $this->addTemplates('settings.css', 'data.js');
+        $this->addTemplates('settings.css', 'data-management.js');
         return Main::loadTemplate('admin-data.txt');
     }
 
@@ -569,35 +568,119 @@ class AdminModule extends DefaultModule
         global $config;
         global $server;
 
-        $r = array();
-
         $messagesDao = MessagesDao::getInstance();
-        //$messagesDao->clearMessages();
+        $messagesDao->clearMessages();
         $files = scandir($server['host_address'].$config['uploads_dir']);
         foreach($files as $f)
         {
-            if($f != '.' && $f != '..')
+            if($f != '.' && $f != '..' && $f != 'dummy.txt')
             {
-                $r[] = $f;
+                unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
         }
 
-        return $r;
+        return array('success' => true);
     }
 
+    /**
+     * Create a backup of the MySQL database. 
+     *
+     * @return array 
+     */
     protected function backupSqlDatabase() : array 
     {
-        return array();
+        global $config;
+        global $server;
+        
+        $response = array(
+            'success' => false,
+        );
+
+        $sqlFilename = 'archive-'.DelayTime::convertTsForFile('now').'.sql';
+        $filePath    = $server['host_address'].$config['logs_dir'].'/'.$sqlFilename;
+
+        $command = 'mysqldump --opt -h'.$server['db_host'].
+                                  ' -u'.$server['db_user'].
+                                  ' -p'.$server['db_pass'].
+                                  ' '.$server['db_name'].
+                                  ' > '.$filePath;
+        exec($command, $output, $worked);
+
+        if($worked != 0)
+        {
+            Logger::warning('admin::backupSqlDatabase failed to create "'.$sqlFilename.'"', 
+                array('output'=>$output, 'worked'=>$worked));
+        }
+        else
+        {
+            Logger::debug('admin::backupSqlDatabase finished for "'.$sqlFilename.'"');
+            $response = array(
+                'success' => true,
+                'filename' => $sqlFilename,
+                'filesize' => FileUpload::getHumanReadableSize(filesize($filePath))
+            );
+        }
+
+        return $response;
     }
 
-    protected function saveConversationText() : array
+    protected function saveArchive(bool $mccPerspective = true) : array
     {
-        return array();
-    }
+        global $config;
+        global $server;
+        
+        $zipFilename = 'archive-'.DelayTime::convertTsForFile('now').'.zip';
+        $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$zipFilename;
 
-    protected function saveConversationFiles() : array
-    {
-        return array();
+        Logger::debug('admin::saveArchive started for "'.$zipFilename.'"');
+        $startTime = microtime(true);
+
+        $response = array(
+            'success' => true, 
+            'time'    => 0, 
+            'error'   => '', 
+            'file'    => $zipFilename,
+            'size'    => 0,
+        );
+
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversations = $conversationsDao->getAllConversations();
+        
+        $zip = new ZipArchive();
+        if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
+        {
+            Logger::warning('admin::saveArchive failed to create "'.$zipFilename.'"');
+        }      
+        else
+        {
+            foreach($conversations as $convoId => $convo)
+            {
+                if(!$convo->archiveConvo($zip, $mccPerspective))
+                {
+                    Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
+                    $response['success'] = false;
+                    break;
+                }
+            }
+            $zip->close();
+            $response['time'] = microtime(true) - $startTime;
+            
+
+            if($response['success'])
+            {
+                $response['size'] = FileUpload::getHumanReadableSize(filesize($zipFilepath));
+            }
+            else
+            {
+                unlink($zipFilepath);
+                $response['error'] = 'Failed to create archive. See system log for details.';
+            }
+        }
+        
+        Logger::debug('admin::saveArchive finished for "'.$zipFilename.
+            '" ('.$response['size'].') in '.$response['time'].' sec.');
+
+        return $response;
     }
 }
 
