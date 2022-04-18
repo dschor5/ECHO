@@ -558,8 +558,19 @@ class AdminModule extends DefaultModule
 
     protected function editDataManagement() : string 
     {
+        
         $this->addTemplates('settings.css', 'data-management.js');
-        return Main::loadTemplate('admin-data.txt');
+        $mission = MissionConfig::getInstance();
+
+
+        $timezoneData = $this->getTimezoneList();
+
+        $timezoneOptions = '';
+        $timezoneOptions .= $this->makeSelectOption($mission->hab_timezone, 'Habitat ('.$mission->hab_timezone.')', true);
+        $timezoneOptions .= $this->makeSelectOption($mission->mcc_timezone, 'Mission Control ('.$mission->mcc_timezone.')', false);
+
+
+        return Main::loadTemplate('admin-data.txt', array('/%timezones%/'=>$timezoneOptions));
     }
 
     
@@ -599,9 +610,9 @@ class AdminModule extends DefaultModule
         $sqlFilename = 'archive-'.DelayTime::convertTsForFile('now').'.sql';
         $filePath    = $server['host_address'].$config['logs_dir'].'/'.$sqlFilename;
 
-        $command = 'mysqldump --opt -h'.$server['db_host'].
-                                  ' -u'.$server['db_user'].
-                                  ' -p'.$server['db_pass'].
+        $command = 'mysqldump --opt --host '.$server['db_host'].
+                                  ' --user '.$server['db_user'].
+                                  ' --password '.$server['db_pass'].
                                   ' '.$server['db_name'].
                                   ' > '.$filePath;
         exec($command, $output, $worked);
