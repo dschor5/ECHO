@@ -628,7 +628,7 @@ class AdminModule extends DefaultModule
             $response = array(
                 'success' => true,
                 'filename' => $sqlFilename,
-                'filesize' => FileUpload::getHumanReadableSize(filesize($filePath))
+                'filesize' => ServerFile::getHumanReadableSize(filesize($filePath))
             );
         }
 
@@ -640,17 +640,24 @@ class AdminModule extends DefaultModule
         global $config;
         global $server;
         
-        $zipFilename = 'archive-'.DelayTime::convertTsForFile('now').'.zip';
-        $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$zipFilename;
+        $currTime = new DelayTime();
+        $archiveData = array();
+        $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
+        $archiveData['archive_name'] = 'archive-'.DelayTime::convertTsForFile('now').'.zip';;
+        $archiveData['notes'] = ''; // Placeholder to save options used for creating archive (if any).
+        $archiveData['timestamp'] = $currTime->getTime();
 
-        Logger::debug('admin::saveArchive started for "'.$zipFilename.'"');
+        $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
+
+        Logger::debug('admin::saveArchive started for "'.$archiveData['server_name'].'"');
         $startTime = microtime(true);
 
         $response = array(
             'success' => true, 
             'time'    => 0, 
             'error'   => '', 
-            'file'    => $zipFilename,
+            'id'      => 0,
+            'file'    =>  $archiveData['archive_name'],
             'size'    => 0,
         );
 
@@ -660,7 +667,7 @@ class AdminModule extends DefaultModule
         $zip = new ZipArchive();
         if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
         {
-            Logger::warning('admin::saveArchive failed to create "'.$zipFilename.'"');
+            Logger::warning('admin::saveArchive failed to create "'. $archiveData['archive_name'].'"');
         }      
         else
         {
@@ -676,10 +683,13 @@ class AdminModule extends DefaultModule
             $zip->close();
             $response['time'] = microtime(true) - $startTime;
             
-
-            if($response['success'])
+            $archiveDao = ArchiveDao::getInstance();
+            $result = $archiveDao->insert($archiveData);
+            
+            if($result !== false && $response['success'])
             {
-                $response['size'] = FileUpload::getHumanReadableSize(filesize($zipFilepath));
+                $response['id'] = $result;
+                $response['size'] = ServerFile::getHumanReadableSize(filesize($zipFilepath));
             }
             else
             {
@@ -688,7 +698,7 @@ class AdminModule extends DefaultModule
             }
         }
         
-        Logger::debug('admin::saveArchive finished for "'.$zipFilename.
+        Logger::debug('admin::saveArchive finished for "'. $archiveData['archive_name'].
             '" ('.$response['size'].') in '.$response['time'].' sec.');
 
         return $response;

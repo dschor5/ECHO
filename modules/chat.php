@@ -274,7 +274,7 @@ class ChatModule extends DefaultModule
         // All files will be renamed and stored in the uploads directory on the server. 
         // This prevents overwriting files if different versions of the same document 
         // are uploaded and also makes it harder for people to guess filenames. 
-        $serverName = FileUpload::generateFilename();
+        $serverName = ServerFile::generateFilename($config['uploads_dir']);
         $fullPath = $server['host_address'].$config['uploads_dir'].'/'.$serverName;
         
         // Start building the response. 
@@ -301,9 +301,9 @@ class ChatModule extends DefaultModule
             $result['error'] = 'Invalid file type uploaded. (Extension)';
         }
         // Validate filesize. 
-        else if($fileSize <= 0 || $fileSize > FileUpload::getMaxUploadSize())
+        else if($fileSize <= 0 || $fileSize > ServerFile::getMaxUploadSize())
         {
-            $result['error'] = 'Invalid file size (0 < size < '.FileUpload::getMaxUploadSize().')';
+            $result['error'] = 'Invalid file size (0 < size < '.ServerFile::getMaxUploadSize().')';
         }
         // Move the file to the uploads directory. 
         else if(!move_uploaded_file($_FILES['data']['tmp_name'], $fullPath))
@@ -677,7 +677,7 @@ class ChatModule extends DefaultModule
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%chat_rooms%/'         => $this->getConversationList(),
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
-                  '/%max_upload_size%/'    => FileUpload::getHumanReadableSize(FileUpload::getMaxUploadSize()),
+                  '/%max_upload_size%/'    => ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                   '/%download-link%/'      => Main::loadTemplate('download-link.txt', 
                                               array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),

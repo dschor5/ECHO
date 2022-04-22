@@ -69,6 +69,15 @@ CREATE TABLE `mission_config` (
   PRIMARY KEY(`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `mission_archives` (
+  `archive_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `archive_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `notes` varchar(256) COLLATE utf8_unicode_ci NOT NULL, 
+  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(`archive_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('name',            'string', 'Analog Mission Name'),
 ('date_start',      'string', '2021-08-10 00:00:00'),
