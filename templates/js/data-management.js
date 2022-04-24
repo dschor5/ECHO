@@ -1,4 +1,4 @@
-function downloadData(downloadType) {
+function saveArchive(downloadType) {
     $.ajax({
         url: BASE_URL + '/admin',
         type: 'POST',
@@ -18,16 +18,13 @@ function downloadData(downloadType) {
     });    
 }
 
-function confirmDelete() {
-    $('#dialog-confirm').dialog('open');
-}
-
 function clearData() {
     $.ajax({
         url: BASE_URL + '/admin',
         type: 'POST',
         data: {
-            subaction: 'clear',
+            subaction: $('#confirm-subaction').val(),        
+            archive_id: $('#confirm-user-id').val(),        
         },
         dataType: 'json',
         success: function(data) {
@@ -39,6 +36,27 @@ function clearData() {
                 location.href = BASE_URL + '/admin/data';
             }
         }
+    });
+}
+
+
+function confirmAction(subaction, id, str) {
+    $(document).ready(function() {
+        $('#confirm-subaction').val(subaction);
+        $('#confirm-archive-id').val(id);
+
+        if(subaction == 'deletearchive') {
+            $('#dialog-confirm').dialog({title: 'Delete Archive'});
+            $('.modal-confirm-body').text("Are you sure you want to delete the " + str + "?");
+            $('#confirm-btn').text('Delete Archive');
+        }
+        else {
+            $('#dialog-confirm').dialog({title: 'Delete All Data'});
+            $('.modal-confirm-body').text("Are you sure you want to delete all messages and user accounts (except admin accounts)?");
+            $('#confirm-btn').text('Delete All Data');
+        }
+        
+        $('#dialog-confirm').dialog('open');
     });
 }
 
@@ -67,3 +85,4 @@ $(document).ready(function() {
     });
 
 });
+

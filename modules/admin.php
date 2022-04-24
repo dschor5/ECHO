@@ -18,7 +18,8 @@ class AdminModule extends DefaultModule
             // Data Management
             'clear'        => 'clearMissionData', 
             'backupsql'    => 'backupSqlDatabase', 
-            'saveconvo'    => 'saveArchive'            
+            'saveconvo'    => 'saveArchive',
+            'deletearchive'=> 'deleteArchive',   
         );
 
         $this->subHtmlRequests = array(
@@ -590,7 +591,7 @@ class AdminModule extends DefaultModule
                 '/%text%/'=>'Download'
             ));
             $tools[] = Main::loadTemplate('link-js.txt', array(
-                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getTimestamp().'\')', 
+                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getDesc().'\')', 
                 '/%text%/'=>'Delete'
             ));
 
@@ -760,6 +761,43 @@ class AdminModule extends DefaultModule
         
         Logger::debug('admin::saveArchive finished for "'. $archiveData['server_name'].
             '" in '.$response['time'].' sec.');
+
+        return $response;
+    }
+
+    protected function deleteArchive()
+    {
+        global $config;
+        global $server;
+        $archiveDao = ArchiveDao::getInstance();
+        
+        $response = array('success'=>false, 'error'=>'');
+
+        $archiveId = $_POST['archiveId'] ?? 0;
+
+        if($archiveId > 0)
+        {
+            $archive = $archiveDao->getArchive($archiveId);
+            if($archive !== false)
+            {
+                $filepath = $server['host_address'].$config['logs_dir'].'/'.$archive->server_name;
+                
+                if(!unlink($filepath))
+                {
+                    Logger::warning('admin::deleteArchive failed to delete '.$archive->server_name.'.');
+                    $response['error'] = 'Failed to delete archive. (archive_id='.$archiveId.')';
+                }
+                else if($archiveDao->drop($archiveId) !== true)
+                {
+                    Logger::warning('admin::deleteArchive failed to delete '.$archive->archive_id.' db entry.');
+                    $response['error'] = 'Failed to delete archive. (archive_id='.$archiveId.')';
+                }
+                else
+                {
+                    $response['success'] = true;
+                }
+            }
+        }
 
         return $response;
     }

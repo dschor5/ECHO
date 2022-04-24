@@ -131,6 +131,13 @@ class DelayTime
         return $ts->format(self::DATE_FORMAT);
     }
 
+    public static function convertFilenameTimestamp(string $timestamp, string $toTz) : string
+    {
+        $ts = new DateTime($timestamp, new DateTimeZone('UTC'));
+        $ts->setTimezone(new DateTimeZone($toTz));
+        return $ts->format(self::DATE_FORMAT_FILE);
+    }
+
     /**
      * Static function that returns the mission epoch in UTC. 
      * @return int Unix timestamp for mission epoch in UTC.

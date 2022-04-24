@@ -102,23 +102,33 @@ class FileModule implements Module
         echo Main::loadTemplate($filepath, array(), '');
     }
 
-    private function downloadArchive(string $filename)
+    private function downloadArchive(int $archiveId)
     {
-        global $config;
-        global $server;
+        $file = false;
 
-        $filepath = $server['host_address'].$config['logs_dir'].'/'.$filename;
-        $filesize = filesize($filepath);
-
-        if(!file_exists($filepath))
+        if($this->user != null)
         {
-            header("HTTP/1.1 404 Not Found");
-            exit();
+            $archiveDao = ArchiveDao::getInstance();
+            $archive = $archiveDao->getArchive($archiveId, $this->user->user_id);
         }
 
-        header('Content-Disposition: attachment; filename='.basename($filename));
+        // Also catches the case where the user does not have 
+        // access to the image (because they are guessing files 
+        // or trying to access a file without being logged in)
+        if($archive == null || !$archive->exists()) 
+        {
+            header("HTTP/1.1 404 Not Found");
+            return;
+        }
+
+        $filepath = $archive->getServerPath();
+        $mimeType = $archive->mime_type;
+        $origName = 'archive-'.$archive->archive_id.'-'.$archive->getFilenameTimestamp().'.'.$archive->getExtension();
+        $filesize = $file->size;
+
+        header('Content-Disposition: attachment; filename='.basename($origName));
         header('Content-Length: ' . $filesize);
-        header("Content-Type: ".mime_content_type($filepath));
+        header("Content-Type: ".$mimeType);
         readfile($filepath);
     }
 }

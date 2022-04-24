@@ -39,9 +39,25 @@
         return DelayTime::convertTimestampTimezone($this->timestamp, 'UTC', $mission->mcc_timezone);
     }
 
+    public function getFilenameTimestamp() : string
+    {
+        $mission = MissionConfig::getInstance();
+        return DelayTime::convertFilenameTimestamp($this->timestamp, $mission->mcc_timezone);
+    }
+
     public function getType() : string
     {
         return ($this->mime_type == 'application/sql') ? 'SQL Backup (sql)' : 'Conversation Archive (zip)';
+    }
+
+    public function getExtension() : string
+    {
+        return ($this->mime_type == 'applicaiton/sql') ? 'sql' : 'zip';
+    }
+
+    public function getDesc() : string
+    {
+        return $this->getType().' created on '.$this->getTimestamp();
     }
 }
 
