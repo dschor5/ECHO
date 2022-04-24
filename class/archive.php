@@ -38,6 +38,11 @@
         $mission = MissionConfig::getInstance();
         return DelayTime::convertTimestampTimezone($this->timestamp, 'UTC', $mission->mcc_timezone);
     }
+
+    public function getType() : string
+    {
+        return ($this->mime_type == 'application/sql') ? 'SQL Backup (sql)' : 'Conversation Archive (zip)';
+    }
 }
 
 ?>

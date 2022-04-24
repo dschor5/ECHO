@@ -572,6 +572,7 @@ class AdminModule extends DefaultModule
 
         $headersZip = array(
             'id' => 'ID',
+            'type' => 'Archive Type',
             'timestamp' => 'Date Created',
             'tools' => 'Actions'
         );
@@ -595,6 +596,7 @@ class AdminModule extends DefaultModule
 
             $list->addRow(array(
                 'id' => $id,
+                'type' => $archive->getType(),
                 'timestamp' => $archive->getTimestamp(),
                 'tools' => join(', ', $tools),
             ));
