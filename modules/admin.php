@@ -729,20 +729,15 @@ class AdminModule extends DefaultModule
             }
             $zip->close();
             $response['time'] = microtime(true) - $startTime;
-            
-            Logger::warning('conversation::archiveConvo 1');
 
             if($response['success'] === true)
             {
-                Logger::warning('conversation::archiveConvo 2');
                 $archiveDao = ArchiveDao::getInstance();
                 $result = $archiveDao->insert($archiveData);
-                
-                Logger::warning('conversation::archiveConvo 3 - '.$result);
+                $filesize = filesize($zipFilepath);
 
                 if($result === false)
                 {
-                    Logger::warning('conversation::archiveConvo 4');
                     unlink($zipFilepath);
                     Logger::warning('conversation::saveArchive failed to add archive to database.');
                     $response['success'] = false;
@@ -758,7 +753,7 @@ class AdminModule extends DefaultModule
         }
         
         Logger::debug('admin::saveArchive finished for "'. $archiveData['server_name'].
-            '" ('.$response['size'].') in '.$response['time'].' sec.');
+            '" ('.$filesize.') in '.$response['time'].' sec.');
 
         return $response;
     }
