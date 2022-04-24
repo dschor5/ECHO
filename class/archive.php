@@ -52,7 +52,7 @@
 
     public function getExtension() : string
     {
-        return ($this->mime_type == 'applicaiton/sql') ? 'sql' : 'zip';
+        return ($this->mime_type == 'application/sql') ? 'sql' : 'zip';
     }
 
     public function getDesc() : string

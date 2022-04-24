@@ -24,7 +24,7 @@ function clearData() {
         type: 'POST',
         data: {
             subaction: $('#confirm-subaction').val(),        
-            archive_id: $('#confirm-user-id').val(),        
+            archive_id: $('#confirm-archive-id').val(),        
         },
         dataType: 'json',
         success: function(data) {
