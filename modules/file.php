@@ -14,11 +14,7 @@ class FileModule implements Module
         $subaction = $_GET['subaction'] ?? '';
         $id = $_GET['id'] ?? '';
         
-        if($subaction == 'file' && intval($id) > 0)
-        {
-            $this->getFileUpload($id);
-        }
-        else if($subaction == 'archive' && intval($id) > 0)
+        if($subaction == 'archive' && intval($id) > 0)
         {
             // Download archive file
             $this->downloadArchive($id);
@@ -27,6 +23,10 @@ class FileModule implements Module
         {
             // Parse JS or CSS file
             $this->parseFile($id);
+        }
+        else if(intval($id) > 0)
+        {
+            $this->getFileUpload($id);
         }
 
         exit();
