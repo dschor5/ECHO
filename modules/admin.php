@@ -656,7 +656,9 @@ class AdminModule extends DefaultModule
                                   ' --password '.$database['db_pass'].
                                   ' '.$database['db_name'].
                                   ' > '.$filePath;
+        $startTime = microtime(true);
         exec($command, $output, $worked);
+        $response['time'] = microtime(true) - $startTime;
 
         if($worked == 0)
         {
