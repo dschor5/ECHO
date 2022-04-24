@@ -33,7 +33,7 @@
         parent::__construct($data, $config['logs_dir']);
     }
 
-    public function getTimestamp($data)
+    public function getTimestamp() : string
     {
         $mission = MissionConfig::getInstance();
         return DelayTime::convertTimestampTimezone($this->timestamp, 'UTC', $mission->mcc_timezone);
