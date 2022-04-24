@@ -78,12 +78,12 @@ class ArchiveDao extends Dao
             {
                 while(($data = $result->fetch_assoc()) != null)
                 {
-                    $arvhives[$data['archive_id']] = new MissionArchive($data);
+                    $archives[$data['archive_id']] = new MissionArchive($data);
                 }
             }
         }
 
-        return $arvhives;
+        return $archives;
     }
 }
 
