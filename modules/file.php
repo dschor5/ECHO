@@ -40,7 +40,6 @@ class FileModule implements Module
         {
             $messageFileDao = MessageFileDao::getInstance();
             $file = $messageFileDao->getFile($fileId, $this->user->user_id);
-            Logger::warning('Get '.$fileId.' == '.$file);
         }
 
         // Also catches the case where the user does not have 
