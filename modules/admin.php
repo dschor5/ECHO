@@ -653,7 +653,7 @@ class AdminModule extends DefaultModule
 
         $command = 'mysqldump --opt --host '.$database['db_host'].
                                   ' --user '.$database['db_user'].
-                                  ' --password '.$database['db_pass'].
+                                  ' --password \''.$database['db_pass'].'\''.
                                   ' '.$database['db_name'].
                                   ' > '.$filePath;
         $startTime = microtime(true);
@@ -677,6 +677,7 @@ class AdminModule extends DefaultModule
         {
             Logger::warning('admin::backupSqlDatabase failed to create "'.$archiveData['server_name'].'"', 
                 array('output'=>$output, 'worked'=>$worked));
+            unlink($archiveData['server_name']);    
             $response['success'] = false;
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
