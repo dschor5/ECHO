@@ -46,7 +46,7 @@ class FileModule implements Module
         {
             $messageFileDao = MessageFileDao::getInstance();
             $file = $messageFileDao->getFile($fileId, $this->user->user_id);
-            Logger::warning('getFileUpload: '.$fileId. ' - '.strval($file->exists()).'.');
+            Logger::warning('getFileUpload: '.$fileId. ' - '.($file->exists()).'.');
         }
 
         // Also catches the case where the user does not have 
