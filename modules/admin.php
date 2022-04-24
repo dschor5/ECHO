@@ -641,6 +641,7 @@ class AdminModule extends DefaultModule
         );
 
         $archiveData = array();
+        $archiveData['archive_id'] = 0;
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
         $archiveData['notes'] = ''; // Not used for SQL archives.
         $archiveData['mime_type'] = 'application/sql';
@@ -690,6 +691,7 @@ class AdminModule extends DefaultModule
         
         $currTime = new DelayTime();
         $archiveData = array();
+        $archiveData['archive_id'] = 0;
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
         $archiveData['notes'] = ''; // Placeholder to save options used for creating archive (if any).
         $archiveData['mime_type'] = 'application/zip';

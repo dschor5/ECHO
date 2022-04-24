@@ -72,9 +72,9 @@ CREATE TABLE `mission_config` (
 CREATE TABLE `mission_archives` (
   `archive_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
-  `archive_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
   `notes` varchar(256) COLLATE utf8_unicode_ci NOT NULL, 
-  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `timestamp` datetime NOT NULL,
   PRIMARY KEY(`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
