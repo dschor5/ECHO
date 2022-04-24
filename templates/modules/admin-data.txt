@@ -39,7 +39,9 @@
             </div>
         </div>
 
-        %archives%
+        <div class="form-row">
+            %archives%
+        </div>
 
         <div class="form-divider"></div>
         <div class="subheading">Reset Application</div>
