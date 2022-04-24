@@ -104,7 +104,7 @@ class FileModule implements Module
 
     private function downloadArchive(int $archiveId)
     {
-        $file = false;
+        $archive = false;
 
         if($this->user != null)
         {
@@ -117,6 +117,7 @@ class FileModule implements Module
         // or trying to access a file without being logged in)
         if($archive == null || !$archive->exists()) 
         {
+            Logger::warning('file::downloadArchive failed to download '.$archiveId.'.');
             header("HTTP/1.1 404 Not Found");
             return;
         }
