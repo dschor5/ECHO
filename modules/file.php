@@ -14,6 +14,8 @@ class FileModule implements Module
         $subaction = $_GET['subaction'] ?? '';
         $id = $_GET['id'] ?? '';
         
+Logger::warning($subaction);
+
         if($subaction == 'archive' && intval($id) > 0)
         {
             // Download archive file
