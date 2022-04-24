@@ -13,8 +13,6 @@ class FileModule implements Module
     {
         $subaction = $_GET['subaction'] ?? '';
         $id = $_GET['id'] ?? '';
-        
-Logger::warning($subaction);
 
         if($subaction == 'archive' && intval($id) > 0)
         {
@@ -32,11 +30,7 @@ Logger::warning($subaction);
             Logger::warning('compile: '.$id.'.');
             $this->getFileUpload($id);
         }
-        else
-        {
-            Logger::warning('FileModule::compile - Invalid subaction='.strval($subaction).', id='.strval($id));
-        }
-
+        
         exit();
     }
 

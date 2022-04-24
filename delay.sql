@@ -26,7 +26,6 @@ CREATE TABLE `participants` (
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Participant',
   `last_read` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`conversation_id`, `user_id`),
-  FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
