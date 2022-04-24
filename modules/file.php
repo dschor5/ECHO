@@ -125,7 +125,7 @@ class FileModule implements Module
         $filepath = $archive->getServerPath();
         $mimeType = $archive->mime_type;
         $origName = 'archive-'.$archive->archive_id.'-'.$archive->getFilenameTimestamp().'.'.$archive->getExtension();
-        $filesize = $file->size;
+        $filesize = $archive->size;
 
         header('Content-Disposition: attachment; filename='.basename($origName));
         header('Content-Length: ' . $filesize);
