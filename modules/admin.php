@@ -640,6 +640,7 @@ class AdminModule extends DefaultModule
             'success' => true,
         );
 
+        $currTime = new DelayTime();
         $archiveData = array();
         $archiveData['archive_id'] = 0;
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
