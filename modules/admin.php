@@ -730,13 +730,19 @@ class AdminModule extends DefaultModule
             $zip->close();
             $response['time'] = microtime(true) - $startTime;
             
+            Logger::warning('conversation::archiveConvo 1');
+
             if($response['success'] === true)
             {
+                Logger::warning('conversation::archiveConvo 2');
                 $archiveDao = ArchiveDao::getInstance();
                 $result = $archiveDao->insert($archiveData);
                 
+                Logger::warning('conversation::archiveConvo 3 - '.$result);
+
                 if($result === false)
                 {
+                    Logger::warning('conversation::archiveConvo 4');
                     unlink($zipFilepath);
                     Logger::warning('conversation::saveArchive failed to add archive to database.');
                     $response['success'] = false;
