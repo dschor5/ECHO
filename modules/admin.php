@@ -635,6 +635,7 @@ class AdminModule extends DefaultModule
     {
         global $config;
         global $server;
+        global $database;
         
         $response = array(
             'success' => true,
@@ -650,10 +651,10 @@ class AdminModule extends DefaultModule
 
         $filePath    = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
-        $command = 'mysqldump --opt --host '.$server['db_host'].
-                                  ' --user '.$server['db_user'].
-                                  ' --password '.$server['db_pass'].
-                                  ' '.$server['db_name'].
+        $command = 'mysqldump --opt --host '.$database['db_host'].
+                                  ' --user '.$database['db_user'].
+                                  ' --password '.$database['db_pass'].
+                                  ' '.$database['db_name'].
                                   ' > '.$filePath;
         exec($command, $output, $worked);
 
