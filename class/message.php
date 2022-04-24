@@ -172,13 +172,13 @@ class Message
         // Prepend http:// if no protocol specified
         $completeUrl = $match[1] ? $match[0] : "http://{$match[0]}";
 
-        return '<a href="' . $completeUrl . '">'
+        return '<a href="' . $completeUrl . '" target="_blank">'
             . $match[2] . $match[3] . $match[4] . '</a>';
     }
 
     private function compileMsgText() : string
     {
-        $rexProtocol = '(https?://)?';
+        $rexProtocol = '((https?://)|(ftp://))?';
         $rexDomain   = '((?:[-a-zA-Z0-9]{1,63}\.)+[-a-zA-Z0-9]{2,63}|(?:[0-9]{1,3}\.){3}[0-9]{1,3})';
         $rexPort     = '(:[0-9]{1,5})?';
         $rexPath     = '(/[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]*?)?';
@@ -187,12 +187,6 @@ class Message
 
         return preg_replace_callback("&\\b$rexProtocol$rexDomain$rexPort$rexPath$rexQuery$rexFragment(?=[?.!,;:\"]?(\s|$))&",
             array($this, 'callback'), htmlspecialchars($this->data['text']));
-
-        // Replace links
-        //return preg_replace(
-        //    '/(http[s]{0,1}\:\/\/\S{4,})\s{0,}/ims', 
-        //    '<a href="$1" target="_blank">$1</a> ', 
-        //    $this->data['text']);
     }
 
     /**
