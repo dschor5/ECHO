@@ -24,10 +24,15 @@ class FileModule implements Module
             // Parse JS or CSS file
             $this->parseFile($id);
         }
-        else if(intval($id) > 0)
+        else if($subaction == 'file' && intval($id) > 0)
         {
-            $this->getFileUpload($id);
+            // Get file attachment
             Logger::warning('compile: '.$id.'.');
+            $this->getFileUpload($id);
+        }
+        else
+        {
+            Logger::warning('FileModule::compile - Invalid subaction='.strval($subaction).', id='.strval($id));
         }
 
         exit();
