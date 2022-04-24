@@ -142,7 +142,7 @@ class Message
     {
         $perspective = $crewPerspective ? 'recv_time_hab' : 'recv_time_mcc';
 
-        $msg = $this->data['text'];
+        $msg = $this->compileMsgText();
         if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
         {
             $msg = $this->file->original_name.' ('.$this->file->getSize().')';
@@ -167,6 +167,34 @@ class Message
             ));
     }
 
+    private function callback($match)
+    {
+        // Prepend http:// if no protocol specified
+        $completeUrl = $match[1] ? $match[0] : "http://{$match[0]}";
+
+        return '<a href="' . $completeUrl . '">'
+            . $match[2] . $match[3] . $match[4] . '</a>';
+    }
+
+    private function compileMsgText() : string
+    {
+        $rexProtocol = '(https?://)?';
+        $rexDomain   = '((?:[-a-zA-Z0-9]{1,63}\.)+[-a-zA-Z0-9]{2,63}|(?:[0-9]{1,3}\.){3}[0-9]{1,3})';
+        $rexPort     = '(:[0-9]{1,5})?';
+        $rexPath     = '(/[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]*?)?';
+        $rexQuery    = '(\?[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
+        $rexFragment = '(#[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
+
+        return preg_replace_callback("&\\b$rexProtocol$rexDomain$rexPort$rexPath$rexQuery$rexFragment(?=[?.!,;:\"]?(\s|$))&",
+            array($this, 'callback'), htmlspecialchars($this->data['text']));
+
+        // Replace links
+        //return preg_replace(
+        //    '/(http[s]{0,1}\:\/\/\S{4,})\s{0,}/ims', 
+        //    '<a href="$1" target="_blank">$1</a> ', 
+        //    $this->data['text']);
+    }
+
     /**
      * Return associative array with message contents to display on the chat applicaiton.
      *
@@ -181,7 +209,7 @@ class Message
             'user_id'          => $this->data['user_id'],
             'is_crew'          => $this->data['is_crew'],
             'author'           => $this->data['alias'],
-            'message'          => preg_replace('/(http[s]{0,1}\:\/\/\S{4,})\s{0,}/ims', '<a href="$1" target="_blank">$1</a> ', $this->data['text']),
+            'message'          => $this->compileMsgText(),
             'type'             => self::TEXT,
             'sent_time'        => DelayTime::convertTsForJs($this->data['sent_time']),
             'recv_time_mcc'    => DelayTime::convertTsForJs($this->data['recv_time_mcc']),
