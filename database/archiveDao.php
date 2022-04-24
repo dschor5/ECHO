@@ -68,6 +68,23 @@ class ArchiveDao extends Dao
 
         return $file;
     }
+
+    public function getArchives(): array
+    {
+        $archives = array();
+        if(($result = $this->select('*','*','timestamp','ASC')) !== false)
+        {   
+            if($result->num_rows > 0)
+            {
+                while(($data = $result->fetch_assoc()) != null)
+                {
+                    $arvhives[$data['archive_id']] = new MissionArchive($data);
+                }
+            }
+        }
+
+        return $arvhives;
+    }
 }
 
 ?>

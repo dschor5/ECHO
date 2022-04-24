@@ -578,7 +578,7 @@ class AdminModule extends DefaultModule
         
         $list = new ListGenerator($headersZip);
 
-        $archivesDao = ArchiveDao::getInstance();
+        $archiveDao = ArchiveDao::getInstance();
         $archives = $archiveDao->getArchives();
 
         foreach($archives as $id => $archive)
