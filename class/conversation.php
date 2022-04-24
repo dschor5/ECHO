@@ -126,7 +126,7 @@ class Conversation
         return $participants;
     }
 
-    public function archiveConvo(ZipArchive &$zip) : bool
+    public function archiveConvo(ZipArchive &$zip, string $tz) : bool
     {
         $success = true;
         $messagesDao = MessagesDao::getInstance();

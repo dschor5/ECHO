@@ -300,12 +300,6 @@ class MessagesDao extends Dao
         $this->startTransaction();
         $this->database->query('DELETE FROM messages');
         $this->database->query('ALTER TABLE messages AUTO_INCREMENT = 1');
-        $this->database->query('DELETE FROM users WHERE is_admin = 0');
-        $convosToDelete = $participantsDao->getConvosWithSingleParticipant();
-        if(count($convosToDelete) > 0)
-        {
-            $conversationsDao->drop('conversation_id IN ('.implode(',', $convosToDelete).')');
-        }
         $conversationsDao->update(
             array(
                 'date_created' => '0000-00-00 00:00:00',

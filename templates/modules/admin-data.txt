@@ -5,23 +5,11 @@
     
     <div id="form-contents">
         <div class="subheading">Save Conversations</div>
-        <!--
-        <div class="form-row">
-            <label for="name">Archive Timezone</label>
-            <div class="form-field">
-                <select name="archive_timezone" id="archive_timezone">
-                    %timezones%
-                </select>
-            </div>
-            <div class="form-help">
-                Select the timezone to use for all messages
-            </div>
-        </div>
-        -->
+    
         <div class="form-row">
             <label for="name">Conversations</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="downloadConvos()">Create Archive</button>
+                <button type="button" class="form-button" onclick="saveArchive('saveconvo')">Create Archive</button>
                 <!--<div id="archive_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating archive...</div>-->
                 <div id="archive_download"></div>
             </div>
@@ -38,13 +26,11 @@
                 Where CCCCC and MMMMM refer to the unique conversation and message ids respectively.
             </div>
         </div>
-        
-        <div class="form-divider"></div>
-        <div class="subheading">Backup Database</div>
+
         <div class="form-row">
             <label for="name">SQL Backup</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="downloadSql()">Download SQL Backup</button>
+                <button type="button" class="form-button" onclick="saveArchive('backupsql')">Download SQL Backup</button>
                 <!--<div id="sql_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating SQL backup...</div>-->
                 <div id="sql_download"></div>
             </div>
@@ -53,13 +39,17 @@
             </div>
         </div>
 
+        <div class="form-row">
+            <label for="name">Archives Created</label>
+            %archives%
+        </div>
 
         <div class="form-divider"></div>
         <div class="subheading">Reset Application</div>
         <div class="form-row">
             <label for="name">Dalete All Data</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="confirmDelete()">Delete All Data</button>
+                <button type="button" class="form-button" onclick="confirmAction('clear', 0, '')">Delete All Data</button>
             </div>
             <div class="form-help">
                 Clear all messages (text, audio, video, and files) and delete non-admin user 
@@ -70,7 +60,8 @@
     </div>
 </div>
 
-<div id="dialog-confirm" title="Delete All Data" class="dialog-body">
-    <div class="modal-confirm-body">Are you sure you want to delete all messages 
-    and user accounts (except admin accounts)?</div> 
+<div id="dialog-confirm" title="" class="dialog-body">
+    <div class="modal-confirm-body"></div>
+    <input type="hidden" id="confirm-archive-id" name="archive_id" value="">
+    <input type="hidden" id="confirm-subaction" name="subaction" value="">    
 </div>

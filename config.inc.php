@@ -78,12 +78,14 @@ require_once('modules/error.php');
 require_once('class/log.php');
 require_once('class/delay.php');
 require_once('class/time.php');
+require_once('class/serverFile.php');
 require_once('class/message.php');
 require_once('class/user.php');
 require_once('class/list.php');
 require_once('class/mission.php');
 require_once('class/conversation.php');
 require_once('class/attachment.php');
+require_once('class/archive.php');
 
 // Include database objects
 require_once('database/missionDao.php');
@@ -93,6 +95,7 @@ require_once('database/participantsDao.php');
 require_once('database/messagesDao.php');
 require_once('database/messageStatusDao.php');
 require_once('database/messageFileDao.php');
+require_once('database/archiveDao.php');
 
 
 

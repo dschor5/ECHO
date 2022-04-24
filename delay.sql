@@ -26,7 +26,6 @@ CREATE TABLE `participants` (
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Participant',
   `last_read` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`conversation_id`, `user_id`),
-  FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -67,6 +66,15 @@ CREATE TABLE `mission_config` (
   `value` text CHARACTER SET utf8 NOT NULL,
   `type` enum('string','int','float','bool', 'datetime') COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY(`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `mission_archives` (
+  `archive_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `notes` varchar(256) COLLATE utf8_unicode_ci NOT NULL, 
+  `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY(`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES

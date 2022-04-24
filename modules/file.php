@@ -13,22 +13,24 @@ class FileModule implements Module
     {
         $subaction = $_GET['subaction'] ?? '';
         $id = $_GET['id'] ?? '';
-        
-        if(intval($id) > 0)
-        {
-            $this->getFileUpload($id);
-        }
-        else if($subaction == 'archive')
+
+        if($subaction == 'archive' && intval($id) > 0)
         {
             // Download archive file
             $this->downloadArchive($id);
         }
-        else
+        else if($subaction == 'css' || $subaction == 'js')
         {
             // Parse JS or CSS file
             $this->parseFile($id);
         }
-
+        else if($subaction == 'file' && intval($id) > 0)
+        {
+            // Get file attachment
+            Logger::warning('compile: '.$id.'.');
+            $this->getFileUpload($id);
+        }
+        
         exit();
     }
 
@@ -40,6 +42,7 @@ class FileModule implements Module
         {
             $messageFileDao = MessageFileDao::getInstance();
             $file = $messageFileDao->getFile($fileId, $this->user->user_id);
+            Logger::warning('getFileUpload: '.$fileId. ' - '.($file->getServerPath()).'.');
         }
 
         // Also catches the case where the user does not have 
@@ -102,23 +105,34 @@ class FileModule implements Module
         echo Main::loadTemplate($filepath, array(), '');
     }
 
-    private function downloadArchive(string $filename)
+    private function downloadArchive(int $archiveId)
     {
-        global $config;
-        global $server;
+        $archive = false;
 
-        $filepath = $server['host_address'].$config['logs_dir'].'/'.$filename;
-        $filesize = filesize($filepath);
-
-        if(!file_exists($filepath))
+        if($this->user != null)
         {
-            header("HTTP/1.1 404 Not Found");
-            exit();
+            $archiveDao = ArchiveDao::getInstance();
+            $archive = $archiveDao->getArchive($archiveId, $this->user->user_id);
         }
 
-        header('Content-Disposition: attachment; filename='.basename($filename));
+        // Also catches the case where the user does not have 
+        // access to the image (because they are guessing files 
+        // or trying to access a file without being logged in)
+        if($archive == null || !$archive->exists()) 
+        {
+            Logger::warning('file::downloadArchive failed to download '.$archiveId.'.');
+            header("HTTP/1.1 404 Not Found");
+            return;
+        }
+
+        $filepath = $archive->getServerPath();
+        $mimeType = $archive->mime_type;
+        $origName = 'archive-'.$archive->archive_id.'-'.$archive->getFilenameTimestamp().'.'.$archive->getExtension();
+        $filesize = $archive->size;
+
+        header('Content-Disposition: attachment; filename='.basename($origName));
         header('Content-Length: ' . $filesize);
-        header("Content-Type: ".mime_content_type($filepath));
+        header("Content-Type: ".$mimeType);
         readfile($filepath);
     }
 }
