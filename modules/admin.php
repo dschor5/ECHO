@@ -778,7 +778,7 @@ class AdminModule extends DefaultModule
         if($archiveId > 0)
         {
             $archive = $archiveDao->getArchive($archiveId);
-            if($archive !== false)
+            if($archive != null)
             {
                 $filepath = $server['host_address'].$config['logs_dir'].'/'.$archive->server_name;
                 
