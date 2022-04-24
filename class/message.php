@@ -181,7 +181,7 @@ class Message
             'user_id'          => $this->data['user_id'],
             'is_crew'          => $this->data['is_crew'],
             'author'           => $this->data['alias'],
-            'message'          => $this->data['text'],
+            'message'          => preg_replace('/(http[s]{0,1}\:\/\/\S{4,})\s{0,}/ims', '<a href="$1" target="_blank">$1</a> ', $this->data['text']),
             'type'             => self::TEXT,
             'sent_time'        => DelayTime::convertTsForJs($this->data['sent_time']),
             'recv_time_mcc'    => DelayTime::convertTsForJs($this->data['recv_time_mcc']),
