@@ -720,7 +720,7 @@ class AdminModule extends DefaultModule
         {
             foreach($conversations as $convoId => $convo)
             {
-                if(!$convo->archiveConvo($zip))
+                if(!$convo->archiveConvo($zip, 'UTC'))
                 {
                     Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
                     $response['success'] = false;
