@@ -576,7 +576,7 @@ class AdminModule extends DefaultModule
             'tools' => 'Actions'
         );
         
-        $list = new ListGenerator($headers);
+        $list = new ListGenerator($headersZip);
 
         $archivesDao = ArchiveDao::getInstance();
         $archives = $archiveDao->getArchives();
