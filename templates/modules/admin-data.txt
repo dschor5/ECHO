@@ -40,7 +40,13 @@
         </div>
 
         <div class="form-row">
-            %archives%
+            <label for="name">Archives Created</label>
+            <div class="form-field">
+                %archives%
+            </div>
+            <div class="form-help">
+                Some help.
+            </div>
         </div>
 
         <div class="form-divider"></div>
