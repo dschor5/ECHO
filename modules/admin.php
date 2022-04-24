@@ -730,7 +730,7 @@ class AdminModule extends DefaultModule
             $zip->close();
             $response['time'] = microtime(true) - $startTime;
             
-            if(!$response['success'])
+            if($response['success'] === true)
             {
                 $archiveDao = ArchiveDao::getInstance();
                 $result = $archiveDao->insert($archiveData);
@@ -739,12 +739,14 @@ class AdminModule extends DefaultModule
                 {
                     unlink($zipFilepath);
                     Logger::warning('conversation::saveArchive failed to add archive to database.');
+                    $response['success'] = false;
                     $response['error'] = 'Failed to create archive. See system log for details.';
                 }
             }
             else
             {
                 unlink($zipFilepath);
+                $response['success'] = false;
                 $response['error'] = 'Failed to create archive. See system log for details.';
             }
         }
