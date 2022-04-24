@@ -651,11 +651,11 @@ class AdminModule extends DefaultModule
 
         $filePath    = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
-        $command = 'mysqldump --opt --host '.$database['db_host'].
-                                  ' --user '.$database['db_user'].
-                                  ' --password \''.$database['db_pass'].'\''.
-                                  ' '.$database['db_name'].
-                                  ' > '.$filePath;
+        $command = 'mysqldump --host '.$database['db_host'].
+                            ' --user '.$database['db_user'].
+                            ' --password \''.$database['db_pass'].'\''.
+                            ' '.$database['db_name'].
+                            ' > '.$filePath;
         $startTime = microtime(true);
         exec($command, $output, $worked);
         $response['time'] = microtime(true) - $startTime;
