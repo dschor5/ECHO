@@ -1,9 +1,9 @@
-function downloadConvos() {
+function downloadData(downloadType) {
     $.ajax({
         url: BASE_URL + '/admin',
         type: 'POST',
         data: {
-            subaction: 'saveconvo',
+            subaction: downloadType,
         },
         dataType: 'json',
         success: function(data) {
