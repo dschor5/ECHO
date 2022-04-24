@@ -41,12 +41,7 @@
 
         <div class="form-row">
             <label for="name">Archives Created</label>
-            <div class="form-field">
-                %archives%
-            </div>
-            <div class="form-help">
-                Some help.
-            </div>
+            %archives%
         </div>
 
         <div class="form-divider"></div>
