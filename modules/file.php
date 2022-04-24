@@ -27,7 +27,7 @@ class FileModule implements Module
         else if(intval($id) > 0)
         {
             $this->getFileUpload($id);
-            Logger::warning('FILE: '.$id.'.');
+            Logger::warning('compile: '.$id.'.');
         }
 
         exit();
@@ -41,7 +41,7 @@ class FileModule implements Module
         {
             $messageFileDao = MessageFileDao::getInstance();
             $file = $messageFileDao->getFile($fileId, $this->user->user_id);
-            Logger::warning('FILE: '.($file != null).'.');
+            Logger::warning('getFileUpload: '.$fileId. ' - '.($file != null).'.');
         }
 
         // Also catches the case where the user does not have 
