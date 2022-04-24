@@ -34,7 +34,7 @@ class ArchiveDao extends Dao
      **/
     protected function __construct()
     {
-        parent::__construct('mission_archives');
+        parent::__construct('mission_archives', 'archive_id');
     }
 
     /**
