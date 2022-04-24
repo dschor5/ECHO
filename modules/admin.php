@@ -773,7 +773,7 @@ class AdminModule extends DefaultModule
         
         $response = array('success'=>false, 'error'=>'');
 
-        $archiveId = $_POST['archiveId'] ?? 0;
+        $archiveId = $_POST['archive_id'] ?? 0;
 
         if($archiveId > 0)
         {
