@@ -797,6 +797,14 @@ class AdminModule extends DefaultModule
                     $response['success'] = true;
                 }
             }
+            else
+            {
+                Logger::warning('admin::deleteArchive failed to delete '.$archiveId.' (obj null).');
+            }
+        }
+        else
+        {
+            Logger::warning('admin::deleteArchive '.$archiveId.' <= 0.');
         }
 
         return $response;
