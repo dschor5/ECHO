@@ -570,7 +570,40 @@ class AdminModule extends DefaultModule
         $timezoneOptions .= $this->makeSelectOption($mission->mcc_timezone, 'Mission Control ('.$mission->mcc_timezone.')', false);
 
 
-        return Main::loadTemplate('admin-data.txt', array('/%timezones%/'=>$timezoneOptions));
+        $headersZip = array(
+            'id' => 'ID',
+            'timestamp' => 'Date Created',
+            'tools' => 'Actions'
+        );
+        
+        $list = new ListGenerator($headers);
+
+        $archivesDao = ArchiveDao::getInstance();
+        $archives = $archiveDao->getArchives();
+
+        foreach($archives as $id => $archive)
+        {
+            $tools = array();
+            $tools[] = Main::loadTemplate('link-url.txt', array(
+                '/%path%/'=>'archive/'.$archive->archive_id, 
+                '/%text%/'=>'Download'
+            ));
+            $tools[] = Main::loadTemplate('link-js.txt', array(
+                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getTimestamp().'\')', 
+                '/%text%/'=>'Delete'
+            ));
+
+            $list->addRow(array(
+                'id' => $id,
+                'timestamp' => $archive->getTimestamp(),
+                'tools' => join(', ', $tools),
+            ));
+        }
+
+        return Main::loadTemplate('admin-data.txt', array(
+            '/%timezones%/'=>$timezoneOptions,
+            '/%archives%/' => $list->build(),
+        ));
     }
 
     
@@ -607,8 +640,13 @@ class AdminModule extends DefaultModule
             'success' => false,
         );
 
-        $sqlFilename = 'archive-'.DelayTime::convertTsForFile('now').'.sql';
-        $filePath    = $server['host_address'].$config['logs_dir'].'/'.$sqlFilename;
+        $archiveData = array();
+        $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
+        $archiveData['notes'] = ''; // Not used for SQL archives.
+        $archiveData['mime_type'] = 'application/sql';
+        $archiveData['timestamp'] = $currTime->getTime();
+
+        $filePath    = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
         $command = 'mysqldump --opt --host '.$server['db_host'].
                                   ' --user '.$server['db_user'].
@@ -619,17 +657,27 @@ class AdminModule extends DefaultModule
 
         if($worked != 0)
         {
-            Logger::warning('admin::backupSqlDatabase failed to create "'.$sqlFilename.'"', 
+            Logger::warning('admin::backupSqlDatabase failed to create "'.$archiveData['server_name'].'"', 
                 array('output'=>$output, 'worked'=>$worked));
         }
         else
         {
-            Logger::debug('admin::backupSqlDatabase finished for "'.$sqlFilename.'"');
-            $response = array(
-                'success' => true,
-                'filename' => $sqlFilename,
-                'filesize' => ServerFile::getHumanReadableSize(filesize($filePath))
-            );
+            $archiveDao = ArchiveDao::getInstance();
+            $result = $archiveDao->insert($archiveData);
+            
+            if($result === false)
+            {
+                unlink($archiveData['server_name']);
+                Logger::warning('admin::backupSqlDatabase failed to add archive to database.');
+                $response['error'] = 'Failed to create archive. See system log for details.';
+            }
+            else
+            {
+                Logger::debug('admin::backupSqlDatabase finished for "'.$archiveData['server_name'].'"');
+                $response = array(
+                    'success' => true,
+                );
+            }
         }
 
         return $response;
@@ -643,8 +691,8 @@ class AdminModule extends DefaultModule
         $currTime = new DelayTime();
         $archiveData = array();
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-        $archiveData['archive_name'] = 'archive-'.DelayTime::convertTsForFile('now').'.zip';;
         $archiveData['notes'] = ''; // Placeholder to save options used for creating archive (if any).
+        $archiveData['mime_type'] = 'application/zip';
         $archiveData['timestamp'] = $currTime->getTime();
 
         $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
@@ -656,9 +704,6 @@ class AdminModule extends DefaultModule
             'success' => true, 
             'time'    => 0, 
             'error'   => '', 
-            'id'      => 0,
-            'file'    =>  $archiveData['archive_name'],
-            'size'    => 0,
         );
 
         $conversationsDao = ConversationsDao::getInstance();
@@ -667,7 +712,7 @@ class AdminModule extends DefaultModule
         $zip = new ZipArchive();
         if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
         {
-            Logger::warning('admin::saveArchive failed to create "'. $archiveData['archive_name'].'"');
+            Logger::warning('admin::saveArchive failed to create "'. $archiveData['server_name'].'"');
         }      
         else
         {
@@ -683,13 +728,17 @@ class AdminModule extends DefaultModule
             $zip->close();
             $response['time'] = microtime(true) - $startTime;
             
-            $archiveDao = ArchiveDao::getInstance();
-            $result = $archiveDao->insert($archiveData);
-            
-            if($result !== false && $response['success'])
+            if(!$response['success'])
             {
-                $response['id'] = $result;
-                $response['size'] = ServerFile::getHumanReadableSize(filesize($zipFilepath));
+                $archiveDao = ArchiveDao::getInstance();
+                $result = $archiveDao->insert($archiveData);
+                
+                if($result === false)
+                {
+                    unlink($zipFilepath);
+                    Logger::warning('conversation::saveArchive failed to add archive to database.');
+                    $response['error'] = 'Failed to create archive. See system log for details.';
+                }
             }
             else
             {
@@ -698,7 +747,7 @@ class AdminModule extends DefaultModule
             }
         }
         
-        Logger::debug('admin::saveArchive finished for "'. $archiveData['archive_name'].
+        Logger::debug('admin::saveArchive finished for "'. $archiveData['server_name'].
             '" ('.$response['size'].') in '.$response['time'].' sec.');
 
         return $response;

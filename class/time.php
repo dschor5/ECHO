@@ -113,19 +113,7 @@ class DelayTime
     {
         $ts = new DateTime($tsStr);
         return $ts->format(self::DATE_FORMAT_JS);
-    }
-
-    /**
-     * Static function to convert a timestamp string into a Filename compatible format. 
-     * 
-     * @param string $tsStr Timestamp. Generally expects the MySQL format (YYYY-MM-DD HH:MM:SS)
-     * @return string Javascript compatible timestamp
-     */
-    public static function convertTsForFile(string $tsStr) : string
-    {
-        $ts = new DateTime($tsStr);
-        return $ts->format(self::DATE_FORMAT_FILE);
-    }    
+    } 
 
     /**
      * Static function that converts a timestamp from 

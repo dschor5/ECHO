@@ -5,19 +5,7 @@
     
     <div id="form-contents">
         <div class="subheading">Save Conversations</div>
-        <!--
-        <div class="form-row">
-            <label for="name">Archive Timezone</label>
-            <div class="form-field">
-                <select name="archive_timezone" id="archive_timezone">
-                    %timezones%
-                </select>
-            </div>
-            <div class="form-help">
-                Select the timezone to use for all messages
-            </div>
-        </div>
-        -->
+    
         <div class="form-row">
             <label for="name">Conversations</label>
             <div class="form-field">
@@ -38,9 +26,7 @@
                 Where CCCCC and MMMMM refer to the unique conversation and message ids respectively.
             </div>
         </div>
-        
-        <div class="form-divider"></div>
-        <div class="subheading">Backup Database</div>
+
         <div class="form-row">
             <label for="name">SQL Backup</label>
             <div class="form-field">
@@ -53,6 +39,7 @@
             </div>
         </div>
 
+        %archives%
 
         <div class="form-divider"></div>
         <div class="subheading">Reset Application</div>
