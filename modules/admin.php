@@ -637,7 +637,7 @@ class AdminModule extends DefaultModule
         global $server;
         
         $response = array(
-            'success' => false,
+            'success' => true,
         );
 
         $archiveData = array();
@@ -656,12 +656,7 @@ class AdminModule extends DefaultModule
                                   ' > '.$filePath;
         exec($command, $output, $worked);
 
-        if($worked != 0)
-        {
-            Logger::warning('admin::backupSqlDatabase failed to create "'.$archiveData['server_name'].'"', 
-                array('output'=>$output, 'worked'=>$worked));
-        }
-        else
+        if($worked == 0)
         {
             $archiveDao = ArchiveDao::getInstance();
             $result = $archiveDao->insert($archiveData);
@@ -670,16 +665,20 @@ class AdminModule extends DefaultModule
             {
                 unlink($archiveData['server_name']);
                 Logger::warning('admin::backupSqlDatabase failed to add archive to database.');
+                $response['success'] = false;
                 $response['error'] = 'Failed to create archive. See system log for details.';
             }
-            else
-            {
-                Logger::debug('admin::backupSqlDatabase finished for "'.$archiveData['server_name'].'"');
-                $response = array(
-                    'success' => true,
-                );
-            }
         }
+        else
+        {
+            Logger::warning('admin::backupSqlDatabase failed to create "'.$archiveData['server_name'].'"', 
+                array('output'=>$output, 'worked'=>$worked));
+            $response['success'] = false;
+            $response['error'] = 'Failed to create archive. See system log for details.';
+        }
+
+        Logger::debug('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
+        '" in '.$response['time'].' sec.');
 
         return $response;
     }
@@ -734,7 +733,6 @@ class AdminModule extends DefaultModule
             {
                 $archiveDao = ArchiveDao::getInstance();
                 $result = $archiveDao->insert($archiveData);
-                $filesize = filesize($zipFilepath);
 
                 if($result === false)
                 {
@@ -753,7 +751,7 @@ class AdminModule extends DefaultModule
         }
         
         Logger::debug('admin::saveArchive finished for "'. $archiveData['server_name'].
-            '" ('.$filesize.') in '.$response['time'].' sec.');
+            '" in '.$response['time'].' sec.');
 
         return $response;
     }
