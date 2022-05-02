@@ -717,7 +717,7 @@ class AdminModule extends DefaultModule
         );
 
         $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getAllConversations();
+        $conversations = $conversationsDao->getConversations();
         
         $zip = new ZipArchive();
         if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
