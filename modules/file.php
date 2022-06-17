@@ -27,7 +27,6 @@ class FileModule implements Module
         else if($subaction == 'file' && intval($id) > 0)
         {
             // Get file attachment
-            Logger::warning('compile: '.$id.'.');
             $this->getFileUpload($id);
         }
         
@@ -42,7 +41,6 @@ class FileModule implements Module
         {
             $messageFileDao = MessageFileDao::getInstance();
             $file = $messageFileDao->getFile($fileId, $this->user->user_id);
-            Logger::warning('getFileUpload: '.$fileId. ' - '.($file->getServerPath()).'.');
         }
 
         // Also catches the case where the user does not have 
