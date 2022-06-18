@@ -80,7 +80,7 @@ function handleEventSourceDelay(event) {
 
 var newMsgSound = null;
 $(document).ready(
-    newMsgSound = $("new-msg-sound")
+    newMsgSound = document.getElementById("new-msg-sound")
 );
 
 function handleEventSourceNewMessage(event) {
@@ -89,6 +89,7 @@ function handleEventSourceNewMessage(event) {
     var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
     compileMsg(data, false);
     
+    alert(newMsgSound);
     newMsgSound.pause();
     newMsgSound.play();
 
