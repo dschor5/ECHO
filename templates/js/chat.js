@@ -78,20 +78,14 @@ function handleEventSourceDelay(event) {
     $('#distance-value').text(data.distance);
 }
 
-var newMsgSound = null;
-$(document).ready(
-    newMsgSound = document.getElementById("new-msg-sound")
-);
-
 function handleEventSourceNewMessage(event) {
     const data = JSON.parse(event.data);
     var scrollContainer = document.querySelector("#content");
     var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
     compileMsg(data, false);
     
-    alert(newMsgSound);
-    newMsgSound.pause();
-    newMsgSound.play();
+    $("#new-msg-sound")[0].pause();
+    $("#new-msg-sound")[0].play();
 
     if(autoScroll < 200)
     {
