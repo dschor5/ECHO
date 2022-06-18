@@ -78,12 +78,20 @@ function handleEventSourceDelay(event) {
     $('#distance-value').text(data.distance);
 }
 
+var newMsgSound = null;
+$(document).ready(
+    newMsgSound = $("new-msg-sound")
+);
+
 function handleEventSourceNewMessage(event) {
     const data = JSON.parse(event.data);
     var scrollContainer = document.querySelector("#content");
     var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
     compileMsg(data, false);
     
+    newMsgSound.pause();
+    newMsgSound.play();
+
     if(autoScroll < 200)
     {
         autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;

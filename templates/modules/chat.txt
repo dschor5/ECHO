@@ -60,7 +60,7 @@
 
         <template id="msg-sent-hab">
             <div class="msg">
-                <img src="%http%%site_url%/%templates_dir%/images/user-hab.jpg" class="msg-avatar"/>
+                <img src="%http%%site_url%/%templates_dir%/media/user-hab.jpg" class="msg-avatar"/>
                 <div class="msg-from"></div>
                 <div class="msg-content"></div>
                 <div class="msg-status">
@@ -79,7 +79,7 @@
 
         <template id="msg-sent-mcc">
             <div class="msg">
-                <img src="%http%%site_url%/%templates_dir%/images/user-mcc.jpg" class="msg-avatar"/>
+                <img src="%http%%site_url%/%templates_dir%/media/user-mcc.jpg" class="msg-avatar"/>
                 <div class="msg-from"></div>
                 <div class="msg-content"></div>
                 <div class="msg-status">
@@ -175,3 +175,8 @@
         <center><img id="large-msg-img" src="#"></center>
     </div>
     
+    <audio id="new-msg-sound">
+        <source src="%http%%site_url%/%templates_dir%/media/new_msg.ogg" type="audio/ogg">
+        <source src="%http%%site_url%/%templates_dir%/media/new_msg.m4r" type="audio/aac">
+        <source src="%http%%site_url%/%templates_dir%/media/new_msg.mp3" type="audio/mpeg">
+    </audio>
