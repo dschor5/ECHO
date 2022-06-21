@@ -1,4 +1,8 @@
+/**
+ * Sends a text message. 
+ */
 function sendTextMessage() {
+
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
     if(newMsgText.length == 0) {
@@ -16,6 +20,8 @@ function sendTextMessage() {
             msgBody: newMsgText,
         },
         dataType: 'json',
+
+        // On success, build the message to display on the screen.
         success: function(resp) {
             if(resp.success) {
                 compileMsg(resp, false);
@@ -31,11 +37,17 @@ function sendTextMessage() {
     });
 }
 
+/**
+ * Scrolls to the bottom of the chat window.
+ */
 function scrollToBottom() {
-    var scrollContainer = document.querySelector("#content");
-    scrollContainer.scrollTop = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+    $('#content').prop("scrollTop", $('#content').prop("scrollHeight") - $('#content').prop("clientHeight"));
 }
 
+/**
+ * Detect whehter the user pressed SHIFT+ENTER and send the message.
+ * @param {event} Key event.
+ */
 function detectShiftEnter(event) {
     if(event.keyCode == 13 && event.shiftKey) {
         event.preventDefault();
@@ -66,6 +78,9 @@ evtSource.addEventListener("logout", handleEventSourceLogout);
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
+evtSource.onerror = function(e) {
+    console.log(e);
+};
 
 function handleEventSourceLogout(event) {
     evtSource.close();
@@ -80,30 +95,67 @@ function handleEventSourceDelay(event) {
 
 function handleEventSourceNewMessage(event) {
     const data = JSON.parse(event.data);
-    var scrollContainer = document.querySelector("#content");
-    var autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight - scrollContainer.scrollTop;
+    var scrollContainer = $("#content");
+    var autoScroll = scrollContainer.prop("scrollHeight") - scrollContainer.prop("clientHeight") - scrollContainer.prop("scrollTop");
+    
     compileMsg(data, false);
     
-    $("#new-msg-sound")[0].pause();
-    $("#new-msg-sound")[0].play();
-
     if(autoScroll < 200)
     {
-        autoScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+        autoScroll = scrollContainer.prop("scrollHeight") - scrollContainer.prop("clientHeight");
         $('#content').animate({
             scrollTop: autoScroll.toString() + 'px'
         }, 250);
+    }
+
+    newMessageNotification(data.author, true);
+}
+
+function newMessageNotification(name, thisRoom=true, ack=false) {
+    if($('#new-msg-sound').length) {
+        $("#new-msg-sound")[0].pause();
+        $("#new-msg-sound")[0].play();
+    }
+
+    if($('#badge-notification').length) {
+        var msg = "Message in '" + name + "'.";
+        var opt = {
+            icon: '%http%%site_url%/%templates_dir%/media/android-chrome-192x192.png',
+            requireInteraction: ack
+        };
+        if(thisRoom) {
+            msg = "Message from " + name;
+        } 
+
+        if(!("Notification" in window)) {
+            console.log("Browser does not support notifications.")
+        }
+        else if(Notification.persmission === "granted") {
+            var notification = new Notification(msg, opt);
+        }
+        else if(Notification.persmission !== "denied") {
+            Notification.requestPermission().then(function(permission) {
+                if(permission === "granted") {
+                    var notification = new Notification(msg, opt);
+                }
+            })
+        }
     }
 }
 
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
-    var container = document.querySelector('#room-new-' + data.conversation_id);
-    if(container != null) {
-        container.textContent = '(' + data.num_messages + ')';
+    if($('#room-new-' + data.conversation_id).length) {
+        $('#room-new-' + data.conversation_id).text( '(' + data.num_messages + ')');
+        newMessageNotification($('#room-name-' + data.conversation_id).text(), false);
     }
 }
 
+/**
+ * Compile message to display on the chat window. 
+ * @param {} data 
+ * @param {*} before 
+ */
 function compileMsg(data, before){
     var template = document.querySelector('#msg-sent-'.concat(data.source));
     if('content' in document.createElement('template'))
