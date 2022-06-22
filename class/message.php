@@ -179,8 +179,10 @@ class Message
 
     private function compileMsgText() : string
     {
-        $Parsedown = new Parsedown();
-        return $Parsedown->line($this->text);
+        $parsedown = new Parsedown();
+        $parsedown->setSafeMode(true);
+        $parsedown->setBreaksEnabled(false);
+        return $parsedown->line($this->text);
 
         /*$rexProtocol = '((https?://)|(ftp://))?';
         $rexDomain   = '((?:[-a-zA-Z0-9]{1,63}\.)+[-a-zA-Z0-9]{2,63}|(?:[0-9]{1,3}\.){3}[0-9]{1,3})';
