@@ -47,12 +47,42 @@
 
     public function getType() : string
     {
-        return ($this->mime_type == 'application/sql') ? 'SQL Backup (sql)' : 'Conversation Archive (zip)';
+        $type = '';
+
+        if($this->mime_type == 'application/sql')
+        {
+            $type = 'SQL Backup (sql)'; 
+        }
+        else if($this->mime_type == 'application/txt')
+        {
+            $type = 'System Log Backup (txt)';
+        }
+        else
+        {
+            $type = 'Conversation Backup (zip)';
+        }
+
+        return $type;
     }
 
     public function getExtension() : string
     {
-        return ($this->mime_type == 'application/sql') ? 'sql' : 'zip';
+        $ext = '';
+
+        if($this->mime_type == 'application/sql')
+        {
+            $ext = 'sql'; 
+        }
+        else if($this->mime_type == 'application/txt')
+        {
+            $ext = 'txt';
+        }
+        else
+        {
+            $ext = 'zip';
+        }
+
+        return $ext;
     }
 
     public function getDesc() : string
