@@ -54,7 +54,8 @@ $config['modules_user'] = array_merge($config['modules_public'], array(
 ));
 
 $config['modules_admin'] = array_merge($config['modules_user'], array( 
-    'admin'
+    'admin',
+    'debug'
 ));
 
 $config['cookie_name'] = 'website';
@@ -73,6 +74,7 @@ require_once('database/dao.php');
 require_once('modules/interface.php');
 require_once('modules/default.php');
 require_once('modules/error.php');
+require_once('modules/debug.php');
 
 // Include classes
 require_once('class/log.php');

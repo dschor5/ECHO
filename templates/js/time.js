@@ -1,5 +1,11 @@
+/**
+ * Update time at 1Hz.
+ */
 $(document).ready(setTimeout(updateTime, 1000));
 
+/**
+ * Update time diaplay. 
+ */
 function updateTime() {
     var dt = new Date();
     var mccDate = formatTime(null, true);
@@ -29,6 +35,12 @@ function updateTime() {
     setTimeout(updateTime, 1000);
 }
 
+/**
+ * Format string to display time. 
+ * @param {string} timeStr 
+ * @param {boolean} mccOffset 
+ * @returns stirng
+ */
 function formatTime(timeStr, mccOffset=USER_IN_MCC) {
     var dt;
     if(timeStr == null) {

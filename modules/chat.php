@@ -671,6 +671,18 @@ class ChatModule extends DefaultModule
         // Add templates for this module. 
         $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
 
+        $notificationAudio = '';
+        if(MissionConfig::getInstance()->notification_audio)
+        {
+            $notificationAudio = Main::loadTemplate('chat-notification-audio.txt');
+        }
+
+        $notificationBadge = '';
+        if(MissionConfig::getInstance()->notification_badge)
+        {
+            $notificationBadge = Main::loadTemplate('chat-notification-badge.txt');
+        }
+
         // Load template. 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'           =>$this->user->username,
@@ -681,6 +693,8 @@ class ChatModule extends DefaultModule
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                   '/%download-link%/'      => Main::loadTemplate('download-link.txt', 
                                               array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),
+                  '/%notification_audio%/' => $notificationAudio,
+                  '/%notification_badge%/' => $notificationBadge,
                 ));
     }
 
