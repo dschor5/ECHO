@@ -188,8 +188,7 @@ class Conversation
                         '/%id%/'           => $this->conversation_id,
                         '/%participants%/' => $participantsStr,
                         '/%messages%/'     => $msgStr,
-                        '/%timeref-mcc%/'  => $missionConfig->mcc_timezone,
-                        '/%timeref-hab%/'  => $missionConfig->hab_timezone
+                        '/%archive-tz%/'   => archive-tz,
                 ));
 
             $fileName = $folderName.'.html';
