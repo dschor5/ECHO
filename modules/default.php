@@ -139,6 +139,7 @@ abstract class DefaultModule implements Module
             // Default links for all users. 
             $navLinks[] = array('url' => 'chat',        'name' => 'Chat',        'icon' => 'home');
             $navLinks[] = array('url' => 'preferences', 'name' => 'Preferences', 'icon' => 'pencil');
+            $navLinks[] = array('url' => 'help',        'name' => 'Help',        'icon' => 'help');
             
             // Links for admin users only
             if($this->user->is_admin)

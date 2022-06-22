@@ -180,7 +180,7 @@ class Message
     private function compileMsgText() : string
     {
         $Parsedown = new Parsedown();
-        return $Parsedown->text($this->text);
+        return $Parsedown->line($this->text);
 
         /*$rexProtocol = '((https?://)|(ftp://))?';
         $rexDomain   = '((?:[-a-zA-Z0-9]{1,63}\.)+[-a-zA-Z0-9]{2,63}|(?:[0-9]{1,3}\.){3}[0-9]{1,3})';
