@@ -603,9 +603,15 @@ class AdminModule extends DefaultModule
             ));
         }
 
+        // Get a copy of the system log to display
+        $logNum = 20;
+        $logEntries = Logger::tailLog($logNum);
+
         return Main::loadTemplate('admin-data.txt', array(
             '/%archive_tz%/'=>$archiveTzOptions,
             '/%archives%/' => $list->build(),
+            '/%log-num%/' => $logNum,
+            '/%log-entries%/' => $logEntries,
         ));
     }
 
