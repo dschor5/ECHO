@@ -114,7 +114,8 @@ class Logger
         global $server;
         
         // Format log entry
-        $logEntry = date(self::DATE_FORMAT).' ['.$type.'] '.$message;
+        $dateUtc = new DateTime("now", new DateTimeZone('UTC'));
+        $logEntry = $dateUtc->format(self::DATE_FORMAT).' ['.$type.'] '.$message;
 
         // If provided, JSON encode the $context array.
         if($context != null)
