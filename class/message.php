@@ -181,7 +181,7 @@ class Message
     {
         $parsedown = new Parsedown();
         $parsedown->setSafeMode(true);
-        $parsedown->setBreaksEnabled(false);
+        $parsedown->setBreaksEnabled(true);
         return $parsedown->text($this->text);
 
         /*$rexProtocol = '((https?://)|(ftp://))?';
