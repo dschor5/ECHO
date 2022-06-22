@@ -604,7 +604,7 @@ class AdminModule extends DefaultModule
         }
 
         // Get a copy of the system log to display
-        $logNum = 20;
+        $logNum = 50;
         $logEntries = Logger::tailLog($logNum);
 
         return Main::loadTemplate('admin-data.txt', array(
