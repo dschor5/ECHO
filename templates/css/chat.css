@@ -465,3 +465,21 @@
     display: inline-block;
     color: #000000;
   }
+
+  .msg-content table {
+    border: 1px solid black;
+    padding: 0px;
+    margin: 0px;
+    border-spacing:0;
+}
+
+.msg-content td, .msg-content th {
+    border: 1px solid black;
+    margin: 0px;
+    padding: 3px;
+}
+
+.msg-content blockquote {
+    border-left: 2px solid #CCC;
+    padding-left: 10px;
+}
