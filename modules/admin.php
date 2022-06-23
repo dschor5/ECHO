@@ -631,7 +631,7 @@ class AdminModule extends DefaultModule
             {
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
-            Logger::debug("Cleared log.");
+            Logger::info("Cleared log.");
         }
 
         return array('success' => true);
@@ -695,7 +695,7 @@ class AdminModule extends DefaultModule
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
 
-        Logger::debug('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
+        Logger::info('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
         '" in '.$response['time'].' sec.');
 
         return $response;
@@ -715,7 +715,7 @@ class AdminModule extends DefaultModule
         {
             $response['success'] = unlink($filepath);
         }
-        Logger::debug("Reset System Log.");
+        Logger::info("Reset System Log.");
 
         return $response;
     }
@@ -763,7 +763,7 @@ class AdminModule extends DefaultModule
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
 
-        Logger::debug('admin::backupSystemLog finished for "'. $archiveData['server_name'].'".');
+        Logger::info('admin::backupSystemLog finished for "'. $archiveData['server_name'].'".');
 
         return $response;
     }
@@ -797,7 +797,7 @@ class AdminModule extends DefaultModule
             $archiveData['timestamp'] = $currTime->getTime();
             $archiveData['content_tz'] = $tzSelected;
 
-            Logger::debug('admin::backupConversations started for "'.$archiveData['server_name'].'"');
+            Logger::info('admin::backupConversations started for "'.$archiveData['server_name'].'"');
             $startTime = microtime(true);
 
             $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
@@ -846,7 +846,7 @@ class AdminModule extends DefaultModule
             }
         }
         
-        Logger::debug('admin::backupConversations finished for "'. $archiveData['server_name'].
+        Logger::info('admin::backupConversations finished for "'. $archiveData['server_name'].
             '" in '.$response['time'].' sec.');
 
         return $response;
