@@ -92,9 +92,9 @@
                 <span style="color: red;">WARNING:</span> This step is irreversible.
             </div>
         </div>
-    </div>
 
-    <div style="height: 100px;"></div>
+        <div style="height: 100px;"></div>
+    </div>
 </div>
 
 <div id="dialog-confirm" title="" class="dialog-body">
