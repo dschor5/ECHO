@@ -16,7 +16,8 @@ class AdminModule extends DefaultModule
             'deleteuser'   => 'deleteUser', 
             'resetuser'    => 'resetUserPassword', 
             // Data Management
-            'clear'        => 'clearMissionData', 
+            'clear'        => 'clearMissionData',
+            'resetlog'     => 'resetSystemLog', 
             'backupsql'    => 'backupSqlDatabase', 
             'backupconvo'  => 'backupConversations',
             'backuplog'    => 'backupSystemLog',
@@ -630,6 +631,7 @@ class AdminModule extends DefaultModule
             {
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
+            Logger::debug("Cleared log.");
         }
 
         return array('success' => true);
@@ -699,6 +701,24 @@ class AdminModule extends DefaultModule
         return $response;
     }
 
+    protected function resetSystemLog() : array
+    {
+        global $config;
+        global $server;
+
+        $response = array(
+            'success' => true,
+        );
+
+        $filepath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
+        if(file_exists($filepath))
+        {
+            $response['success'] = unlink($filepath);
+        }
+
+        return $response;
+    }
+
     /**
      * Create a backup of the System Log. 
      *
@@ -708,12 +728,7 @@ class AdminModule extends DefaultModule
     {
         global $config;
         global $server;
-        global $database;
         
-        $response = array(
-            'success' => true,
-        );
-
         $currTime = new DelayTime();
         $archiveData = array();
         $archiveData['archive_id'] = 0;

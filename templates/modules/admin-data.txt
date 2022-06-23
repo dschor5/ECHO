@@ -83,6 +83,17 @@
                 <span style="color: red;">WARNING:</span> This step is irreversible.
             </div>
         </div>
+
+        <div class="form-row">
+            <label for="name">Reset System Log</label>
+            <div class="form-field">
+                <button type="button" class="form-button" onclick="confirmAction('resetlog', 0, '')">Reset System Log</button>
+            </div>
+            <div class="form-help">
+                Clears system log. <br>
+                <span style="color: red;">WARNING:</span> This step is irreversible.
+            </div>
+        </div>
     </div>
 </div>
 
