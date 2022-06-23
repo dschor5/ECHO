@@ -191,7 +191,7 @@ class Conversation
                         '/%id%/'           => $this->conversation_id,
                         '/%participants%/' => $participantsStr,
                         '/%messages%/'     => $msgStr,
-                        '/%archive-tz%/'   => archive-tz,
+                        '/%archive-tz%/'   => $tz,
                 ));
 
             $fileName = $folderName.'.html';
