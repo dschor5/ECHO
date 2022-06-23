@@ -152,7 +152,7 @@ class Logger
         foreach($lines as $line)
         {
             [$logTime, $logType, $logText] = explode(" ", $line, 3);
-            $logType = substr($parts[1], 1, -1);
+            $logType = substr($logType, 1, -1);
 
             $output .= Main::loadTemplate(array(
                 '/%log-time%/' => $logTime, 
