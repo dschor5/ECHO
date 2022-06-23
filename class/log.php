@@ -151,15 +151,18 @@ class Logger
         $lines = explode(PHP_EOL, $text);
         foreach($lines as $line)
         {
-            [$logDate, $logTime, $logType, $logText] = explode(" ", $line, 4);
-            $logType = substr($logType, 1, -1);
+            if(strlen(trim($line)) > 0)
+            {
+                [$logDate, $logTime, $logType, $logText] = explode(" ", $line, 4);
+                $logType = substr($logType, 1, -1);
 
-            $output .= Main::loadTemplate('admin-data-log.txt', array(
-                '/%log-time%/' => $logDate.' '.$logTime, 
-                '/%log-type%/' => strtolower($logType), 
-                '/%LOG-TYPE%/' => strtoupper($logType), 
-                '/%log-text%/' => $logText
-            ));
+                $output .= Main::loadTemplate('admin-data-log.txt', array(
+                    '/%log-time%/' => $logDate.' '.$logTime, 
+                    '/%log-type%/' => strtolower($logType), 
+                    '/%LOG-TYPE%/' => strtoupper($logType), 
+                    '/%log-text%/' => $logText
+                ));
+            }
         }
 
         return $output;

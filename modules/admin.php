@@ -715,6 +715,7 @@ class AdminModule extends DefaultModule
         {
             $response['success'] = unlink($filepath);
         }
+        Logger::debug("Reset System Log.");
 
         return $response;
     }
