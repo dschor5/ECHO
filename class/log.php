@@ -170,7 +170,7 @@ class Logger
                 $parts[1] = '<span class="log-info">'.$parts[1].'</span>';
                 $parts[2] = '<span class="log-text">'.$parts[2].'</span>';
             }
-            $output = implode(' ', $parts).'<br/>';
+            $output .= implode(' ', $parts).'<br/>';
         }
 
         return $output;
