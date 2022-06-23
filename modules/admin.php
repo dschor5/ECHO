@@ -720,7 +720,7 @@ class AdminModule extends DefaultModule
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
         $archiveData['notes'] = ''; // Not used for SQL archives.
         $archiveData['mime_type'] = 'application/txt';
-        $archiveData['timestamp'] = $currTime->getTime();.
+        $archiveData['timestamp'] = $currTime->getTime();
         $archiveData['content_tz'] = 'UTC';
 
         $fromPath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
