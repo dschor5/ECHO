@@ -108,7 +108,7 @@ class Message
      */
     private function getReceivedTime(bool $remoteDest) : string
     {
-        return ($remoteDest xor $this->is_crew) ? $this->recv_time_hab : $this->recv_time_mcc;
+        return ($remoteDest xor $this->is_crew) ? $this->recv_time_mcc : $this->recv_time_hab;
     }
 
     /**
