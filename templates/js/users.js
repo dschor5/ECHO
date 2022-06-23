@@ -1,4 +1,7 @@
-// Get user information to edit profile.
+/**
+ * Ajax request to get user information and populate fields. 
+ * @param {number} id 
+ */
 function getUser(id) {
     $.ajax({
         url: BASE_URL + '/admin',
@@ -30,7 +33,9 @@ function getUser(id) {
     });
 }
 
-// Process request to edit user profile. 
+/**
+ * Ajax request to edit/update user profile. 
+ */
 function editUser() {
     $.ajax({
         url: BASE_URL + '/admin',
@@ -56,6 +61,12 @@ function editUser() {
     });
 }
 
+/**
+ * Populate and show dialog to reset/delete a user account.
+ * @param {string} subaction 
+ * @param {number} id 
+ * @param {string} username 
+ */
 function confirmAction(subaction, id, username) {
     $(document).ready(function() {
         $('#confirm-subaction').val(subaction);
@@ -76,6 +87,10 @@ function confirmAction(subaction, id, username) {
     });
 }
 
+/**
+ * Ajax request to delete or reset a user account.
+ * On success, reload page. 
+ */
 function deleteOrResetUser() {
     $.ajax({
         url: BASE_URL + '/admin',
@@ -91,15 +106,21 @@ function deleteOrResetUser() {
     });
 }
 
-// Actions to execute when closing modal window.
+/**
+ * Hide dialogs and response fields.
+ */
 function closeModal() {
     $('#dialog-edit-user').dialog('widget').hide('highlight', 0);
     $('#dialog-confirm').dialog('widget').hide('highlight', 0);
     $('div.dialog-response').hide();
 }
 
-// Event handlers for closing modal.
+/**
+ * Build JQuery dialogs for editing and deleting/resetting users accounts.
+ */
 $(document).ready(function() {
+
+    // Dialog to edit user accounts.
     $('#dialog-edit-user').dialog({
         autoOpen: false,
         draggable: false,
@@ -121,6 +142,7 @@ $(document).ready(function() {
         modal: true,
     });
 
+    // Dialog to confirm deletion/reseting of a user account
     $('#dialog-confirm').dialog({
         autoOpen: false,
         draggable: false,

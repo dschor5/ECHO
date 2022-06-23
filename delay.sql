@@ -79,20 +79,22 @@ CREATE TABLE `mission_archives` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
-('name',            'string', 'Analog Mission Name'),
-('date_start',      'string', '2021-08-10 00:00:00'),
-('date_end',        'string', '2021-11-10 00:00:00'),
-('mcc_name',        'string', 'Mission Control'),
-('mcc_planet',      'string', 'Earth'),
-('mcc_user_role',   'string', 'Mission Control'),
-('mcc_timezone',    'string', 'America/New_York'),
-('hab_name',        'string', 'Analog Habitat'),
-('hab_planet',      'string', 'Mars'),
-('hab_user_role',   'string', 'Astronaut'),
-('hab_timezone',    'string', 'America/Chicago'),
-('hab_day_name',    'string', 'Mission Day'),
-('delay_is_manual', 'bool',   '1'),
-('delay_config',    'string', '[{"ts":"2021-01-01 00:00:00","eq":0}]');
+('name',               'string', 'Analog Mission Name'),
+('date_start',         'string', '2021-08-10 00:00:00'),
+('date_end',           'string', '2021-11-10 00:00:00'),
+('mcc_name',           'string', 'Mission Control'),
+('mcc_planet',         'string', 'Earth'),
+('mcc_user_role',      'string', 'Mission Control'),
+('mcc_timezone',       'string', 'America/New_York'),
+('hab_name',           'string', 'Analog Habitat'),
+('hab_planet',         'string', 'Mars'),
+('hab_user_role',      'string', 'Astronaut'),
+('hab_timezone',       'string', 'America/Chicago'),
+('hab_day_name',       'string', 'Mission Day'),
+('delay_is_manual',    'bool',   '1'),
+('delay_config',       'string', '[{"ts":"2021-01-01 00:00:00","eq":0}]'),
+('notification_audio', 'bool',   '1'),
+('notification_badge', 'bool',   '1');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
 (1, 'admin', 'Admin', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');

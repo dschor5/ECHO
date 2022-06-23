@@ -58,10 +58,13 @@ class Conversation
         // - participants_both_sites=1 - Convo made up of only MCC or only HAB users.
         // - participants_both_sites=2 - Convo made up of both MCC and HAB users.
         // If not set, it is safer to assume both sites to enforce the comms delay. 
-        $this->data['participants_both_sites'] = true;
         if(isset($data['participants_both_sites']))
         {
             $this->data['participants_both_sites'] = (2 == $this->data['participants_both_sites']);
+        }
+        else
+        {
+            $this->data['participants_both_sites'] = true;
         }
     }
 
