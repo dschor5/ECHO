@@ -767,9 +767,6 @@ class AdminModule extends DefaultModule
             'error'   => '', 
         );
 
-        $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getConversations();
-        
         $tzSelected = $_POST['timezone'] ?? '';
         $timezones = DateTimeZone::listIdentifiers();
         if(!in_array($tzSelected, $timezones))
