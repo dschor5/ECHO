@@ -108,6 +108,9 @@ class Message
      */
     private function getReceivedTime(bool $remoteDest) : string
     {
+        $str = 'remoteDest='.($remoteDest?'true':'false').', '. 
+               'is_crew='.($this->is_crew?'true':'false');
+        Logger::error($str)
         return ($remoteDest xor $this->is_crew) ? $this->recv_time_mcc : $this->recv_time_hab;
     }
 
