@@ -40,7 +40,6 @@ function clearData() {
     });
 }
 
-
 function confirmAction(subaction, id, str) {
     $(document).ready(function() {
         $('#confirm-subaction').val(subaction);
@@ -51,7 +50,7 @@ function confirmAction(subaction, id, str) {
             $('.modal-confirm-body').text("Are you sure you want to delete the " + str + "?");
             $('#confirm-btn').text('Delete Archive');
         }
-        else if($subacton == 'resetlog') {
+        else if(subacton == 'resetlog') {
             $('#dialog-confirm').dialog({title: 'Reset System Log'});
             $('.modal-confirm-body').text("Are you sure you want to reset the System Log?");
             $('#confirm-btn').text('Reset System Log');
