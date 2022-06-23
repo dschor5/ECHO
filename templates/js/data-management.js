@@ -50,7 +50,7 @@ function confirmAction(subaction, id, str) {
             $('.modal-confirm-body').text("Are you sure you want to delete the " + str + "?");
             $('#confirm-btn').text('Delete Archive');
         }
-        else if(subacton == 'resetlog') {
+        else if(subaction == 'resetlog') {
             $('#dialog-confirm').dialog({title: 'Reset System Log'});
             $('.modal-confirm-body').text("Are you sure you want to reset the System Log?");
             $('#confirm-btn').text('Reset System Log');
