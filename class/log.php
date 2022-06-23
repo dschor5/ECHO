@@ -151,7 +151,7 @@ class Logger
         $lines = explode(PHP_EOL, $text);
         foreach($lines as $line)
         {
-            [$logDate, $logTime, $logType, $logText] = explode(" ", $line, 3);
+            [$logDate, $logTime, $logType, $logText] = explode(" ", $line, 4);
             $logType = substr($logType, 1, -1);
 
             $output .= Main::loadTemplate('admin-data-log.txt', array(
