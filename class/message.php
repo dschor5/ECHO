@@ -167,35 +167,26 @@ class Message
         $planet = ($participants[$this->data['user_id']]['is_crew'] ? $missionConfig->hab_planet : $missionConfig->mcc_planet);
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
-            array('/%id%/'        => $this->data['message_id'],
-                  '/%from-user%/' => $participants[$this->data['user_id']]['alias'].' ('.$planet.')',
-                  '/%sent-time%/' => DelayTime::convertTimestampTimezone($this->data['sent_time'], 'UTC', $tz),
+            array('/%id%/'        => $this->message_id,
+                  '/%from-user%/' => $participants[$this->user_id]['alias'],
+                  '/%sent-time%/' => DelayTime::convertTimestampTimezone($this->sent_time, 'UTC', $tz),
                   '/%recv-time-mcc%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
                   '/%recv-time-hab%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
                   '/%msg%/'       => $msg,
             ));
     }
 
-    private function callback($match)
-    {
-        // Prepend http:// if no protocol specified
-        $completeUrl = $match[1] ? $match[0] : "http://{$match[0]}";
-
-        return '<a href="' . $completeUrl . '" target="_blank">'
-            . $match[2] . $match[3] . $match[4] . '</a>';
-    }
-
+    /**
+     * Use Parsedown class to render TEXT messages using markdown formatting. 
+     *
+     * @return string
+     */
     private function compileMsgText() : string
     {
-        $rexProtocol = '((https?://)|(ftp://))?';
-        $rexDomain   = '((?:[-a-zA-Z0-9]{1,63}\.)+[-a-zA-Z0-9]{2,63}|(?:[0-9]{1,3}\.){3}[0-9]{1,3})';
-        $rexPort     = '(:[0-9]{1,5})?';
-        $rexPath     = '(/[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]*?)?';
-        $rexQuery    = '(\?[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
-        $rexFragment = '(#[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
-
-        return preg_replace_callback("&\\b$rexProtocol$rexDomain$rexPort$rexPath$rexQuery$rexFragment(?=[?.!,;:\"]?(\s|$))&",
-            array($this, 'callback'), htmlspecialchars($this->data['text']));
+        $parsedown = new Parsedown();
+        $parsedown->setSafeMode(true);
+        $parsedown->setBreaksEnabled(true);
+        return $parsedown->text($this->text);
     }
 
     /**

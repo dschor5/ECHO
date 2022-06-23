@@ -166,7 +166,8 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg-from").textContent = data.author + "(" + data.message_id + ")";
 
         if(data.type === 'text') {
-            msgClone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');
+            //msgClone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');
+            msgClone.querySelector(".msg-content").innerHTML = data.message;
         }
         else {
             template = document.querySelector('#msg-' + data.type);

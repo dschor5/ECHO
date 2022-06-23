@@ -139,7 +139,7 @@ abstract class DefaultModule implements Module
             // Default links for all users. 
             $navLinks[] = array('url' => 'chat',        'name' => 'Chat',        'icon' => 'home');
             $navLinks[] = array('url' => 'preferences', 'name' => 'Preferences', 'icon' => 'pencil');
-            
+                        
             // Links for admin users only
             if($this->user->is_admin)
             {
@@ -149,7 +149,8 @@ abstract class DefaultModule implements Module
                 $navLinks[] = array('url' => 'admin/data',    'name' => 'Data Management',  'icon' => 'document');
             }
 
-            // Add logout option for all users
+            // Add help and logout option for all users
+            $navLinks[] = array('url' => 'help',        'name' => 'Help',        'icon' => 'help');
             $navLinks[] = array('url' => 'logout', 'name' => 'Logout', 'icon' => 'power');
 
             // Build url for current path. 
