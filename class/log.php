@@ -154,7 +154,7 @@ class Logger
             [$logTime, $logType, $logText] = explode(" ", $line, 3);
             $logType = substr($logType, 1, -1);
 
-            $output .= Main::loadTemplate(array(
+            $output .= Main::loadTemplate('admin-data-log.txt', array(
                 '/%log-time%/' => $logTime, 
                 '/%log-type%/' => strtolower($logType), 
                 '/%LOG-TYPE%/' => strtoupper($logType), 
