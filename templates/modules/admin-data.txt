@@ -65,7 +65,7 @@
         <div class="subheading">Application Log</div>
         <div class="form-row">
             <label for="name">Last %log-num% log entries (refresh as needed)</label>
-            <div class="log-entries">
+            <div id="log-entries">
                 %log-entries%
             </div>
         </div>

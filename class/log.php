@@ -151,26 +151,15 @@ class Logger
         $lines = explode(PHP_EOL, $text);
         foreach($lines as $line)
         {
-            $parts = explode(" ", $line, 3);
-            $type = substr($parts[1], 1, -1);
+            [$logTime, $logType, $logText] = explode(" ", $line, 3);
+            $logType = substr($parts[1], 1, -1);
 
-            $parts[0] = '<span class="log-time">'.$parts[0].'</span>';
-            if($type == self::ERROR_STR)
-            {
-                $parts[1] = '<span class="log-error">'.$parts[1].'</span>';
-                $parts[2] = '<span class="log-text-error">'.$parts[2].'</span>';
-            }
-            else if($type == self::WARNING_STR)
-            {
-                $parts[1] = '<span class="log-warning">'.$parts[1].'</span>';
-                $parts[2] = '<span class="log-text">'.$parts[2].'</span>';
-            }
-            else
-            {
-                $parts[1] = '<span class="log-info">'.$parts[1].'</span>';
-                $parts[2] = '<span class="log-text">'.$parts[2].'</span>';
-            }
-            $output .= implode(' ', $parts).'<br/>';
+            $output .= Main::loadTemplate(array(
+                '/%log-time%/' => $logTime, 
+                '/%log-type%/' => strtolower($logType), 
+                '/%LOG-TYPE%/' => strtoupper($logType), 
+                '/%log-text%/' => $logText
+            ));
         }
 
         return $output;
