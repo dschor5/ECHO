@@ -97,7 +97,7 @@ class ChatModule extends DefaultModule
         
         // Get a listing of all the conversation the current user belongs to.
         $conversationsDao = ConversationsDao::getInstance();
-        $this->conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
+        $this->conversations = $conversationsDao->getConversations($this->user->user_id);
 
         // Check that the current user is a participant to the conversationId selected above. 
         if(isset($this->conversations[$conversationId]))
