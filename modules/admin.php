@@ -787,7 +787,7 @@ class AdminModule extends DefaultModule
             $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
             $conversationsDao = ConversationsDao::getInstance();
-            $conversations = $conversationsDao->getAllConversations();
+            $conversations = $conversationsDao->getConversations();
         
             $zip = new ZipArchive();
             if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
