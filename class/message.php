@@ -163,7 +163,8 @@ class Message
             }
         }
 
-        $planet = ($participants[$this->data['user_id']]['is_crew'] ? $habStr : $mccStr);
+        $missionConfig = MissionConfig::getInstance();
+        $planet = ($participants[$this->data['user_id']]['is_crew'] ? $missionConfig->hab_planet : $missionConfig->mcc_planet);
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%id%/'        => $this->data['message_id'],

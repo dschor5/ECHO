@@ -94,7 +94,7 @@ class ListGenerator
         }
         else
         {
-            $content .= self::TAB.self.TAB.'<tr><td colspan="'.count($this->headings).'">No data to display.</td></tr>'.PHP_EOL;
+            $content .= self::TAB.self::TAB.'<tr><td colspan="'.count($this->headings).'">No data to display.</td></tr>'.PHP_EOL;
         }
         
         $content .= self::TAB.'</table>'.PHP_EOL;

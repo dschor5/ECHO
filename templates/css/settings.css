@@ -173,3 +173,36 @@
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 10pt;
 }
+
+#log-entries {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 5px;
+    padding: 5px;
+    width: 770px;
+    height: 200px;
+    border: 0px;
+    overflow-y: scroll;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    border: 1px solid black;
+}
+
+.log-time {
+    font-weight: bold;
+}
+
+.log-error {
+    font-weight: bold;
+    color: #FF0000;
+}
+
+.log-warning {
+    font-style: italic;
+    color: #FF9933;
+}
+
+.log-debug, .log-info {
+    color: #666;
+}

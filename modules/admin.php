@@ -16,7 +16,8 @@ class AdminModule extends DefaultModule
             'deleteuser'   => 'deleteUser', 
             'resetuser'    => 'resetUserPassword', 
             // Data Management
-            'clear'        => 'clearMissionData', 
+            'clear'        => 'clearMissionData',
+            'resetlog'     => 'resetSystemLog', 
             'backupsql'    => 'backupSqlDatabase', 
             'backupconvo'  => 'backupConversations',
             'backuplog'    => 'backupSystemLog',
@@ -630,6 +631,7 @@ class AdminModule extends DefaultModule
             {
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
+            Logger::info("Cleared log.");
         }
 
         return array('success' => true);
@@ -678,7 +680,7 @@ class AdminModule extends DefaultModule
             
             if($result === false)
             {
-                unlink($archiveData['server_name']);
+                unlink($filePath);
                 Logger::warning('admin::backupSqlDatabase failed to add archive to database.');
                 $response['success'] = false;
                 $response['error'] = 'Failed to create archive. See system log for details.';
@@ -688,13 +690,32 @@ class AdminModule extends DefaultModule
         {
             Logger::warning('admin::backupSqlDatabase failed to create "'.$archiveData['server_name'].'"', 
                 array('output'=>$output, 'worked'=>$worked));
-            unlink($archiveData['server_name']);    
+            unlink($filePath);    
             $response['success'] = false;
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
 
-        Logger::debug('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
+        Logger::info('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
         '" in '.$response['time'].' sec.');
+
+        return $response;
+    }
+
+    protected function resetSystemLog() : array
+    {
+        global $config;
+        global $server;
+
+        $response = array(
+            'success' => true,
+        );
+
+        $filepath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
+        if(file_exists($filepath))
+        {
+            $response['success'] = unlink($filepath);
+        }
+        Logger::info("Reset System Log.");
 
         return $response;
     }
@@ -708,19 +729,14 @@ class AdminModule extends DefaultModule
     {
         global $config;
         global $server;
-        global $database;
         
-        $response = array(
-            'success' => true,
-        );
-
         $currTime = new DelayTime();
         $archiveData = array();
         $archiveData['archive_id'] = 0;
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
         $archiveData['notes'] = ''; // Not used for SQL archives.
         $archiveData['mime_type'] = 'application/txt';
-        $archiveData['timestamp'] = $currTime->getTime();.
+        $archiveData['timestamp'] = $currTime->getTime();
         $archiveData['content_tz'] = 'UTC';
 
         $fromPath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
@@ -733,7 +749,7 @@ class AdminModule extends DefaultModule
             
             if($result === false)
             {
-                unlink($archiveData['server_name']);
+                unlink($toPath);
                 Logger::warning('admin::backupSystemLog failed to add archive to database.');
                 $response['success'] = false;
                 $response['error'] = 'Failed to create archive. See system log for details.';
@@ -742,13 +758,12 @@ class AdminModule extends DefaultModule
         else
         {
             Logger::warning('admin::backupSystemLog failed to create "'.$archiveData['server_name'].'"');
-            unlink($archiveData['server_name']);    
+            unlink($toPath);    
             $response['success'] = false;
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
 
-        Logger::debug('admin::backupSystemLog finished for "'. $archiveData['server_name'].
-        '" in '.$response['time'].' sec.');
+        Logger::info('admin::backupSystemLog finished for "'. $archiveData['server_name'].'".');
 
         return $response;
     }
@@ -757,9 +772,6 @@ class AdminModule extends DefaultModule
     {
         global $config;
         global $server;
-        
-        Logger::debug('admin::backupConversations started for "'.$archiveData['server_name'].'"');
-            $startTime = microtime(true);
 
         $response = array(
             'success' => true, 
@@ -785,10 +797,13 @@ class AdminModule extends DefaultModule
             $archiveData['timestamp'] = $currTime->getTime();
             $archiveData['content_tz'] = $tzSelected;
 
+            Logger::info('admin::backupConversations started for "'.$archiveData['server_name'].'"');
+            $startTime = microtime(true);
+
             $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
             $conversationsDao = ConversationsDao::getInstance();
-            $conversations = $conversationsDao->getAllConversations();
+            $conversations = $conversationsDao->getConversations();
         
             $zip = new ZipArchive();
             if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
@@ -831,7 +846,7 @@ class AdminModule extends DefaultModule
             }
         }
         
-        Logger::debug('admin::backupConversations finished for "'. $archiveData['server_name'].
+        Logger::info('admin::backupConversations finished for "'. $archiveData['server_name'].
             '" in '.$response['time'].' sec.');
 
         return $response;

@@ -1,0 +1,1 @@
+<span class="log-time">%log-time%</span> <span class="log-%log-type%">[%LOG-TYPE%]</span> <span class="log-text">%log-text%</span> <br/>
