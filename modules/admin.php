@@ -747,8 +747,7 @@ class AdminModule extends DefaultModule
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
 
-        Logger::debug('admin::backupSystemLog finished for "'. $archiveData['server_name'].
-        '" in '.$response['time'].' sec.');
+        Logger::debug('admin::backupSystemLog finished for "'. $archiveData['server_name'].'".');
 
         return $response;
     }
