@@ -38,7 +38,7 @@ class Logger
     /**
      * Constant date format used for logging errors.
      */
-    const DATE_FORMAT = 'Y-m-dTH:i:s';
+    const DATE_FORMAT = 'Y-m-d H:i:s';
 
     /**
      * Destination for error log as defined in 
@@ -151,11 +151,11 @@ class Logger
         $lines = explode(PHP_EOL, $text);
         foreach($lines as $line)
         {
-            [$logTime, $logType, $logText] = explode(" ", $line, 3);
+            [$logDate, $logTime, $logType, $logText] = explode(" ", $line, 3);
             $logType = substr($logType, 1, -1);
 
             $output .= Main::loadTemplate('admin-data-log.txt', array(
-                '/%log-time%/' => $logTime, 
+                '/%log-time%/' => $logDate.' '.$logTime, 
                 '/%log-type%/' => strtolower($logType), 
                 '/%LOG-TYPE%/' => strtoupper($logType), 
                 '/%log-text%/' => $logText
