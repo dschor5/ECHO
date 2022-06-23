@@ -678,7 +678,7 @@ class AdminModule extends DefaultModule
             
             if($result === false)
             {
-                unlink($archiveData['server_name']);
+                unlink($filePath);
                 Logger::warning('admin::backupSqlDatabase failed to add archive to database.');
                 $response['success'] = false;
                 $response['error'] = 'Failed to create archive. See system log for details.';
@@ -688,7 +688,7 @@ class AdminModule extends DefaultModule
         {
             Logger::warning('admin::backupSqlDatabase failed to create "'.$archiveData['server_name'].'"', 
                 array('output'=>$output, 'worked'=>$worked));
-            unlink($archiveData['server_name']);    
+            unlink($filePath);    
             $response['success'] = false;
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
@@ -733,7 +733,7 @@ class AdminModule extends DefaultModule
             
             if($result === false)
             {
-                unlink($archiveData['server_name']);
+                unlink($toPath);
                 Logger::warning('admin::backupSystemLog failed to add archive to database.');
                 $response['success'] = false;
                 $response['error'] = 'Failed to create archive. See system log for details.';
@@ -742,7 +742,7 @@ class AdminModule extends DefaultModule
         else
         {
             Logger::warning('admin::backupSystemLog failed to create "'.$archiveData['server_name'].'"');
-            unlink($archiveData['server_name']);    
+            unlink($toPath);    
             $response['success'] = false;
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
@@ -757,9 +757,6 @@ class AdminModule extends DefaultModule
     {
         global $config;
         global $server;
-        
-        Logger::debug('admin::backupConversations started for "'.$archiveData['server_name'].'"');
-            $startTime = microtime(true);
 
         $response = array(
             'success' => true, 
@@ -784,6 +781,9 @@ class AdminModule extends DefaultModule
             $archiveData['mime_type'] = 'application/zip';
             $archiveData['timestamp'] = $currTime->getTime();
             $archiveData['content_tz'] = $tzSelected;
+
+            Logger::debug('admin::backupConversations started for "'.$archiveData['server_name'].'"');
+            $startTime = microtime(true);
 
             $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 

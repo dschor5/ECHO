@@ -33,9 +33,9 @@
         </div>
 
         <div class="form-row">
-            <label for="name">Backup MySQL</label>
+            <label for="name">MySQL Database</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="saveArchive('backupsql')">Download SQL Backup</button>
+                <button type="button" class="form-button" onclick="saveArchive('backupsql')">Backup MySQL Database</button>
                 <!--<div id="sql_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating SQL backup...</div>-->
                 <div id="sql_download"></div>
             </div>
@@ -45,9 +45,9 @@
         </div>
 
         <div class="form-row">
-            <label for="name">Backup System Log</label>
+            <label for="name">System Log</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="saveArchive('backuplog')">Download SQL Backup</button>
+                <button type="button" class="form-button" onclick="saveArchive('backuplog')">Backup System Log</button>
                 <!--<div id="sql_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating SQL backup...</div>-->
                 <div id="sql_download"></div>
             </div>
