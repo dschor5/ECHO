@@ -30,15 +30,21 @@ class Logger
     const WARNING_STR = 'WARNING';
 
     /**
+     * Level Threshold: INFO - Applicaiton can continue.
+     */
+    const INFO     = 2;
+    const INFO_STR = 'INFO';
+
+    /**
      * Level Threshold: DEBUG - Informaiton for developer only.
      */
-    const DEBUG     = 2;
-    const DEBUG_STR = 'INFO';
+    const DEBUG     = 3;
+    const DEBUG_STR = 'DEBUG';
 
     /**
      * Constant date format used for logging errors.
      */
-    const DATE_FORMAT = 'Y-m-dTH:i:s';
+    const DATE_FORMAT = 'Y-m-d H:i:s';
 
     /**
      * Destination for error log as defined in 
@@ -51,7 +57,7 @@ class Logger
      * @access private
      * @var int
      */
-    private static $levelThreshold = Logger::WARNING;
+    private static $levelThreshold = Logger::INFO;
     
     /**
      * Private constructor to prevent instantiating the class. 
@@ -86,6 +92,21 @@ class Logger
         }
         self::logMessage(self::WARNING_STR, $message, $context);
     }
+
+   /*
+    * Log an INFO level message. Recorded based on threshold setting.
+    *
+    * @param string $message Message to log.
+    * @param array|null $context Optional array to encode with the msg.
+    */    
+   public static function info(string $message, ?array $context=null)
+   {
+       if(self::$levelThreshold < Logger::INFO)
+       {
+           return;
+       }
+       self::logMessage(self::INFO_STR, $message, $context);
+   }    
 
     /**
      * Log an DEBUG level message. Recorded based on threshold setting.
@@ -147,33 +168,25 @@ class Logger
         $output = '';
 
         $filename = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
-        $text = Logger.tailCustom($filename, $lines);
+        $text = Logger::tailCustom($filename, $lines);
         $lines = explode(PHP_EOL, $text);
         foreach($lines as $line)
         {
-            $parts = explode(" ", $line, 3);
-            $type = substr($parts[1], 1, -1);
+            if(strlen(trim($line)) > 0)
+            {
+                [$logDate, $logTime, $logType, $logText] = explode(" ", $line, 4);
+                $logType = substr($logType, 1, -1);
 
-            $parts[0] = '<span class="log-time">'.$parts[0].'</span>';
-            if($type == ERROR_STR)
-            {
-                $parts[1] = '<span class="log-error">'.$parts[1].'</span>';
-                $parts[2] = '<span class="log-text-error">'.$parts[2].'</span>';
+                $output .= Main::loadTemplate('admin-data-log.txt', array(
+                    '/%log-time%/' => $logDate.' '.$logTime, 
+                    '/%log-type%/' => strtolower($logType), 
+                    '/%LOG-TYPE%/' => strtoupper($logType), 
+                    '/%log-text%/' => $logText
+                ));
             }
-            else if($type == WARNING_STR)
-            {
-                $parts[1] = '<span class="log-warning">'.$parts[1].'</span>';
-                $parts[2] = '<span class="log-text">'.$parts[2].'</span>';
-            }
-            else
-            {
-                $parts[1] = '<span class="log-info">'.$parts[1].'</span>';
-                $parts[2] = '<span class="log-text">'.$parts[2].'</span>';
-            }
-            $output = implode(' ', $parts).'<br/>';
         }
 
-        return $lines;
+        return $output;
     }
 
     /**

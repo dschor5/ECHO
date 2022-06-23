@@ -4,7 +4,7 @@ function saveArchive(downloadType) {
         type: 'POST',
         data: {
             subaction: downloadType,
-            timezone: $('#archive-tz option: selected').val()
+            timezone: $('#archive-tz option:selected').val()
         },
         dataType: 'json',
         success: function(data) {
@@ -40,7 +40,6 @@ function clearData() {
     });
 }
 
-
 function confirmAction(subaction, id, str) {
     $(document).ready(function() {
         $('#confirm-subaction').val(subaction);
@@ -50,6 +49,11 @@ function confirmAction(subaction, id, str) {
             $('#dialog-confirm').dialog({title: 'Delete Archive'});
             $('.modal-confirm-body').text("Are you sure you want to delete the " + str + "?");
             $('#confirm-btn').text('Delete Archive');
+        }
+        else if(subaction == 'resetlog') {
+            $('#dialog-confirm').dialog({title: 'Reset System Log'});
+            $('.modal-confirm-body').text("Are you sure you want to reset the System Log?");
+            $('#confirm-btn').text('Reset System Log');
         }
         else {
             $('#dialog-confirm').dialog({title: 'Delete All Data'});
@@ -79,7 +83,7 @@ $(document).ready(function() {
             {
                 text: 'OK',
                 id: 'confirm-btn',
-                click: clearData
+                click: clearData,
             }
         ],
         modal: true,

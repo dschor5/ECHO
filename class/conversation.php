@@ -188,10 +188,11 @@ class Conversation
         {
             $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
                 array('/%name%/'           => $this->name,
-                        '/%id%/'           => $this->conversation_id,
-                        '/%participants%/' => $participantsStr,
-                        '/%messages%/'     => $msgStr,
-                        '/%archive-tz%/'   => archive-tz,
+                      '/%id%/'           => $this->conversation_id,
+                      '/%participants%/' => $participantsStr,
+                      '/%messages%/'     => $msgStr,
+                      '/%archive-tz%/'   => $tz,
+                      '/%title%/'        => $this->name,
                 ));
 
             $fileName = $folderName.'.html';
