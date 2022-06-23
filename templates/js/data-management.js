@@ -55,13 +55,11 @@ function confirmAction(subaction, id, str) {
             $('#dialog-confirm').dialog({title: 'Reset System Log'});
             $('.modal-confirm-body').text("Are you sure you want to reset the System Log?");
             $('#confirm-btn').text('Reset System Log');
-            $('#confirm-btn').click(resetLog);
         }
         else {
             $('#dialog-confirm').dialog({title: 'Delete All Data'});
             $('.modal-confirm-body').text("Are you sure you want to delete all messages and user accounts (except admin accounts)?");
             $('#confirm-btn').text('Delete All Data');
-            $('#confirm-btn').click(clearData);
         }
         
         $('#dialog-confirm').dialog('open');
@@ -86,6 +84,7 @@ $(document).ready(function() {
             {
                 text: 'OK',
                 id: 'confirm-btn',
+                click: clearData,
             }
         ],
         modal: true,
