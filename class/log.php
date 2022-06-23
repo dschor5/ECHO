@@ -30,10 +30,16 @@ class Logger
     const WARNING_STR = 'WARNING';
 
     /**
+     * Level Threshold: INFO - Applicaiton can continue.
+     */
+    const INFO     = 2;
+    const INFO_STR = 'INFO';
+
+    /**
      * Level Threshold: DEBUG - Informaiton for developer only.
      */
-    const DEBUG     = 2;
-    const DEBUG_STR = 'INFO';
+    const DEBUG     = 3;
+    const DEBUG_STR = 'DEBUG';
 
     /**
      * Constant date format used for logging errors.
@@ -51,7 +57,7 @@ class Logger
      * @access private
      * @var int
      */
-    private static $levelThreshold = Logger::DEBUG;
+    private static $levelThreshold = Logger::INFO;
     
     /**
      * Private constructor to prevent instantiating the class. 
@@ -86,6 +92,21 @@ class Logger
         }
         self::logMessage(self::WARNING_STR, $message, $context);
     }
+
+   /*
+    * Log an INFO level message. Recorded based on threshold setting.
+    *
+    * @param string $message Message to log.
+    * @param array|null $context Optional array to encode with the msg.
+    */    
+   public static function info(string $message, ?array $context=null)
+   {
+       if(self::$levelThreshold < Logger::INFO)
+       {
+           return;
+       }
+       self::logMessage(self::INFO_STR, $message, $context);
+   }    
 
     /**
      * Log an DEBUG level message. Recorded based on threshold setting.

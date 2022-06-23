@@ -203,6 +203,6 @@
     color: #FF9933;
 }
 
-.log-debug {
+.log-debug, .log-info {
     color: #666;
 }
