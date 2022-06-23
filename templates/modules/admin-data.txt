@@ -61,9 +61,9 @@
         </div>
 
         <div class="form-divider"></div>
-        <div class="subheading">Application Log</div>
+        <div class="subheading">System Log</div>
         <div class="form-row">
-            <label for="name">Last %log-num% log entries (refresh as needed)</label>
+            <label for="name">Last %log-num% log entries (UTC timestamp; no-auto refresh)</label>
             <div id="log-entries">
                 %log-entries%
             </div>
