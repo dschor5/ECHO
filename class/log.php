@@ -20,22 +20,25 @@ class Logger
     /**
      * Level Threshold: ERROR - Applicaiton cannot recover.
      */
-    const ERROR    = 0;
+    const ERROR     = 0;
+    const ERROR_STR = 'ERROR';
 
     /**
      * Level Threshold: WARNING - Applicaiton can continue.
      */
-    const WARNING  = 1;
+    const WARNING     = 1;
+    const WARNING_STR = 'WARNING';
 
     /**
      * Level Threshold: DEBUG - Informaiton for developer only.
      */
-    const DEBUG    = 2;
+    const DEBUG     = 2;
+    const DEBUG_STR = 'INFO';
 
     /**
      * Constant date format used for logging errors.
      */
-    const DATE_FORMAT = 'Y-m-d H:i:s';
+    const DATE_FORMAT = 'Y-m-dTH:i:s';
 
     /**
      * Destination for error log as defined in 
@@ -66,7 +69,7 @@ class Logger
      */
     public static function error(string $message, ?array $context=null)
     {
-        self::logMessage('ERROR', $message, $context);
+        self::logMessage(self::ERROR_STR, $message, $context);
     }
 
     /**
@@ -81,7 +84,7 @@ class Logger
         {
             return;
         }
-        self::logMessage('WARNING', $message, $context);
+        self::logMessage(self::WARNING_STR, $message, $context);
     }
 
     /**
@@ -96,7 +99,7 @@ class Logger
         {
             return;
         }
-        self::logMessage('DEBUG', $message, $context);
+        self::logMessage(self::DEBUG_STR, $message, $context);
     }
 
     /**
@@ -114,7 +117,8 @@ class Logger
         global $server;
         
         // Format log entry
-        $logEntry = date(self::DATE_FORMAT).' ['.$type.'] '.$message;
+        $dateUtc = new DateTime("now", new DateTimeZone('UTC'));
+        $logEntry = $dateUtc->format(self::DATE_FORMAT).' ['.$type.'] '.$message;
 
         // If provided, JSON encode the $context array.
         if($context != null)
@@ -129,6 +133,121 @@ class Logger
             error_log($logEntry.PHP_EOL, self::ERROR_LOG_DEST, $folder.'/'.$config['log_file']);
         }
     }
+
+    /**
+     * Returns last X lines from the log into an array to display on GUI.
+     * @param int $lines Number of lines to read from log. 
+     * @return array
+     */
+    public static function tailLog($lines = 20) : string
+    {
+        global $config;
+        global $server;
+
+        $output = '';
+
+        $filename = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
+        $text = Logger.tailCustom($filename, $lines);
+        $lines = explode(PHP_EOL, $text);
+        foreach($lines as $line)
+        {
+            $parts = explode(" ", $line, 3);
+            $type = substr($parts[1], 1, -1);
+
+            $parts[0] = '<span class="log-time">'.$parts[0].'</span>';
+            if($type == ERROR_STR)
+            {
+                $parts[1] = '<span class="log-error">'.$parts[1].'</span>';
+                $parts[2] = '<span class="log-text-error">'.$parts[2].'</span>';
+            }
+            else if($type == WARNING_STR)
+            {
+                $parts[1] = '<span class="log-warning">'.$parts[1].'</span>';
+                $parts[2] = '<span class="log-text">'.$parts[2].'</span>';
+            }
+            else
+            {
+                $parts[1] = '<span class="log-info">'.$parts[1].'</span>';
+                $parts[2] = '<span class="log-text">'.$parts[2].'</span>';
+            }
+            $output = implode(' ', $parts).'<br/>';
+        }
+
+        return $lines;
+    }
+
+    /**
+	 * Slightly modified version of http://www.geekality.net/2011/05/28/php-tail-tackling-large-files/
+     * Modified by Dario Schor to work with different EOL configurations.
+	 * @author Torleif Berger, Lorenzo Stanco
+	 * @link http://stackoverflow.com/a/15025877/995958
+	 * @license http://creativecommons.org/licenses/by/3.0/
+	 */
+	private static function tailCustom($filepath, $lines = 1, $adaptive = true) 
+    {
+		// Open file
+		$f = @fopen($filepath, "rb");
+		if ($f === false)
+        {
+            return false;
+        }
+
+		// Sets buffer size, according to the number of lines to retrieve.
+		// This gives a performance boost when reading a few lines from the file.
+		if (!$adaptive)
+        {
+            $buffer = 4096;
+        }
+		else
+        {
+            $buffer = ($lines < 2 ? 64 : ($lines < 10 ? 512 : 4096));
+        }
+
+		// Jump to last character
+		fseek($f, -1, SEEK_END);
+
+		// Read it and adjust line number if necessary
+		// (Otherwise the result would be wrong if file doesn't end with a blank line)
+		if (fread($f, 1) != PHP_EOL)
+        {
+            $lines -= 1;
+        }
+		
+		// Start reading
+		$output = '';
+		$chunk = '';
+
+		// While we would like more
+		while (ftell($f) > 0 && $lines >= 0) 
+        {
+        	// Figure out how far back we should jump
+			$seek = min(ftell($f), $buffer);
+
+			// Do the jump (backwards, relative to where we are)
+			fseek($f, -$seek, SEEK_CUR);
+
+			// Read a chunk and prepend it to our output
+			$output = ($chunk = fread($f, $seek)) . $output;
+
+			// Jump back to where we started reading
+			fseek($f, -mb_strlen($chunk, '8bit'), SEEK_CUR);
+
+			// Decrease our line counter
+			$lines -= substr_count($chunk, PHP_EOL);
+		}
+
+		// While we have too many lines
+		// (Because of buffer size we might have read too many)
+		while ($lines++ < 0) 
+        {
+			// Find first newline and remove all text before that
+			$output = substr($output, strpos($output, PHP_EOL) + 1);
+		}
+
+		// Close file and return
+		fclose($f);
+		return trim($output);
+	}
 }
 
 ?>

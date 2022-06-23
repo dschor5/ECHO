@@ -4,6 +4,7 @@ function saveArchive(downloadType) {
         type: 'POST',
         data: {
             subaction: downloadType,
+            timezone: $('#archive-tz option: selected').val()
         },
         dataType: 'json',
         success: function(data) {

@@ -4,18 +4,23 @@
     </div>
     
     <div id="form-contents">
-        <div class="subheading">Save Conversations</div>
+        <div class="subheading">Backup Conversations</div>
     
         <div class="form-row">
             <label for="name">Conversations</label>
             <div class="form-field">
-                <button type="button" class="form-button" onclick="saveArchive('saveconvo')">Create Archive</button>
+
+                <select name="archive-tz" id="archive-tz">
+                    %archive_tz%
+                </select>
+
+                <button type="button" class="form-button" onclick="saveArchive('backupconvo')">Create Archive</button>
                 <!--<div id="archive_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating archive...</div>-->
                 <div id="archive_download"></div>
             </div>
             <div class="form-help">
-                Create a zip file containing a copy of all conversations and attachments. When downloading, select 
-                whether to show the receive time from the perspective of Mission Control or the Habitat. 
+                Create a zip file containing a copy of all conversations and attachments. Before generating the archive, select 
+                what timezone to use for all sent/receive messages.  
                 <br/>
                 File structure:
                 <div>&nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> archive-YYYY-MM-DDTHH-MM-SS.zip</div>
@@ -28,7 +33,7 @@
         </div>
 
         <div class="form-row">
-            <label for="name">SQL Backup</label>
+            <label for="name">Backup MySQL</label>
             <div class="form-field">
                 <button type="button" class="form-button" onclick="saveArchive('backupsql')">Download SQL Backup</button>
                 <!--<div id="sql_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating SQL backup...</div>-->
@@ -40,8 +45,29 @@
         </div>
 
         <div class="form-row">
-            <label for="name">Archives Created</label>
+            <label for="name">Backup System Log</label>
+            <div class="form-field">
+                <button type="button" class="form-button" onclick="saveArchive('backuplog')">Download SQL Backup</button>
+                <!--<div id="sql_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating SQL backup...</div>-->
+                <div id="sql_download"></div>
+            </div>
+            <div class="form-help">
+                Download a copy of the system log. Note that the filename and all timestamps therein are in the UTC timezone.
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="name">Backups Created</label>
             %archives%
+        </div>
+
+        <div class="form-divider"></div>
+        <div class="subheading">Application Log</div>
+        <div class="form-row">
+            <label for="name">Last %log-num% log entries (refresh as needed)</label>
+            <div class="log-entries">
+                %log-entries%
+            </div>
         </div>
 
         <div class="form-divider"></div>
@@ -61,7 +87,7 @@
 </div>
 
 <div id="dialog-confirm" title="" class="dialog-body">
-    <div class="modal-confirm-body"></div>
+    <div class="modal-confirm-body"><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span></div>
     <input type="hidden" id="confirm-archive-id" name="archive_id" value="">
     <input type="hidden" id="confirm-subaction" name="subaction" value="">    
 </div>

@@ -29,12 +29,8 @@
             </tr>
 %participants%    
             <tr>
-                <th colspan="2" class="convo-info-label">MCC Time Reference:</th>
-                <td colspan="4" class="convo-info-value">%timeref-mcc%</td>
-            </tr>
-            <tr>
-                <th colspan="2" class="convo-info-label">HAB Time Reference:</th>
-                <td colspan="4" class="convo-info-value">%timeref-hab%</td>
+                <th colspan="2" class="convo-info-label">Archive Timezone:</th>
+                <td colspan="4" class="convo-info-value">%archive-tz%</td>
             </tr>
             <tr>
                 <th width="6%">Id</th>
