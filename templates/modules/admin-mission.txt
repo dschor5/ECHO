@@ -128,19 +128,19 @@
         <div class="form-row">
             <label for="hab_name">Notifications</label>
             <div class="form-field">
-                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <span class="switch-label">Sound Notification:</span>
                 <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
             </div>
             <div class="form-field">
-                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <span class="switch-label">Sound Notification:</span>
                 <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
             </div>
             <div class="form-field">
-                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <span class="switch-label">Sound Notification:</span>
                 <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
             </div>
             <div class="form-field">
-                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <span class="switch-label">Sound Notification:</span>
                 <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
             </div>
             <div class="form-help">
