@@ -128,11 +128,11 @@
         <div class="form-row">
             <label for="hab_name">Notifications</label>
             <div class="form-field">
-                <span class="switch-label">Sound Notification:</span>
+                <div class="switch-label">Sound Notification:</div>
                 <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
             </div>
             <div class="form-field">
-                <span class="switch-label">Sound Notification:</span>
+                <div class="switch-label">Sound Notification:</div>
                 <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
             </div>
             <div class="form-field">

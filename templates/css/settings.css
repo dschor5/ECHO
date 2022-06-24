@@ -265,4 +265,5 @@
     border: 1px solid black;
     height: 26px;
     vertical-align: middle;
+    float: left;
   }
