@@ -261,6 +261,8 @@
   }
 
   .form-field .switch-label {
-    width: 100px;
+    width: 200px;
     border: 1px solid black;
+    height: 26px;
+    vertical-align: middle;
   }
