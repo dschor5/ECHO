@@ -123,6 +123,32 @@
         </div>
 
         <div class="form-divider"></div>
+        <div class="subheading">User Interface Features</div>
+
+        <div class="form-row">
+            <label for="hab_name">Notifications</label>
+            <div class="form-field">
+                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
+            </div>
+            <div class="form-field">
+                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
+            </div>
+            <div class="form-field">
+                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
+            </div>
+            <div class="form-field">
+                <label for="feature_notify_sound" class="switch-label">Sound Notification:</label>
+                <label class="switch"><input type="checkbox"><span class="slider"></span></label> 
+            </div>
+            <div class="form-help">
+                Name or accronym used to identify analog habitat.
+            </div>
+        </div>
+
+        <div class="form-divider"></div>
         <div class="form-row">
             <button onclick="saveConfig('mission')" type="button">Save Mission Configuration</button>
         </div>
