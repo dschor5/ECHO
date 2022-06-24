@@ -45,7 +45,7 @@ function login() {
     var password = $('#dialog-login #upass').val();
     if(username != '' && password != '') {
         $.ajax({
-            url:  BASE_URL,
+            url:  BASE_URL + '?ajax=true',
             type: "POST",
             data: {
                 uname: username,
