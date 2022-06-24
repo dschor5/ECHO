@@ -200,10 +200,17 @@ abstract class DefaultModule implements Module
         // Only allow requests from this server. 
         header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
-        if(array_key_exists($subaction, $this->subJsonRequests))
+        if(isset($_GET['ajax']))
         {
             header('Content-Type: application/json');
-            $response = $this->compileJson($subaction);
+            if(array_key_exists($subaction, $this->subJsonRequests))
+            {
+                $response = $this->compileJson($subaction);   
+            }
+            else
+            {
+                $response = array('success' => false);
+            }
             echo json_encode($response);
         }
         elseif(array_key_exists($subaction, $this->subStreamRequests))

@@ -4,7 +4,7 @@
  */
 function getUser(id) {
     $.ajax({
-        url: BASE_URL + '/admin',
+        url: BASE_URL + '/admin?ajax=true',
         type: 'POST',
         data: {
             subaction: 'getuser',        
