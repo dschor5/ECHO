@@ -27,7 +27,7 @@ function saveConfig(subaction){
     });
 
     $.ajax({
-        url:  BASE_URL + "/admin",
+        url:  BASE_URL + "/admin" + '?ajax=true',
         type: "POST",
         data: dataObj,
         dataType: 'json',

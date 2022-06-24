@@ -11,7 +11,7 @@ function sendTextMessage() {
     
     // Send AJAX request to save the message. 
     $.ajax({
-        url:  BASE_URL,
+        url:  BASE_URL + '?ajax=true',
         type: "POST",
         data: {
             action: 'chat',
@@ -73,7 +73,7 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
     return;
 }
 
-const evtSource = new EventSource(BASE_URL + '/chat/refresh');
+const evtSource = new EventSource(BASE_URL + '/chat/refresh' + '?Event=true');
 evtSource.addEventListener("logout", handleEventSourceLogout);
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
@@ -448,7 +448,7 @@ function uploadMedia(mediaType) {
 
     $.ajax({
         type: "POST",
-        url:  BASE_URL,
+        url:  BASE_URL + '?ajax=true',
         async: true,
         data: formData,
         cache: false,
@@ -517,7 +517,7 @@ function loadPrevMsgs() {
     if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
         $.ajax({
-            url:  BASE_URL,
+            url:  BASE_URL + '?ajax=true',
             type: "POST",
             data: {
                 action: 'chat',

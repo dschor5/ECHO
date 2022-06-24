@@ -1,6 +1,6 @@
 function saveArchive(downloadType) {
     $.ajax({
-        url: BASE_URL + '/admin',
+        url: BASE_URL + '/admin' + '?ajax=true',
         type: 'POST',
         data: {
             subaction: downloadType,
@@ -20,7 +20,7 @@ function saveArchive(downloadType) {
 
 function clearData() {
     $.ajax({
-        url: BASE_URL + '/admin',
+        url: BASE_URL + '/admin' + '?ajax=true',
         type: 'POST',
         data: {
             subaction: $('#confirm-subaction').val(),        
