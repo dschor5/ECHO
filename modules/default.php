@@ -213,10 +213,18 @@ abstract class DefaultModule implements Module
             }
             echo json_encode($response);
         }
-        elseif(array_key_exists($subaction, $this->subStreamRequests))
+        elseif(isset($_GET['stream']))
         {
-            header('Content-Type: text/event-stream');
-            $this->compileStream();
+            if(array_key_exists($subaction, $this->subStreamRequests))
+            {
+                header('Content-Type: text/event-stream');
+                $this->compileStream();
+            }
+            else
+            {
+                // TODO - What HTTP header do we send to show an invalid request?
+                header("HTTP/1.1 404 Not Found");
+            }
         }
         else
         {
@@ -226,9 +234,12 @@ abstract class DefaultModule implements Module
             $commDelay = Delay::getInstance();
 
             $inMcc = 'true';
+            $timeoutWindow = '';
             if($this->user != null)
             {
                 $inMcc = ($this->user->is_crew) ? 'false' : 'true';
+                $this->addTemplates('timeout.js', 'timeout.css');
+                $timeoutWindow = Main::loadTemplate('timeout-window.txt');
             }
 
             $replace = array(
@@ -250,6 +261,8 @@ abstract class DefaultModule implements Module
                 '/%timezone_mcc_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(true),
                 '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(false),
                 '/%in_mcc%/'           => $inMcc,
+                '/%timeout-window%/'   => $timeoutWindow,
+                '/%timeout-sec%/'      => $mission->timeout_sec,
             );
 
             echo Main::loadTemplate('main.txt', $replace);
@@ -283,8 +296,6 @@ abstract class DefaultModule implements Module
         if(array_key_exists($subaction, $this->subJsonRequests))
         {
             $ret = call_user_func(array($this, $this->subJsonRequests[$subaction]));
-           
-            //$ret = $this->{$this->subJsonRequests[$subaction]}();
         }
         else
         {

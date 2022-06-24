@@ -1,0 +1,3 @@
+<div id="timeout-dialog" title="Login Timeout" class="dialog-body">
+    <div class="timeout-body">Are you still there? Session will expire in <span id="timeout-counter"></div> seconds.</div>
+</div>
