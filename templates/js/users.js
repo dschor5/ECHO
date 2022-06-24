@@ -4,9 +4,10 @@
  */
 function getUser(id) {
     $.ajax({
-        url: BASE_URL + '/admin?ajax=true',
+        url: BASE_URL + '/ajax',
         type: 'POST',
         data: {
+            action: 'admin',
             subaction: 'getuser',        
             user_id: id,        
         },
@@ -38,9 +39,10 @@ function getUser(id) {
  */
 function editUser() {
     $.ajax({
-        url: BASE_URL + '/admin',
+        url: BASE_URL + '/ajax',
         type: 'POST',
         data: {
+            action:   'admin',
             subaction: 'edituser',
             user_id:  $('#edit-user-id').val(),
             username: $('#username').val(),
@@ -93,9 +95,10 @@ function confirmAction(subaction, id, username) {
  */
 function deleteOrResetUser() {
     $.ajax({
-        url: BASE_URL + '/admin',
+        url: BASE_URL + '/ajax',
         type: 'POST',
         data: {
+            action: 'admin',
             subaction: $('#confirm-subaction').val(),        
             user_id: $('#confirm-user-id').val(),        
         },

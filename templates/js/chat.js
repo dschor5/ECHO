@@ -11,7 +11,7 @@ function sendTextMessage() {
     
     // Send AJAX request to save the message. 
     $.ajax({
-        url:  BASE_URL + '?ajax=true',
+        url:  BASE_URL + "/ajax",
         type: "POST",
         data: {
             action: 'chat',
@@ -73,7 +73,7 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
     return;
 }
 
-const evtSource = new EventSource(BASE_URL + '/chat/refresh' + '?Event=true');
+const evtSource = new EventSource(BASE_URL + 'stream/chat/refresh');
 evtSource.addEventListener("logout", handleEventSourceLogout);
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
@@ -172,7 +172,6 @@ function compileMsg(data, before){
             template = document.querySelector('#msg-' + data.type);
             var contentClone = template.content.cloneNode(true);
             try {
-            //contentClone.querySelector(".file-location").src = BASE_URL + "/file/" + data.message_id;
                 contentClone.querySelectorAll(".file-location").forEach(function(element) {
                     element.src = BASE_URL + "/file/" + data.message_id;
                 });
@@ -448,7 +447,7 @@ function uploadMedia(mediaType) {
 
     $.ajax({
         type: "POST",
-        url:  BASE_URL + '?ajax=true',
+        url:  BASE_URL + '/ajax',
         async: true,
         data: formData,
         cache: false,
@@ -517,7 +516,7 @@ function loadPrevMsgs() {
     if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
         $.ajax({
-            url:  BASE_URL + '?ajax=true',
+            url:  BASE_URL + '/ajax',
             type: "POST",
             data: {
                 action: 'chat',
@@ -558,6 +557,7 @@ function loadPrevMsgs() {
             },
             error: function(jqHR, textStatus, errorThrown) {
                 //location.href = BASE_URL + '/chat';
+                // TODO - Add error showing messages could not be loaded.
             },
         });
     }
