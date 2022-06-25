@@ -238,7 +238,7 @@ abstract class DefaultModule implements Module
             if($this->user != null)
             {
                 $inMcc = ($this->user->is_crew) ? 'false' : 'true';
-                $this->addTemplates('timeout.js', 'timeout.css');
+                $this->addTemplates('timeout.js');
                 $timeoutWindow = Main::loadTemplate('timeout-window.txt');
             }
 
