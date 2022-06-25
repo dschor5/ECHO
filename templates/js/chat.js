@@ -84,7 +84,8 @@ evtSource.onerror = function(e) {
 
 function handleEventSourceLogout(event) {
     evtSource.close();
-    location.href = BASE_URL;
+    //location.href = BASE_URL;
+    alert("Event Source logout");
 }
 
 function handleEventSourceDelay(event) {
