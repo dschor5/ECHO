@@ -74,19 +74,12 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
 }
 
 const evtSource = new EventSource(BASE_URL + '/stream/chat/refresh');
-evtSource.addEventListener("logout", handleEventSourceLogout);
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.onerror = function(e) {
     console.log(e);
 };
-
-function handleEventSourceLogout(event) {
-    evtSource.close();
-    //location.href = BASE_URL;
-    alert("Event Source logout");
-}
 
 function handleEventSourceDelay(event) {
     const data = JSON.parse(event.data);

@@ -462,9 +462,6 @@ class ChatModule extends DefaultModule
      *                  there is no duplicate informaiton. 
      * - notification - Notifies the client that the current user received messages in 
      *                  another conversation. 
-     * - logout       - Warning to log out the user because their session expired or they 
-     *                  attempted to request information from a conversation that they do not
-     *                  belong to. 
      * - keep-alive   - Empty message sent if no activity was recorded for more than X sec
      *                  to ensure the conneciton is kept alive. 
      * 
@@ -484,7 +481,6 @@ class ChatModule extends DefaultModule
         // Block invalid access. 
         if($this->currConversation == null)
         {
-            $this->sendLogoutEvents();
             return;
         }
 
@@ -505,7 +501,6 @@ class ChatModule extends DefaultModule
         while(true)
         {
             // Send events with updates. 
-            $this->sendLogoutEvents();
             $this->sendDelayEvents();
             $this->sendNewMsgEvents();
             $this->sendNotificationEvents();
@@ -533,21 +528,6 @@ class ChatModule extends DefaultModule
             usleep(self::STREAM_WAIT_BETWEEN_ITER_SEC * self::SEC_TO_MSEC);
             $iter++;
         } 
-    }
-
-    /**
-     * Sends event stream message 'logout' if the user session expired. 
-     */
-    private function sendLogoutEvents()
-    {
-        // Read cookie expiration. 
-        if(time() > intval(Main::getCookieValue('expiration')))
-        {
-            $this->sendEventStream(
-                'logout',
-                array('session expired')
-            );
-        }
     }
 
     /**
