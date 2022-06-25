@@ -1,6 +1,6 @@
 function saveConfig(subaction){
     let dataObj = {
-        'action': 'settings', 
+        'action': 'admin', 
         'subaction': 'save_' + subaction,
     };
 
