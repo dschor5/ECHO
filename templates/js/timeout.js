@@ -72,11 +72,11 @@ function updateExpiredTime() {
             dataType: 'json',
             success: function(data) {
                 if(data.success != true) {
-                    $('div.dialog-response').text(data.error);
-                    $('div.dialog-response').show();
+                    alert("heartbeat success");
                 }
                 else {
-                    location.href = BASE_URL + '/admin/users';
+                    alert("heartbeat failed");
+                    //location.href = BASE_URL + '/admin/users';
                 }
             }
         });
