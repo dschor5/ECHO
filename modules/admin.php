@@ -2,6 +2,15 @@
 
 class AdminModule extends DefaultModule
 {
+    const TIMEOUT_OPS_MIN = array(
+           30 => '30 min', 
+           60 => '60 min (1 hr)', 
+          120 => '120 min (2 hr)', 
+         1440 => '1440 min (24 hr)', 
+         2880 => '2880 min (48 hr)', 
+        10080 => '10080 min (7 days)'
+    );
+
     public function __construct(&$user)
     {
         parent::__construct($user);
@@ -51,6 +60,7 @@ class AdminModule extends DefaultModule
 
         $STR_FMT    = '/^.+$/';
         $DATE_FMT   = '/^[\d]{4}-[\d]{2}-[\d]{2}$/';
+        $INT_FMT    = '/[\d]{2-5}/';
         
         // List of fields to validate automatically. 
         $fields = array(
@@ -65,6 +75,7 @@ class AdminModule extends DefaultModule
             'hab_planet'    => array('name'=>'Analog Habitat Planet',     'format'=>$STR_FMT),
             'hab_user_role' => array('name'=>'Analog Habitat User Role',  'format'=>$STR_FMT),
             'hab_timezone'  => array('name'=>'Analog Habitat Timezone',   'format'=>$STR_FMT),
+            'timeout_sec'   => array('name'=>'Config Timeout',            'format'=>$INT_FMT),
         );
 
         foreach($fields as $name => $validation)
@@ -105,6 +116,11 @@ class AdminModule extends DefaultModule
             if(!in_array($data['hab_timezone'], $timezones))
             {
                 $response['error'][] = 'Invalid "Analog Habitat Timezone" selected.';
+            }
+
+            if(!array_key_exists($data['timeout_sec'], self::TIMEOUT_OPS_MIN))
+            {
+                $response['error'][] = 'Invalid "Login Timeout" selected.';
             }
         }
 
@@ -167,6 +183,12 @@ class AdminModule extends DefaultModule
             $habTimezoneOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->hab_timezone == $tz['timezone_id']);
         }
 
+        $timeoutOptions = '';
+        foreach(self::TIMEOUT_OPS_MIN as $timeout_min => $timeout_label)
+        {
+            $timeoutOptions .= $this->makeSelectOption($timeout_min, $timeout_label, $mission->timeout_sec == intval($timeout_min) * 60);
+        }
+
         $missionStartDate = DelayTime::convertTimestampTimezone(
             $mission->date_start, 'UTC', $mission->hab_timezone);
         $missionEndDate = DelayTime::convertTimestampTimezone(
@@ -184,6 +206,7 @@ class AdminModule extends DefaultModule
             '/%hab_planet%/'      => $mission->hab_planet,
             '/%hab_user_role%/'   => $mission->hab_user_role,
             '/%hab_timezone%/'    => $habTimezoneOptions,
+            '/%timeout-option%/'  => $timeoutOptions,
         ));
     }
 

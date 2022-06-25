@@ -1,6 +1,6 @@
 const HEARTBEAT_FREQ_MSEC  = 30 * 1000; 
 const HEARTBEAT_RETRY_MSEC = 5 * 1000;
-const SHOW_TIMEOUT_SEC     = 120;  
+const SHOW_TIMEOUT_SEC     = 300;  
 
 var timeoutInterval;
 var countdownInterval;
