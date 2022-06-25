@@ -8,6 +8,8 @@ var heartbeatRetry = 0;
 var hasTimeout = false;
 
 $(document).ready(function() {
+    localStorage.removeItem("_expiredTime");
+
     // Dialog to confirm deletion/reseting of a user account
     $('#timeout-dialog').dialog({
         autoOpen: false,
