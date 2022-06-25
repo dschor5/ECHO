@@ -46,6 +46,7 @@
                     <span class="msg-from"></span>
                     <span class="msg-id"></span>
                 </div>
+                <div class="msg-content"></div>
                 <div class="msg-status">
                     <time/>
                     <div class="msg-delivery-status"></div>
@@ -173,6 +174,10 @@
             <p>Max file size: %max_upload_size%</p>
         </form>
         <div id="progress-file"><div class="progress-label-fiel"></div></div>
+    </div>
+
+    <div id="dialog-logout" title="Session Expired" class="dialog-body">
+        Your session has expired. Please click here to login again.
     </div>
 
     <div id="dialog-image" title="Image Attachment" class="dialog-body">
