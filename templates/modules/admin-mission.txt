@@ -150,6 +150,20 @@
 
         <div class="form-divider"></div>
         <div class="form-row">
+            <label for="timeout_sec">Login Timeout</label>
+            <div class="form-field">
+                <select name="timeout_sec" id="timeout_sec">
+                    %timeout-options%
+                </select>
+            </div>
+            <div class="form-help">
+                Timeout to log users out after X minutes of inactivity. <br/>
+                Note: A warning will appear when there are 5 min left. 
+            </div>
+        </div>
+
+        <div class="form-divider"></div>
+        <div class="form-row">
             <button onclick="saveConfig('mission')" type="button">Save Mission Configuration</button>
         </div>
 

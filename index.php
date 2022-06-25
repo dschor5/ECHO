@@ -26,7 +26,7 @@ try
 }
 catch (Exception $e) 
 {
-    Logger::error("Main::compile()", $e);
+    Logger::error("Main::compile()", array($e));
 }
 
 /**
@@ -117,6 +117,12 @@ class Main
             $moduleName = $_GET['action'];
         }
         
+        // Add heartbeat to all modules if user not logged in. 
+        if($this->user != null)
+        {
+            $defaults[] = 'heartbeat.js';
+        }
+
         // Load module
         require_once($config['modules_dir'].'/'.$moduleName.'.php');
         $moduleClassName = $moduleName.'Module';
@@ -164,9 +170,10 @@ class Main
     public static function setSiteCookie($data)
     {
         global $config;
-        global $server;
 
-        self::$cookie['expiration'] = time() + $config['cookie_expire'];
+        $missionConfig = MissionConfig::getInstance();
+
+        self::$cookie['expiration'] = time() + $missionConfig->timeout_sec + 30;
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;
