@@ -56,8 +56,7 @@ function updateExpiredTime() {
     }
     
     // Since the user is still active, set a new expiration timer. 
-    expiration = Date.now() + TIMEOUT_MSEC;
-    localStorage.setItem("_expiredTime", expiration);
+    localStorage.setItem("_expiredTime", Date.now() + TIMEOUT_MSEC);
     timeoutInterval = setInterval(checkTimeout, TIMEOUT_MSEC);
 
     // Send heartbeat on regular intervals to update the server side
@@ -106,7 +105,8 @@ function checkTimeout() {
         hasTimeout = true;
         clearTimeout(timeoutInterval);
         clearTimeout(countdownInterval);
-        location.href = BASE_URL + '/logout';
+        //location.href = BASE_URL + '/logout';
+        alert("logout");
     }   
 }
 
