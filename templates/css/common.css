@@ -148,3 +148,7 @@ a:hover {
 .dialog-body input[type='checkbox'] {
     display: inline-block;
 }
+
+.timeout-counter {
+    color: var(--background-dark);
+}
