@@ -86,7 +86,7 @@ function updateExpiredTime() {
 }
 
 function updateCountdown() {
-    timeLeftSec = (localStorage.getItem("_expiredTime") - Date.now()) / 1000;
+    timeLeftSec = Math.floor((localStorage.getItem("_expiredTime") - Date.now()) / 1000);
     $('#timeout-counter').text(timeLeftSec);
     $('#new-msg-text').text(timeLeftSec);
 
