@@ -25,7 +25,7 @@ $(document).ready(function() {
         modal: true,
     });  
     initTimeout();  
-};
+});
 
 /**
  * Initialize user login timout. 
