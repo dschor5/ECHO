@@ -2,13 +2,13 @@
 
 class AdminModule extends DefaultModule
 {
-    const TIMEOUT_OPS_MIN = array(
-           30 => '30 min', 
-           60 => '60 min (1 hr)', 
-          120 => '120 min (2 hr)', 
-         1440 => '1440 min (24 hr)', 
-         2880 => '2880 min (48 hr)', 
-        10080 => '10080 min (7 days)'
+    const TIMEOUT_OPS_SEC = array(
+        strval(   30 * 60) => '30 min', 
+        strval(   60 * 60) => '60 min (1 hr)', 
+        strval(  120 * 60) => '120 min (2 hr)', 
+        strval( 1440 * 60) => '1440 min (24 hr)', 
+        strval( 2880 * 60) => '2880 min (48 hr)', 
+        strval(10080 * 60) => '10080 min (7 days)'
     );
 
     public function __construct(&$user)
@@ -60,7 +60,6 @@ class AdminModule extends DefaultModule
 
         $STR_FMT    = '/^.+$/';
         $DATE_FMT   = '/^[\d]{4}-[\d]{2}-[\d]{2}$/';
-        $INT_FMT    = '/[\d]{2-5}/';
         
         // List of fields to validate automatically. 
         $fields = array(
@@ -75,7 +74,7 @@ class AdminModule extends DefaultModule
             'hab_planet'    => array('name'=>'Analog Habitat Planet',     'format'=>$STR_FMT),
             'hab_user_role' => array('name'=>'Analog Habitat User Role',  'format'=>$STR_FMT),
             'hab_timezone'  => array('name'=>'Analog Habitat Timezone',   'format'=>$STR_FMT),
-            'timeout_sec'   => array('name'=>'Config Timeout',            'format'=>$INT_FMT),
+            'timeout_sec'   => array('name'=>'Config Timeout',            'format'=>$STR_FMT),
         );
 
         foreach($fields as $name => $validation)
@@ -118,7 +117,7 @@ class AdminModule extends DefaultModule
                 $response['error'][] = 'Invalid "Analog Habitat Timezone" selected.';
             }
 
-            if(!array_key_exists($data['timeout_sec'], self::TIMEOUT_OPS_MIN))
+            if(!array_key_exists($data['timeout_sec'], self::TIMEOUT_OPS_SEC))
             {
                 $response['error'][] = 'Invalid "Login Timeout" selected.';
             }
@@ -184,9 +183,9 @@ class AdminModule extends DefaultModule
         }
 
         $timeoutOptions = '';
-        foreach(self::TIMEOUT_OPS_MIN as $timeout_min => $timeout_label)
+        foreach(self::TIMEOUT_OPS_SEC as $timeout_sec => $timeout_label)
         {
-            $timeoutOptions .= $this->makeSelectOption($timeout_min, $timeout_label, $mission->timeout_sec == intval($timeout_min) * 60);
+            $timeoutOptions .= $this->makeSelectOption($timeout_sec, $timeout_label, $mission->timeout_sec == intval($timeout_sec));
         }
 
         $missionStartDate = DelayTime::convertTimestampTimezone(
