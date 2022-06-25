@@ -3,12 +3,12 @@
 class AdminModule extends DefaultModule
 {
     const TIMEOUT_OPS_SEC = array(
-        strval(   30 * 60) => '30 min', 
-        strval(   60 * 60) => '60 min (1 hr)', 
-        strval(  120 * 60) => '120 min (2 hr)', 
-        strval( 1440 * 60) => '1440 min (24 hr)', 
-        strval( 2880 * 60) => '2880 min (48 hr)', 
-        strval(10080 * 60) => '10080 min (7 days)'
+          '1800' => '30 min', 
+          '3600 '=> '60 min (1 hr)', 
+          '7200' => '120 min (2 hr)', 
+         '86400' => '1440 min (24 hr)', 
+        '172800' => '2880 min (48 hr)', 
+        '604800' => '10080 min (7 days)'
     );
 
     public function __construct(&$user)
