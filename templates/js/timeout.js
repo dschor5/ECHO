@@ -7,8 +7,6 @@ var nextHeartbeat = Date.now() + HEARTBEAT_FREQ;
 var hasTimeout = false;
 
 $(document).ready(function() {
-    initTimeout();
-
     // Dialog to confirm deletion/reseting of a user account
     $('#timeout-dialog').dialog({
         autoOpen: false,
@@ -25,7 +23,8 @@ $(document).ready(function() {
             },
         ],
         modal: true,
-    });    
+    });  
+    initTimeout();  
 };
 
 /**
