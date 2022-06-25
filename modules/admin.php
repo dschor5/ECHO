@@ -170,7 +170,7 @@ class AdminModule extends DefaultModule
 
     protected function editMissionSettings() : string
     {
-        $this->addTemplates('settings.css', 'settings.js', 'globalize.js', 'globalize.culture.de-DE.js');
+        $this->addTemplates('settings.css', 'admin.js', 'globalize.js', 'globalize.culture.de-DE.js');
         $mission = MissionConfig::getInstance();
         
         $timezoneData = $this->getTimezoneList();
@@ -318,7 +318,7 @@ class AdminModule extends DefaultModule
 
     protected function editDelaySettings() : string
     {
-        $this->addTemplates('settings.css', 'settings.js', 'globalize.js', 'globalize.culture.de-DE.js');
+        $this->addTemplates('settings.css', 'admin.js', 'globalize.js', 'globalize.culture.de-DE.js');
         $mission = MissionConfig::getInstance();
 
         $delayIsManualOptions = 
