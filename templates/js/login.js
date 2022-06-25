@@ -50,12 +50,13 @@ function login() {
             data: {
                 uname: username,
                 upass: password,
+                action: 'home',
                 subaction: 'login'
             },
             dataType: 'json',
             success: function(data) {
                 if(data.login == true) {
-                    location.href = BASE_URL + '/home/login';
+                    location.href = BASE_URL + '/chat';
                 }
                 else{
                     $('#dialog-login .dialog-response').text('Invalid username or password.');
