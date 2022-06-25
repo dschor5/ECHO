@@ -124,9 +124,9 @@
 
         <div class="form-divider"></div>
         <div class="form-row">
-            <label for="config_timeout">Login Timeout</label>
+            <label for="timeout_sec">Login Timeout</label>
             <div class="form-field">
-                <select name="config_timeout" id="config_timeout">
+                <select name="timeout_sec" id="timeout_sec">
                     %timeout-options%
                 </select>
             </div>
