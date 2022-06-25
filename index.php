@@ -26,7 +26,7 @@ try
 }
 catch (Exception $e) 
 {
-    Logger::error("Main::compile()", $e);
+    Logger::error("Main::compile()", array($e));
 }
 
 /**
@@ -117,6 +117,12 @@ class Main
             $moduleName = $_GET['action'];
         }
         
+        // Add heartbeat to all modules if user not logged in. 
+        if($this->user != null)
+        {
+            $defaults[] = 'heartbeat.js';
+        }
+
         // Load module
         require_once($config['modules_dir'].'/'.$moduleName.'.php');
         $moduleClassName = $moduleName.'Module';
