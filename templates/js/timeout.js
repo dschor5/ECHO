@@ -3,7 +3,7 @@ const SHOW_TIMEOUT_SEC    = 120;
 
 var timeoutInterval;
 var countdownInterval;
-var nextHeartbeat = Date.now() + HEARTBEAT_FREQ;
+var nextHeartbeat = Date.now() + HEARTBEAT_FREQ_MSEC;
 var hasTimeout = false;
 
 $(document).ready(function() {
