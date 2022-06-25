@@ -91,9 +91,9 @@ function updateCountdown() {
 
     if(timeLeftSec < SHOW_TIMEOUT_SEC) {
         // Remove event listeners to force user to click button to continue. 
-        window.removeEventListener("mousemove", eventHandler);
-        window.removeEventListener("scroll", eventHandler);
-        window.removeEventListener("keydown", eventHandler);
+        window.removeEventListener("mousemove", updateExpiredTime);
+        window.removeEventListener("scroll", updateExpiredTime);
+        window.removeEventListener("keydown", updateExpiredTime);
         $('#timeout-dialog').dialog('open');
     }
 }
