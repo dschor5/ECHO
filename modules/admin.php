@@ -206,7 +206,7 @@ class AdminModule extends DefaultModule
             '/%hab_planet%/'      => $mission->hab_planet,
             '/%hab_user_role%/'   => $mission->hab_user_role,
             '/%hab_timezone%/'    => $habTimezoneOptions,
-            '/%timeout-option%/'  => $timeoutOptions,
+            '/%timeout-options%/' => $timeoutOptions,
         ));
     }
 
