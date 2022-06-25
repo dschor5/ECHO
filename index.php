@@ -172,7 +172,7 @@ class Main
         global $config;
         global $server;
 
-        self::$cookie['expiration'] = time() + $config['cookie_expire'];
+        self::$cookie['expiration'] = time() + $config['cookie_expire'] + 30;
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;
