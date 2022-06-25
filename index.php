@@ -170,9 +170,10 @@ class Main
     public static function setSiteCookie($data)
     {
         global $config;
-        global $server;
 
-        self::$cookie['expiration'] = time() + $config['cookie_expire'] + 30;
+        $missionConfig = MissionConfig::getInstance();
+
+        self::$cookie['expiration'] = time() + $missionConfig->timeout_sec + 30;
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;

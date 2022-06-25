@@ -59,7 +59,6 @@ $config['modules_admin'] = array_merge($config['modules_user'], array(
 ));
 
 $config['cookie_name'] = 'website';
-$config['cookie_expire'] = 10; // sec
 
 //these are the dao's that are allowed to load.  Add new tables to this list if you need.
 $config['db_tables'] = array(
