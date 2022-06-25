@@ -16,9 +16,11 @@ class AdminModule extends DefaultModule
             'deleteuser'   => 'deleteUser', 
             'resetuser'    => 'resetUserPassword', 
             // Data Management
-            'clear'        => 'clearMissionData', 
+            'clear'        => 'clearMissionData',
+            'resetlog'     => 'resetSystemLog', 
             'backupsql'    => 'backupSqlDatabase', 
-            'saveconvo'    => 'saveArchive',
+            'backupconvo'  => 'backupConversations',
+            'backuplog'    => 'backupSystemLog',
             'deletearchive'=> 'deleteArchive',   
         );
 
@@ -563,18 +565,17 @@ class AdminModule extends DefaultModule
         $this->addTemplates('settings.css', 'data-management.js');
         $mission = MissionConfig::getInstance();
 
-
         $timezoneData = $this->getTimezoneList();
-
-        $timezoneOptions = '';
-        $timezoneOptions .= $this->makeSelectOption($mission->hab_timezone, 'Habitat ('.$mission->hab_timezone.')', true);
-        $timezoneOptions .= $this->makeSelectOption($mission->mcc_timezone, 'Mission Control ('.$mission->mcc_timezone.')', false);
-
-
+        $archiveTzOptions = '';
+        foreach($timezoneData as $tz) 
+        {
+            $archiveTzOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->mcc_timezone == $tz['timezone_id']);
+        }
+        
         $headersZip = array(
             'id' => 'ID',
             'type' => 'Archive Type',
-            'timestamp' => 'Date Created',
+            'timestamp' => 'Date Created (MCC Timezone)',
             'tools' => 'Actions'
         );
         
@@ -603,9 +604,15 @@ class AdminModule extends DefaultModule
             ));
         }
 
+        // Get a copy of the system log to display
+        $logNum = 50;
+        $logEntries = Logger::tailLog($logNum);
+
         return Main::loadTemplate('admin-data.txt', array(
-            '/%timezones%/'=>$timezoneOptions,
+            '/%archive_tz%/'=>$archiveTzOptions,
             '/%archives%/' => $list->build(),
+            '/%log-num%/' => $logNum,
+            '/%log-entries%/' => $logEntries,
         ));
     }
 
@@ -624,6 +631,7 @@ class AdminModule extends DefaultModule
             {
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
+            Logger::info("Cleared log.");
         }
 
         return array('success' => true);
@@ -651,6 +659,7 @@ class AdminModule extends DefaultModule
         $archiveData['notes'] = ''; // Not used for SQL archives.
         $archiveData['mime_type'] = 'application/sql';
         $archiveData['timestamp'] = $currTime->getTime();
+        $archiveData['content_tz'] = 'UTC';
 
         $filePath    = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
@@ -671,7 +680,7 @@ class AdminModule extends DefaultModule
             
             if($result === false)
             {
-                unlink($archiveData['server_name']);
+                unlink($filePath);
                 Logger::warning('admin::backupSqlDatabase failed to add archive to database.');
                 $response['success'] = false;
                 $response['error'] = 'Failed to create archive. See system log for details.';
@@ -681,18 +690,42 @@ class AdminModule extends DefaultModule
         {
             Logger::warning('admin::backupSqlDatabase failed to create "'.$archiveData['server_name'].'"', 
                 array('output'=>$output, 'worked'=>$worked));
-            unlink($archiveData['server_name']);    
+            unlink($filePath);    
             $response['success'] = false;
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
 
-        Logger::debug('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
+        Logger::info('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
         '" in '.$response['time'].' sec.');
 
         return $response;
     }
 
-    protected function saveArchive() : array
+    protected function resetSystemLog() : array
+    {
+        global $config;
+        global $server;
+
+        $response = array(
+            'success' => true,
+        );
+
+        $filepath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
+        if(file_exists($filepath))
+        {
+            $response['success'] = unlink($filepath);
+        }
+        Logger::info("Reset System Log.");
+
+        return $response;
+    }
+
+    /**
+     * Create a backup of the System Log. 
+     *
+     * @return array 
+     */
+    protected function backupSystemLog() : array 
     {
         global $config;
         global $server;
@@ -701,14 +734,44 @@ class AdminModule extends DefaultModule
         $archiveData = array();
         $archiveData['archive_id'] = 0;
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-        $archiveData['notes'] = ''; // Placeholder to save options used for creating archive (if any).
-        $archiveData['mime_type'] = 'application/zip';
+        $archiveData['notes'] = ''; // Not used for SQL archives.
+        $archiveData['mime_type'] = 'application/txt';
         $archiveData['timestamp'] = $currTime->getTime();
+        $archiveData['content_tz'] = 'UTC';
 
-        $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
+        $fromPath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
+        $toPath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
-        Logger::debug('admin::saveArchive started for "'.$archiveData['server_name'].'"');
-        $startTime = microtime(true);
+        if(copy($fromPath, $toPath))
+        {
+            $archiveDao = ArchiveDao::getInstance();
+            $result = $archiveDao->insert($archiveData);
+            
+            if($result === false)
+            {
+                unlink($toPath);
+                Logger::warning('admin::backupSystemLog failed to add archive to database.');
+                $response['success'] = false;
+                $response['error'] = 'Failed to create archive. See system log for details.';
+            }
+        }
+        else
+        {
+            Logger::warning('admin::backupSystemLog failed to create "'.$archiveData['server_name'].'"');
+            unlink($toPath);    
+            $response['success'] = false;
+            $response['error'] = 'Failed to create archive. See system log for details.';
+        }
+
+        Logger::info('admin::backupSystemLog finished for "'. $archiveData['server_name'].'".');
+
+        return $response;
+    }
+
+    protected function backupConversations() : array
+    {
+        global $config;
+        global $server;
 
         $response = array(
             'success' => true, 
@@ -716,50 +779,74 @@ class AdminModule extends DefaultModule
             'error'   => '', 
         );
 
-        $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getAllConversations();
-        
-        $zip = new ZipArchive();
-        if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
+        $tzSelected = $_POST['timezone'] ?? '';
+        $timezones = DateTimeZone::listIdentifiers();
+        if(!in_array($tzSelected, $timezones))
         {
-            Logger::warning('admin::saveArchive failed to create "'. $archiveData['server_name'].'"');
-        }      
+            $response['success'] = false;
+            $response['error'] = 'Invalid "Timezone" selected.';
+        }
         else
         {
-            foreach($conversations as $convoId => $convo)
+            $currTime = new DelayTime();
+            $archiveData = array();
+            $archiveData['archive_id'] = 0;
+            $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
+            $archiveData['notes'] = ''; // Placeholder to save options used for creating archive (if any).
+            $archiveData['mime_type'] = 'application/zip';
+            $archiveData['timestamp'] = $currTime->getTime();
+            $archiveData['content_tz'] = $tzSelected;
+
+            Logger::info('admin::backupConversations started for "'.$archiveData['server_name'].'"');
+            $startTime = microtime(true);
+
+            $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
+
+            $conversationsDao = ConversationsDao::getInstance();
+            $conversations = $conversationsDao->getConversations();
+        
+            $zip = new ZipArchive();
+            if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
             {
-                if(!$convo->archiveConvo($zip, 'UTC'))
+                Logger::warning('admin::backupConversations failed to create "'. $archiveData['server_name'].'"');
+            }      
+            else
+            {
+                foreach($conversations as $convoId => $convo)
                 {
-                    Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
-                    $response['success'] = false;
-                    break;
+                    if(!$convo->archiveConvo($zip, $tzSelected))
+                    {
+                        Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
+                        $response['success'] = false;
+                        break;
+                    }
                 }
-            }
-            $zip->close();
-            $response['time'] = microtime(true) - $startTime;
+                $zip->close();
+                $response['time'] = microtime(true) - $startTime;
 
-            if($response['success'] === true)
-            {
-                $archiveDao = ArchiveDao::getInstance();
-                $result = $archiveDao->insert($archiveData);
+                if($response['success'] === true)
+                {
+                    $archiveDao = ArchiveDao::getInstance();
+                    $result = $archiveDao->insert($archiveData);
 
-                if($result === false)
+                    if($result === false)
+                    {
+                        unlink($zipFilepath);
+                        Logger::warning('conversation::saveArchive failed to add archive to database.');
+                        $response['success'] = false;
+                        $response['error'] = 'Failed to create archive. See system log for details.';
+                    }
+                }
+                else
                 {
                     unlink($zipFilepath);
-                    Logger::warning('conversation::saveArchive failed to add archive to database.');
                     $response['success'] = false;
                     $response['error'] = 'Failed to create archive. See system log for details.';
                 }
             }
-            else
-            {
-                unlink($zipFilepath);
-                $response['success'] = false;
-                $response['error'] = 'Failed to create archive. See system log for details.';
-            }
         }
         
-        Logger::debug('admin::saveArchive finished for "'. $archiveData['server_name'].
+        Logger::info('admin::backupConversations finished for "'. $archiveData['server_name'].
             '" in '.$response['time'].' sec.');
 
         return $response;

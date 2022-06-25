@@ -84,11 +84,19 @@ class ListGenerator
         }
         $content .= self::TAB.self::TAB.'</tr>'.PHP_EOL;
 
-        // Add table rows
-        foreach($this->rows as $row)
+        if(count($this->rows) > 0)
         {
-            $content .= $row;
+            // Add table rows
+            foreach($this->rows as $row)
+            {
+                $content .= $row;
+            }
         }
+        else
+        {
+            $content .= self::TAB.self::TAB.'<tr><td colspan="'.count($this->headings).'">No data to display.</td></tr>'.PHP_EOL;
+        }
+        
         $content .= self::TAB.'</table>'.PHP_EOL;
         return $content;
     }

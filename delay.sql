@@ -74,6 +74,7 @@ CREATE TABLE `mission_archives` (
   `notes` varchar(256) COLLATE utf8_unicode_ci NOT NULL, 
   `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `timestamp` datetime NOT NULL,
+  `content_tz` varchar(64) COLLATE utf8_unicode_ci NOT NULL, 
   PRIMARY KEY(`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

@@ -104,30 +104,36 @@ class Message
     /**
      * Get the message received time.
      * 
-     * @param bool $useHabTime Flag to select HAB or MCC time.
+     * @param bool $remoteDest True if sending to a remote destination.
      */
-    private function getReceivedTime(bool $useHabTime) : string
+    private function getReceivedTime(bool $remoteDest) : string
     {
-        if($useHabTime)
+        if($remoteDest)
         {
-            return $this->data['recv_time_hab'];
+            $receiveTime = $this->is_crew ? $this->recv_time_mcc : $this->recv_time_hab;
         }
-        return $this->data['recv_time_mcc'];
+        else
+        {
+            $receiveTime = $this->is_crew ? $this->recv_time_hab : $this->recv_time_mcc;
+        }
+
+        return $receiveTime;
     }
 
     /**
      * Get the message status (delivered or transit) from the perspective of 
      * the person receiving the message.
      *
+     * @param bool $remoteDest True if sending to a remote destination.
      * @return string
      */
-    private function getMsgStatus() : string
+    private function getMsgStatus(bool $remoteDest) : string
     {
         // Get current time. 
         $time = new DelayTime();
 
         // Get receive time.
-        $recvTime = $this->getReceivedTime(!$this->data['is_crew']);
+        $recvTime = $this->getReceivedTime($remoteDest);
 
         // Assign and return the status
         $ret = self::MSG_STATUS_DELIVERED;
@@ -156,6 +162,9 @@ class Message
                 return false;
             }
         }
+
+        $missionConfig = MissionConfig::getInstance();
+        $planet = ($participants[$this->data['user_id']]['is_crew'] ? $missionConfig->hab_planet : $missionConfig->mcc_planet);
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%id%/'        => $this->message_id,
@@ -199,21 +208,13 @@ class Message
             'sent_time'        => DelayTime::convertTsForJs($this->data['sent_time']),
             'recv_time_mcc'    => DelayTime::convertTsForJs($this->data['recv_time_mcc']),
             'recv_time_hab'    => DelayTime::convertTsForJs($this->data['recv_time_hab']),
-            'delivered_status' => $this->getMsgStatus(),
+            'recv_time'        => DelayTime::convertTsForJs($this->getReceivedTime($remoteDest)),
+            'delivered_status' => $this->getMsgStatus($remoteDest),
             'sent_from'        => $this->data['is_crew'],
             'remoteDest'       => $remoteDest,
         );
-
-        // Add received expected received time by all participants in the conversation.
-        if(boolval($this->data['is_crew']) == $remoteDest)
-        {
-            $msgData['recv_time'] = $msgData['recv_time_mcc'];
-        }
-        else
-        {
-            $msgData['recv_time'] = $msgData['recv_time_hab'];
-        }
-
+            
+        
         // If not null, add the details on the file attachment. 
         if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
         {
