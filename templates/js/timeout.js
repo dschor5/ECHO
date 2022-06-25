@@ -2,7 +2,6 @@ const HEARTBEAT_FREQ_MSEC  = 30 * 1000;
 const HEARTBEAT_RETRY_MSEC = 5 * 1000;
 const SHOW_TIMEOUT_SEC     = 300;  
 
-var timeoutInterval;
 var countdownInterval;
 var nextHeartbeat = Date.now() + HEARTBEAT_FREQ_MSEC;
 var heartbeatRetry = 0;
@@ -52,14 +51,8 @@ function updateExpiredTime() {
         return;
     }
     
-    // Clear any existing timeout intervals.
-    if(timeoutInterval) {
-        clearTimeout(timeoutInterval);
-    }
-    
     // Since the user is still active, set a new expiration timer. 
     localStorage.setItem("_expiredTime", Date.now() + TIMEOUT_MSEC);
-    timeoutInterval = setInterval(checkTimeout, TIMEOUT_MSEC);
 
     // Send heartbeat on regular intervals to update the server side
     // settings and reset the cookie expiration time. 
@@ -93,7 +86,9 @@ function updateExpiredTime() {
 }
 
 function updateCountdown() {
-    timeLeftSec = Math.round((localStorage.getItem("_expiredTime") - Date.now()) / 1000);
+    expiredTime = localStorage.getItem("_expiredTime");
+    
+    timeLeftSec = Math.round((expiredTime - Date.now()) / 1000);
     $('#timeout-counter').text(timeLeftSec);
 
     if(timeLeftSec < SHOW_TIMEOUT_SEC) {
@@ -103,16 +98,10 @@ function updateCountdown() {
         window.removeEventListener("keydown", updateExpiredTime);
         $('#timeout-dialog').dialog('open');
     }
-}
 
-function checkTimeout() {
-    expiredTime = localStorage.getItem("_expiredTime");
-   
     if(expiredTime < Date.now()) {
         hasTimeout = true;
-        clearTimeout(timeoutInterval);
         clearTimeout(countdownInterval);
         location.href = BASE_URL + '/logout';
     }   
 }
-
