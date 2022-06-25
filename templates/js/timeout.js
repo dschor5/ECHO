@@ -72,11 +72,7 @@ function updateExpiredTime() {
             dataType: 'json',
             success: function(data) {
                 if(data.success != true) {
-                    $('#new-msg-text').text("hs");
-                }
-                else {
-                    $('#new-msg-text').text("hf")
-                    //location.href = BASE_URL + '/admin/users';
+                    // TODO
                 }
             }
         });
@@ -86,9 +82,8 @@ function updateExpiredTime() {
 }
 
 function updateCountdown() {
-    timeLeftSec = Math.floor((localStorage.getItem("_expiredTime") - Date.now()) / 1000);
+    timeLeftSec = Math.round((localStorage.getItem("_expiredTime") - Date.now()) / 1000);
     $('#timeout-counter').text(timeLeftSec);
-    $('#new-msg-text').text(timeLeftSec);
 
     if(timeLeftSec < SHOW_TIMEOUT_SEC) {
         // Remove event listeners to force user to click button to continue. 
@@ -106,8 +101,7 @@ function checkTimeout() {
         hasTimeout = true;
         clearTimeout(timeoutInterval);
         clearTimeout(countdownInterval);
-        //location.href = BASE_URL + '/logout';
-        $('#new-msg-text').text("logout");
+        location.href = BASE_URL + '/logout';
     }   
 }
 
