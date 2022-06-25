@@ -4,7 +4,7 @@ class AdminModule extends DefaultModule
 {
     const TIMEOUT_OPS_SEC = array(
           '1800' => '30 min', 
-          '3600 '=> '60 min (1 hr)', 
+          '3600' => '60 min (1 hr)', 
           '7200' => '120 min (2 hr)', 
          '86400' => '1440 min (24 hr)', 
         '172800' => '2880 min (48 hr)', 
