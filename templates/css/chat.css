@@ -388,9 +388,17 @@
     resize: horizontal;
 }
 
+.msg-originator {
+    padding-bottom: 3px;
+}
+
 .msg-from {
     font-weight: bold;
-    padding-bottom: 3px;
+}
+
+.msg-id {
+    font-style: italic;
+    font-size: 80%
 }
 
 .msg-time {

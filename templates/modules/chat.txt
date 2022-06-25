@@ -42,7 +42,10 @@
 
         <template id="msg-sent-usr">
             <div class="msg response">
-                <div class="msg-from"></div>
+                <div class="msg-originator">
+                    <span class="msg-from"></span>
+                    <span class="msg-id"></span>
+                </div>
                 <div class="msg-content"></div>
                 <div class="msg-status">
                     <time/>
@@ -61,7 +64,10 @@
         <template id="msg-sent-hab">
             <div class="msg">
                 <img src="%http%%site_url%/%templates_dir%/media/user-hab.jpg" class="msg-avatar"/>
-                <div class="msg-from"></div>
+                <div class="msg-originator">
+                    <span class="msg-from"></span>
+                    <span class="msg-id"></span>
+                </div>
                 <div class="msg-content"></div>
                 <div class="msg-status">
                     <time/>
@@ -80,7 +86,10 @@
         <template id="msg-sent-mcc">
             <div class="msg">
                 <img src="%http%%site_url%/%templates_dir%/media/user-mcc.jpg" class="msg-avatar"/>
-                <div class="msg-from"></div>
+                <div class="msg-originator">
+                    <span class="msg-from"></span>
+                    <span class="msg-id"></span>
+                </div>
                 <div class="msg-content"></div>
                 <div class="msg-status">
                     <time/>
@@ -165,6 +174,10 @@
             <p>Max file size: %max_upload_size%</p>
         </form>
         <div id="progress-file"><div class="progress-label-fiel"></div></div>
+    </div>
+
+    <div id="dialog-logout" title="Session Expired" class="dialog-body">
+        Your session has expired. Please click here to login again.
     </div>
 
     <div id="dialog-image" title="Image Attachment" class="dialog-body">

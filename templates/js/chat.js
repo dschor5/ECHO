@@ -157,7 +157,8 @@ function compileMsg(data, before){
         console.log(data);
         var msgClone = template.content.cloneNode(true);
         msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
-        msgClone.querySelector(".msg-from").textContent = data.author + "(" + data.message_id + ")";
+        msgClone.querySelector(".msg-from").textContent = data.author;
+        msgClone.querySelector(".msg-id").textContent = "(" + data.message_id + ")";
 
         if(data.type === 'text') {
             //msgClone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');

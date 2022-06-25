@@ -20,7 +20,7 @@ class DebugModule extends DefaultModule
 
         // Get a listing of all the conversation the current user belongs to.
         $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
+        $conversations = $conversationsDao->getConversations($this->user->user_id);
 
         $DELAY_BETWEEN_MESSAGS = 5;
         $messagesDao = MessagesDao::getInstance();
