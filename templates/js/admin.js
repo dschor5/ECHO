@@ -1,6 +1,6 @@
 function saveConfig(subaction){
     let dataObj = {
-        'action': 'settings', 
+        'action': 'admin', 
         'subaction': 'save_' + subaction,
     };
 
@@ -27,7 +27,7 @@ function saveConfig(subaction){
     });
 
     $.ajax({
-        url:  BASE_URL + "/admin",
+        url:  BASE_URL + "/ajax",
         type: "POST",
         data: dataObj,
         dataType: 'json',

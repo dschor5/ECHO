@@ -2,6 +2,15 @@
 
 class AdminModule extends DefaultModule
 {
+    const TIMEOUT_OPS_SEC = array(
+          '1800' => '30 min', 
+          '3600' => '60 min (1 hr)', 
+          '7200' => '120 min (2 hr)', 
+         '86400' => '1440 min (24 hr)', 
+        '172800' => '2880 min (48 hr)', 
+        '604800' => '10080 min (7 days)'
+    );
+
     public function __construct(&$user)
     {
         parent::__construct($user);
@@ -67,6 +76,7 @@ class AdminModule extends DefaultModule
             'hab_planet'    => array('name'=>'Analog Habitat Planet',     'format'=>$STR_FMT),
             'hab_user_role' => array('name'=>'Analog Habitat User Role',  'format'=>$STR_FMT),
             'hab_timezone'  => array('name'=>'Analog Habitat Timezone',   'format'=>$STR_FMT),
+            'timeout_sec'   => array('name'=>'Config Timeout',            'format'=>$STR_FMT),
         );
 
         foreach($fields as $name => $validation)
@@ -107,6 +117,11 @@ class AdminModule extends DefaultModule
             if(!in_array($data['hab_timezone'], $timezones))
             {
                 $response['error'][] = 'Invalid "Analog Habitat Timezone" selected.';
+            }
+
+            if(!array_key_exists($data['timeout_sec'], self::TIMEOUT_OPS_SEC))
+            {
+                $response['error'][] = 'Invalid "Login Timeout" selected.';
             }
         }
 
@@ -157,7 +172,7 @@ class AdminModule extends DefaultModule
 
     protected function editMissionSettings() : string
     {
-        $this->addTemplates('settings.css', 'settings.js', 'globalize.js', 'globalize.culture.de-DE.js');
+        $this->addTemplates('settings.css', 'admin.js', 'globalize.js', 'globalize.culture.de-DE.js');
         $mission = MissionConfig::getInstance();
         
         $timezoneData = $this->getTimezoneList();
@@ -167,6 +182,12 @@ class AdminModule extends DefaultModule
         {
             $mccTimezoneOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->mcc_timezone == $tz['timezone_id']);
             $habTimezoneOptions .= $this->makeSelectOption($tz['timezone_id'], $tz['label'], $mission->hab_timezone == $tz['timezone_id']);
+        }
+
+        $timeoutOptions = '';
+        foreach(self::TIMEOUT_OPS_SEC as $timeout_sec => $timeout_label)
+        {
+            $timeoutOptions .= $this->makeSelectOption($timeout_sec, $timeout_label, $mission->timeout_sec == intval($timeout_sec));
         }
 
         $missionStartDate = DelayTime::convertTimestampTimezone(
@@ -186,6 +207,7 @@ class AdminModule extends DefaultModule
             '/%hab_planet%/'      => $mission->hab_planet,
             '/%hab_user_role%/'   => $mission->hab_user_role,
             '/%hab_timezone%/'    => $habTimezoneOptions,
+            '/%timeout-options%/' => $timeoutOptions,
         ));
     }
 
@@ -298,7 +320,7 @@ class AdminModule extends DefaultModule
 
     protected function editDelaySettings() : string
     {
-        $this->addTemplates('settings.css', 'settings.js', 'globalize.js', 'globalize.culture.de-DE.js');
+        $this->addTemplates('settings.css', 'admin.js', 'globalize.js', 'globalize.culture.de-DE.js');
         $mission = MissionConfig::getInstance();
 
         $delayIsManualOptions = 

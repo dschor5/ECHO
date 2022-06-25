@@ -167,10 +167,6 @@
         <div id="progress-file"><div class="progress-label-fiel"></div></div>
     </div>
 
-    <div id="dialog-logout" title="Session Expired" class="dialog-body">
-        Your session has expired. Please click here to login again.
-    </div>
-
     <div id="dialog-image" title="Image Attachment" class="dialog-body">
         <center><img id="large-msg-img" src="#"></center>
     </div>

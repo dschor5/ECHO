@@ -6,7 +6,10 @@ RewriteRule config.inc.php error
 RewriteRule server.inc.php error
 RewriteRule mission.inc.php error
 
-RewriteRule ^login index.php?action=home&subaction=checkLogin [QSA]
+RewriteRule ^ajax/(.*)/(.*) index.php?ajax=true&action=$1&subaction=$2 [QSA]
+RewriteRule ^ajax/(.*) index.php?ajax=true&action=$1 [QSA]
+RewriteRule ^ajax index.php?ajax=true [QSA]
+RewriteRule ^stream/(.*)/(.*) index.php?stream=true&action=$1&subaction=$2 [QSA]
 RewriteRule ^home index.php?action=home [QSA]
 RewriteRule ^logout index.php?action=home&subaction=logout [QSA]
 RewriteRule ^chat/([0-9]+) index.php?action=chat&conversation_id=$1 [QSA]

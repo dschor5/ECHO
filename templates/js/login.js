@@ -45,17 +45,18 @@ function login() {
     var password = $('#dialog-login #upass').val();
     if(username != '' && password != '') {
         $.ajax({
-            url:  BASE_URL,
+            url:  BASE_URL + '/ajax',
             type: "POST",
             data: {
                 uname: username,
                 upass: password,
+                action: 'home',
                 subaction: 'login'
             },
             dataType: 'json',
             success: function(data) {
                 if(data.login == true) {
-                    location.href = BASE_URL + '/login';
+                    location.href = BASE_URL + '/chat';
                 }
                 else{
                     $('#dialog-login .dialog-response').text('Invalid username or password.');
