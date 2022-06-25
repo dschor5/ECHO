@@ -1,9 +1,11 @@
-const HEARTBEAT_FREQ_MSEC = 30 * 1000; 
-const SHOW_TIMEOUT_SEC    = 120;  
+const HEARTBEAT_FREQ_MSEC  = 30 * 1000; 
+const HEARTBEAT_RETRY_MSEC = 5 * 1000;
+const SHOW_TIMEOUT_SEC     = 120;  
 
 var timeoutInterval;
 var countdownInterval;
 var nextHeartbeat = Date.now() + HEARTBEAT_FREQ_MSEC;
+var heartbeatRetry = 0;
 var hasTimeout = false;
 
 $(document).ready(function() {
@@ -71,12 +73,21 @@ function updateExpiredTime() {
             },
             dataType: 'json',
             success: function(data) {
-                if(data.success != true) {
-                    // TODO
+                if(data.success == true) {
+                    nextHeartbeat = Date.now() + HEARTBEAT_FREQ_MSEC;
+                    heartbeatRetry = 0;
+                }
+                else {
+                    heartbeatRetry++;
+                    nextHeartbeat = Date.now() + HEARTBEAT_RETRY_MSEC;
+                    if(heartbeatRetry > HEARTBEAT_RETRY_LIMIT) {
+                        localStorage.setItem("_expiredTime", Date.now() - 1000);
+                        checkTimeout();
+                    }
                 }
             }
         });
-        nextHeartbeat = Date.now() + HEARTBEAT_FREQ_MSEC;
+        
     }
 
 }

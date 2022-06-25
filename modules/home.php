@@ -230,7 +230,7 @@ class HomeModule extends DefaultModule
 
     protected function heartbeat() : array 
     {
-        return array('success' => true);
+        return array('success' => ($this->user != null));
     }
 }
 
