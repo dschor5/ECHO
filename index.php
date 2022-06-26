@@ -173,7 +173,9 @@ class Main
 
         $missionConfig = MissionConfig::getInstance();
 
-        self::$cookie['expiration'] = time() + $missionConfig->timeout_sec + 30;
+        // Note: The cookie expires in 10 min. If the user is logged in an active, 
+        // the heartbeat messages should keep that going longer. 
+        self::$cookie['expiration'] = time() + 10 * 60;
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;
