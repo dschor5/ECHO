@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>%title%</title>
+    <title>ECHO: %title%</title>
     <meta charset="UTF-8" />
     <meta name="keywords" content="human spaceflight, analog mission, communication delay" />
     <meta name="description" content="Emulator for Interplanetary Human Spaceflight" />
