@@ -1,6 +1,7 @@
-const HEARTBEAT_FREQ_MSEC  = 30 * 1000; 
-const HEARTBEAT_RETRY_MSEC = 5 * 1000;
-const SHOW_TIMEOUT_SEC     = 300;  
+const HEARTBEAT_FREQ_MSEC   = 60 * 1000; 
+const HEARTBEAT_RETRY_MSEC  = 10 * 1000;
+const HEARTBEAT_RETRY_LIMIT = 5;
+const SHOW_TIMEOUT_SEC      = 300;  
 
 var countdownInterval;
 var nextHeartbeat = Date.now() + HEARTBEAT_FREQ_MSEC;
