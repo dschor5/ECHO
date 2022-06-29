@@ -76,7 +76,7 @@ class AdminModule extends DefaultModule
             'hab_planet'    => array('name'=>'Analog Habitat Planet',     'format'=>$STR_FMT),
             'hab_user_role' => array('name'=>'Analog Habitat User Role',  'format'=>$STR_FMT),
             'hab_timezone'  => array('name'=>'Analog Habitat Timezone',   'format'=>$STR_FMT),
-            'timeout_sec'   => array('name'=>'Config Timeout',            'format'=>$STR_FMT),
+            'login_timeout' => array('name'=>'Config Timeout',            'format'=>$STR_FMT),
         );
 
         foreach($fields as $name => $validation)
@@ -136,7 +136,7 @@ class AdminModule extends DefaultModule
                 $response['error'][] = 'Invalid "Analog Habitat Timezone" selected.';
             }
 
-            if(!array_key_exists($data['timeout_sec'], self::TIMEOUT_OPS_SEC))
+            if(!array_key_exists($data['login_timeout'], self::TIMEOUT_OPS_SEC))
             {
                 $response['error'][] = 'Invalid "Login Timeout" selected.';
             }
@@ -204,7 +204,7 @@ class AdminModule extends DefaultModule
         $timeoutOptions = '';
         foreach(self::TIMEOUT_OPS_SEC as $timeout_sec => $timeout_label)
         {
-            $timeoutOptions .= $this->makeSelectOption($timeout_sec, $timeout_label, $mission->timeout_sec == intval($timeout_sec));
+            $timeoutOptions .= $this->makeSelectOption($timeout_sec, $timeout_label, $mission->login_timeout == intval($timeout_sec));
         }
 
         $missionStartDate = DelayTime::convertTimestampTimezone(
