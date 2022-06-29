@@ -184,5 +184,5 @@
         <center><img id="large-msg-img" src="#"></center>
     </div>
     
-    %notification_audio%
-    %notification_badge%
+    %feat_audio_notification%
+    %feat_badge_notification%

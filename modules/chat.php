@@ -652,13 +652,13 @@ class ChatModule extends DefaultModule
         $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
 
         $notificationAudio = '';
-        if(MissionConfig::getInstance()->notification_audio)
+        if(MissionConfig::getInstance()->feat_audio_notification)
         {
             $notificationAudio = Main::loadTemplate('chat-notification-audio.txt');
         }
 
         $notificationBadge = '';
-        if(MissionConfig::getInstance()->notification_badge)
+        if(MissionConfig::getInstance()->feat_badge_notification)
         {
             $notificationBadge = Main::loadTemplate('chat-notification-badge.txt');
         }
@@ -673,8 +673,8 @@ class ChatModule extends DefaultModule
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                   '/%download-link%/'      => Main::loadTemplate('download-link.txt', 
                                               array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),
-                  '/%notification_audio%/' => $notificationAudio,
-                  '/%notification_badge%/' => $notificationBadge,
+                  '/%feat_audio_notification%/' => $notificationAudio,
+                  '/%feat_badge_notification%/' => $notificationBadge,
                 ));
     }
 

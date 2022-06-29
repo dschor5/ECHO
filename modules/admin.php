@@ -97,6 +97,23 @@ class AdminModule extends DefaultModule
             }
         }
 
+        $featureEnableState = array(
+            'feat_audio_notification',
+            'feat_badge_notification',
+            'feat_unread_msg_counts',
+            'feat_convo_list_order',
+            'feat_est_delivery_status',
+            'feat_progress_bar',
+            'feat_markdown_support',
+            'feat_important_msgs',
+            'feat_convo_threads',            
+        );
+
+        foreach($featureEnableState as $feature)
+        {
+            $data[$feature] = (isset($_POST[$feature])) ? '1' : '0';
+        }
+
         // Additional checks if all required fields are filled and the right format.
         if(count($response['error']) == 0)
         {
