@@ -93,7 +93,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('hab_day_name',       'string', 'Mission Day'),
 ('delay_is_manual',    'bool',   '1'),
 ('delay_config',       'string', '[{"ts":"2021-01-01 00:00:00","eq":0}]'),
-('login_timeout',      'int',    '10'),
+('login_timeout',      'int',    '3600'),
 ('feat_audio_notification',  'bool', '1'),
 ('feat_badge_notification',  'bool', '1'),
 ('feat_unread_msg_counts',   'bool', '1'),
@@ -102,7 +102,8 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('feat_progress_bar',        'bool', '1'),
 ('feat_markdown_support',    'bool', '1'),
 ('feat_important_msgs',      'bool', '1'),
-('feat_convo_threads',       'bool', '1');
+('feat_convo_threads',       'bool', '1'), 
+('debug',                    'bool', '1');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
 (1, 'admin', 'Admin', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
