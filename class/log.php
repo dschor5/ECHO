@@ -126,7 +126,6 @@ class Logger
      */        
     public static function debug(string $message, ?array $context=null)
     {
-        $missionConfig = MissionConfig::getInstance();
         if(self::$levelThreshold < Logger::DEBUG)
         {
             return;
