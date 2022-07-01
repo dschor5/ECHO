@@ -183,10 +183,17 @@ class Message
      */
     private function compileMsgText() : string
     {
-        $parsedown = new Parsedown();
-        $parsedown->setSafeMode(true);
-        $parsedown->setBreaksEnabled(true);
-        return $parsedown->text($this->text);
+        $missionConfig = MissionConfig::getInstance();
+        $result = $this->text;
+        if($missionConfig->feat_markdown_support)
+        {
+            $parsedown = new Parsedown();
+            $parsedown->setSafeMode(true);
+            $parsedown->setBreaksEnabled(true);
+            $result = $parsedown->text($this->text);
+        }
+        
+        return $result;
     }
 
     /**
