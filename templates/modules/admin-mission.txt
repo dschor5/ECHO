@@ -128,36 +128,112 @@
         <div class="form-row">
             <label for="hab_name">Notifications</label>
             <div class="form-field">
-                <div class="switch-label">Sound Notification:</div>
-                <label class="switch"><input type="checkbox" name="feat_audio_notification" id="feat_audio_notification"><span class="slider"></span></label> 
+                <label class="switch"><input type="checkbox" name="feat_audio_notification" id="feat_audio_notification" %feat_audio_notification_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Sound Notification</div>
             </div>
-            <div class="form-field">
-                <div class="switch-label">Badge Notification:</div>
-                <label class="switch"><input type="checkbox" name="feat_badge_notification" id="feat_badge_notification"><span class="slider"></span></label> 
-            </div>
-            <div class="form-help">
-                Audio and badge notifications to alert the user of an incoming message. <br/>
+             <div class="form-help">
+                Audio alerts for every incoming message. <br/>
                 Note: Chrome requires that users interact with the page before allowing an application to play sounds. 
+            </div>         
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_badge_notification" id="feat_badge_notification" %feat_badge_notification_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Badge Notification</div>
+            </div>
+             <div class="form-help">
+                Badge notifications for every incoming message. <br/>
                 Note: Users will be prompted to allow badge notifications for the application. 
             </div>
         </div>
 
         <div class="form-row">
-            <label for="hab_name">Draw Attention to Unread Messages</label>
             <div class="form-field">
-                <div class="switch-label">Unread message counts:</div>
-                <label class="switch"><input type="checkbox" name="feat_unread_msg_counts" id="feat_unread_msg_counts"><span class="slider"></span></label> 
+                <label class="switch"><input type="checkbox" name="feat_unread_msg_counts" id="feat_unread_msg_counts" %feat_unread_msg_counts_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Unread Message Count</div>
             </div>
-            <div class="form-field">
-                <div class="switch-label">Conversation Order:</div>
-                <label class="switch"><input type="checkbox" name="feat_convo_list_order" id="feat_convo_list_order"><span class="slider"></span></label> 
-            </div>
-            <div class="form-help">
-                The conversations panel can be used to draw attention to unread incoming messages. 
-                
+             <div class="form-help">
+                <br/>Show number of unread messages on non-active conversations. 
             </div>
         </div>
 
+         <div class="form-row">
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_convo_list_order" id="feat_convo_list_order" %feat_convo_list_order_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Conversation Ordering</div>
+            </div>
+             <div class="form-help">
+                <br/>Re-order conversation list based on received unread messages.
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="hab_name">Delay Reminders</label>
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_est_delivery_status" id="feat_est_delivery_status" %feat_est_delivery_status_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Show Transit/Delivered Status</div>
+            </div>
+             <div class="form-help">
+                Estimate the message status (transit/delivered) based on when it was sent and the current delay. <br/>
+                Note: There is no message being sent back to serve as a read receipt as that would also require a delay.
+            </div>         
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_progress_bar" id="feat_progress_bar" %feat_progress_bar_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Message Progress Bar</div>
+            </div>
+             <div class="form-help">
+                <br/>Visualization showing messages are in transit. 
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="hab_name">Message Formatting</label>
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_markdown_support" id="feat_markdown_support" %feat_markdown_support_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Markdown Support</div>
+            </div>
+             <div class="form-help">
+                <br/>Enables markdown support to allow users to format message contents.
+            </div>         
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_important_msgs" id="feat_important_msgs" %feat_important_msgs_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Important Messages</div>
+            </div>
+             <div class="form-help">
+                Allows users to send regular text messages and important text messages that get formatted differently to draw attention from the user. <br/>
+                Note: If sound notifications are enabled, the important messages use a different sound cue to draw the user's attention.
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="hab_name">Conversation Threads</label>
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_convo_threads" id="feat_convo_threads" %feat_convo_threads_checked%><span class="slider"></span></label> 
+                <div class="switch-label"> Threads</div>
+            </div>
+             <div class="form-help">
+                <br/>Enable conversation threads. 
+            </div>         
+        </div>
+
+        <div class="form-row">
+            <label for="hab_name">Debugging</label>
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="debug" id="debug" %debug_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Debug</div>
+            </div>
+             <div class="form-help">
+                Changes logging mode to debug mode to capture every MySQL query. <br/>
+                Also enables module for random automated message generation. 
+            </div>         
+        </div>
 
         <div class="form-divider"></div>
         <div class="form-row">
