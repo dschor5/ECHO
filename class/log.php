@@ -69,12 +69,12 @@ class Logger
 
     public static function init()
     {
-        $missionConfig = MissionConfig::getInstance();
+        /*$missionConfig = MissionConfig::getInstance();
         self::$levelThreshold = Logger::INFO;
         if($missionConfig->debug)
         {
             self::$levelThreshold = Logger::DEBUG;
-        }
+        }*/
     }
 
     /**
