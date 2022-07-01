@@ -15,7 +15,7 @@ class DebugModule extends DefaultModule
         $missionConfig = MissionConfig::getInstance();
         if(!$missionConfig->debug)
         {
-            return;
+            exit();
         }
 
         // Get a listing of all the conversation the current user belongs to.
