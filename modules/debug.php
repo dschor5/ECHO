@@ -12,8 +12,8 @@ class DebugModule extends DefaultModule
 
     public function debugStream() 
     {
-        global $config;
-        if($config['debug'] == false)
+        $missionConfig = MissionConfig::getInstance();
+        if(!$missionConfig->debug)
         {
             return;
         }

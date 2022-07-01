@@ -55,6 +55,7 @@ class Main
      */
     private function __construct()
     {
+        Logger::init();
         $this->readCookie();
         $this->checkLogin();
     }

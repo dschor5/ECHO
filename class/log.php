@@ -67,6 +67,16 @@ class Logger
         // Do nothing. 
     }
 
+    public static function init()
+    {
+        $missionConfig = MissionConfig::getInstance();
+        self::$levelThreshold = Logger::INFO;
+        if($missionConfig->debug)
+        {
+            self::$levelThreshold = Logger::DEBUG;
+        }
+    }
+
     /**
      * Log an ERROR level message. Always recorded.
      *
@@ -116,6 +126,7 @@ class Logger
      */        
     public static function debug(string $message, ?array $context=null)
     {
+        $missionConfig = MissionConfig::getInstance();
         if(self::$levelThreshold < Logger::DEBUG)
         {
             return;
