@@ -139,9 +139,17 @@ function newMessageNotification(name, thisRoom=true, ack=false) {
 
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
-    if($('#room-new-' + data.conversation_id).length) {
-        $('#room-new-' + data.conversation_id).text( '(' + data.num_messages + ')');
-        newMessageNotification($('#room-name-' + data.conversation_id).text(), false);
+    if($('#feat-unread-msg-counts-enabled').length) {
+        if($('#room-new-' + data.conversation_id).length) {
+            $('#room-new-' + data.conversation_id).text( '(' + data.num_messages + ')');
+            newMessageNotification($('#room-name-' + data.conversation_id).text(), false);
+        }
+    }
+
+    if($('#feat-unread-msg-counts-enabled').length) {
+        if($('#room-new-' + data.conversation_id).length) {
+            $('#room-new-' + data.conversation_id).parent().insertBefore($('.room').first());
+        }
     }
 }
 
