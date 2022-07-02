@@ -145,10 +145,10 @@ function handleEventSourceNotification(event) {
             newMessageNotification($('#room-name-' + data.conversation_id).text(), false);
         }
     }
-
-    if($('#feat-unread-msg-counts-enabled').length) {
-        if($('#room-new-' + data.conversation_id).length) {
-            $('#room-new-' + data.conversation_id).parent(".room").insertBefore($('.room').first());
+    
+    if($('#feat-convo-list-order-enabled').length) {
+        if($('#room-name-' + data.conversation_id).length) {
+            ($('#room-name-' + data.conversation_id).parent().parent('.room')).insertBefore( $('.room').first() );
         }
     }
 }
