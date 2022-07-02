@@ -148,7 +148,7 @@ function handleEventSourceNotification(event) {
 
     if($('#feat-unread-msg-counts-enabled').length) {
         if($('#room-new-' + data.conversation_id).length) {
-            $('#room-new-' + data.conversation_id).parent().insertBefore($('.room').first());
+            $('#room-new-' + data.conversation_id).parent(".room").insertBefore($('.room').first());
         }
     }
 }
