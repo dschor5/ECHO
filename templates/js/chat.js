@@ -106,12 +106,12 @@ function handleEventSourceNewMessage(event) {
 }
 
 function newMessageNotification(name, thisRoom=true, ack=false) {
-    if($('#new-msg-sound').length) {
+    if($('#feat-audio-notification-enabled').length) {
         $("#new-msg-sound")[0].pause();
         $("#new-msg-sound")[0].play();
     }
 
-    if($('#badge-notification').length) {
+    if($('#feat-badge-notification-enabled').length) {
         var msg = "Message in '" + name + "'.";
         var opt = {
             icon: '%http%%site_url%/%templates_dir%/media/android-chrome-192x192.png',
@@ -161,7 +161,6 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg-id").textContent = "(" + data.message_id + ")";
 
         if(data.type === 'text') {
-            //msgClone.querySelector(".msg-content").innerHTML = (data.message).replace(/(?:\r\n|\r|\n)/g, '<br>');
             msgClone.querySelector(".msg-content").innerHTML = data.message;
         }
         else {

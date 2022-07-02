@@ -484,6 +484,8 @@ class ChatModule extends DefaultModule
             return;
         }
 
+        $missionConfig = MissionConfig::getInstance();
+
         // Get a list of all conversations to monitor for msg notifications. 
         // Essentially, all the conversations the user belongs to except the 
         // active conversations. 
@@ -651,17 +653,16 @@ class ChatModule extends DefaultModule
         // Add templates for this module. 
         $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
 
-        $notificationAudio = '';
-        if(MissionConfig::getInstance()->feat_audio_notification)
-        {
-            $notificationAudio = Main::loadTemplate('chat-notification-audio.txt');
-        }
-
-        $notificationBadge = '';
-        if(MissionConfig::getInstance()->feat_badge_notification)
-        {
-            $notificationBadge = Main::loadTemplate('chat-notification-badge.txt');
-        }
+        $featuresEnabled = ''.
+            (($mission->feat_audio_notification) ? Main::loadTemplate('chat-feat-audio-notification.txt') : '').
+            (($mission->feat_audio_notification) ? Main::loadTemplate('chat-feat-audio-notification.txt') : '').
+            (($mission->feat_unread_msg_counts) ? Main::loadTemplate('chat-feat-unread-msg-counts.txt') : '').
+            (($mission->feat_convo_list_order) ? Main::loadTemplate('chat-feat-convo-list-order.txt') : '').
+            (($mission->feat_est_delivery_status) ? Main::loadTemplate('chat-feat-est-delivery-status.txt') : '').
+            (($mission->feat_progress_bar) ? Main::loadTemplate('chat-feat-progress-bar.txt') : '').
+            (($mission->feat_markdown_support) ? Main::loadTemplate('chat-feat-markdown-support.txt') : '').
+            (($mission->feat_important_msgs) ? Main::loadTemplate('chat-feat-important-msgs.txt') : '').
+            (($mission->feat_convo_threads) ? Main::loadTemplate('chat-feat-convo-threads.txt') : '');
 
         // Load template. 
         return Main::loadTemplate('chat.txt', 
@@ -673,8 +674,7 @@ class ChatModule extends DefaultModule
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                   '/%download-link%/'      => Main::loadTemplate('download-link.txt', 
                                               array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),
-                  '/%feat_audio_notification%/' => $notificationAudio,
-                  '/%feat_badge_notification%/' => $notificationBadge,
+                  '/%features_enabled%/'  => $featuresEnabled
                 ));
     }
 

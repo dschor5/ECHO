@@ -180,5 +180,5 @@
         <center><img id="large-msg-img" src="#"></center>
     </div>
     
-    %feat_audio_notification%
-    %feat_badge_notification%
+    %features_enabled%
+
