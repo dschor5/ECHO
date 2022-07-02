@@ -148,7 +148,7 @@ function handleEventSourceNotification(event) {
     
     if($('#feat-convo-list-order-enabled').length) {
         if($('#room-name-' + data.conversation_id).length) {
-            ($('#room-name-' + data.conversation_id).parent().parent('.room')).insertBefore( $('.room').first() );
+            ($('#room-name-' + data.conversation_id).parent().parent()).insertBefore( $('.room').first() );
         }
     }
 }
