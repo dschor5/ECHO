@@ -5,6 +5,7 @@ header('Pragma: no-cache');
 date_default_timezone_set("UTC");
 require_once('config.inc.php');
 header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
+Logger::info('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
 try
 {
