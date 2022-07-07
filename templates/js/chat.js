@@ -73,7 +73,7 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
     return;
 }
 
-const evtSource = new EventSource(BASE_URL + '/stream/chat/refresh');
+const evtSource = new EventSource(BASE_URL + '/chatstream');
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
@@ -162,7 +162,6 @@ function compileMsg(data, before){
     var template = document.querySelector('#msg-sent-'.concat(data.source));
     if('content' in document.createElement('template'))
     {
-        console.log(data);
         var msgClone = template.content.cloneNode(true);
         msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
         msgClone.querySelector(".msg-from").textContent = data.author;
@@ -187,6 +186,7 @@ function compileMsg(data, before){
             contentClone.querySelector(".filesize").textContent = data.filesize;
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
+        
         var msgStatus = msgClone.querySelector(".msg-status");
         if(data.delivered_status != 'Delivered') {
             msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
