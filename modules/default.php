@@ -218,6 +218,7 @@ abstract class DefaultModule implements Module
         {
             if(array_key_exists($subaction, $this->subStreamRequests))
             {
+                header('Access-Control-Allow-Origin: *');
                 header('Content-Type: text/event-stream');
                 $this->compileStream();
             }
