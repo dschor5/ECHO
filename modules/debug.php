@@ -12,10 +12,10 @@ class DebugModule extends DefaultModule
 
     public function debugStream() 
     {
-        global $config;
-        if($config['debug'] == false)
+        $missionConfig = MissionConfig::getInstance();
+        if(!$missionConfig->debug)
         {
-            return;
+            exit();
         }
 
         // Get a listing of all the conversation the current user belongs to.
