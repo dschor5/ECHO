@@ -13,7 +13,7 @@
  * Assumption:
  * - Applicaition has write access to $server['host_address'].$config['logs_dir'].
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class Logger
 {
