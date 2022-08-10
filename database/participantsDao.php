@@ -4,7 +4,7 @@
  * Data Abstraction Object for the participants table. Implements custom 
  * queries to search and update conversations as needed. 
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class ParticipantsDao extends Dao
 {
@@ -42,48 +42,6 @@ class ParticipantsDao extends Dao
     protected function __construct()
     {
         parent::__construct('participants');
-    }
-
-    /**
-     * Update the timestamp when the current users last read the current conversation.
-     *
-     * @param int $convoId
-     * @param int $userId
-     * @param string $lastRead 
-     * @param bool True on success.
-     **/
-    public function updateLastRead(int $convoId, int $userId, string $lastRead)
-    {
-        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
-        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
-
-        return $this->update(array('last_read' => $lastRead),
-            'conversation_id='.$qConvoId.' AND user_id='.$qUserId);
-    }
-
-    /**
-     * Reads timestamp when the user last read this conversation. 
-     * Defaults to '0000-00-00 00:00:00' as if the user never read this conversation.
-     * 
-     * @param int $convoId 
-     * @param int $userId
-     * @return string Formatted as 'YYYY-MM-DD HH:MM:SS'
-     **/
-    public function getLastRead(int $convoId, int $userId) : string
-    {
-        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
-        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
-
-        if(($result = $this->select('last_read', 'conversation_id='.$qConvoId.' AND user_id='.$qUserId)))
-        {
-            if($result->num_rows > 0)
-            {
-               $rowData = $result->fetch_assoc();
-               return $rowData['last_read'];
-            }
-        }
-
-        return '0000-00-00 00:00:00';
     }
 
     /** 

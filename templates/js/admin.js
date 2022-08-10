@@ -1,6 +1,6 @@
 function saveConfig(subaction){
     let dataObj = {
-        'action': 'settings', 
+        'action': 'admin', 
         'subaction': 'save_' + subaction,
     };
 
@@ -15,6 +15,9 @@ function saveConfig(subaction){
             }
             dataObj[objName][dataObj[objName].length] = $(this).val();
         }
+        else if($(this).prop('type') == "checkbox") {
+            dataObj[$(this).attr('name')] = $(this).prop('checked') ? '1' : '0';
+        }
         else {
             dataObj[$(this).attr('name')] = $(this).val();
         }
@@ -27,7 +30,7 @@ function saveConfig(subaction){
     });
 
     $.ajax({
-        url:  BASE_URL + "/admin",
+        url:  BASE_URL + "/ajax",
         type: "POST",
         data: dataObj,
         dataType: 'json',

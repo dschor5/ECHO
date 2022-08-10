@@ -12,15 +12,15 @@ class DebugModule extends DefaultModule
 
     public function debugStream() 
     {
-        global $config;
-        if($config['debug'] == false)
+        $missionConfig = MissionConfig::getInstance();
+        if(!$missionConfig->debug)
         {
-            return;
+            exit();
         }
 
         // Get a listing of all the conversation the current user belongs to.
         $conversationsDao = ConversationsDao::getInstance();
-        $conversations = $conversationsDao->getConversationsByUserId($this->user->user_id);
+        $conversations = $conversationsDao->getConversations($this->user->user_id);
 
         $DELAY_BETWEEN_MESSAGS = 5;
         $messagesDao = MessagesDao::getInstance();

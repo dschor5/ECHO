@@ -462,9 +462,6 @@ class ChatModule extends DefaultModule
      *                  there is no duplicate informaiton. 
      * - notification - Notifies the client that the current user received messages in 
      *                  another conversation. 
-     * - logout       - Warning to log out the user because their session expired or they 
-     *                  attempted to request information from a conversation that they do not
-     *                  belong to. 
      * - keep-alive   - Empty message sent if no activity was recorded for more than X sec
      *                  to ensure the conneciton is kept alive. 
      * 
@@ -484,9 +481,10 @@ class ChatModule extends DefaultModule
         // Block invalid access. 
         if($this->currConversation == null)
         {
-            $this->sendLogoutEvents();
             return;
         }
+
+        $missionConfig = MissionConfig::getInstance();
 
         // Get a list of all conversations to monitor for msg notifications. 
         // Essentially, all the conversations the user belongs to except the 
@@ -505,7 +503,6 @@ class ChatModule extends DefaultModule
         while(true)
         {
             // Send events with updates. 
-            $this->sendLogoutEvents();
             $this->sendDelayEvents();
             $this->sendNewMsgEvents();
             $this->sendNotificationEvents();
@@ -533,21 +530,6 @@ class ChatModule extends DefaultModule
             usleep(self::STREAM_WAIT_BETWEEN_ITER_SEC * self::SEC_TO_MSEC);
             $iter++;
         } 
-    }
-
-    /**
-     * Sends event stream message 'logout' if the user session expired. 
-     */
-    private function sendLogoutEvents()
-    {
-        // Read cookie expiration. 
-        if(time() > intval(Main::getCookieValue('expiration')))
-        {
-            $this->sendEventStream(
-                'logout',
-                array('session expired')
-            );
-        }
     }
 
     /**
@@ -671,17 +653,16 @@ class ChatModule extends DefaultModule
         // Add templates for this module. 
         $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
 
-        $notificationAudio = '';
-        if(MissionConfig::getInstance()->notification_audio)
-        {
-            $notificationAudio = Main::loadTemplate('chat-notification-audio.txt');
-        }
-
-        $notificationBadge = '';
-        if(MissionConfig::getInstance()->notification_badge)
-        {
-            $notificationBadge = Main::loadTemplate('chat-notification-badge.txt');
-        }
+        $featuresEnabled = ''.
+            (($mission->feat_audio_notification) ? Main::loadTemplate('chat-feat-audio-notification.txt') : '').
+            (($mission->feat_audio_notification) ? Main::loadTemplate('chat-feat-audio-notification.txt') : '').
+            (($mission->feat_unread_msg_counts) ? Main::loadTemplate('chat-feat-unread-msg-counts.txt') : '').
+            (($mission->feat_convo_list_order) ? Main::loadTemplate('chat-feat-convo-list-order.txt') : '').
+            (($mission->feat_est_delivery_status) ? Main::loadTemplate('chat-feat-est-delivery-status.txt') : '').
+            (($mission->feat_progress_bar) ? Main::loadTemplate('chat-feat-progress-bar.txt') : '').
+            (($mission->feat_markdown_support) ? Main::loadTemplate('chat-feat-markdown-support.txt') : '').
+            (($mission->feat_important_msgs) ? Main::loadTemplate('chat-feat-important-msgs.txt') : '').
+            (($mission->feat_convo_threads) ? Main::loadTemplate('chat-feat-convo-threads.txt') : '');
 
         // Load template. 
         return Main::loadTemplate('chat.txt', 
@@ -693,8 +674,7 @@ class ChatModule extends DefaultModule
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                   '/%download-link%/'      => Main::loadTemplate('download-link.txt', 
                                               array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),
-                  '/%notification_audio%/' => $notificationAudio,
-                  '/%notification_badge%/' => $notificationBadge,
+                  '/%features_enabled%/'  => $featuresEnabled
                 ));
     }
 

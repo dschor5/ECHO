@@ -20,6 +20,8 @@ class ErrorModule extends DefaultModule
     public function compileHtml(string $subaction) : string
     {
         $this->addTemplates('common.css', 'settings.css');
+        $username = ($this->user == null) ? 'n/a' : $this->user->username;
+        Logger::warning('error:compileHtml user='.$username.', '.json_encode($_GET));
         return Main::loadTemplate('error.txt');
     }
 }

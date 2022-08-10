@@ -21,7 +21,7 @@
  * - This class does not validate the delay expressions. It is assumed that
  *   the validation is done when saving the settings in the admin module. 
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class Delay
 {
