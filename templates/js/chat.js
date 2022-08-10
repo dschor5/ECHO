@@ -203,9 +203,9 @@ function compileMsg(data, before){
         msgTime.setAttribute('sent',   data.sent_time);
         msgTime.setAttribute('msg-id', data.message_id);
             
+        msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
+        msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
         if($('#feat-progress-bar-enabled').length && data.delivery_status != 'Delivered') {
-            msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
-            msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
             msgClone.querySelector('.msg-progress-bar').style.display = "block";
         }
         
