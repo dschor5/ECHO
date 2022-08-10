@@ -49,9 +49,7 @@
                 <div class="msg-content"></div>
                 <time/>
                 <div class="msg-status">
-                    <div class="msg-delivery-status">
-                        [<span class="sent-time"></span><span class="recv-status"></span>]
-                    </div>
+                    <div class="msg-delivery-status"></div>
                     <div class="msg-progress-bar">
                         <span class="msg-progress-bar-fill"></span>
                     </div>

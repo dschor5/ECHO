@@ -205,14 +205,8 @@ function compileMsg(data, before){
             
         msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
         msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
-        if($('#feat-progress-bar-enabled').length) {
-            if(data.delivery_status != 'Delivered') {
-                msgClone.querySelector('.msg-progress-bar').style.display = "block";
-            }
-            else 
-            {
-                msgClone.querySelector('.msg-progress-bar').style.display = "none";
-            }
+        if($('#feat-progress-bar-enabled').length && data.delivered_status != 'Delivered') {
+            msgClone.querySelector('.msg-progress-bar').style.display = "block";
         }
         
         var msgStatus = '[Sent: ' + formatTime(data.sent_time);
@@ -262,7 +256,7 @@ function updateDeliveryStatus() {
         delay = recvTime - sentTime;
         percent = 100.0 - (recvTime - currTime) / delay * 100.0;
 
-        /*document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
+        document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
             match.removeAttribute('status');            
             var msgStatus = '[Sent: ' + formatTime(sentTime);
@@ -274,7 +268,6 @@ function updateDeliveryStatus() {
             document.querySelector('#progress-msg-id' + id).style.display = 'none';
             document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
         }
-        */
     });
     setTimeout(updateDeliveryStatus, 1000);
 }
