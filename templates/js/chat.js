@@ -160,7 +160,7 @@ function handleEventSourceNotification(event) {
  */
 function compileMsg(data, before){
     //var template = document.querySelector('#msg-sent-'.concat(data.source));
-    var template = document.querySelector('#msg-setn-template');
+    var template = document.querySelector('#msg-sent-template');
     if('content' in document.createElement('template'))
     {
         var msgClone = template.content.cloneNode(true);
