@@ -168,7 +168,7 @@ class Message
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%id%/'        => $this->message_id,
-                  '/%from-user%/' => $participants[$this->user_id]['alias'],
+                  '/%from-user%/' => $participants[$this->user_id]['username'],
                   '/%sent-time%/' => DelayTime::convertTimestampTimezone($this->sent_time, 'UTC', $tz),
                   '/%recv-time-mcc%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
                   '/%recv-time-hab%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),

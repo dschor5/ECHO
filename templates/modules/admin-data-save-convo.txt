@@ -24,8 +24,7 @@
             <tr>
                 <th colspan="2" class="convo-info-label">Participants:</th>
                 <th class="convo-info-label">User</td>
-                <th class="convo-info-label">Alias</td>
-                <th class="convo-info-label" colspan="2">Base</td>        
+                <th class="convo-info-label" colspan="3">Base</td>        
             </tr>
 %participants%    
             <tr>
