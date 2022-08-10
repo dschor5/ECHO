@@ -20,7 +20,7 @@ $(document).ready(function() {
         autoOpen: false,
         draggable: false,
         resizable: false,
-        height: 280,
+        height: 360,
         width: 400,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
