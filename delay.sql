@@ -25,7 +25,8 @@ CREATE TABLE `participants` (
   `conversation_id` int(10) UNSIGNED NOT NULL ,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Participant',
   PRIMARY KEY (`conversation_id`, `user_id`),
-  FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `messages` (
