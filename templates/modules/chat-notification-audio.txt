@@ -1,5 +1,0 @@
-    <audio id="new-msg-sound">
-        <source src="%http%%site_url%/%templates_dir%/media/new_msg.ogg" type="audio/ogg">
-        <source src="%http%%site_url%/%templates_dir%/media/new_msg.m4r" type="audio/aac">
-        <source src="%http%%site_url%/%templates_dir%/media/new_msg.mp3" type="audio/mpeg">
-    </audio>

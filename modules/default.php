@@ -263,7 +263,7 @@ abstract class DefaultModule implements Module
                 '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(false),
                 '/%in_mcc%/'           => $inMcc,
                 '/%timeout-window%/'   => $timeoutWindow,
-                '/%timeout-sec%/'      => $mission->timeout_sec,
+                '/%timeout-sec%/'      => $mission->login_timeout,
             );
 
             echo Main::loadTemplate('main.txt', $replace);

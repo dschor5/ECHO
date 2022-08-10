@@ -76,7 +76,7 @@ class AdminModule extends DefaultModule
             'hab_planet'    => array('name'=>'Analog Habitat Planet',     'format'=>$STR_FMT),
             'hab_user_role' => array('name'=>'Analog Habitat User Role',  'format'=>$STR_FMT),
             'hab_timezone'  => array('name'=>'Analog Habitat Timezone',   'format'=>$STR_FMT),
-            'timeout_sec'   => array('name'=>'Config Timeout',            'format'=>$STR_FMT),
+            'login_timeout' => array('name'=>'Config Timeout',            'format'=>$STR_FMT),
         );
 
         foreach($fields as $name => $validation)
@@ -95,6 +95,24 @@ class AdminModule extends DefaultModule
             {
                 $data[$name] = $temp;
             }
+        }
+
+        $featureEnableState = array(
+            'feat_audio_notification',
+            'feat_badge_notification',
+            'feat_unread_msg_counts',
+            'feat_convo_list_order',
+            'feat_est_delivery_status',
+            'feat_progress_bar',
+            'feat_markdown_support',
+            'feat_important_msgs',
+            'feat_convo_threads',    
+            'debug'        
+        );
+
+        foreach($featureEnableState as $feature)
+        {
+            $data[$feature] = $_POST[$feature] ?? '0';
         }
 
         // Additional checks if all required fields are filled and the right format.
@@ -119,7 +137,7 @@ class AdminModule extends DefaultModule
                 $response['error'][] = 'Invalid "Analog Habitat Timezone" selected.';
             }
 
-            if(!array_key_exists($data['timeout_sec'], self::TIMEOUT_OPS_SEC))
+            if(!array_key_exists($data['login_timeout'], self::TIMEOUT_OPS_SEC))
             {
                 $response['error'][] = 'Invalid "Login Timeout" selected.';
             }
@@ -187,7 +205,7 @@ class AdminModule extends DefaultModule
         $timeoutOptions = '';
         foreach(self::TIMEOUT_OPS_SEC as $timeout_sec => $timeout_label)
         {
-            $timeoutOptions .= $this->makeSelectOption($timeout_sec, $timeout_label, $mission->timeout_sec == intval($timeout_sec));
+            $timeoutOptions .= $this->makeSelectOption($timeout_sec, $timeout_label, $mission->login_timeout == intval($timeout_sec));
         }
 
         $missionStartDate = DelayTime::convertTimestampTimezone(
@@ -208,6 +226,16 @@ class AdminModule extends DefaultModule
             '/%hab_user_role%/'   => $mission->hab_user_role,
             '/%hab_timezone%/'    => $habTimezoneOptions,
             '/%timeout-options%/' => $timeoutOptions,
+            '/%feat_audio_notification_checked%/'  => $mission->feat_audio_notification  == '1' ? 'checked' : '',
+            '/%feat_badge_notification_checked%/'  => $mission->feat_badge_notification  == '1' ? 'checked' : '',
+            '/%feat_unread_msg_counts_checked%/'   => $mission->feat_unread_msg_counts   == '1' ? 'checked' : '',
+            '/%feat_convo_list_order_checked%/'    => $mission->feat_convo_list_order    == '1' ? 'checked' : '',
+            '/%feat_est_delivery_status_checked%/' => $mission->feat_est_delivery_status == '1' ? 'checked' : '',
+            '/%feat_progress_bar_checked%/'        => $mission->feat_progress_bar        == '1' ? 'checked' : '',
+            '/%feat_markdown_support_checked%/'    => $mission->feat_markdown_support    == '1' ? 'checked' : '',
+            '/%feat_important_msgs_checked%/'      => $mission->feat_important_msgs      == '1' ? 'checked' : '',
+            '/%feat_convo_threads_checked%/'       => $mission->feat_convo_threads       == '1' ? 'checked' : '',
+            '/%debug_checked%/'                    => $mission->debug                    == '1' ? 'checked' : '',
         ));
     }
 

@@ -1,6 +1,6 @@
 function saveArchive(downloadType) {
     $.ajax({
-        url: BASE_URL,
+        url: BASE_URL + "/ajax",
         type: 'POST',
         data: {
             action: 'admin',
