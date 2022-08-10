@@ -122,6 +122,15 @@ a:hover {
     margin-bottom: 10px;
 }
 
+.browser-warning {
+    display: none;
+    color: #af2525;
+    border: 1px solid #ffdd00;
+    background: #fffddd;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
 .dialog-body label {
     line-height: 12px;
     margin-bottom: 5px;
