@@ -1,4 +1,8 @@
 $(document).ready(function() {
+    if(!navigator.userAgent.match(/chrome|chromium|crios/i)){
+        $('#dialog-login .browser-warning').style.display = "block";
+    }
+
     // Register action to open modal
     $('#current-delay-login').click(function() {
         $('#dialog-login').dialog('open');

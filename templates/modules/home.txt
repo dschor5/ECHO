@@ -19,6 +19,8 @@
 
 <div id="dialog-login" title="Login to Server" class="dialog-body">
     <form method="POST">
+        <div class="browser-warning"><span class="ui-icon ui-icon-alert"></span> ECHO was designed and tested with Google Chrome. <br/> The use of other browsers may result in degraded performance with respect to audio and video messages.<div>
+
         <div class="dialog-response"></div>
     
         <label for="uname">Username</label>
