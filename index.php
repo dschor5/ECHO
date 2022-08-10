@@ -4,6 +4,8 @@ error_reporting(E_ALL);
 header('Pragma: no-cache');
 date_default_timezone_set("UTC");
 require_once('config.inc.php');
+header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
+Logger::info('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
 try
 {
@@ -55,6 +57,7 @@ class Main
      */
     private function __construct()
     {
+        Logger::init();
         $this->readCookie();
         $this->checkLogin();
     }
@@ -173,7 +176,9 @@ class Main
 
         $missionConfig = MissionConfig::getInstance();
 
-        self::$cookie['expiration'] = time() + $missionConfig->timeout_sec + 30;
+        // Note: The cookie expires in 10 min. If the user is logged in an active, 
+        // the heartbeat messages should keep that going longer. 
+        self::$cookie['expiration'] = time() + 10 * 60;
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;

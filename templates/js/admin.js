@@ -15,6 +15,9 @@ function saveConfig(subaction){
             }
             dataObj[objName][dataObj[objName].length] = $(this).val();
         }
+        else if($(this).prop('type') == "checkbox") {
+            dataObj[$(this).attr('name')] = $(this).prop('checked') ? '1' : '0';
+        }
         else {
             dataObj[$(this).attr('name')] = $(this).val();
         }

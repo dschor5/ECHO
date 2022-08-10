@@ -183,10 +183,17 @@ class Message
      */
     private function compileMsgText() : string
     {
-        $parsedown = new Parsedown();
-        $parsedown->setSafeMode(true);
-        $parsedown->setBreaksEnabled(true);
-        return $parsedown->text($this->text);
+        $missionConfig = MissionConfig::getInstance();
+        $result = $this->text;
+        if($missionConfig->feat_markdown_support)
+        {
+            $parsedown = new Parsedown();
+            $parsedown->setSafeMode(true);
+            $parsedown->setBreaksEnabled(true);
+            $result = $parsedown->text($this->text);
+        }
+        
+        return $result;
     }
 
     /**
@@ -225,20 +232,25 @@ class Message
         }
 
         // Set the format of who authored the message. 
+        // Sending the avatars is somewhat redundant given the source field, 
+        // however, this may provide more functionality in future releases.
         if($userPerspective->user_id == $this->data['user_id'])
         {
             // Current user
             $msgData['source'] = 'usr';
+            $msgData['avatar'] = '';
         }
         elseif($this->data['is_crew'])
         {
             // Someone elese in the habitat
             $msgData['source'] = 'hab';
+            $msgData['avatar'] = 'user-hab.jpg';
         }
         else
         {
             // Someone else in MCC
             $msgData['source'] = 'mcc';
+            $msgData['avatar'] = 'user-mcc.jpg';
         }
 
         return $msgData;
