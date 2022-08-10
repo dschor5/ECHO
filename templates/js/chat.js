@@ -159,7 +159,6 @@ function handleEventSourceNotification(event) {
  * @param {*} before 
  */
 function compileMsg(data, before){
-    //var template = document.querySelector('#msg-sent-'.concat(data.source));
     var template = document.querySelector('#msg-sent-template');
     if('content' in document.createElement('template'))
     {
