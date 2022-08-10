@@ -159,7 +159,8 @@ function handleEventSourceNotification(event) {
  * @param {*} before 
  */
 function compileMsg(data, before){
-    var template = document.querySelector('#msg-sent-'.concat(data.source));
+    //var template = document.querySelector('#msg-sent-'.concat(data.source));
+    var template = document.querySelector('#msg-setn-template');
     if('content' in document.createElement('template'))
     {
         var msgClone = template.content.cloneNode(true);
@@ -167,10 +168,20 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg-from").textContent = data.author;
         msgClone.querySelector(".msg-id").textContent = "(" + data.message_id + ")";
 
+        // Add appropriate avatar. Only added for non-logged in user. 
+        if(data.source != 'usr') {
+            var imgTag = document.createElement("img");
+            imgTag.setAttribute('class', 'msg-avatar');
+            imgTag.setAttribute('src', '%http%%site_url%/%templates_dir%/media/'.concat(data.avatar));
+            msgClone.querySelector('.msg').prepend(imgTag);
+        }
+
+        // Message content. Eiter text or a template for the img/audio/video/file. 
         if(data.type === 'text') {
             msgClone.querySelector(".msg-content").innerHTML = data.message;
         }
         else {
+            // Copy appropriate video, audio, image, or file template. 
             template = document.querySelector('#msg-' + data.type);
             var contentClone = template.content.cloneNode(true);
             try {
@@ -186,28 +197,32 @@ function compileMsg(data, before){
             contentClone.querySelector(".filesize").textContent = data.filesize;
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
-        
-        var msgStatus = msgClone.querySelector(".msg-status");
-        if(data.delivered_status != 'Delivered') {
-            msgStatus.querySelector("time").setAttribute('status', data.delivered_status);
-            msgStatus.querySelector("time").setAttribute('recv',   data.recv_time);
-            msgStatus.querySelector("time").setAttribute('sent',   data.sent_time);
-            msgStatus.querySelector("time").setAttribute('msg-id',   data.message_id);
-            msgStatus.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
-            msgStatus.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
-            msgStatus.querySelector('.msg-progress-bar').style.display = "block";
+
+        msgTime = msgClone.querySelector("time");
+        msgTime.setAttribute('status', data.delivered_status);
+        msgTime.setAttribute('recv',   data.recv_time);
+        msgTime.setAttribute('sent',   data.sent_time);
+        msgTime.setAttribute('msg-id', data.message_id);
+            
+        if($('#feat-progress-bar-enabled').length && data.delivery_status != 'Delivered') {
+            msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
+            msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
+            msgClone.querySelector('.msg-progress-bar').style.display = "block";
         }
         
-        msgStatus.querySelector(".msg-delivery-status").textContent = 
-            '[Sent: ' + formatTime(data.sent_time) + ', Recv: ' + formatTime(data.recv_time) + ', ' + data.delivered_status + ']';
-        msgStatus.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
+        var msgStatus = '[Sent: ' + formatTime(data.sent_time);
+        if($('#feat-est-delivery-status-enabled').length) {
+            msgStatus += ', Recv: ' + formatTime(data.recv_time) + ', ' + data.delivered_status + ']';
+        }
+        msgClone.querySelector(".msg-delivery-status").textContent = msgStatus;
+        msgClone.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
+        // Determine where to add the message within the DOM.
+        var container = document.querySelector('#msg-container');
         if(before) {
-            var container = document.querySelector('#msg-container');
             container.prepend(msgClone);
         }
         else {
-            var container = document.querySelector('#msg-container');
             container.appendChild(msgClone);
         }
     }
@@ -245,8 +260,11 @@ function updateDeliveryStatus() {
         document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
             match.removeAttribute('status');            
-            document.querySelector('#status-msg-id-' + id).textContent = 
-                '[Sent: ' + formatTime(sentTime) + ', Recv: ' + formatTime(recvTime) + ', Delivered]';
+            var msgStatus = '[Sent: ' + formatTime(sentTime);
+            if($('#feat-est-delivery-status-enabled').length) {
+                msgStatus += ', Recv: ' + formatTime(recvTime) + ', Delivered]';
+            }
+            document.querySelector('#status-msg-id-' + id).textContent = msgStatus;
             document.querySelector('#progress-msg-id' + id).style.display = 'none';
             document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
         }
