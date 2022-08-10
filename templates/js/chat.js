@@ -205,9 +205,14 @@ function compileMsg(data, before){
             
         msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
         msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
-        msgClone.querySelector(".msg-progress-bar").style.display = 'none';
-        if($('#feat-progress-bar-enabled').length && data.delivery_status != 'Delivered') {
-            msgClone.querySelector('.msg-progress-bar').style.display = "block";
+        if($('#feat-progress-bar-enabled').length) {
+            if(data.delivery_status != 'Delivered') {
+                msgClone.querySelector('.msg-progress-bar').style.display = "block";
+            }
+            else
+            {
+                msgClone.querySelector('.msg-progress-bar').style.display = "none";
+            }
         }
         
         var msgStatus = '[Sent: ' + formatTime(data.sent_time);
@@ -219,12 +224,11 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
         // Determine where to add the message within the DOM.
-        var container = document.querySelector('#msg-container');
-        if(before) {
-            container.prepend(msgClone);
+        if(before) { 
+            document.querySelector('#msg-container').prepend(msgClone);
         }
         else {
-            container.appendChild(msgClone);
+            document.querySelector('#msg-container').appendChild(msgClone);
         }
     }
     else
