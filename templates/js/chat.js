@@ -209,7 +209,7 @@ function compileMsg(data, before){
             if(data.delivery_status != 'Delivered') {
                 msgClone.querySelector('.msg-progress-bar').style.display = "block";
             }
-            else
+            else 
             {
                 msgClone.querySelector('.msg-progress-bar').style.display = "none";
             }
@@ -262,7 +262,7 @@ function updateDeliveryStatus() {
         delay = recvTime - sentTime;
         percent = 100.0 - (recvTime - currTime) / delay * 100.0;
 
-        document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
+        /*document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
             match.removeAttribute('status');            
             var msgStatus = '[Sent: ' + formatTime(sentTime);
@@ -274,6 +274,7 @@ function updateDeliveryStatus() {
             document.querySelector('#progress-msg-id' + id).style.display = 'none';
             document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
         }
+        */
     });
     setTimeout(updateDeliveryStatus, 1000);
 }
