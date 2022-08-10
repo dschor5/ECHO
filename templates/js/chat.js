@@ -1,7 +1,7 @@
 /**
  * Sends a text message. 
  */
-function sendTextMessage() {
+function sendTextMessage(important) {
 
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
@@ -308,6 +308,13 @@ function openFileModal() {
 
 
 $(document).ready(function() {
+    if($('#feat-important-msgs-enabled').length) {
+        $('#send-btn').style.width = 113 - 40;
+    }
+    else {
+        $('#important-btn').hide();
+    }
+
     // Video
     $('#dialog-video').dialog({
         autoOpen: false,

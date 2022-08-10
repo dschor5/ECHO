@@ -299,6 +299,13 @@
     font-family: "symbols";
 }
 
+#important-btn {
+    position: absolute;
+    right: 10px;
+    top: 48px;
+    font-family: "symbols";
+}
+
 .symbol {
     font-family: "glyphicons";
     line-height: 80%;
@@ -313,32 +320,6 @@
     display:inline-block;
     margin-bottom: 2px;
 }
-
-/*.modal-footer-small {
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    padding-top: 5px;
-    color: #000000;
-    font-size: 16pt;
-    font-weight: bold;
-    text-align: center;
-}
-
-.modal-footer-small button {
-    margin: 0px auto;
-    position: relative;
-    width: calc(33% - 6px);
-    padding: 5px 0px;
-    height: 25px;
-    border-radius: 5px;
-    border: 1px solid #666;
-}
-
-.modal-footer-small button:hover:enabled {
-    background-color: #666;
-    color: #FFF;
-}
-*/
 
 .new-msg-btn {
     height: 33px;
