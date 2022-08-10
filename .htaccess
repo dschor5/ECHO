@@ -21,10 +21,10 @@ RewriteRule ^preferences index.php?action=preferences [QSA]
 RewriteRule ^(file|css|js|archive)/(.*) index.php?action=file&subaction=$1&id=$2 [QSA]
 RewriteRule ^debug/run index.php?action=debug&subaction=run [QSA]
 
-ErrorDocument 400 /index.php?action=error [QSA]
-ErrorDocument 403 /index.php?action=error [QSA]
-ErrorDocument 404 /index.php?action=error [QSA]
-ErrorDocument 500 /index.php?action=error [QSA]
+ErrorDocument 400 /index.php?action=error&page=%{REQUEST_URI}
+ErrorDocument 403 /index.php?action=error&page=%{REQUEST_URI}
+ErrorDocument 404 /index.php?action=error&page=%{REQUEST_URI}
+ErrorDocument 500 /index.php?action=error&page=%{REQUEST_URI}
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
