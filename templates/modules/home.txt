@@ -1,5 +1,5 @@
 <h1>%mission_name%</h1>
-<h2>Communication System</h2>
+<h2><b>E</b>mulating <b>C</b>ommunication delays for <b>H</b>uman spaceflight <b>O</b>perations</h2>
 
 <div id="current-delay" style="background-image: url('%http%%site_url%/%templates_dir%/media/background-home.jpg');">
     <div id="current-delay-container">
@@ -19,6 +19,11 @@
 
 <div id="dialog-login" title="Login to Server" class="dialog-body">
     <form method="POST">
+        <div class="browser-warning">
+            <span class="ui-icon ui-icon-alert"></span> ECHO was designed and tested with Google Chrome. 
+            The use of other browsers may result in degraded performance with respect to audio and video messages.
+        </div>
+
         <div class="dialog-response"></div>
     
         <label for="uname">Username</label>

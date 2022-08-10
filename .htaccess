@@ -5,8 +5,13 @@ RewriteRule \.git error
 RewriteRule config.inc.php error
 RewriteRule server.inc.php error
 RewriteRule mission.inc.php error
+RewriteRule ^uploads /index.php?action=error&page=%{REQUEST_URI}
+RewriteRule ^uploads/(.*) /index.php?action=error&p=$1&page=%{REQUEST_URI}
 
-RewriteRule ^login index.php?action=home&subaction=checkLogin [QSA]
+RewriteRule ^ajax/(.*)/(.*) index.php?ajax=true&action=$1&subaction=$2 [QSA]
+RewriteRule ^ajax/(.*) index.php?ajax=true&action=$1 [QSA]
+RewriteRule ^ajax index.php?ajax=true [QSA]
+RewriteRule ^chatstream index.php?stream=true&action=chat&subaction=refresh [QSA]
 RewriteRule ^home index.php?action=home [QSA]
 RewriteRule ^logout index.php?action=home&subaction=logout [QSA]
 RewriteRule ^chat/([0-9]+) index.php?action=chat&conversation_id=$1 [QSA]
@@ -18,10 +23,10 @@ RewriteRule ^preferences index.php?action=preferences [QSA]
 RewriteRule ^(file|css|js|archive)/(.*) index.php?action=file&subaction=$1&id=$2 [QSA]
 RewriteRule ^debug/run index.php?action=debug&subaction=run [QSA]
 
-ErrorDocument 400 /index.php?action=error
-ErrorDocument 403 /index.php?action=error
-ErrorDocument 404 /index.php?action=error
-ErrorDocument 500 /index.php?action=error
+ErrorDocument 400 /index.php?action=error&page=%{REQUEST_URI}
+ErrorDocument 403 /index.php?action=error&page=%{REQUEST_URI}
+ErrorDocument 404 /index.php?action=error&page=%{REQUEST_URI}
+ErrorDocument 500 /index.php?action=error&page=%{REQUEST_URI}
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

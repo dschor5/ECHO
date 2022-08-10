@@ -4,7 +4,7 @@
  * Data Abstraction Object for the msg_file table. Implements custom 
  * queries to search and update conversations as needed. 
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class MessageFileDao extends Dao
 {

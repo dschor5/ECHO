@@ -23,7 +23,7 @@ function resetPassword() {
     var upass2 = $('#dialog-login #upass2').val();
     if(upass1 != '' && upass2 != '') {
         $.ajax({
-            url:  BASE_URL,
+            url:  BASE_URL + '/ajax',
             type: "POST",
             data: {
                 password1: upass1,

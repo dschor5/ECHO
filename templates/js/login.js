@@ -1,4 +1,8 @@
 $(document).ready(function() {
+    if(!navigator.userAgent.match(/chrome|chromium|crios/i)){
+        $('#dialog-login .browser-warning').show();
+    }
+
     // Register action to open modal
     $('#current-delay-login').click(function() {
         $('#dialog-login').dialog('open');
@@ -16,7 +20,7 @@ $(document).ready(function() {
         autoOpen: false,
         draggable: false,
         resizable: false,
-        height: 280,
+        height: 400,
         width: 400,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
@@ -45,17 +49,18 @@ function login() {
     var password = $('#dialog-login #upass').val();
     if(username != '' && password != '') {
         $.ajax({
-            url:  BASE_URL,
+            url:  BASE_URL + '/ajax',
             type: "POST",
             data: {
                 uname: username,
                 upass: password,
+                action: 'home',
                 subaction: 'login'
             },
             dataType: 'json',
             success: function(data) {
                 if(data.login == true) {
-                    location.href = BASE_URL + '/login';
+                    location.href = BASE_URL + '/chat';
                 }
                 else{
                     $('#dialog-login .dialog-response').text('Invalid username or password.');

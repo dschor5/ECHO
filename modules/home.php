@@ -16,8 +16,9 @@ class HomeModule extends DefaultModule
 
         // Acceptable request types. 
         $this->subJsonRequests = array(
-            'reset' => 'resetPassword',
-            'login' => 'login'
+            'reset'      => 'resetPassword',
+            'login'      => 'login',
+            'heartbeat'  => 'heartbeat',
         );
         $this->subHtmlRequests = array(
             'logout'     => 'logout',
@@ -226,6 +227,11 @@ class HomeModule extends DefaultModule
         header('Location: '.$server['http'].$server['site_url']);
         return 'Logging out, please wait while you are redirected to the homepage.';
     }    
+
+    protected function heartbeat() : array 
+    {
+        return array('success' => ($this->user != null));
+    }
 }
 
 ?>

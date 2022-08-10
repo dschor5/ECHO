@@ -13,7 +13,7 @@
  * Assumption:
  * - Applicaition has write access to $server['host_address'].$config['logs_dir'].
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class Logger
 {
@@ -65,6 +65,16 @@ class Logger
     private function __construct() 
     {
         // Do nothing. 
+    }
+
+    public static function init()
+    {
+        $missionConfig = MissionConfig::getInstance();
+        self::$levelThreshold = Logger::INFO;
+        if($missionConfig->debug)
+        {
+            self::$levelThreshold = Logger::DEBUG;
+        }
     }
 
     /**

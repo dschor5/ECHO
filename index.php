@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 header('Pragma: no-cache');
 date_default_timezone_set("UTC");
 require_once('config.inc.php');
+header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
 try
 {
@@ -26,7 +27,7 @@ try
 }
 catch (Exception $e) 
 {
-    Logger::error("Main::compile()", $e);
+    Logger::error("Main::compile()", array($e));
 }
 
 /**
@@ -55,6 +56,7 @@ class Main
      */
     private function __construct()
     {
+        Logger::init();
         $this->readCookie();
         $this->checkLogin();
     }
@@ -117,6 +119,12 @@ class Main
             $moduleName = $_GET['action'];
         }
         
+        // Add heartbeat to all modules if user not logged in. 
+        if($this->user != null)
+        {
+            $defaults[] = 'heartbeat.js';
+        }
+
         // Load module
         require_once($config['modules_dir'].'/'.$moduleName.'.php');
         $moduleClassName = $moduleName.'Module';
@@ -164,9 +172,12 @@ class Main
     public static function setSiteCookie($data)
     {
         global $config;
-        global $server;
 
-        self::$cookie['expiration'] = time() + $config['cookie_expire'];
+        $missionConfig = MissionConfig::getInstance();
+
+        // Note: The cookie expires in 10 min. If the user is logged in an active, 
+        // the heartbeat messages should keep that going longer. 
+        self::$cookie['expiration'] = time() + 10 * 60;
         foreach ($data as $key => $val)
         {
             self::$cookie[$key] = $val;

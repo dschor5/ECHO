@@ -6,7 +6,6 @@ ini_set('display_errors', '1');
 require_once('server.inc.php');
 
 $config = array();
-$config['debug'] = true;
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
@@ -59,7 +58,6 @@ $config['modules_admin'] = array_merge($config['modules_user'], array(
 ));
 
 $config['cookie_name'] = 'website';
-$config['cookie_expire'] = 1800;
 
 //these are the dao's that are allowed to load.  Add new tables to this list if you need.
 $config['db_tables'] = array(
