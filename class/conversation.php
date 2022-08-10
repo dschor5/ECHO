@@ -150,7 +150,6 @@ class Conversation
         {
             $participantsStr .= Main::loadTemplate('admin-data-save-user.txt', 
                 array('/%username%/' => $participant['username'],
-                        '/%alias%/'  => $participant['alias'],
                         '/%home%/'   => ($participant['is_crew'] ? $habStr : $mccStr)
                 ));
         }
