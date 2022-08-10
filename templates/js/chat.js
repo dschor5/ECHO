@@ -211,8 +211,9 @@ function compileMsg(data, before){
         
         var msgStatus = '[Sent: ' + formatTime(data.sent_time);
         if($('#feat-est-delivery-status-enabled').length) {
-            msgStatus += ', Recv: ' + formatTime(data.recv_time) + ', ' + data.delivered_status + ']';
+            msgStatus += ', Recv: ' + formatTime(data.recv_time) + ', ' + data.delivered_status;
         }
+        msgStatus += ']';
         msgClone.querySelector(".msg-delivery-status").textContent = msgStatus;
         msgClone.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
@@ -261,8 +262,9 @@ function updateDeliveryStatus() {
             match.removeAttribute('status');            
             var msgStatus = '[Sent: ' + formatTime(sentTime);
             if($('#feat-est-delivery-status-enabled').length) {
-                msgStatus += ', Recv: ' + formatTime(recvTime) + ', Delivered]';
+                msgStatus += ', Recv: ' + formatTime(recvTime) + ', Delivered';
             }
+            msgStatus += ']';
             document.querySelector('#status-msg-id-' + id).textContent = msgStatus;
             document.querySelector('#progress-msg-id' + id).style.display = 'none';
             document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
