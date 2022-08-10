@@ -205,6 +205,8 @@ function compileMsg(data, before){
             
         msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
         msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
+        msgClone.querySelector('#progress-msg-id' + id).style.display = 'none';
+        msgClone.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
         if($('#feat-progress-bar-enabled').length && data.delivery_status != 'Delivered') {
             msgClone.querySelector('.msg-progress-bar').style.display = "block";
         }
