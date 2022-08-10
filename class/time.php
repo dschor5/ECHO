@@ -7,7 +7,7 @@
  *     the object stores the UTC timestamp. 
  *  2. Use static functions to convert timezones or get constants. 
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class DelayTime
 {

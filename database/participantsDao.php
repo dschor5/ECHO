@@ -4,7 +4,7 @@
  * Data Abstraction Object for the participants table. Implements custom 
  * queries to search and update conversations as needed. 
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class ParticipantsDao extends Dao
 {

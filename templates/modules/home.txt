@@ -1,5 +1,5 @@
 <h1>%mission_name%</h1>
-<h2>Communication System</h2>
+<h2><b>E</b>mulating <b>C</b>ommunication delays for <b>H</b>uman spaceflight <b>O</b>perations</h2>
 
 <div id="current-delay" style="background-image: url('%http%%site_url%/%templates_dir%/media/background-home.jpg');">
     <div id="current-delay-container">

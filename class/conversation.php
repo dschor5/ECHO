@@ -22,7 +22,7 @@
   * 
  * Note: The nth entry in the participant_* fields all correspond to the same account.
  * 
- * @link https://github.com/dschor5/AnalogDelaySite
+ * @link https://github.com/dschor5/ECHO
  */
 class Conversation
 {
