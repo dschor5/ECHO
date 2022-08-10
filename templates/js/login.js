@@ -1,6 +1,6 @@
 $(document).ready(function() {
     if(!navigator.userAgent.match(/chrome|chromium|crios/i)){
-        $('#dialog-login .browser-warning').style.display = "block";
+        $('#dialog-login .browser-warning').show();
     }
 
     // Register action to open modal
