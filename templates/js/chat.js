@@ -309,7 +309,7 @@ function openFileModal() {
 
 $(document).ready(function() {
     if($('#feat-important-msgs-enabled').length) {
-        $('#send-btn').style.width = 113 - 40;
+        $('#send-btn').css('width', '73px');
     }
     else {
         $('#important-btn').hide();
