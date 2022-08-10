@@ -24,7 +24,6 @@ CREATE TABLE `conversations` (
 CREATE TABLE `participants` (
   `conversation_id` int(10) UNSIGNED NOT NULL ,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Participant',
-  `last_read` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`conversation_id`, `user_id`),
   FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -111,8 +110,8 @@ INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
 (1, 'Mission Chat', NULL, '2021-07-23 14:57:49', '0000-00-00 00:00:00');
 
-INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
-(1, 1, '0000-00-00 00:00:00');
+INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES
+(1, 1);
 
 /* The following values are used for testing only and should not be deployed by default. */
 
@@ -131,19 +130,19 @@ INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`
 (7, 'Blueberry-Tangirine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00');
 
 
-INSERT INTO `participants` (`conversation_id`, `user_id`, `last_read`) VALUES
-(1, 2, '0000-00-00 00:00:00'),
-(1, 3, '0000-00-00 00:00:00'),
-(1, 4, '0000-00-00 00:00:00'),
-(2, 1, '0000-00-00 00:00:00'),
-(2, 2, '0000-00-00 00:00:00'),
-(3, 1, '0000-00-00 00:00:00'),
-(3, 3, '0000-00-00 00:00:00'),
-(4, 2, '0000-00-00 00:00:00'),
-(4, 3, '0000-00-00 00:00:00'),
-(5, 1, '0000-00-00 00:00:00'),
-(5, 4, '0000-00-00 00:00:00'),
-(6, 2, '0000-00-00 00:00:00'),
-(6, 4, '0000-00-00 00:00:00'),
-(7, 3, '0000-00-00 00:00:00'),
-(7, 4, '0000-00-00 00:00:00');
+INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES
+(1, 2),
+(1, 3),
+(1, 4),
+(2, 1),
+(2, 2),
+(3, 1),
+(3, 3),
+(4, 2),
+(4, 3),
+(5, 1),
+(5, 4),
+(6, 2),
+(6, 4),
+(7, 3),
+(7, 4);
