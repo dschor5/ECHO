@@ -619,9 +619,9 @@ class ChatModule extends DefaultModule
             $newNotifications = array();
             foreach($notifications as $convoId => $msgs) 
             {
-                if(count(array_diff_assoc($prevNotifications[$convoId], $msgs[$convoId])) > 0)
+                if(count(array_diff_assoc($prevNotifications[$convoId], $msgs)) > 0)
                 {
-                    $newNotifications[$convoId] = $notifications[$convoId];
+                    $newNotifications[$convoId] = $msgs;
                 }
             }
 
