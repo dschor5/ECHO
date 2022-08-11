@@ -182,7 +182,7 @@ function compileMsg(data, before){
         // Message content. Eiter text or a template for the img/audio/video/file. 
         if(data.type === 'text' || data.type === 'important') {
             msgClone.querySelector(".msg-content").innerHTML = data.message;
-            if(data.type === 'important') {
+            if(data.type === 'important' && $('#feat-important-msgs-enabled').length) {
                 msgClone.querySelector(".msg").classList.add("msg-important");
                 msgClone.querySelector(".msg-content").classList.add("msg-content-important");
             }
