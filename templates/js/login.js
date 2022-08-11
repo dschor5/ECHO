@@ -15,6 +15,15 @@ $(document).ready(function() {
         }
     });
 
+    if (localStorage.getItem("cookieSeen") != "shown") {
+        $(".cookie-banner").delay(2000).fadeIn();
+    };
+
+    $(".cookie-close").click(function() {
+        localStorage.setItem("cookieSeen", "shown");
+        $(".cookie-banner").fadeOut();
+    })
+
     // Modal options
     $('#dialog-login').dialog({
         autoOpen: false,
