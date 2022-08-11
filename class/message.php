@@ -74,7 +74,7 @@ class Message
         $this->file = null;
 
         // If the message contains an attachment, load teh corresponding fields. 
-        if($this->data['type'] != self::TEXT)
+        if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT)
         {
             $this->file = new FileUpload(
                 array_intersect_key($this->data, 
