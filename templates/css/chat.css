@@ -208,6 +208,14 @@
     height: 50px;
 }
 
+.msg-content-important {
+    color: #ff00009f;
+}
+
+.msg-important {
+    border: 5px solid #FF0000;
+}
+
 .msg-status {
     width: 100%;
     height: 15px;
