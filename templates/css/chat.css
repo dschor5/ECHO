@@ -221,6 +221,7 @@
 
 .msg-important {
     border: 5px solid #FF0000;
+    width: calc(80% - 6px);
 }
 
 .msg-status {
