@@ -617,6 +617,14 @@ class ChatModule extends DefaultModule
         {
             // Ensure we only send new notifications. 
             $newNotifications = array_diff_assoc($notifications, $prevNotifications);
+            $newNotifications = array();
+            foreach($notifications as $convoId => $msgs) 
+            {
+                if(count(array_diff_assoc($prevNotifications[$convoId], $notifications[$convoId])) > 0)
+                {
+                    $newNotifications[$convoId] = $notifications[$convoId];
+                }
+            }
 
             // Send a new message indicating the conversation id and num messages. 
             foreach($newNotifications as $convoId=>$numMsgs)
@@ -627,7 +635,8 @@ class ChatModule extends DefaultModule
                         'notification', 
                         array(
                             'conversation_id' => $convoId,
-                            'num_messages'    => $numMsgs
+                            'num_messages'    => $numMsgs['num_new'],
+                            'num_important'   => $numMsgs['num_important'],
                         )
                     );
                 }

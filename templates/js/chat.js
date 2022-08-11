@@ -142,7 +142,8 @@ function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
     if($('#feat-unread-msg-counts-enabled').length) {
         if($('#room-new-' + data.conversation_id).length) {
-            $('#room-new-' + data.conversation_id).text( '(' + data.num_messages + ')');
+            $('#room-new-' + data.conversation_id).text( '(' + data.num_messages + 
+                ((data.num_important > 0) ? '!!':'') + ')');
             newMessageNotification($('#room-name-' + data.conversation_id).text(), false);
         }
     }
