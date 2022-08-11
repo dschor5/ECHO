@@ -35,7 +35,7 @@
 </div>
 
 <div class="cookie-banner" style="display: none">
-    <p>Cookies help manage logged in sessions and are essential to ECHO. 
-    No personal information other than a username are stored in the cookies. </p>
+    <p>Cookies are essential to manage logged in sessions and are essential to ECHO. <br/>
+    No personal or tracking information other than a username are stored in the cookies. </p>
     <button class="cookie-close">&times;</button>
 </div>
