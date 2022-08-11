@@ -1,7 +1,7 @@
 /**
  * Sends a text message. 
  */
-function sendTextMessage(important=false) {
+function sendTextMessage(msgImportant) {
 
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
@@ -18,7 +18,7 @@ function sendTextMessage(important=false) {
             subaction: 'send',
             conversation_id: $('#conversation_id').val(),
             msgBody: newMsgText,
-            type: important,
+            type: msgImportant,
         },
         dataType: 'json',
 
