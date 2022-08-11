@@ -235,6 +235,8 @@ class Message
         // If not null, add the details on the file attachment. 
         if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT && $this->file != null)
         {
+            Logger::warning(var_dump($this->file).'   '.$this->data['type']);
+
             if($this->file->exists())
             {
                 $msgData['filename'] = $this->file->original_name;
