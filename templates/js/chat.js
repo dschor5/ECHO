@@ -183,7 +183,8 @@ function compileMsg(data, before){
         if(data.type === 'text' || data.type === 'important') {
             msgClone.querySelector(".msg-content").innerHTML = data.message;
             if(data.type === 'important') {
-                msgClone.querySelector(".msg-content").classList.add("msg-important");
+                msgClone.querySelector(".msg").classList.add("msg-important");
+                msgClone.querySelector(".msg-content").classList.add("msg-content-important");
             }
         }
         else {
