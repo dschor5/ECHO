@@ -401,7 +401,7 @@ class ChatModule extends DefaultModule
 
         $msgText = $_POST['msgBody'] ?? '';
         $msgImportant = filter_var($_POST['msgType'] ?? false, FILTER_VALIDATE_BOOLEAN) ?
-            Message::TEXT : Message::IMPORTANT;
+            Message::IMPORTANT : Message::TEXT;
 
         $response = array(
             'success' => false, 
