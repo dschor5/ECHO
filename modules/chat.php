@@ -423,7 +423,6 @@ class ChatModule extends DefaultModule
             // Send the message. If this fails, then 
             if(($messageId = $messagesDao->sendMessage($msgData)) !== false)
             {
-                
                 $newMsg = new Message(
                     array_merge(
                         $msgData, 
