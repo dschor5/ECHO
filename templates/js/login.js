@@ -20,7 +20,7 @@ $(document).ready(function() {
         localStorage.setItem("cookieSeen", "shown")
     };
 
-    $(.cookie-close").click(function() {
+    $(".cookie-close").click(function() {
         $(".cookie-banner").fadeOut();
     })
 
