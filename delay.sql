@@ -34,7 +34,7 @@ CREATE TABLE `messages` (
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Author',
   `conversation_id` int(10) UNSIGNED NOT NULL ,
   `text` text CHARACTER SET utf8 DEFAULT NULL,
-  `type` enum('text','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
+  `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
   `sent_time` datetime NOT NULL,
   `recv_time_hab` datetime NOT NULL,
   `recv_time_mcc` datetime NOT NULL,

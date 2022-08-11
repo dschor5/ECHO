@@ -17,6 +17,11 @@ class Message
     const TEXT = 'text';
 
     /**
+     * Constant message type: IMPORTANT
+     */
+    const IMPORTANT = 'important';
+
+    /**
      * Constant message type: FILE
      */
     const FILE = 'file';
@@ -69,7 +74,7 @@ class Message
         $this->file = null;
 
         // If the message contains an attachment, load teh corresponding fields. 
-        if($this->data['type'] != self::TEXT)
+        if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT)
         {
             $this->file = new FileUpload(
                 array_intersect_key($this->data, 
@@ -221,14 +226,24 @@ class Message
             'remoteDest'       => $remoteDest,
         );
             
+        // Flag as important
+        if($this->data['type'] == self::IMPORTANT) 
+        {
+            $msgData['type'] = self::IMPORTANT;
+        }
         
         // If not null, add the details on the file attachment. 
-        if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
+        if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT && $this->file != null)
         {
-            $msgData['filename'] = $this->file->original_name;
-            $msgData['filesize'] = $this->file->getSize();
-            $msgData['type'] = $this->file->getTemplateType();
-            $msgData['mime_type'] = $this->file->mime_type;
+            Logger::warning(var_dump($this->file).'   '.$this->data['type']);
+
+            if($this->file->exists())
+            {
+                $msgData['filename'] = $this->file->original_name;
+                $msgData['filesize'] = $this->file->getSize();
+                $msgData['type'] = $this->file->getTemplateType();
+                $msgData['mime_type'] = $this->file->mime_type;
+            }
         }
 
         // Set the format of who authored the message. 
