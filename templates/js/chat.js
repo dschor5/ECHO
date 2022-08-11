@@ -18,7 +18,7 @@ function sendTextMessage(msgImportant) {
             subaction: 'send',
             conversation_id: $('#conversation_id').val(),
             msgBody: newMsgText,
-            type: msgImportant,
+            msgType: msgImportant,
         },
         dataType: 'json',
 

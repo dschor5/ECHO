@@ -400,7 +400,7 @@ class ChatModule extends DefaultModule
         $currTime = new DelayTime();
 
         $msgText = $_POST['msgBody'] ?? '';
-        $msgImportant = filter_var($_POST['msgBody'] ?? false, FILTER_VALIDATE_BOOLEAN) ?
+        $msgImportant = filter_var($_POST['msgType'] ?? false, FILTER_VALIDATE_BOOLEAN) ?
             Message::TEXT : Message::IMPORTANT;
 
         $response = array(
