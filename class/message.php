@@ -17,6 +17,11 @@ class Message
     const TEXT = 'text';
 
     /**
+     * Constant message type: IMPORTANT
+     */
+    const IMPORTANT = 'important';
+
+    /**
      * Constant message type: FILE
      */
     const FILE = 'file';
@@ -221,9 +226,15 @@ class Message
             'remoteDest'       => $remoteDest,
         );
             
+        // Flag as important
+        if($this->data['type'] == self::IMPORTANT) 
+        {
+            $msgData['type'] = self::IMPORTANT;
+        }
         
         // If not null, add the details on the file attachment. 
-        if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
+        if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT && 
+           $this->file != null && $this->file->exists())
         {
             $msgData['filename'] = $this->file->original_name;
             $msgData['filesize'] = $this->file->getSize();

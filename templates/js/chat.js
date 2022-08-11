@@ -1,7 +1,7 @@
 /**
  * Sends a text message. 
  */
-function sendTextMessage(important) {
+function sendTextMessage(important=false) {
 
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
@@ -18,6 +18,7 @@ function sendTextMessage(important) {
             subaction: 'send',
             conversation_id: $('#conversation_id').val(),
             msgBody: newMsgText,
+            type: important,
         },
         dataType: 'json',
 
@@ -174,10 +175,16 @@ function compileMsg(data, before){
             imgTag.setAttribute('src', '%http%%site_url%/%templates_dir%/media/'.concat(data.avatar));
             msgClone.querySelector('.msg').prepend(imgTag);
         }
+        else{
+            msgClone.querySelector('.msg').classList.add('response');
+        }
 
         // Message content. Eiter text or a template for the img/audio/video/file. 
-        if(data.type === 'text') {
+        if(data.type === 'text' || data.type === 'important') {
             msgClone.querySelector(".msg-content").innerHTML = data.message;
+            if(data.type === 'important') {
+                msgClone.querySelector(".msg-content").classList.add("msg-important");
+            }
         }
         else {
             // Copy appropriate video, audio, image, or file template. 

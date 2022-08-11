@@ -400,6 +400,8 @@ class ChatModule extends DefaultModule
         $currTime = new DelayTime();
 
         $msgText = $_POST['msgBody'] ?? '';
+        $msgImportant = filter_var($_POST['msgBody'] ?? false, FILTER_VALIDATE_BOOLEAN) ?
+            Message::TEXT : Message::IMPORTANT;
 
         $response = array(
             'success' => false, 
@@ -412,7 +414,7 @@ class ChatModule extends DefaultModule
                 'user_id' => $this->user->user_id,
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text' => $msgText,
-                'type' => Message::TEXT,
+                'type' => $msgImportant,
                 'sent_time' => $currTime->getTime(),
                 'recv_time_hab' => $currTime->getTime(!$this->user->is_crew),
                 'recv_time_mcc' => $currTime->getTime($this->user->is_crew),
