@@ -33,3 +33,9 @@
         <input type="password" placeholder="Enter Password" name="upass" id="upass" autocomplete="current-password" required>
     </form>
 </div>
+
+<div class="cookie-banner" style="display: none">
+    <p>Cookies help manage logged in sessions and are essential to ECHO. 
+    No personal information other than a username are stored in the cookies. </p>
+    <button class="cookie-close">&times;</button>
+</div>
