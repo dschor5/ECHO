@@ -92,6 +92,12 @@
     border: 1px solid red;
 }
 
+.room-important {
+    color: #c81f1f;
+    font-family: "symbols";
+}
+
+
 #rooms::-webkit-scrollbar {
     width: 10px;
 }

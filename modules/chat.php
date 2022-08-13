@@ -610,19 +610,35 @@ class ChatModule extends DefaultModule
         $time = new DelayTime();
         $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
-        $notifications = $messagesDao->getMsgNotifications(
+        $currNotifications = $messagesDao->getMsgNotifications(
             array_keys($this->conversations), $this->user->user_id, $this->user->is_crew, $timeStr);
 
-        if(count($notifications) > 0)
+            Logger::warning('currNotifications ==> '.print_r($currNotifications, true));
+
+        if(count($currNotifications) > 0)
         {
             // Ensure we only send new notifications. 
             $newNotifications = array();
-            foreach($notifications as $convoId => $msgs) 
+
+            foreach($currNotifications as $convoId => $msgs)
             {
-                if(count(array_diff_assoc($prevNotifications[$convoId], $msgs)) > 0)
+                if(count($prevNotifications) == 0)
                 {
-                    $newNotifications[$convoId] = $msgs;
+                    $newNotifications[$convoId] = $currNotifications[$convoId];
+                    $newNotifications[$convoId]['notif_important'] = ($msgs['num_important'] > 0) ? 1:0;
                 }
+                else if($prevNotifications[$convoId]['num_new'] != $currNotifications[$convoId]['num_new'])
+                {
+                    $newNotifications[$convoId] = $currNotifications[$convoId];
+                    $newNotifications[$convoId]['notif_important'] = 
+                        ($prevNotifications[$convoId]['num_important'] != $currNotifications[$convoId]['num_important']) ? 1:0;
+                }
+            }
+
+            if($this->user->user_id == 1)
+            {
+                Logger::warning('prevNotifications ==> '.print_r($prevNotifications, true));
+                Logger::error  ('newNotifications  ==> '.print_r($newNotifications, true));
             }
 
             // Send a new message indicating the conversation id and num messages. 
@@ -636,13 +652,14 @@ class ChatModule extends DefaultModule
                             'conversation_id' => $convoId,
                             'num_messages'    => $numMsgs['num_new'],
                             'num_important'   => $numMsgs['num_important'],
+                            'notif_important' => $numMsgs['notif_important'],
                         )
                     );
                 }
             }
 
             // Track notifications already sent. 
-            $prevNotifications = $notifications;
+            $prevNotifications = $currNotifications;
         }
     }
 
@@ -663,15 +680,15 @@ class ChatModule extends DefaultModule
         $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
 
         $featuresEnabled = ''.
-            (($mission->feat_audio_notification) ? Main::loadTemplate('chat-feat-audio-notification.txt') : '').
-            (($mission->feat_audio_notification) ? Main::loadTemplate('chat-feat-audio-notification.txt') : '').
-            (($mission->feat_unread_msg_counts) ? Main::loadTemplate('chat-feat-unread-msg-counts.txt') : '').
-            (($mission->feat_convo_list_order) ? Main::loadTemplate('chat-feat-convo-list-order.txt') : '').
+            (($mission->feat_audio_notification)  ? Main::loadTemplate('chat-feat-audio-notification.txt')  : '').
+            (($mission->feat_badge_notification)  ? Main::loadTemplate('chat-feat-badge-notification.txt')  : '').
+            (($mission->feat_unread_msg_counts)   ? Main::loadTemplate('chat-feat-unread-msg-counts.txt')   : '').
+            (($mission->feat_convo_list_order)    ? Main::loadTemplate('chat-feat-convo-list-order.txt')    : '').
             (($mission->feat_est_delivery_status) ? Main::loadTemplate('chat-feat-est-delivery-status.txt') : '').
-            (($mission->feat_progress_bar) ? Main::loadTemplate('chat-feat-progress-bar.txt') : '').
-            (($mission->feat_markdown_support) ? Main::loadTemplate('chat-feat-markdown-support.txt') : '').
-            (($mission->feat_important_msgs) ? Main::loadTemplate('chat-feat-important-msgs.txt') : '').
-            (($mission->feat_convo_threads) ? Main::loadTemplate('chat-feat-convo-threads.txt') : '');
+            (($mission->feat_progress_bar)        ? Main::loadTemplate('chat-feat-progress-bar.txt')        : '').
+            (($mission->feat_markdown_support)    ? Main::loadTemplate('chat-feat-markdown-support.txt')    : '').
+            (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
+            (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '');
 
         // Load template. 
         return Main::loadTemplate('chat.txt', 

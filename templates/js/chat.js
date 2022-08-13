@@ -106,10 +106,19 @@ function handleEventSourceNewMessage(event) {
     newMessageNotification(data.author, true);
 }
 
-function newMessageNotification(name, thisRoom=true, ack=false) {
+function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
     if($('#feat-audio-notification-enabled').length) {
         $("#new-msg-sound")[0].pause();
-        $("#new-msg-sound")[0].play();
+        if($('#feat-important-msgs-enabled').length) {
+            $('#new-important-msg-sound')[0].pause();
+        }
+
+        if(important && $('#feat-important-msgs-enabled').length) {
+            $("#new-important-msg-sound")[0].play();
+        }
+        else{
+            $("#new-msg-sound")[0].play();
+        }
     }
 
     if($('#feat-badge-notification-enabled').length) {
@@ -140,13 +149,12 @@ function newMessageNotification(name, thisRoom=true, ack=false) {
 
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
-    if($('#feat-unread-msg-counts-enabled').length) {
-        if($('#room-new-' + data.conversation_id).length) {
-            $('#room-new-' + data.conversation_id).text( '(' + data.num_messages + 
-                ((data.num_important > 0) ? '!!':'') + ')');
-            newMessageNotification($('#room-name-' + data.conversation_id).text(), false);
-        }
+    if($('#feat-unread-msg-counts-enabled').length && $('#room-new-' + data.conversation_id).length) {
+        $('#room-new-' + data.conversation_id).html( '(' + data.num_messages + 
+            ((data.num_important > 0) ? '<span class="room-important">&#8252;</span>':'') + ')');
     }
+
+    newMessageNotification($('#room-name-' + data.conversation_id).text(), data.notif_important > 0, false);
     
     if($('#feat-convo-list-order-enabled').length) {
         if($('#room-name-' + data.conversation_id).length) {
