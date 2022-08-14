@@ -613,8 +613,6 @@ class ChatModule extends DefaultModule
         $currNotifications = $messagesDao->getMsgNotifications(
             array_keys($this->conversations), $this->user->user_id, $this->user->is_crew, $timeStr);
 
-            Logger::warning('currNotifications ==> '.print_r($currNotifications, true));
-
         if(count($currNotifications) > 0)
         {
             // Ensure we only send new notifications. 
@@ -633,12 +631,6 @@ class ChatModule extends DefaultModule
                     $newNotifications[$convoId]['notif_important'] = 
                         ($prevNotifications[$convoId]['num_important'] != $currNotifications[$convoId]['num_important']) ? 1:0;
                 }
-            }
-
-            if($this->user->user_id == 1)
-            {
-                Logger::warning('prevNotifications ==> '.print_r($prevNotifications, true));
-                Logger::error  ('newNotifications  ==> '.print_r($newNotifications, true));
             }
 
             // Send a new message indicating the conversation id and num messages. 
