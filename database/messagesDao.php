@@ -266,12 +266,15 @@ class MessagesDao extends Dao
             $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
             $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
-            $queryStr = 'SELECT messages.conversation_id, COUNT(*) AS num_new FROM messages '. 
+            $queryStr = 'SELECT messages.conversation_id, '. 
+                            'COUNT(*) AS num_new, '. 
+                            "SUM(IF(messages.type = 'important', 1, 0)) AS num_important ".
+                        'FROM messages '.
                         'JOIN msg_status ON messages.message_id=msg_status.message_id '. 
                         'WHERE messages.conversation_id IN ('.$qConvos.') '. 
-                        'AND msg_status.is_read=0 '.
-                        'AND msg_status.user_id='.$qUserId.' '. 
-                        'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
+                            'AND msg_status.is_read=0 '.
+                            'AND msg_status.user_id='.$qUserId.' '. 
+                            'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
                         'GROUP BY messages.conversation_id';
             
             if(($result = $this->database->query($queryStr)) !== false)
@@ -280,7 +283,10 @@ class MessagesDao extends Dao
                 {
                     while(($rowData=$result->fetch_assoc()) != null)
                     {
-                        $notifications[$rowData['conversation_id']] = $rowData['num_new'];
+                        $notifications[$rowData['conversation_id']] = array(
+                            'num_new' => $rowData['num_new'], 
+                            'num_important' => $rowData['num_important']
+                        );
                     }
                 }
             }       

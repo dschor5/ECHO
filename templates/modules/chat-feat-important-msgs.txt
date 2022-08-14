@@ -1,1 +1,7 @@
-    <div id="feat-important-msgs-enabled"></div>
+    <div id="feat-important-msgs-enabled">
+        <audio id="new-important-msg-sound">
+            <source src="%http%%site_url%/%templates_dir%/media/new_important_msg.ogg" type="audio/ogg">
+            <source src="%http%%site_url%/%templates_dir%/media/new_important_msg.m4r" type="audio/aac">
+            <source src="%http%%site_url%/%templates_dir%/media/new_important_msg.mp3" type="audio/mpeg">
+        </audio>
+    </div>
