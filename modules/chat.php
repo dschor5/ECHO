@@ -771,19 +771,27 @@ class ChatModule extends DefaultModule
                 
                 $roomSelected = '';
                 $listThreads = '';
-                if($this->currConversation->conversation_id == $convo->conversation_id)
+
+                if($this->currConversation->conversation_id == $convo->conversation_id || $this->currConversation->parent_conversation_id == $convo->conversation_id)
                 {
                     $roomSelected = 'room-selected';
                     
-                    $threads = '';
-                    foreach($this->currConversation->thread_ids as $threadId)
+                    $mission = MissionConfig::getInstance();
+                    if($mission->feat_convo_threads)
                     {
-                        $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
-                            '/%room_id%/'   => $threadId,
-                            '/%room_name%/' => $this->conversations[$threadId]->name,
-                        ));
+                        $roomSelected
+
+                        $threads = '';
+                        foreach($this->currConversation->thread_ids as $threadId)
+                        {
+                            $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
+                                '/%thread_id%/'       => $threadId,
+                                '/%thread_name%/'     => $this->conversations[$threadId]->name,
+                                '/%thread_selected%/' => ($this->currConversation->conversation_id == $convo->conversation_id) ? 'selected' : '',
+                            ));
+                        }
+                        $listThreads = Main::loadTemplate('chat-room-thread.txt', array('/%thread-rooms%/'=>$threads));
                     }
-                    $listThreads = Main::loadTemplate('chat-room-thread.txt', array('/%thread-rooms%/'=>$threads));
                 }
 
                 // Apply the template
