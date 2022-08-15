@@ -73,6 +73,37 @@ class ConversationsDao extends Dao
         return $convos;
     }
 
+    public function newThread(&$convo, $threadName)
+    {
+        $this->startTransaction();
+        $currTime = new DelayTime();
+        $convoFields = array(
+            'name'                   => $threadName,
+            'parent_conversation_id' => $convo->conversation_id,
+            'date_created'           => $currTime->getTime(),
+        );
+        $convoId = $this->insert($convoFields);
+        if($convoId === false)
+        {
+            Logger::error('Cannot create new thread for '.$convo->conversation_id.'.');
+            $this->endTransaction(false);
+            return false;
+        }
+
+        $participantsDao = ParticipantsDao::getInstance();
+        $participants = explode(',', $convo->participants_id);
+        $participantsFields = array();
+        foreach($participants as $userId)
+        {
+            $participantsFields[] = array(
+                'conversation_id' => $convoId,
+                'user_id' => $userId,
+            );
+        }
+        $participantsDao->insertMultiple($participantsFields);
+        $this->endTransaction();
+    }
+
     /**
      * Get all conversations. If provided, only get those for the particular userId.
      *
@@ -118,9 +149,18 @@ class ConversationsDao extends Dao
                 {
                     $currConversation = new Conversation($conversationData);
                     $conversations[$conversationData['conversation_id']] = $currConversation;
-                    self::$cache[$conversationData['conversation_id']] = $currConversation;
+                }
+
+                foreach($conversations as $convoId => $convo)
+                {
+                    if($convo->parent_conversation_id != null)
+                    {
+                        $conversations[$convo->parent_conversation_id]->addThreadId($convoId);
+                    }
                 }
             }
+
+            self::$cache = $conversations;
         }
 
         return $conversations;

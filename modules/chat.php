@@ -150,6 +150,46 @@ class ChatModule extends DefaultModule
     {
         // Receive a name. If success, return new thread id and let the javascript load that page. 
         // This should check if it is a unique name. 
+
+        $threadName = $_POST['thread_name'] ?? '';
+        $response = array(
+            'success' => true,
+        );
+
+        if(strlen($threadName) > 0)
+        {
+            foreach($this->currConversation->thread_ids as $threadId)
+            {
+                if($this->conversations[$threadId]->name == $threadName)
+                {
+                    $response['success'] = false;
+                    $response['error'] = 'Thread name already taken.';
+                }
+            }
+
+            if($response['success'])
+            {
+                $conversationsDao = ConversationsDao::getInstance();
+                $threadId = $conversationsDao->newThread($this->currConversation, $threadName);
+                if($threadId === false)
+                {
+                    $response['success'] = false;
+                    $response['error'] = 'Failed to create new thread.';
+                }
+                else
+                {
+                    $response['success'] = true;
+                    $response['thread_id'] = $threadId;
+                }
+            }
+        }
+        else
+        {
+            $response['success'] = false;
+            $response['error'] = 'Invalid thread name ['.$threadName.'].';
+        }
+
+        return $response;
     }
 
     /**
@@ -671,6 +711,12 @@ class ChatModule extends DefaultModule
         // Add templates for this module. 
         $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
 
+        // Only add theads if enabled. 
+        if($mission->feat_convo_threads)
+        {
+            $this->addTemplates('threads.js');
+        }
+
         $featuresEnabled = ''.
             (($mission->feat_audio_notification)  ? Main::loadTemplate('chat-feat-audio-notification.txt')  : '').
             (($mission->feat_badge_notification)  ? Main::loadTemplate('chat-feat-badge-notification.txt')  : '').
@@ -708,25 +754,46 @@ class ChatModule extends DefaultModule
         // Iterate through each conversation. 
         foreach($this->conversations as $convo)
         {
-            // Get the list of participants for each conversation to 
-            // figure out what name to give this chat. 
-            $participants = $convo->getParticipants($this->user->user_id);
-            if(count($participants) > 1 || $convo->conversation_id == 1)
+            if($convo->parent_conversation_id == null)
             {
-                $name = $convo->name;
+                // Get the list of participants for each conversation to 
+                // figure out what name to give this chat. 
+                $participants = $convo->getParticipants($this->user->user_id);
+                if(count($participants) > 1 || $convo->conversation_id == 1)
+                {
+                    $name = $convo->name;
+                }
+                else
+                {
+                    $userInfo = array_pop($participants);
+                    $name = 'Private: '.(strlen($userInfo['alias']) != 0) ? $userInfo['alias'] : $userInfo['username'];
+                }
+                
+                $roomSelected = '';
+                $listThreads = '';
+                if($this->currConversation->conversation_id == $convo->conversation_id)
+                {
+                    $roomSelected = 'room-selected';
+                    
+                    $threads = '';
+                    foreach($this->currConversation->thread_ids as $threadId)
+                    {
+                        $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
+                            '/%room_id%/'   => $threadId,
+                            '/%room_name%/' => $this->conversations[$threadId]->name,
+                        ));
+                    }
+                    $listThreads = Main::loadTemplate('chat-room-thread.txt', array('/%thread-rooms%/'=>$threads));
+                }
+
+                // Apply the template
+                $content .= Main::loadTemplate('chat-rooms.txt', array(
+                    '/%room_id%/'   => $convo->conversation_id,
+                    '/%room_name%/' => $name,
+                    '/%selected%/'  => $roomSelected,
+                    '/%threads%/'   => $listThreads,
+                ));
             }
-            else
-            {
-                $userInfo = array_pop($participants);
-                $name = 'Private: '.(strlen($userInfo['alias']) != 0) ? $userInfo['alias'] : $userInfo['username'];
-            }
-            
-            // Apply the template
-            $content .= Main::loadTemplate('chat-rooms.txt', array(
-                '/%room_id%/'   => $convo->conversation_id,
-                '/%room_name%/' => $name,
-                '/%selected%/'  => ($convo->conversation_id == $this->currConversation->conversation_id) ? 'room-selected' : '',
-            ));
         }
 
         return $content;

@@ -313,6 +313,7 @@ function closeModal() {
     }
     catch (e) {}
 
+    try { $('#dialog-thread').dialog('close'); } catch(e) {}
     $('#dialog-video').dialog('close');
     $('#dialog-audio').dialog('close');
     $('#dialog-file').dialog('close');

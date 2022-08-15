@@ -19,7 +19,8 @@
  * - participants_is_crew    (bool)     CSV of participants is_crew field for this convo
  * - num_participants        (int)      Number of participants in this convo
  * - participants_both_sites (bool)     True if convo has users in both MCC and HAB
-  * 
+ * - thread_ids              (array)    Ids of child conversations
+ * 
  * Note: The nth entry in the participant_* fields all correspond to the same account.
  * 
  * @link https://github.com/dschor5/ECHO
@@ -66,6 +67,9 @@ class Conversation
         {
             $this->data['participants_both_sites'] = true;
         }
+
+        // Add ids for child convos if threading is enabled
+        $this->data['thread_ids'] = array();
     }
 
     /**
@@ -89,6 +93,11 @@ class Conversation
         }
 
         return $result;
+    }
+
+    public function addThreadId(int $threadId)
+    {
+        $this->data['thread_ids'][] = $threadId;
     }
 
     /**

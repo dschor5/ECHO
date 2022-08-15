@@ -1,0 +1,4 @@
+                <div class="room-thread">
+                    %thread-rooms%
+                    <a href="#" onclick="openThreadModal()"><span class="ui-icon ui-icon-circle-plus"></span> New thread</a>
+                </div>

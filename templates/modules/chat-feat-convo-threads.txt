@@ -1,1 +1,8 @@
-    <div id="feat-convo-threads-enabled"></div>
+    <div id="feat-convo-threads-enabled">
+        <div id="dialog-thread" title="New Thread" class="dialog-body">
+            <form method="POST">
+                <label for="thread_name">New Thread Name</label>
+                <input type="text" placeholder="Enter thread name" name="thread_name" id="thread_name" required autofocus>
+            </form>
+        </div>
+    </div>

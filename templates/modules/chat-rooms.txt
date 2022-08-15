@@ -1,8 +1,7 @@
                 <div class="room %selected%">
-                    <!--<div class="room-plus">%add-thread%</div>-->
                     <a href="%http%%site_url%/chat/%room_id%">
                         <span id="room-name-%room_id%">%room_name%</span> 
                         <span id="room-new-%room_id%"></span>
                     </a>
                 </div>
-                
+%threads%                
