@@ -583,7 +583,33 @@ class ChatModule extends DefaultModule
 
     private function sendNewThreads()
     {
-        // TODO
+        $mission = MissionConfig::getInstance();
+        if($mission->feat_convo_threads)
+        {
+            $conversationsDao = ConversationsDao::getInstance();
+
+            $parentId = $this->currConversation->parent_conversation_id ??
+                $this->currConversation->conversation_id;
+
+            $time = new DelayTime();
+            $timeStr = $time->getTime();
+            $newConvos = $conversationsDao->getNewThreads($parentId, $this->user->user_id, $timeStr);
+
+            Logger::WARNING(print_r($newConvos, true));
+
+            foreach($newConvos as $convoId => $convo)
+            {
+                $this->conversations[$convoId] = $convo;
+                $this->sendEventStream(
+                    'thread', 
+                    array(
+                        'convo_id'    => $convo->parent_conversation_id,
+                        'thread_id'   => $convo->conversation_id,
+                        'thread_name' => $convo->name,
+                    )
+                );
+            }
+        }
     }
 
     /**
@@ -654,16 +680,6 @@ class ChatModule extends DefaultModule
     {
         // Keep track of previous notifications sent to avoid duplicates. 
         static $prevNotifications = array();
-
-        // Conversation ids for which we want notifications. This list is 
-        // static once declared. If new conversations or threads are created
-        // then the page will reload and this variable will be updated. 
-        static $conversationIds = array();
-        if(count($conversationIds) == 0)
-        {
-            $conversationIds = array_keys(array_diff_key(
-                $this->conversations, array($this->currConversation->conversation_id => 0)));
-        }
 
         // Poll database for new messages for each conversation. 
         $time = new DelayTime();
