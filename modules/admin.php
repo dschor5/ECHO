@@ -673,7 +673,7 @@ class AdminModule extends DefaultModule
         global $server;
 
         $messagesDao = MessagesDao::getInstance();
-        $messagesDao->clearMessages();
+        $messagesDao->clearMessagesAndThreads(); 
         $files = scandir($server['host_address'].$config['uploads_dir']);
         foreach($files as $f)
         {
