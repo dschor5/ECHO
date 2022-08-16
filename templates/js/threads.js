@@ -57,3 +57,16 @@ function createThread()
         },
     });
 }
+
+function addThreadToMenu(conversation_id, thread_id, thread_name) {
+    var linkTag = document.createElement('a');
+    linkTag.setAttribute('href', BASE_URL + '/chat/' + thread_id);
+    var span1 = document.createElement('span');
+    span1.setAttribute('id', 'room-name-' + thread_id);
+    span1.innerHTML = thread_name;
+    var span2 = document.createElement('span');
+    span2.setAttribute('id', 'room-new-' + thread_id);
+    linkTag.appendChild(span1);
+    linkTag.appendChild(span2);
+    document.querySelector('#new-thread').prepend(linkTag);
+}

@@ -78,9 +78,20 @@ const evtSource = new EventSource(BASE_URL + '/chatstream');
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
+evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
     console.log(e);
 };
+
+// Wrapper so that the function can be grouped with other thread functions
+// and only included if threads are enabled. 
+function handleEventSourceThread(event) {
+    try {
+        const data = JSON.parse(event.data);
+        addThreadToMenu(data.convo_id, data.thread_id, data.thread_name);
+    }
+    catch (e) {}
+}
 
 function handleEventSourceDelay(event) {
     const data = JSON.parse(event.data);

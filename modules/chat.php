@@ -873,7 +873,9 @@ class ChatModule extends DefaultModule
                             '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'thread-selected' : '',
                         ));
                     }
-                    $listThreads = Main::loadTemplate('chat-room-thread.txt', array('/%thread-rooms%/'=>$threads));
+                    $listThreads = Main::loadTemplate('chat-room-thread.txt', array(
+                        '/%convo-id%/'    => $convo->conversation_id,
+                        '/%thread-rooms%/'=>$threads));
                 }
 
                 // Apply the template
