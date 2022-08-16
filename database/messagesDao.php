@@ -118,9 +118,9 @@ class MessagesDao extends Dao
         }
     }   
 
-    public function getNewMessages(int $convoId, int $userId, bool $isCrew, string $toDate, int $offset=0) : array
+    public function getNewMessages(array $convoIds, int $userId, bool $isCrew, string $toDate, int $offset=0) : array
     {
-        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qConvoIds = implode(',',$convoIds);
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
@@ -135,7 +135,7 @@ class MessagesDao extends Dao
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'WHERE messages.conversation_id='.$qConvoId.' '.
+                    'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.is_read=0 '.    
                         'AND (messages.'.$qRefTime.' BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
@@ -169,38 +169,14 @@ class MessagesDao extends Dao
         return $messages;
     }
 
-    public function getNumMsgInCombo(int $convoId, bool $isCrew, string $toDate) : int
+    public function getOldMessages(array $convoIds, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
     {
-        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
-        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
-        $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
-
-        $queryStr = 'SELECT count(*) AS num_msgs FROM messages '. 
-                    'WHERE messages.conversation_id='.$qConvoId.' '.
-                    'AND messages.'.$qRefTime.' <= '.$qToDate;
-
-        $numMsgs = 0;
-
-        if(($result = $this->database->query($queryStr)) !== false)
-        {
-            if($result->num_rows > 0)
-            {
-                $temp = $result->fetch_assoc();
-                $numMsgs = $temp['num_msgs'];
-            }
-        }
-
-        return $numMsgs;
-    }
-
-    public function getOldMessages(int $convoId, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
-    {
-        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qConvoIds = implode(',',$convoIds);
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qlastMsgId  = '\''.$this->database->prepareStatement($lastMsgId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
-        
+
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_crew, msg_status.is_read, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
@@ -209,7 +185,7 @@ class MessagesDao extends Dao
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'WHERE messages.conversation_id='.$qConvoId.' '.
+                    'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
                         'AND messages.message_id < '.$qlastMsgId.' '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
@@ -237,7 +213,7 @@ class MessagesDao extends Dao
                 'JOIN messages ON msg_status.message_id=messages.message_id '.
                 'SET msg_status.is_read=1 '. 
                 'WHERE msg_status.user_id='.$qUserId.' '.
-                    'AND messages.conversation_id='.$qConvoId.' '. 
+                    'AND messages.conversation_id IN ('.$qConvoIds.') '. 
                     'AND messages.'.$qRefTime.' <= '.$qToDate;
 
             $this->database->query($queryStr);
@@ -275,7 +251,8 @@ class MessagesDao extends Dao
                             'AND msg_status.is_read=0 '.
                             'AND msg_status.user_id='.$qUserId.' '. 
                             'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
-                        'GROUP BY messages.conversation_id';
+                        'GROUP BY messages.conversation_id '.
+                        'ORDER BY messages.conversation_id';
             
             if(($result = $this->database->query($queryStr)) !== false)
             {
@@ -298,7 +275,6 @@ class MessagesDao extends Dao
     public function clearMessages()
     {
         $conversationsDao = ConversationsDao::getInstance();
-        $participantsDao = ParticipantsDao::getInstance();
 
         $this->startTransaction();
         $this->database->query('DELETE FROM messages');
@@ -339,22 +315,6 @@ class MessagesDao extends Dao
         }
      
         return $messages;
-    }
-
-    public function countMessagesInConvo(int $convoId) : int
-    {
-        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
-
-        $queryStr = 'SELECT COUNT(*) FROM messages WHERE messages.conversation_id='.$qConvoId;
-
-        $count = 0;
-
-        if(($result = $this->database->query($queryStr)) !== false)
-        {
-            $count = intval($result->fetch_assoc());
-        }
-
-        return $count;
     }
 
 }

@@ -227,8 +227,15 @@ class ChatModule extends DefaultModule
 
         // Query for old messages received. 
         $messagesDao = MessagesDao::getInstance();
+        $mission = MissionConfig::getInstance();
+        $convoIds = array();
+        $convoIds[] = $this->currConversation->conversation_id;
+        if(!$mission->feat_convo_threads)
+        {
+            $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
+        }
         $messages = $messagesDao->getOldMessages(
-            $this->currConversation->conversation_id, $this->user->user_id, 
+            $convoIds, $this->user->user_id, 
             $this->user->is_crew, $time->getTime(), $msgId, $numMsgs);
         
         // Build response with an array of messages. 
@@ -546,6 +553,7 @@ class ChatModule extends DefaultModule
             // Send events with updates. 
             $this->sendDelayEvents();
             $this->sendNewMsgEvents();
+            $this->sendNewThreads();
             $this->sendNotificationEvents();
 
             // Send keep-alive message every X seconds of inactivity. 
@@ -571,6 +579,11 @@ class ChatModule extends DefaultModule
             usleep(self::STREAM_WAIT_BETWEEN_ITER_SEC * self::SEC_TO_MSEC);
             $iter++;
         } 
+    }
+
+    private function sendNewThreads()
+    {
+        // TODO
     }
 
     /**
@@ -610,9 +623,15 @@ class ChatModule extends DefaultModule
         $time = new DelayTime();
         $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
+        $mission = MissionConfig::getInstance();
+        $convoIds = array();
+        $convoIds[] = $this->currConversation->conversation_id;
+        if(!$mission->feat_convo_threads)
+        {
+            $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
+        }
         $messages = $messagesDao->getNewMessages(
-            $this->currConversation->conversation_id, 
-            $this->user->user_id, $this->user->is_crew, $timeStr);
+            $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr);
 
         // Iterate through the new messages and send a unique event 
         // for each one where the msg data is JSON encoded. 
@@ -655,9 +674,56 @@ class ChatModule extends DefaultModule
 
         if(count($currNotifications) > 0)
         {
+            // Create array containing the current parent & thread ids. 
+            $thisConvoAndThreads = array();
+            if($this->currConversation->parent_conversation_id == null)
+            {
+                $thisConvoAndThreads = array_merge(
+                    array($this->currConversation->conversation_id),
+                    $this->currConversation->thread_ids);
+            }
+            else
+            {
+                $thisConvoAndThreads = array_merge(
+                    array($this->currConversation->parent_conversation_id),
+                    $this->conversations[$this->currConversation->parent_conversation_id]->thread_ids);
+            }
+
+            // Consolidate thread notifications with parent if either:
+            //      a) threads are disabled OR
+            //      b) the user is viewing a different convo altogether
+            $mission = MissionConfig::getInstance();
+            $tempNotifications = array();
+            foreach($currNotifications as $convoId => $convo)
+            {
+                if((!$mission->feat_convo_threads && $this->conversations[$convoId]->parent_conversation_id != null) ||
+                ($mission->feat_convo_threads && !in_array($convoId, $thisConvoAndThreads)))
+                {
+                    $id = $convoId;
+                    if($this->conversations[$convoId]->parent_conversation_id != null)
+                    {
+                        $id = $this->conversations[$convoId]->parent_conversation_id;
+                    }
+
+                    if(!isset($tempNotifications[$id]))
+                    {
+                        $tempNotifications[$id]['num_new'] = 0;
+                        $tempNotifications[$id]['num_important'] = 0;
+                    }
+
+                    $tempNotifications[$id]['num_new'] += $convo['num_new'];
+                    $tempNotifications[$id]['num_important'] += $convo['num_important'];
+                }
+                else
+                {
+                    $tempNotifications[$convoId] = $convo;
+                }
+            }
+
+            $currNotifications = $tempNotifications;
+
             // Ensure we only send new notifications. 
             $newNotifications = array();
-
             foreach($currNotifications as $convoId => $msgs)
             {
                 if(count($prevNotifications) == 0)
@@ -770,28 +836,28 @@ class ChatModule extends DefaultModule
                 }
                 
                 $roomSelected = '';
-                $listThreads = '';
-
-                if($this->currConversation->conversation_id == $convo->conversation_id || $this->currConversation->parent_conversation_id == $convo->conversation_id)
+                if($this->currConversation->conversation_id == $convo->conversation_id)
                 {
                     $roomSelected = 'room-selected';
-                    
-                    $mission = MissionConfig::getInstance();
-                    if($mission->feat_convo_threads)
-                    {
-                        $roomSelected
+                }
 
-                        $threads = '';
-                        foreach($this->currConversation->thread_ids as $threadId)
-                        {
-                            $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
-                                '/%thread_id%/'       => $threadId,
-                                '/%thread_name%/'     => $this->conversations[$threadId]->name,
-                                '/%thread_selected%/' => ($this->currConversation->conversation_id == $convo->conversation_id) ? 'selected' : '',
-                            ));
-                        }
-                        $listThreads = Main::loadTemplate('chat-room-thread.txt', array('/%thread-rooms%/'=>$threads));
+                $listThreads = '';
+
+                $mission = MissionConfig::getInstance();
+                if($mission->feat_convo_threads && 
+                  ($this->currConversation->parent_conversation_id == $convo->conversation_id ||
+                   $this->currConversation->conversation_id == $convo->conversation_id))
+                {
+                    $threads = '';
+                    foreach($convo->thread_ids as $threadId)
+                    {
+                        $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
+                            '/%thread_id%/'       => $threadId,
+                            '/%thread_name%/'     => $this->conversations[$threadId]->name,
+                            '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'thread-selected' : '',
+                        ));
                     }
+                    $listThreads = Main::loadTemplate('chat-room-thread.txt', array('/%thread-rooms%/'=>$threads));
                 }
 
                 // Apply the template

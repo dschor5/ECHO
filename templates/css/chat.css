@@ -66,11 +66,6 @@
     background-color: rgb(255, 255, 255, 0.2);
 }
 
-/*#rooms a {
-    border: 1px solid var(--text-light-bright);
-    color: var(--text-light-bright);
-}*/
-
 .room a {
     color: inherit;
 }
@@ -84,19 +79,46 @@
     color: #DDDDDD;
 }
 
-.room-plus {
-    width: 10px;
-    float: right;
-    padding-left: 5px;
-    padding-right: 5px;
+.room-thread {
     border: 1px solid red;
+    position: relative;
+    list-style-type: none;
+    margin-top: -1px;
+    width: 85%;
+    margin-left: 15px;
+    float: left;
+    border: 1px solid var(--text-light-bright);
+    color: var(--text-light-bright);
+    background-color: #222222;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    display: block;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    text-align: left;
+}
+
+.thread-selected {
+    color: #000;
+    background-color: rgb(255, 255, 255, 0.2);
+}
+
+.room-thread a {
+    color: inherit;
+    display: block;
+    margin-bottom: 5px;
+    padding-left: 5px;
+}
+
+.room-thread a:hover {
+    background: var(--text-light-bright);
+    color: #DDDDDD;
 }
 
 .room-important {
     color: #c81f1f;
     font-family: "symbols";
 }
-
 
 #rooms::-webkit-scrollbar {
     width: 10px;
