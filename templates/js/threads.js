@@ -5,8 +5,8 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 400,
-        width: 600,
+        height: 250,
+        width: 400,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
             {
@@ -51,22 +51,24 @@ function createThread()
                 location.href = BASE_URL + '/chat/' + resp.thread_id;
             }
             else {
-                // TODO - Add error on screen
-                console.error(resp.error);
+                $('.dialog-response').text(resp.error);
+                $('.dialog-response').show('highlight');
             }
         },
     });
 }
 
 function addThreadToMenu(conversation_id, thread_id, thread_name) {
-    var linkTag = document.createElement('a');
-    linkTag.setAttribute('href', BASE_URL + '/chat/' + thread_id);
-    var span1 = document.createElement('span');
-    span1.setAttribute('id', 'room-name-' + thread_id);
-    span1.innerHTML = thread_name;
-    var span2 = document.createElement('span');
-    span2.setAttribute('id', 'room-new-' + thread_id);
-    linkTag.appendChild(span1);
-    linkTag.appendChild(span2);
-    document.querySelector('#new-thread').prepend(linkTag);
+    if($('#room-name-' + thread_id).length == 0) {
+        var linkTag = document.createElement('a');
+        linkTag.setAttribute('href', BASE_URL + '/chat/' + thread_id);
+        var span1 = document.createElement('span');
+        span1.setAttribute('id', 'room-name-' + thread_id);
+        span1.innerHTML = thread_name;
+        var span2 = document.createElement('span');
+        span2.setAttribute('id', 'room-new-' + thread_id);
+        linkTag.appendChild(span1);
+        linkTag.appendChild(span2);
+        $(linkTag).insertBefore('#new-thread');
+    }
 }

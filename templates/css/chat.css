@@ -89,13 +89,20 @@
     float: left;
     border: 1px solid var(--text-light-bright);
     color: var(--text-light-bright);
-    background-color: #222222;
+    background-color: rgb(255, 255, 255, 0.05);
     padding-top: 5px;
     padding-bottom: 5px;
     display: block;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
     text-align: left;
+}
+
+#new-thread {
+    margin-top: 1px;
+    padding-top: 1px;
+    border-top: 1px dotted rgb(255, 255, 255, 0.2);
+    font-style: italic;
 }
 
 .thread-selected {

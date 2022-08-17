@@ -279,7 +279,7 @@ class MessagesDao extends Dao
         $this->startTransaction();
         $this->database->query('DELETE FROM messages');
         $this->database->query('ALTER TABLE messages AUTO_INCREMENT = 1');
-        $conversationsDao->query('DELETE FROM conversations WHERE parent_conversation_id IS NOT NULL');
+        $this->database->query('DELETE FROM conversations WHERE parent_conversation_id IS NOT NULL');
         $conversationsDao->update(
             array(
                 'date_created' => '0000-00-00 00:00:00',

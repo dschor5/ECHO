@@ -166,10 +166,9 @@ class ConversationsDao extends Dao
         return $conversations;
     }
 
-    public function getNewThreads(int $convoId, int $userId, string $toDate) : array
+    public function getNewThreads(int $convoId, string $toDate) : array
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
-        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
         $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
 
@@ -184,7 +183,6 @@ class ConversationsDao extends Dao
             'JOIN users ON users.user_id=participants.user_id '.
             'WHERE conversations.parent_conversation_id='.$qConvoId.' '.
                 'AND (conversations.date_created BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
-                'AND participants.user_id='.$qUserId.' '.
             'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
         
         $conversations = array();
@@ -201,19 +199,13 @@ class ConversationsDao extends Dao
 
                 foreach($conversations as $convoId => $convo)
                 {
-                    if($convo->parent_conversation_id != null)
-                    {
-                        $conversations[$convo->parent_conversation_id]->addThreadId($convoId);
-                    }
+                    // Update parent with new thread id reference
+                    self::$cache[$convo->parent_conversation_id]->addThreadId($convoId);
+
+                    // Update cache
+                    self::$cache[$convoId] = $convo;
                 }
             }
-
-            // Update cache
-            foreach($conversations as $convoId => $convo)
-            {
-                self::$cache[$convoId] = $convo;
-            }
-
         }
 
         return $conversations;

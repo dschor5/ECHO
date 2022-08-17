@@ -1,4 +1,4 @@
                 <div class="room-thread" id="room-thread-%convo-id%">
                     %thread-rooms%
-                    <a id="new-thread" href="#" onclick="openThreadModal()"><span class="ui-icon ui-icon-circle-plus"></span> New thread</a>
+                    <a id="new-thread" href="#" onclick="openThreadModal()">+ New thread</a>
                 </div>

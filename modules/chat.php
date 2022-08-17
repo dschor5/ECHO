@@ -156,7 +156,7 @@ class ChatModule extends DefaultModule
             'success' => true,
         );
 
-        if(strlen($threadName) > 0)
+        if(strlen($threadName) > 0 && strlen($threadName) < 100)
         {
             foreach($this->currConversation->thread_ids as $threadId)
             {
@@ -593,9 +593,8 @@ class ChatModule extends DefaultModule
 
             $time = new DelayTime();
             $timeStr = $time->getTime();
-            $newConvos = $conversationsDao->getNewThreads($parentId, $this->user->user_id, $timeStr);
+            $newConvos = $conversationsDao->getNewThreads($parentId, $timeStr);
 
-            Logger::WARNING(print_r($newConvos, true));
 
             foreach($newConvos as $convoId => $convo)
             {
@@ -870,7 +869,7 @@ class ChatModule extends DefaultModule
                         $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
                             '/%thread_id%/'       => $threadId,
                             '/%thread_name%/'     => $this->conversations[$threadId]->name,
-                            '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'thread-selected' : '',
+                            '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'class="thread-selected"' : '',
                         ));
                     }
                     $listThreads = Main::loadTemplate('chat-room-thread.txt', array(
