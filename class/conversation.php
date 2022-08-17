@@ -97,7 +97,7 @@ class Conversation
 
     public function addThreadId(int $threadId)
     {
-        if(!in_array($threadId, $this->data['thread_id']))
+        if(!in_array($threadId, $this->data['thread_ids']))
         {
             $this->data['thread_ids'][] = $threadId;
         }
