@@ -593,8 +593,8 @@ class AdminModule extends DefaultModule
 
             $list->addRow(array(
                 'id' => $id,
-                'username' => $user->username,
-                'alias' => $user->alias,
+                'username' => htmlspecialchars($user->username),
+                'alias' => htmlspecialchars($user->alias),
                 'is_crew' => $user->is_crew ? $mission->hab_user_role : $mission->mcc_user_role,
                 'is_admin' => $user->is_admin ? 'Yes' : 'No',
                 'tools' => join(', ', $tools),
@@ -603,8 +603,8 @@ class AdminModule extends DefaultModule
 
         return Main::loadTemplate('admin-users.txt', array(
             '/%content%/'=>$list->build(),
-            '/%role_mcc%/'=>$mission->mcc_user_role,
-            '/%role_hab%/'=>$mission->hab_user_role,
+            '/%role_mcc%/'=>htmlspecialchars($mission->mcc_user_role),
+            '/%role_hab%/'=>htmlspecialchars($mission->hab_user_role),
         ));
     }
 

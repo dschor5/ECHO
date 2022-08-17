@@ -189,13 +189,13 @@ class Message
     private function compileMsgText() : string
     {
         $missionConfig = MissionConfig::getInstance();
-        $result = $this->text;
+        $result = htmlspecialchars($this->text);
         if($missionConfig->feat_markdown_support)
         {
             $parsedown = new Parsedown();
             $parsedown->setSafeMode(true);
             $parsedown->setBreaksEnabled(true);
-            $result = $parsedown->text($this->text);
+            $result = $parsedown->text(htmlspecialchars($this->text));
         }
         
         return $result;
@@ -214,7 +214,7 @@ class Message
             'message_id'       => $this->data['message_id'],
             'user_id'          => $this->data['user_id'],
             'is_crew'          => $this->data['is_crew'],
-            'author'           => $this->data['alias'],
+            'author'           => htmlspecialchars($this->data['alias']),
             'message'          => $this->compileMsgText(),
             'type'             => self::TEXT,
             'sent_time'        => DelayTime::convertTsForJs($this->data['sent_time']),
