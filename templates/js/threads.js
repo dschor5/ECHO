@@ -64,7 +64,7 @@ function addThreadToMenu(conversation_id, thread_id, thread_name) {
         linkTag.setAttribute('href', BASE_URL + '/chat/' + thread_id);
         var span1 = document.createElement('span');
         span1.setAttribute('id', 'room-name-' + thread_id);
-        span1.innerHTML = thread_name;
+        span1.innerHTML = '&bull; ' + thread_name;
         var span2 = document.createElement('span');
         span2.setAttribute('id', 'room-new-' + thread_id);
         linkTag.appendChild(span1);

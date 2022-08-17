@@ -114,7 +114,7 @@ function handleEventSourceNewMessage(event) {
         }, 250);
     }
 
-    newMessageNotification(data.author, true);
+    newMessageNotification(data.author, data.type == 'important');
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
