@@ -854,7 +854,7 @@ class AdminModule extends DefaultModule
 
             $conversationsDao = ConversationsDao::getInstance();
             $conversations = $conversationsDao->getConversations();
-        
+            
             $zip = new ZipArchive();
             if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
             {
@@ -862,9 +862,19 @@ class AdminModule extends DefaultModule
             }      
             else
             {
+                $mission = MissionConfig::getInstance();
+                $sepThreads = $mission->feat_convo_threads;
+
                 foreach($conversations as $convoId => $convo)
                 {
-                    if(!$convo->archiveConvo($zip, $tzSelected))
+                    $parentName = ($convo->parent_conversation_id != null) ? 
+                        $conversations[$convo->parent_conversation_id]->name : '';
+                    if(!$sepThreads && $convo->parent_conversation_id != null)
+                    {
+                        continue;
+                    }
+
+                    if(!$convo->archiveConvo($zip, $tzSelected, $sepThreads, $parentName))
                     {
                         Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
                         $response['success'] = false;

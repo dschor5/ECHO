@@ -141,7 +141,7 @@ class Conversation
         return $participants;
     }
 
-    public function archiveConvo(ZipArchive &$zip, string $tz) : bool
+    public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName) : bool
     {
         $success = true;
         $messagesDao = MessagesDao::getInstance();
@@ -166,15 +166,30 @@ class Conversation
                 ));
         }
         
-        $folderName = sprintf('%05d', $this->conversation_id).'-conversation';
-        $zip->addEmptyDir($folderName);
-
         $msgStr = '';
         $offset = 0;
-        $messages = $messagesDao->getMessagesForConvo($this->conversation_id, $isCrew, $offset, $numMsgs);
+
+        $folderName = sprintf('%05d', $this->conversation_id).'-conversation';
+        $ids = array($this->conversation_id);
+        if($sepThreads)
+        {
+            if($this->parent_conversation_id != null)
+            {
+                $folderName = sprintf('%05d', $this->parent_conversation_id).'-'.
+                    sprintf('%05d', $this->conversation_id).'-thread';
+            }
+        }
+        else
+        {
+            $ids = array_merge($ids, $this->data['thread_ids']);
+        }
+        $zip->addEmptyDir($folderName);
+
+
+        $messages = $messagesDao->getMessagesForConvo($ids, $isCrew, $offset, $numMsgs);
         if(count($messages) == 0)
         {
-            $msgStr = '<tr><td colspan="5">No messages</td></tr>';
+            $msgStr = '<tr><td colspan="6">No messages</td></tr>';
         }
         while(count($messages) > 0 && $success)
         {
@@ -192,18 +207,32 @@ class Conversation
                 }
             }
             $offset += $numMsgs;
-            $messages = $messagesDao->getMessagesForConvo($this->conversation_id, $isCrew, $offset, $numMsgs);
+            $messages = $messagesDao->getMessagesForConvo($ids, $isCrew, $offset, $numMsgs);
         }
 
         if($success)
         {
+            $id     = $this->conversation_id;
+            $name   = $this->name;
+            $thread = '';
+
+            if($sepThreads && $this->parent_conversation_id != null)
+            {
+                $id     = $this->parent_conversation_id;
+                $name   = $parentName;
+                $thread = Main::loadTemplate('admin-data-save-thread.txt', 
+                    array('/%id%/' => $this->conversation_id,
+                          '/%name%/' => $this->name));
+            }
+
             $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
-                array('/%name%/'           => $this->name,
-                      '/%id%/'           => $this->conversation_id,
+                array('/%name%/'         => $name,
+                      '/%id%/'           => $id,
+                      '/%thread%/'       => $thread,
                       '/%participants%/' => $participantsStr,
                       '/%messages%/'     => $msgStr,
                       '/%archive-tz%/'   => $tz,
-                      '/%title%/'        => $this->name,
+                      '/%title%/'        => $name,
                 ));
 
             $fileName = $folderName.'.html';
