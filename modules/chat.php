@@ -150,15 +150,23 @@ class ChatModule extends DefaultModule
     {
         // Receive a name. If success, return new thread id and let the javascript load that page. 
         // This should check if it is a unique name. 
+        $conversationsDao = ConversationsDao::getInstance();
+
 
         $threadName = $_POST['thread_name'] ?? '';
         $response = array(
             'success' => true,
         );
 
+        $currConvo = &$this->currConversation;
+        if($this->currConversation->parent_conversation_id != null)
+        {
+            $currConvo = &$this->conversations[$this->currConversation->parent_conversation_id];
+        }
+
         if(strlen($threadName) > 0 && strlen($threadName) < 100)
         {
-            foreach($this->currConversation->thread_ids as $threadId)
+            foreach($currConvo->thread_ids as $threadId)
             {
                 if($this->conversations[$threadId]->name == $threadName)
                 {
@@ -169,8 +177,7 @@ class ChatModule extends DefaultModule
 
             if($response['success'])
             {
-                $conversationsDao = ConversationsDao::getInstance();
-                $threadId = $conversationsDao->newThread($this->currConversation, $threadName);
+                $threadId = $conversationsDao->newThread($currConvo, $threadName);
                 if($threadId === false)
                 {
                     $response['success'] = false;
