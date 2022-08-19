@@ -59,7 +59,7 @@ function confirmAction(subaction, id, str) {
         }
         else {
             $('#dialog-confirm').dialog({title: 'Delete All Data'});
-            $('.modal-confirm-body').text("Are you sure you want to delete all messages and user accounts (except admin accounts)?");
+            $('.modal-confirm-body').text("Are you sure you want to delete all messages and threads?");
             $('#confirm-btn').text('Delete All Data');
         }
         

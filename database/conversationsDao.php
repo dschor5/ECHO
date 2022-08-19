@@ -73,6 +73,39 @@ class ConversationsDao extends Dao
         return $convos;
     }
 
+    public function newThread(&$convo, $threadName)
+    {
+        $this->startTransaction();
+        $currTime = new DelayTime();
+        $convoFields = array(
+            'name'                   => $threadName,
+            'parent_conversation_id' => $convo->conversation_id,
+            'date_created'           => $currTime->getTime(),
+        );
+        $convoId = $this->insert($convoFields);
+        if($convoId === false)
+        {
+            Logger::error('Cannot create new thread for '.$convo->conversation_id.'.');
+            $this->endTransaction(false);
+            return false;
+        }
+
+        $participantsDao = ParticipantsDao::getInstance();
+        $participants = explode(',', $convo->participants_id);
+        $participantsFields = array();
+        foreach($participants as $userId)
+        {
+            $participantsFields[] = array(
+                'conversation_id' => $convoId,
+                'user_id' => $userId,
+            );
+        }
+        $participantsDao->insertMultiple($participantsFields);
+        $this->endTransaction();
+
+        return $convoId;
+    }
+
     /**
      * Get all conversations. If provided, only get those for the particular userId.
      *
@@ -118,13 +151,69 @@ class ConversationsDao extends Dao
                 {
                     $currConversation = new Conversation($conversationData);
                     $conversations[$conversationData['conversation_id']] = $currConversation;
-                    self::$cache[$conversationData['conversation_id']] = $currConversation;
+                }
+
+                foreach($conversations as $convoId => $convo)
+                {
+                    if($convo->parent_conversation_id != null)
+                    {
+                        $conversations[$convo->parent_conversation_id]->addThreadId($convoId);
+                    }
+                }
+            }
+
+            self::$cache = $conversations;
+        }
+
+        return $conversations;
+    }
+
+    public function getNewThreads(array $convoIds, int $userId, string $toDate) : array
+    {
+        $qConvoIds = implode(',',$convoIds);
+        $qUserId   = '\''.$this->database->prepareStatement($userId).'\'';
+        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+        $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
+
+        $queryStr = 'SELECT conversations.*, '.
+            'GROUP_CONCAT( participants.user_id) AS participants_id, '.
+            'GROUP_CONCAT( users.username) AS participants_username, '.
+            'GROUP_CONCAT( users.alias) AS participants_alias, '.
+            'GROUP_CONCAT( users.is_crew) AS participants_is_crew, '.
+                'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
+            'FROM conversations '.
+            'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
+            'JOIN users ON users.user_id=participants.user_id '.
+            'WHERE conversations.conversation_id NOT IN ('.$qConvoIds.') '. 
+                'AND users.user_id='.$qUserId.' '.
+                //'AND (conversations.date_created BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
+            'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
+        
+        $conversations = array();
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                while(($conversationData=$result->fetch_assoc()) != null)
+                {
+                    $currConversation = new Conversation($conversationData);
+                    $conversations[$conversationData['conversation_id']] = $currConversation;
+                }
+
+                foreach($conversations as $convoId => $convo)
+                {
+                    // Update parent with new thread id reference
+                    self::$cache[$convo->parent_conversation_id]->addThreadId($convoId);
+
+                    // Update cache
+                    self::$cache[$convoId] = $convo;
                 }
             }
         }
 
         return $conversations;
-    }
+    }    
 }
 
 ?>
