@@ -616,7 +616,7 @@ class ChatModule extends DefaultModule
                         array(
                             'convo_id'    => $convo->parent_conversation_id,
                             'thread_id'   => $convo->conversation_id,
-                            'thread_name' => $convo->name,
+                            'thread_name' => htmlspecialchars($convo->name),
                         )
                     );
                 }
@@ -700,8 +700,6 @@ class ChatModule extends DefaultModule
         $currNotifications = $messagesDao->getMsgNotifications(
             $this->currConversation->conversation_id, $this->user->user_id, $this->user->is_crew, $timeStr);
 
-        Logger::info('messages = '.implode(',', array_keys($this->conversations)));
-
         if(count($currNotifications) > 0)
         {
             // Create array containing the current parent & thread ids. 
@@ -730,11 +728,9 @@ class ChatModule extends DefaultModule
                 ($mission->feat_convo_threads && !in_array($convoId, $thisConvoAndThreads)))
                 {
                     $id = $convoId;
-                    Logger::warning("Got here");
                     if($this->conversations[$convoId]->parent_conversation_id != null)
                     {
                         $id = $this->conversations[$convoId]->parent_conversation_id;
-                        Logger::warning("And there");
                     }
 
                     if(!isset($tempNotifications[$id]))
@@ -828,7 +824,7 @@ class ChatModule extends DefaultModule
 
         // Load template. 
         return Main::loadTemplate('chat.txt', 
-            array('/%username%/'           =>$this->user->username,
+            array('/%username%/'           => htmlspecialchars($this->user->username),
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%chat_rooms%/'         => $this->getConversationList(),
                   '/%convo_id%/'           => $this->currConversation->conversation_id,

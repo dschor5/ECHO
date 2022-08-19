@@ -222,17 +222,17 @@ class Conversation
                 $name   = $parentName;
                 $thread = Main::loadTemplate('admin-data-save-thread.txt', 
                     array('/%id%/' => $this->conversation_id,
-                          '/%name%/' => $this->name));
+                          '/%name%/' => htmlspecialchars($this->name)));
             }
 
             $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
-                array('/%name%/'         => $name,
+                array('/%name%/'         => htmlspecialchars($name),
                       '/%id%/'           => $id,
                       '/%thread%/'       => $thread,
                       '/%participants%/' => $participantsStr,
                       '/%messages%/'     => $msgStr,
                       '/%archive-tz%/'   => $tz,
-                      '/%title%/'        => $name,
+                      '/%title%/'        => htmlspecialchars($name),
                 ));
 
             $fileName = $folderName.'.html';
