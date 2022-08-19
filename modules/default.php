@@ -138,7 +138,6 @@ abstract class DefaultModule implements Module
 
             // Default links for all users. 
             $navLinks[] = array('url' => 'chat',        'name' => 'Chat',        'icon' => 'home');
-            $navLinks[] = array('url' => 'preferences', 'name' => 'Preferences', 'icon' => 'pencil');
                         
             // Links for admin users only
             if($this->user->is_admin)
@@ -175,9 +174,9 @@ abstract class DefaultModule implements Module
 
         return Main::loadTemplate('header.txt', array(
             '/%links%/'         => $htmlLinks,
-            '/%user_location%/' => $userPlanet,
-            '/%alias%/'         => $userAlias,
-            '/%username%/'      => $userName,
+            '/%user_location%/' => htmlspecialchars($userPlanet),
+            '/%alias%/'         => htmlspecialchars($userAlias),
+            '/%username%/'      => htmlspecialchars($userName),
         ));
     }
 
@@ -244,20 +243,20 @@ abstract class DefaultModule implements Module
             }
 
             $replace = array(
-                '/%title%/'            => $mission->name.' - Comms',
+                '/%title%/'            => htmlspecialchars($mission->name).' - Comms',
                 '/%content%/'          => $this->compileHtml($subaction),
                 '/%templates%/'        => $this->getTemplates(),
                 '/%header%/'           => $this->getHeader(),
-                '/%home_planet%/'      => $mission->mcc_planet,
-                '/%away_planet%/'      => $mission->hab_planet,
+                '/%home_planet%/'      => htmlspecialchars($mission->mcc_planet),
+                '/%away_planet%/'      => htmlspecialchars($mission->hab_planet),
                 '/%delay_distance%/'   => $commDelay->getDistanceStr(),
                 '/%delay_time%/'       => $commDelay->getDelayStr(),
-                '/%mission_name%/'     => $mission->name,
+                '/%mission_name%/'     => htmlspecialchars($mission->name),
                 '/%year%/'             => date('Y'),
                 '/%random%/'           => rand(1, 100000),
                 '/%epoch%/'            => DelayTime::getEpochUTC(),
                 '/%time_sec_per_day%/' => 24*60*60, // TODO
-                '/%time_day%/'         => $mission->hab_day_name,
+                '/%time_day%/'         => htmlspecialchars($mission->hab_day_name),
                 '/%hab_time_format%/'  => 'true', // TODO
                 '/%timezone_mcc_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(true),
                 '/%timezone_hab_offset%/'  => DelayTime::getTimezoneOffsetfromUTC(false),

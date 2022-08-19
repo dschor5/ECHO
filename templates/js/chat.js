@@ -78,9 +78,20 @@ const evtSource = new EventSource(BASE_URL + '/chatstream');
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
+evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
     console.log(e);
 };
+
+// Wrapper so that the function can be grouped with other thread functions
+// and only included if threads are enabled. 
+function handleEventSourceThread(event) {
+    try {
+        const data = JSON.parse(event.data);
+        addThreadToMenu(data.convo_id, data.thread_id, data.thread_name);
+    }
+    catch (e) {}
+}
 
 function handleEventSourceDelay(event) {
     const data = JSON.parse(event.data);
@@ -103,7 +114,7 @@ function handleEventSourceNewMessage(event) {
         }, 250);
     }
 
-    newMessageNotification(data.author, true);
+    newMessageNotification(data.author, data.type == 'important');
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
@@ -157,11 +168,16 @@ function handleEventSourceNotification(event) {
     newMessageNotification($('#room-name-' + data.conversation_id).text(), data.notif_important > 0, false);
     
     if($('#feat-convo-list-order-enabled').length) {
-        if($('#room-name-' + data.conversation_id).length) {
-            ($('#room-name-' + data.conversation_id).parent().parent()).insertAfter( $('.room-selected') );
+        if($('#room-' + data.conversation_id).length) {
+            $('#room-' + data.conversation_id).insertAfter( $('.room-selected').parent() );
+        }
+        else if($('#feat-convo-threads-enabled').length) {
+            $('.room-thread').prepend($('#room-name-' + data.conversation_id).parent());
         }
     }
 }
+
+
 
 /**
  * Compile message to display on the chat window. 
@@ -174,7 +190,7 @@ function compileMsg(data, before){
     {
         var msgClone = template.content.cloneNode(true);
         msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
-        msgClone.querySelector(".msg-from").textContent = data.author;
+        msgClone.querySelector(".msg-from").innerHTML = data.author;
         msgClone.querySelector(".msg-id").textContent = "(" + data.message_id + ")";
 
         // Add appropriate avatar. Only added for non-logged in user. 
@@ -313,6 +329,7 @@ function closeModal() {
     }
     catch (e) {}
 
+    try { $('#dialog-thread').dialog('close'); } catch(e) {}
     $('#dialog-video').dialog('close');
     $('#dialog-audio').dialog('close');
     $('#dialog-file').dialog('close');
@@ -325,6 +342,10 @@ function openFileModal() {
 
 
 $(document).ready(function() {
+    if($('#feat-convo-list-order-enabled').length) {
+        $('#rooms').prepend($('.room-selected').parent())
+    }
+
     if($('#feat-important-msgs-enabled').length) {
         $('#send-btn').css('width', '73px');
         $('#send-btn').css('right', '50px');

@@ -474,9 +474,9 @@ class AdminModule extends DefaultModule
         $usersDao = UsersDao::getInstance();
         $user = $usersDao->getByUsername($username);
 
-        if($username == '' || strlen($username) < 4)
+        if($username == '' || strlen($username) < 4 || strlen($username) > 12 || !ctype_alnum($username))
         {
-            $response['error'] = 'Invalid username. Min 4 characters.';
+            $response['error'] = 'Invalid username. Requires min 4 / max 12 alphanumeric characters.';
         }
         elseif($user !== false && $user->user_id != $userId && $user->username == $username)
         {
@@ -485,7 +485,7 @@ class AdminModule extends DefaultModule
         elseif($user !== false && $user->is_admin != $isAdmin)
         {
             $response['error'] = 'Cannot remove your own admin priviledges.';
-        }
+        }   
         else
         {
             $fields = array(
@@ -593,8 +593,8 @@ class AdminModule extends DefaultModule
 
             $list->addRow(array(
                 'id' => $id,
-                'username' => $user->username,
-                'alias' => $user->alias,
+                'username' => htmlspecialchars($user->username),
+                'alias' => htmlspecialchars($user->alias),
                 'is_crew' => $user->is_crew ? $mission->hab_user_role : $mission->mcc_user_role,
                 'is_admin' => $user->is_admin ? 'Yes' : 'No',
                 'tools' => join(', ', $tools),
@@ -603,8 +603,8 @@ class AdminModule extends DefaultModule
 
         return Main::loadTemplate('admin-users.txt', array(
             '/%content%/'=>$list->build(),
-            '/%role_mcc%/'=>$mission->mcc_user_role,
-            '/%role_hab%/'=>$mission->hab_user_role,
+            '/%role_mcc%/'=>htmlspecialchars($mission->mcc_user_role),
+            '/%role_hab%/'=>htmlspecialchars($mission->hab_user_role),
         ));
     }
 
@@ -673,7 +673,7 @@ class AdminModule extends DefaultModule
         global $server;
 
         $messagesDao = MessagesDao::getInstance();
-        $messagesDao->clearMessages();
+        $messagesDao->clearMessagesAndThreads(); 
         $files = scandir($server['host_address'].$config['uploads_dir']);
         foreach($files as $f)
         {
@@ -681,8 +681,8 @@ class AdminModule extends DefaultModule
             {
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
-            Logger::info("Cleared log.");
         }
+        Logger::info("Cleared log.");
 
         return array('success' => true);
     }
@@ -854,7 +854,7 @@ class AdminModule extends DefaultModule
 
             $conversationsDao = ConversationsDao::getInstance();
             $conversations = $conversationsDao->getConversations();
-        
+            
             $zip = new ZipArchive();
             if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
             {
@@ -862,9 +862,19 @@ class AdminModule extends DefaultModule
             }      
             else
             {
+                $mission = MissionConfig::getInstance();
+                $sepThreads = $mission->feat_convo_threads;
+
                 foreach($conversations as $convoId => $convo)
                 {
-                    if(!$convo->archiveConvo($zip, $tzSelected))
+                    $parentName = ($convo->parent_conversation_id != null) ? 
+                        $conversations[$convo->parent_conversation_id]->name : '';
+                    if(!$sepThreads && $convo->parent_conversation_id != null)
+                    {
+                        continue;
+                    }
+
+                    if(!$convo->archiveConvo($zip, $tzSelected, $sepThreads, $parentName))
                     {
                         Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
                         $response['success'] = false;

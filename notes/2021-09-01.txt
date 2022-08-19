@@ -21,3 +21,6 @@ ffmpeg -i video-mkv.mkv -r 32 video.mp4
 
 https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 --> How to set constraints for initial video capture
+
+Videos
+- https://notificationsounds.com/wake-up-tones/serious-strike-533

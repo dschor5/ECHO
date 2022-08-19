@@ -21,6 +21,7 @@
                 <th colspan="2" class="convo-info-label">Conversation:</th>
                 <td colspan="4" class="convo-info-value">%name% (id=%id%)</td>
             </tr>
+            %thread%
             <tr>
                 <th colspan="2" class="convo-info-label">Participants:</th>
                 <th class="convo-info-label">User</td>
