@@ -474,9 +474,9 @@ class AdminModule extends DefaultModule
         $usersDao = UsersDao::getInstance();
         $user = $usersDao->getByUsername($username);
 
-        if($username == '' || strlen($username) < 4)
+        if($username == '' || strlen($username) < 4 || strlen($username) > 12 || !ctype_alnum($username))
         {
-            $response['error'] = 'Invalid username. Min 4 characters.';
+            $response['error'] = 'Invalid username. Requires min 4 / max 12 alphanumeric characters.';
         }
         elseif($user !== false && $user->user_id != $userId && $user->username == $username)
         {
@@ -485,7 +485,7 @@ class AdminModule extends DefaultModule
         elseif($user !== false && $user->is_admin != $isAdmin)
         {
             $response['error'] = 'Cannot remove your own admin priviledges.';
-        }
+        }   
         else
         {
             $fields = array(
