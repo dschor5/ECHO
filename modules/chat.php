@@ -700,8 +700,6 @@ class ChatModule extends DefaultModule
         $currNotifications = $messagesDao->getMsgNotifications(
             $this->currConversation->conversation_id, $this->user->user_id, $this->user->is_crew, $timeStr);
 
-        Logger::info('messages = '.implode(',', array_keys($this->conversations)));
-
         if(count($currNotifications) > 0)
         {
             // Create array containing the current parent & thread ids. 
