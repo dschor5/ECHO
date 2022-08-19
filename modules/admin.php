@@ -681,8 +681,8 @@ class AdminModule extends DefaultModule
             {
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
-            Logger::info("Cleared log.");
         }
+        Logger::info("Cleared log.");
 
         return array('success' => true);
     }
