@@ -187,13 +187,14 @@ class ChatModule extends DefaultModule
                 {
                     $response['success'] = true;
                     $response['thread_id'] = $threadId;
+                    $response['error'] = '';
                 }
             }
         }
         else
         {
             $response['success'] = false;
-            $response['error'] = 'Invalid thread name ['.$threadName.'].';
+            $response['error'] = 'Invalid thread name ['.htmlspecialchars($threadName).'].';
         }
 
         return $response;
@@ -600,20 +601,25 @@ class ChatModule extends DefaultModule
 
             $time = new DelayTime();
             $timeStr = $time->getTime();
-            $newConvos = $conversationsDao->getNewThreads($parentId, $timeStr);
-
+            $newConvos = $conversationsDao->getNewThreads(
+                array_keys($this->conversations), $this->user->user_id, $timeStr);
 
             foreach($newConvos as $convoId => $convo)
             {
                 $this->conversations[$convoId] = $convo;
-                $this->sendEventStream(
-                    'thread', 
-                    array(
-                        'convo_id'    => $convo->parent_conversation_id,
-                        'thread_id'   => $convo->conversation_id,
-                        'thread_name' => $convo->name,
-                    )
-                );
+                $this->conversations[$convo->parent_conversation_id]->addThreadId($convoId);
+                
+                if($convo->parent_conversation_id != null)
+                {
+                    $this->sendEventStream(
+                        'thread', 
+                        array(
+                            'convo_id'    => $convo->parent_conversation_id,
+                            'thread_id'   => $convo->conversation_id,
+                            'thread_name' => $convo->name,
+                        )
+                    );
+                }
             }
         }
     }
@@ -692,7 +698,9 @@ class ChatModule extends DefaultModule
         $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
         $currNotifications = $messagesDao->getMsgNotifications(
-            array_keys($this->conversations), $this->user->user_id, $this->user->is_crew, $timeStr);
+            $this->currConversation->conversation_id, $this->user->user_id, $this->user->is_crew, $timeStr);
+
+        Logger::info('messages = '.implode(',', array_keys($this->conversations)));
 
         if(count($currNotifications) > 0)
         {
@@ -722,9 +730,11 @@ class ChatModule extends DefaultModule
                 ($mission->feat_convo_threads && !in_array($convoId, $thisConvoAndThreads)))
                 {
                     $id = $convoId;
+                    Logger::warning("Got here");
                     if($this->conversations[$convoId]->parent_conversation_id != null)
                     {
                         $id = $this->conversations[$convoId]->parent_conversation_id;
+                        Logger::warning("And there");
                     }
 
                     if(!isset($tempNotifications[$id]))
@@ -875,7 +885,7 @@ class ChatModule extends DefaultModule
                     {
                         $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
                             '/%thread_id%/'       => $threadId,
-                            '/%thread_name%/'     => $this->conversations[$threadId]->name,
+                            '/%thread_name%/'     => htmlspecialchars($this->conversations[$threadId]->name),
                             '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'class="thread-selected"' : '',
                         ));
                     }
@@ -887,7 +897,7 @@ class ChatModule extends DefaultModule
                 // Apply the template
                 $content .= Main::loadTemplate('chat-rooms.txt', array(
                     '/%room_id%/'   => $convo->conversation_id,
-                    '/%room_name%/' => $name,
+                    '/%room_name%/' => htmlspecialchars($name),
                     '/%selected%/'  => $roomSelected,
                     '/%threads%/'   => $listThreads,
                 ));

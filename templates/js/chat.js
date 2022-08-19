@@ -168,11 +168,16 @@ function handleEventSourceNotification(event) {
     newMessageNotification($('#room-name-' + data.conversation_id).text(), data.notif_important > 0, false);
     
     if($('#feat-convo-list-order-enabled').length) {
-        if($('#room-name-' + data.conversation_id).length) {
-            ($('#room-name-' + data.conversation_id).parent().parent()).insertAfter( $('.room-selected') );
+        if($('#room-' + data.conversation_id).length) {
+            $('#room-' + data.conversation_id).insertAfter( $('.room-selected').parent() );
+        }
+        else if($('#feat-convo-threads-enabled').length) {
+            $('.room-thread').prepend($('#room-name-' + data.conversation_id).parent());
         }
     }
 }
+
+
 
 /**
  * Compile message to display on the chat window. 
@@ -337,6 +342,10 @@ function openFileModal() {
 
 
 $(document).ready(function() {
+    if($('#feat-convo-list-order-enabled').length) {
+        $('#rooms').prepend($('.room-selected').parent())
+    }
+
     if($('#feat-important-msgs-enabled').length) {
         $('#send-btn').css('width', '73px');
         $('#send-btn').css('right', '50px');

@@ -231,43 +231,40 @@ class MessagesDao extends Dao
         return array_reverse($messages, true);
     }
 
-    public function getMsgNotifications(array $conversations, int $userId, bool $isCrew, string $toDate)
+    public function getMsgNotifications(int $conversationId, int $userId, bool $isCrew, string $toDate)
     {
         $notifications = array();
 
-        if(count($conversations) > 0)
-        {
-            $qConvos = implode(',',$conversations);
-            $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
-            $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
-            $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
+        $qConvoId = '\''.$this->database->prepareStatement($conversationId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
-            $queryStr = 'SELECT messages.conversation_id, '. 
-                            'COUNT(*) AS num_new, '. 
-                            "SUM(IF(messages.type = 'important', 1, 0)) AS num_important ".
-                        'FROM messages '.
-                        'JOIN msg_status ON messages.message_id=msg_status.message_id '. 
-                        'WHERE messages.conversation_id IN ('.$qConvos.') '. 
-                            'AND msg_status.is_read=0 '.
-                            'AND msg_status.user_id='.$qUserId.' '. 
-                            'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
-                        'GROUP BY messages.conversation_id '.
-                        'ORDER BY messages.conversation_id';
-            
-            if(($result = $this->database->query($queryStr)) !== false)
+        $queryStr = 'SELECT messages.conversation_id, '. 
+                        'COUNT(*) AS num_new, '. 
+                        "SUM(IF(messages.type = 'important', 1, 0)) AS num_important ".
+                    'FROM messages '.
+                    'JOIN msg_status ON messages.message_id=msg_status.message_id '. 
+                    'WHERE messages.conversation_id<>'.$qConvoId.' '. 
+                        'AND msg_status.is_read=0 '.
+                        'AND msg_status.user_id='.$qUserId.' '. 
+                        'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
+                    'GROUP BY messages.conversation_id '.
+                    'ORDER BY messages.conversation_id';
+        
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
             {
-                if($result->num_rows > 0)
+                while(($rowData=$result->fetch_assoc()) != null)
                 {
-                    while(($rowData=$result->fetch_assoc()) != null)
-                    {
-                        $notifications[$rowData['conversation_id']] = array(
-                            'num_new' => $rowData['num_new'], 
-                            'num_important' => $rowData['num_important']
-                        );
-                    }
+                    $notifications[$rowData['conversation_id']] = array(
+                        'num_new' => $rowData['num_new'], 
+                        'num_important' => $rowData['num_important']
+                    );
                 }
-            }       
-        }
+            }
+        }       
 
         return $notifications;
     }

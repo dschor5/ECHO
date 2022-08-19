@@ -27,7 +27,7 @@
     </div>
 
     <div id="copyright">
-        &copy; 2020-%year% <a href="http://www.darioschor.com" target="_blank">Dario Schor</a>
+        &copy; 2020-%year% <a href="https://github.com/dschor5/ECHO" target="_blank">ECHO</a>
     </div>
 
     <div id="content">

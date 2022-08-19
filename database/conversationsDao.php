@@ -102,6 +102,8 @@ class ConversationsDao extends Dao
         }
         $participantsDao->insertMultiple($participantsFields);
         $this->endTransaction();
+
+        return $convoId;
     }
 
     /**
@@ -166,9 +168,10 @@ class ConversationsDao extends Dao
         return $conversations;
     }
 
-    public function getNewThreads(int $convoId, string $toDate) : array
+    public function getNewThreads(array $convoIds, int $userId, string $toDate) : array
     {
-        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $qConvoIds = implode(',',$convoIds);
+        $qUserId   = '\''.$this->database->prepareStatement($userId).'\'';
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
         $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
 
@@ -181,8 +184,9 @@ class ConversationsDao extends Dao
             'FROM conversations '.
             'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
             'JOIN users ON users.user_id=participants.user_id '.
-            'WHERE conversations.parent_conversation_id='.$qConvoId.' '.
-                'AND (conversations.date_created BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
+            'WHERE conversations.conversation_id NOT IN ('.$qConvoIds.') '. 
+                'AND users.user_id='.$qUserId.' '.
+                //'AND (conversations.date_created BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
             'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
         
         $conversations = array();
