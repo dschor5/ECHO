@@ -656,6 +656,7 @@ class AdminModule extends DefaultModule
 
         // Get a copy of the system log to display
         $logNum = 50;
+        $logEntries = Logger::tailLog($logNum);
 
         return Main::loadTemplate('admin-data.txt', array(
             '/%archive_tz%/'=>$archiveTzOptions,
