@@ -2,5 +2,7 @@
     <div id="heading">
         404 - Lost in Space
     </div>
-    <p style="text-align: center;">You have reached the edge of the universe. Click <a href="%http%%site_url%">here</a> to get back home.</p>
+    <div id="form-contents">
+        <p style="text-align: center;">You have reached the edge of the universe. Click <a href="%http%%site_url%">here</a> to get back home.</p>
+    </div>
 </div>

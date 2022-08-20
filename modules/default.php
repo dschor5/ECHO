@@ -117,9 +117,10 @@ abstract class DefaultModule implements Module
     public function getHeader(): string
     {
         // Default info for current user: 
-        $userPlanet = ''; 
+        $userPlanet = 'Lost in space'; 
         $userName     = ''; 
         $userAlias        = ''; 
+        $htmlLinks = '';
 
         // Associative array for each navigation link. 
         // - Links to appear in the order in which they are added to the array.
@@ -127,6 +128,8 @@ abstract class DefaultModule implements Module
         //      - url  - Relative path from $server['site_url']
         //      - name - Name to display for each link
         //      - icon - Name of jquery icon used
+        
+        $nav = '';
         $navLinks = array();
 
         if($this->user != null)
@@ -158,7 +161,6 @@ abstract class DefaultModule implements Module
             $currUrl   = $action.(strlen($subaction) > 0 ? '/'.$subaction : '');
 
             // Build every link. Skip if it mathes the current path. 
-            $htmlLinks = '';
             foreach($navLinks as $link)
             {
                 if($currUrl != $link['url'])
@@ -170,13 +172,19 @@ abstract class DefaultModule implements Module
                     ));
                 }
             }
+
+            $nav = Main::loadTemplate('nav.txt', array(
+                '/%links%/'         => $htmlLinks,
+                '/%user_location%/' => htmlspecialchars($userPlanet),
+                '/%alias%/'         => htmlspecialchars($userAlias),
+                '/%username%/'      => htmlspecialchars($userName),
+            ));
         }
 
         return Main::loadTemplate('header.txt', array(
-            '/%links%/'         => $htmlLinks,
+            '/%nav%/'           => $nav,
             '/%user_location%/' => htmlspecialchars($userPlanet),
-            '/%alias%/'         => htmlspecialchars($userAlias),
-            '/%username%/'      => htmlspecialchars($userName),
+            
         ));
     }
 

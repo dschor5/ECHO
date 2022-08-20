@@ -9,6 +9,9 @@ class ErrorModule extends DefaultModule
         $this->subHtmlRequests = array(
             'show'      => 'showError', 
         );
+
+        $_GET['subaction'] = 'show';
+        $_POST['subaction'] = 'show';
     }
 
     protected function showError() : string
