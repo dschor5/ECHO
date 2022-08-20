@@ -100,7 +100,12 @@ class DelayTime
      */
     public function getMet() : int
     {
-        return $this->ts - self::getEpochUTC();
+        return $this->ts - self::getStartTimeUTC();
+    }
+
+    public function getTimestamp()
+    {
+        return $this->ts;
     }
 
     /**
@@ -142,12 +147,23 @@ class DelayTime
      * Static function that returns the mission epoch in UTC. 
      * @return int Unix timestamp for mission epoch in UTC.
      */
-    public static function getEpochUTC() : int
+    public static function getStartTimeUTC() : int
     {
         $mission = MissionConfig::getInstance();
-        $epoch = new DateTime($mission->date_start, new DateTimeZone('UTC'));
-        return $epoch->getTimestamp();
+        $t = new DateTime($mission->date_start, new DateTimeZone('UTC'));
+        return $t->getTimestamp();
     }
+
+    /**
+     * Static function that returns the mission end time in UTC. 
+     * @return int Unix timestamp for mission end time in UTC.
+     */
+    public static function getEndTimeUTC() : int
+    {
+        $mission = MissionConfig::getInstance();
+        $t = new DateTime($mission->date_end, new DateTimeZone('UTC'));
+        return $t->getTimestamp();
+    }    
 
     /**
      * Static function that returns the timezone offset in seconds for MCC or the HAB. 

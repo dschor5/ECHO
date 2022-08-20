@@ -153,6 +153,7 @@ class AdminModule extends DefaultModule
                 $data['date_end'], $mission->hab_timezone, 'UTC');
             $missionDao = MissionDao::getInstance();
             $missionDao->updateMissionConfig($data);
+            Logger::info('Save mission settings.', $data);
         }
         
         return $response;
@@ -285,8 +286,24 @@ class AdminModule extends DefaultModule
             }
             else
             {
-                $time = new DelayTime();
-                $delayConfig = array(array('ts'=>$time->getTime(), 'eq'=>floatval($temp)));
+                $currTimeObj = new DelayTime();
+                $currTime = $currTimeObj->getTimestamp();
+
+                $startTime = DelayTime::getStartTimeUTC();
+                $endTime = DelayTime::getEndTimeUTC();
+
+                if($startTime < $currTime && $currTime <= $endTime)
+                {
+                    $delayConfig = array_merge(
+                        json_decode($mission->delay_config, true), 
+                        array(array('ts'=>$currTimeObj->getTime(), 'eq'=>floatval($temp)))
+                    );
+                }
+                else
+                {
+                    $delayConfig = array(array('ts'=>$currTimeObj->getTime(), 'eq'=>floatval($temp)));
+                }
+                
             }
         }
         elseif(isset($_POST['delay_is_manual']) && $_POST['delay_is_manual'] == 'false')
@@ -341,6 +358,7 @@ class AdminModule extends DefaultModule
             $data['delay_config'] = json_encode($delayConfig);
             $missionDao = MissionDao::getInstance();
             $missionDao->updateMissionConfig($data);
+            Logger::info('Saved delay settings.', $delayConfig);
         }
         
         return $response;
@@ -357,8 +375,7 @@ class AdminModule extends DefaultModule
 
         if($mission->delay_is_manual)
         {
-            $delayOptions = json_decode($mission->delay_config, true);
-            $delayManual = floatval($delayOptions[0]['eq']);
+            $delayManual = floatval(Delay::getInstance()->getDelay());
 
             $delayAuto = Main::loadTemplate('admin-delay-config.txt', array(
                 '/%delay-date-id%/'    => 'id="delay-date-0"',
@@ -428,6 +445,10 @@ class AdminModule extends DefaultModule
             {
                 $response['error'] = 'Failed to reset user password (user_id='.$user_id.').';
             } 
+            else
+            {
+                Logger::info('Force password reset for user_id='.$user_id);
+            }
         }
         else
         {
@@ -451,6 +472,10 @@ class AdminModule extends DefaultModule
             if($usersDao->deleteUser($userId) !== true)
             {
                 $response['error'] = 'Failed to delete user. (user_id='.$userId.')';
+            }
+            else
+            {
+                Logger::info('Deleted user_id='.$userId);
             }
         }
         else
@@ -501,9 +526,12 @@ class AdminModule extends DefaultModule
                 $fields['password'] = User::encryptPassword($admin['default_password']);
                 $fields['is_password_reset'] = 1;
                 
-                if($usersDao->createNewUser($fields) === true)
+                if(($userId = $usersDao->createNewUser($fields)) > 0)
                 {
                     $response = array('success'=>true, 'error'=>'');
+                    unset($fields['password']);
+                    $fields['user_id'] = $userId;
+                    Logger::info('Created new user "'.$fields['username'].'"', $fields);
                 }
                 else
                 {
@@ -515,6 +543,7 @@ class AdminModule extends DefaultModule
                 if($usersDao->update($fields, 'user_id='.$userId) === true)
                 {
                     $response = array('success'=>true, 'error'=>'');
+                    Logger::info('Updated user_id='.$userId, $fields);
                 }
                 else
                 {
@@ -746,7 +775,7 @@ class AdminModule extends DefaultModule
         }
 
         Logger::info('admin::backupSqlDatabase finished for "'. $archiveData['server_name'].
-        '" in '.$response['time'].' sec.');
+        '" in '.$response['time'].' sec. ('.$result.')');
 
         return $response;
     }
@@ -813,7 +842,7 @@ class AdminModule extends DefaultModule
             $response['error'] = 'Failed to create archive. See system log for details.';
         }
 
-        Logger::info('admin::backupSystemLog finished for "'. $archiveData['server_name'].'".');
+        Logger::info('admin::backupSystemLog finished for "'. $archiveData['server_name'].'". ('.$result.')');
 
         return $response;
     }
@@ -907,7 +936,7 @@ class AdminModule extends DefaultModule
         }
         
         Logger::info('admin::backupConversations finished for "'. $archiveData['server_name'].
-            '" in '.$response['time'].' sec.');
+            '" in '.$response['time'].' sec. ('.$result.')');
 
         return $response;
     }
@@ -942,6 +971,7 @@ class AdminModule extends DefaultModule
                 else
                 {
                     $response['success'] = true;
+                    Logger::info('Delete archive_id='.$archiveId);
                 }
             }
             else

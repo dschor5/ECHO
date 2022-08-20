@@ -254,7 +254,7 @@ abstract class DefaultModule implements Module
                 '/%mission_name%/'     => htmlspecialchars($mission->name),
                 '/%year%/'             => date('Y'),
                 '/%random%/'           => rand(1, 100000),
-                '/%epoch%/'            => DelayTime::getEpochUTC(),
+                '/%epoch%/'            => DelayTime::getStartTimeUTC(),
                 '/%time_sec_per_day%/' => 24*60*60, // TODO
                 '/%time_day%/'         => htmlspecialchars($mission->hab_day_name),
                 '/%hab_time_format%/'  => 'true', // TODO
