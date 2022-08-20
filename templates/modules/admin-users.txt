@@ -1,6 +1,6 @@
 <div id="content">
     <div id="heading">
-        Mission Settings
+        User Accounts
     </div>
     <div id="navigation">
         <button type="button" class="top-button" onclick="getUser(0)">New User</button>
