@@ -49,7 +49,7 @@ $config['modules_public'] = array(
 
 $config['modules_user'] = array_merge($config['modules_public'], array(
     'chat',
-    'preferences'
+    'help'
 ));
 
 $config['modules_admin'] = array_merge($config['modules_user'], array( 
@@ -58,13 +58,6 @@ $config['modules_admin'] = array_merge($config['modules_user'], array(
 ));
 
 $config['cookie_name'] = 'website';
-
-//these are the dao's that are allowed to load.  Add new tables to this list if you need.
-$config['db_tables'] = array(
-    'users',
-    'messages',
-    'conversations'
-);
 
 // include some files that we need to run.
 require_once('database/database.php');
