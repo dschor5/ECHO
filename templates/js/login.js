@@ -69,7 +69,7 @@ function login() {
             dataType: 'json',
             success: function(data) {
                 if(data.login == true) {
-                    location.href = BASE_URL + '/chat';
+                    location.href = BASE_URL + '/login';
                 }
                 else{
                     $('#dialog-login .dialog-response').text('Invalid username or password.');
