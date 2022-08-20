@@ -132,7 +132,6 @@ class UsersDao extends Dao
 
     public function createNewUser($fields)
     {
-        $result = false;
         $conversationsDao = ConversationsDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
         $messagesDao = MessagesDao::getInstance();
@@ -185,17 +184,17 @@ class UsersDao extends Dao
                 }
             }
             $this->endTransaction(true);
-            $result = true;
         }
         catch(Exception $e)
         {
             $this->endTransaction(false);
             Logger::warning('usersDao::createNewUser', $e);
+            $newUserId = -1;
         }
 
         $this->database->queryExceptionEnabled(false);
 
-        return $result;
+        return $newUserId;
     }    
 
     public function deleteUser($userId)
