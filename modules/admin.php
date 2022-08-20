@@ -441,7 +441,12 @@ class AdminModule extends DefaultModule
 
         if($user_id > 0 && $user_id != $this->user->user_id)
         {
-            if($usersDao->update(array('is_password_reset'=>1), $user_id) !== true)
+            global $admin;
+            $fields = array();
+            $fields['password'] = User::encryptPassword($admin['default_password']);
+            $fields['is_password_reset'] = 1;
+
+            if($usersDao->update($fields, $user_id) !== true)
             {
                 $response['error'] = 'Failed to reset user password (user_id='.$user_id.').';
             } 

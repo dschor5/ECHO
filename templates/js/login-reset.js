@@ -11,6 +11,12 @@ $(document).ready(function() {
             {
                 text: 'Reset Password',
                 click: resetPassword
+            },
+            {
+                text: 'Cancel',
+                click: function() {
+                    location.href = BASE_URL + '/logout';
+                }
             }
         ],
         modal: true,
