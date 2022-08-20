@@ -46,14 +46,19 @@ class HomeModule extends DefaultModule
     public function compileHtml(string $subaction): string
     {
         global $server;
+        Logger::info('Subaction = compileHtml in Home module');
         if($subaction == 'logout')
         {
             $this->logout();
         }
         elseif($subaction == 'checkLogin')
         {
+            Logger::info('Subaction = checkLogin');
+
             if($this->user->is_password_reset)
             {
+                Logger::info('Subaction = show Reset page');
+
                 return $this->showResetPage();
             }
             else
