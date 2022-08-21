@@ -40,7 +40,7 @@
                     %delay_auto%
                 </div>
                 <div class="form-help">
-                    Delay defined as piece-wise function of time (t). <br>
+                    Delay defined as piece-wise function of time (t) using the MCC timezone. <br>
                     Valid operators include +, -, *, /, ^.
                 </div>
                 <template id="delay_auto_template">

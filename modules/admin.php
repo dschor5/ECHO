@@ -341,7 +341,7 @@ class AdminModule extends DefaultModule
                     else
                     {
                         $delayConfig[$i]['ts'] = DelayTime::convertTimestampTimezone(
-                            $delayConfig[$i]['ts'], $mission->hab_timezone, 'UTC');
+                            $delayConfig[$i]['ts'], $mission->mcc_timezone, 'UTC');
                     }
                 }
             }
@@ -394,7 +394,7 @@ class AdminModule extends DefaultModule
             foreach($delayOptions as $id => $cfg)
             {
                 $cfg['ts'] = DelayTime::convertTimestampTimezone(
-                    $cfg['ts'], 'UTC', $mission->hab_timezone);
+                    $cfg['ts'], 'UTC', $mission->mcc_timezone);
 
                 $dateTime = explode(' ', $cfg['ts']);
 
@@ -506,7 +506,7 @@ class AdminModule extends DefaultModule
         if($user == null)
         {
             $response['error'] = 'Invalid user id.';
-            Logger::warning('Admin::editUser() - Invalid user id.')
+            Logger::warning('Admin::editUser() - Invalid user id.');
         }
         else if($username == '' || strlen($username) < 4 || strlen($username) > 12 || !ctype_alnum($username))
         {
