@@ -74,7 +74,7 @@ class UsersDao extends Dao
 
     public function getByUsername(string $username)
     {
-        $user = false;
+        $user = null;
 
         foreach(self::$cache as $userId => $cachedUser)
         {
@@ -85,7 +85,7 @@ class UsersDao extends Dao
             }
         }
 
-        if($user === false)
+        if($user == null)
         {
             $qUsername = '\''.$this->database->prepareStatement($username).'\'';
 

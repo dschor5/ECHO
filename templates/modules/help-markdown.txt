@@ -1,0 +1,57 @@
+<p>Markdown is a markup language for converting plain-text into formatted HTML. 
+This allows users to format messages to make them easier to read. </p>
+
+<p>The following examples show how to use Markdown to format messages.</p>
+
+<table width="540" cellspacing="0">
+    <tr>
+        <th class="help-cell-head">Plain-text message sent</th>
+        <th class="help-cell-head">Formatted message received</th>
+    </tr>
+    <tr>
+        <td class="help-cell">**bold**</td>
+        <td class="help-cell"><b>bold</b></td>
+    </tr>
+    <tr>
+        <td class="help-cell">*italics*</td>
+        <td class="help-cell"><i>italics</i></td>
+    </tr>
+    <tr>
+        <td class="help-cell">'''<br/>preformatted<br/>multiline<br/>text<br/>'''</td>
+        <td class="help-cell"><pre>preformatted
+multiline
+text</pre></td>
+    </tr>
+    <tr>
+        <td class="help-cell">~~strikethrough~~</td>
+        <td class="help-cell"><del>strikethrough</del></td>
+    </tr>
+    <tr>
+        <td class="help-cell"># Big header</td>
+        <td class="help-cell"><h1>Big header</h1></td>
+    </tr>
+    <tr>
+        <td class="help-cell">## Medium header</td>
+        <td class="help-cell"><h2>Medium header</h2></td>
+    </tr>
+    <tr>
+        <td class="help-cell">### Small header</td>
+        <td class="help-cell"><h3>Small header</h3></td>
+    </tr>
+    <tr>
+        <td class="help-cell">#### Tiny header</td>
+        <td class="help-cell"><h4>Tiny header</h4></td>
+    </tr>
+    <tr>
+        <td class="help-cell">* Itemized list 1<br/>* Itemized list 2<br/>* Itemized list 3</td>
+        <td class="help-cell"><ul><li>Itemized list 1</li><li>Itemized list 2</li><li>Itemized list 3</li></ul></td>
+    </tr>
+    <tr>
+        <td class="help-cell">1. Enumerated list 1<br/>2. Enumerated list 2<br/>3. Enumerated list 3</td>
+        <td class="help-cell"><ol><li>Enumerated list 1</li><li>Enumerated list 2</li><li>Enumerated list 3</li></ol></td>
+    </tr>
+    <tr>
+        <td class="help-cell">[Link to Google](http://www.google.com)</td>
+        <td class="help-cell"><a href="http://www.google.com">Link to Google</a></td>
+    </tr>
+</table>

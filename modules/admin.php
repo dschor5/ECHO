@@ -503,8 +503,12 @@ class AdminModule extends DefaultModule
 
         $usersDao = UsersDao::getInstance();
         $user = $usersDao->getByUsername($username);
-
-        if($username == '' || strlen($username) < 4 || strlen($username) > 12 || !ctype_alnum($username))
+        if($user == null)
+        {
+            $response['error'] = 'Invalid user id.';
+            Logger::warning('Admin::editUser() - Invalid user id.')
+        }
+        else if($username == '' || strlen($username) < 4 || strlen($username) > 12 || !ctype_alnum($username))
         {
             $response['error'] = 'Invalid username. Requires min 4 / max 12 alphanumeric characters.';
         }

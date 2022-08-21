@@ -192,7 +192,7 @@ class HomeModule extends DefaultModule
             $user = $usersDao->getByUsername($_POST['uname']);
 
             // Check if the password provided matches what the user account.
-            if($user !== false && $user->isValidPassword($_POST['upass']))
+            if($user != null && $user->isValidPassword($_POST['upass']))
             {
                 // If so, crease a new session and update the database.
                 $this->user = $user;

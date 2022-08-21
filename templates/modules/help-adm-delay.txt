@@ -1,0 +1,18 @@
+<h3>Overview</h3>
+<p>ECHO supports both manual or automatic delays. Manual delays can be changed anytime by an Administrator, 
+whereas automatic delays are configured as piecewise functions of time. The latter allows for gradual delay changes
+over time to represent the transit to a distant planet and/or relative orbital position changes between two planets.</p>
+
+<p><b>Important:</b> The new delay setting does not affect messages already in transit. If a message was sent with 
+delay=Xsec, that delay will be enforced even if the Administrator changes the settings to Ysec delays. However, all 
+other messages sent after the new delay setting was applied will use the new delay. To avoid problems it is better 
+to coordinate the time to change the delay settings during periods of low activity.</p>
+
+<h3>Manual Delays</h3>
+
+<p>Manual delays are defined in seconds and can be changed anytime before, during, or after a mission. </p>
+
+<h3>Automatic Delays</h3>
+
+<p>Automatic delays allow Administrators to define delays as a piecewise function of time.</p>
+

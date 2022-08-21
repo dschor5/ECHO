@@ -2,7 +2,15 @@
     <div id="heading">
         Help
     </div>
-    <div id="form-contents">
-        Coming soon!
+    <div id="help-canvas">
+        <div id="help-menu">
+            <b>Navigation</b>
+            <ol>
+                %menu%
+            </ol>
+        </div>
+        <div id="help-contents">
+            %content%
+        </div>
     </div>
 </div>

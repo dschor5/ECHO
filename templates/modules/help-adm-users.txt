@@ -1,0 +1,60 @@
+<h3>Overview</h3>
+<p>ECHO is design to support individual accounts for each analog participant and mission control operator. 
+All accounts will have access to the public chat ("Mission Chat") and also private channels for 1-on-1 
+conversations with every other user.</p>
+
+<h3>User Accounts</h3>
+<p>Each user has the following fields:</p>
+<dl>
+    <dt>
+        <code>username</code>
+    <dt>
+    <dd>
+        Unique alphanumeric strings to login to the application that identify the individual in conversation archives.<br/> 
+        <b>Important: </b> If required by the Institutional Review Board, the <code>username</code> should be 
+        non-identifiable strings to protect the identity of individuals in conversation archives.
+    </dd>
+
+    <dt>
+        <code>alias</code>
+    </dt>
+    <dd>
+        Optional parameter intended to have preferred name or callsign for each individual. <br/>
+        <b>Important:</b> If filled, this is only displayed on the main application and never included in conversation archives. 
+    </dd>
+
+    <dt>
+        <code>Analog Role</code>
+    </dt>
+    <dd>
+        Selects between roles for analog crew member and mission control operator. <br/>
+        <i>Note: The names for each role are derived from fields within the Mission Settings.</i>
+    </dd>
+
+    <dt>
+        <code>Software Role</code>
+    </dt>
+    <dd>
+        Options are <code>user</code> for regular accounts or <code>admin</code> for administrator accounts. <br/>
+        Administrators can change mission parameters, delay settings, download archives, and manage user accounts.
+    </dd>
+
+</dl>
+
+<p><i>Note: There is no e-mail associated with each user account to help retrieve lost passwords because including 
+it would require individuals to use a separate communication tool (i.e., an e-mail client) without delays during 
+the mission. Thus, it is up to the Administrators to reset accounts as needed.</i></p>
+
+<h3>Managing User Accounts</h3>
+
+<p>The administrator can create, edit, delete, and reset the password for accounts. </p>
+
+<p>Every new account is automatically assigned a default password (see <code>server.inc.php</code>) and 
+users will be prompted to create a new password on their first login. </p>
+
+<p>Similarly, if an Administrator resets the password for an account, the password will revert to the 
+default until the first login.</p>
+
+<p>New accounts created during a mission will not automatically appear on the "Conversations" panel for logged in users. A refresh is needed to reload the full list of active accounts.</p>
+
+<p><b>Important:</b>Never delete accounts partway through a mission as that will delete all messages sent by that user and private chats with that user.</p>

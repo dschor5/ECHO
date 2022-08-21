@@ -161,3 +161,48 @@ a:hover {
 .timeout-counter {
     color: var(--background-dark);
 }
+
+#help-canvas {
+    position: absolute;
+    width: 100%;
+    max-width: 800px;
+    min-width: 390px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid green;
+}
+
+#help-menu {
+    position: relative;
+    float: left;
+    border: 1px solid black;
+    width: 200px;
+    margin-top: 20px;
+    padding: 0px 5px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.5);
+}
+
+#help-contents {
+    position: relative;
+    float: right;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    height: calc(100% - 200px);
+    max-width: 550px;
+    min-width: 370px;
+    padding: 0px 5px 80px 5px;
+    margin: 20px 0px 0px 0px;
+}
+
+.help-cell-head {
+    padding: 10px 0px;
+    border-bottom: 1px solid black;
+    text-align: center;
+}
+
+.help-cell {
+    padding: 10px 0px;
+    border-bottom: 1px dashed gray;
+}
