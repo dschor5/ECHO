@@ -1,0 +1,36 @@
+<h3>Overview</h3>
+
+<p>The Data Management page allows Administrators to download archives, view system logs, and reset the application.</p>
+
+<h3>Backup Conversations</h3>
+
+<p>There are three types of backups used for different purposes. </p>
+
+<dl>
+    <dt>
+        <code>Conversations</code>
+    <dt>
+    <dd>
+        Archive of conversations saved in HTML files. Each conversation is saved in its own file and 
+        contains a table listing the id, author, sent timestamp, receive timestamp, and content for every message. 
+    
+        Each file identifies the conversation, participants (by <code>username</code> only), and all messages. 
+        <br/>
+
+        File structure:
+        <div>&nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> archive-YYYY-MM-DDTHH-MM-SS.zip</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-conversation</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment1.jpg</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment2.pdf</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-conversation.html</div>
+        Where CCCCC and MMMMM refer to the unique conversation and message ids respectively.
+
+    </dd>
+
+
+<th width="6%">Id</th>
+                <th width="11%">From</th>
+                <th width="11%">Sent timestamp (author)</th>
+                <th width="11%">Recv timestamp (MCC)</th>
+                <th width="11%">Recv timestamp (HAB)</th>
+                <th width="50%">Message</th>
