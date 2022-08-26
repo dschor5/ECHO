@@ -271,6 +271,7 @@ abstract class DefaultModule implements Module
                 '/%in_mcc%/'           => $inMcc,
                 '/%timeout-window%/'   => $timeoutWindow,
                 '/%timeout-sec%/'      => $mission->login_timeout,
+                '/%version%/'          => $config['echo_version'],
             );
 
             echo Main::loadTemplate('main.txt', $replace);

@@ -13,6 +13,7 @@
 </div>
 
 <div id="credits">
+<p>&copy; 2020-%year% <a href="https://github.com/dschor5/ECHO/releases/tag/v%version%" target="_blank">ECHO v%version%</a></p>
 <p>Image credits: (a) <a href="https://www.nasa.gov/image-feature/goddard/2021/summer-solstice-in-the-northern-hemisphere">Earth Image courtesy of NASA/DSCOVR EPIC</a>, 
 (b) <a href="https://mars.nasa.gov/resources/6453/valles-marineris-hemisphere-enhanced/">Mars Image Credits courtesy of NASA/JPL-Caltech</a>.</p>
 </div>
