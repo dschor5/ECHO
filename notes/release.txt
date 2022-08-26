@@ -1,3 +1,9 @@
+# Create new issue to update rev number on Github
+
+# Update version number in config.inc.php. 
+
+# Commit and merge the issue back to main. 
+
 # In local repo, view current ags
 git tag
 
