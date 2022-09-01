@@ -235,7 +235,11 @@ function compileMsg(data, before){
         msgTime.setAttribute('recv',   data.recv_time);
         msgTime.setAttribute('sent',   data.sent_time);
         msgTime.setAttribute('msg-id', data.message_id);
-            
+        
+        msgClone.querySelector(".msg-out-seq").setAttribute('id', 'msg-out-seq-id-' + data.message_id);
+        msgClone.querySelector(".msg-out-seq").setAttribute('recipient_crew', 'from' + data.is_crew);
+        msgClone.querySelector(".msg-out-seq").setAttribute('sender_crew', 'msg-out-seq-id-' + data.sent_from);
+
         msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
         msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
         if($('#feat-progress-bar-enabled').length && data.delivered_status != 'Delivered') {
@@ -257,6 +261,7 @@ function compileMsg(data, before){
         else {
             document.querySelector('#msg-container').appendChild(msgClone);
         }
+        updateOutOfSeqWarning();
     }
     else
     {
@@ -265,6 +270,36 @@ function compileMsg(data, before){
 }
 
 $(document).ready(setTimeout(updateDeliveryStatus, 1000));
+
+function updateOutOfSeqWarning() {
+    var matches = document.querySelectorAll("time");
+    var prevSentTime = 0;
+    var currSentTime = 0;
+    var prevId;
+    var currId = 0;
+    var index;
+
+    for(index = 1; index < matches.length; index++) {
+
+        currId = matches[index].getAttribute('msg-id');
+        currSentTime = (new Date(matches[index].getAttribute("sent"))).getTime();
+        
+        prevIndex = index - 1;
+        while(prevIndex >= 0) {
+            prevId = matches[prevIndex].getAttribute('msg-id');
+            prevSentTime = (new Date(matches[prevIndex].getAttribute("sent"))).getTime();
+            
+            if(prevSentTime > currSentTime) {
+                document.querySelector('#msg-out-seq-id-' + prevId).textContent = "Out of sequence!";
+                document.querySelector('#msg-out-seq-id-' + currId).textContent = "Out of sequence!";
+            }
+
+            console.log('Compared ' + currId + ' to ' + prevId);
+
+            prevIndex--;
+        }
+    }
+}
 
 function updateDeliveryStatus() {
     var matches = document.querySelectorAll("time[status='Transit']");
