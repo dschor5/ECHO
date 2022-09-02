@@ -191,7 +191,7 @@ function compileMsg(data, before){
         var msgClone = template.content.cloneNode(true);
         msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
         msgClone.querySelector(".msg-from").innerHTML = data.author;
-        msgClone.querySelector(".msg-id").textContent = "(" + data.message_id + ")";
+        msgClone.querySelector(".msg-id").textContent = "(" + data.message_id_alt + ")";
 
         // Add appropriate avatar. Only added for non-logged in user. 
         if(data.source != 'usr') {

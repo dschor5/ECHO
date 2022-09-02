@@ -97,9 +97,9 @@ class Conversation
 
     public function addThreadId(int $threadId)
     {
-        if(!in_array($threadId, $this->data['thread_ids']))
+        if(!in_array($threadId, $this->thread_ids))
         {
-            $this->data['thread_ids'][] = $threadId;
+            $this->thread_ids[] = $threadId;
         }
     }
 
@@ -118,10 +118,10 @@ class Conversation
         $participants = array();
 
         // Split comma separated entries from the database.
-        $ids = explode(',', $this->data['participants_id']);
-        $alias = explode(',', $this->data['participants_alias']);
-        $usernames = explode(',', $this->data['participants_username']);
-        $isCrew = explode(',', $this->data['participants_is_crew']);
+        $ids = explode(',', $this->participants_id);
+        $alias = explode(',', $this->participants_alias);
+        $usernames = explode(',', $this->participants_username);
+        $isCrew = explode(',', $this->participants_is_crew);
 
         // Iterate through each entry. 
         for($i = 0; $i < count($ids); $i++)
@@ -141,13 +141,11 @@ class Conversation
         return $participants;
     }
 
-    public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName) : bool
+    public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName, bool $isCrew) : bool
     {
         $success = true;
         $messagesDao = MessagesDao::getInstance();
         $missionConfig = MissionConfig::getInstance();
-        
-        $isCrew = true;
         
         $mccStr = $missionConfig->mcc_planet;
         $habStr = $missionConfig->hab_planet;
@@ -181,7 +179,7 @@ class Conversation
         }
         else
         {
-            $ids = array_merge($ids, $this->data['thread_ids']);
+            $ids = array_merge($ids, $this->thread_ids);
         }
         $zip->addEmptyDir($folderName);
 
@@ -195,7 +193,7 @@ class Conversation
         {
             foreach($messages as $msg)
             {
-                $msgResponse = $msg->archiveMessage($zip, $folderName, $convoParticipants, $isCrew, $tz);
+                $msgResponse = $msg->archiveMessage($zip, $folderName, $convoParticipants, $tz);
                 if($msgResponse === false)
                 {
                     $success = false;

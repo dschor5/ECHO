@@ -1,8 +1,10 @@
         <tr>
-            <td>%id%</td>
+            <td>%message_id%</td>
             <td>%from-user%</td>
             <td>%sent-time%</td>
-            <td>%recv-time-mcc%</td>
+            <td>%message_id_hab%</td>
             <td>%recv-time-hab%</td>
-            <td>%msg%</td>
+            <td>%message_id_mcc%</td>
+            <td>%recv-time-mcc%</td>
+            <td>%important% %msg%</td>
         </tr>
