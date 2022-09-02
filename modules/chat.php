@@ -393,16 +393,20 @@ class ChatModule extends DefaultModule
 
             // Execute both database queries. 
             $messagesDao = MessagesDao::getInstance();
-            if(($messageId = $messagesDao->sendMessage($msgData, $fileData)) !== false)
+            if(($messageIds = $messagesDao->sendMessage($msgData, $fileData)) !== false)
             {
                 // Get the new message_id and build the Message object 
                 // to compile the response for the user. 
-                $fileData['message_id'] = $messageId;
+                $fileData['message_id'] = $messageIds['message_id'];
                 $newMsg = new Message(
                     array_merge(
                         $msgData, 
                         $fileData, 
-                        array('username' => $this->user->username, 
+                        array(
+                            'message_id' => $messageIds['message_id'],
+                            'message_id_mcc' => $messageIds['message_id_mcc'],
+                            'message_id_hab' => $messageIds['message_id_hab'],
+                            'username' => $this->user->username, 
                             'alias'    => $this->user->alias, 
                             'is_crew'  => $this->user->is_crew)
                         )
@@ -458,7 +462,7 @@ class ChatModule extends DefaultModule
         $msgImportant = filter_var($_POST['msgType'] ?? false, FILTER_VALIDATE_BOOLEAN) ?
             Message::IMPORTANT : Message::TEXT;
 
-        $response = array(
+        $result = array(
             'success' => false, 
             'message_id' => -1
         );
@@ -476,12 +480,15 @@ class ChatModule extends DefaultModule
             );
             
             // Send the message. If this fails, then 
-            if(($messageId = $messagesDao->sendMessage($msgData)) !== false)
+            if(($messageIds = $messagesDao->sendMessage($msgData)) !== false)
             {
                 $newMsg = new Message(
                     array_merge(
                         $msgData, 
-                        array('message_id' => $messageId,
+                        array(
+                            'message_id' => $messageIds['message_id'],
+                            'message_id_mcc' => $messageIds['message_id_mcc'],
+                            'message_id_hab' => $messageIds['message_id_hab'],
                             'username' => $this->user->username, 
                             'alias' => $this->user->alias, 
                             'is_crew' => $this->user->is_crew)
@@ -494,7 +501,7 @@ class ChatModule extends DefaultModule
                 // be receiving their own message immediately. 
                 $newMsgData = $newMsg->compileArray($this->user, 
                     $this->currConversation->participants_both_sites);
-                $response = array_merge(array('success' => true), $newMsgData);
+                $result = array_merge(array('success' => true), $newMsgData);
             }
             else
             {
@@ -504,7 +511,7 @@ class ChatModule extends DefaultModule
 
         }
         
-        return $response;
+        return $result;
     }
 
     /**

@@ -13,6 +13,10 @@
                 <select name="archive-tz" id="archive-tz">
                     %archive_tz%
                 </select>
+                <select name="archive-perspective" id="archive-perspective">
+                    <option value="hab">Habitat Perspective</option>
+                    <option value="mcc">Mission Control Perspective</option>
+                </select>
 
                 <button type="button" class="form-button" onclick="saveArchive('backupconvo')">Create Archive</button>
                 <!--<div id="archive_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating archive...</div>-->
@@ -20,7 +24,8 @@
             </div>
             <div class="form-help">
                 Before generating the archive, select what timezone to use for all sent/receive messages.  <br/>
-                Then, click the button to create a zip file containing a copy of all conversations and attachments. <br/>
+                Then select whether to order messages by the Habitat or MCC received timestamp. <br/>
+                Finally, click the button to create a zip file containing a copy of all conversations and attachments. <br/>
                 File structure:
                 <div>&nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> archive-YYYY-MM-DDTHH-MM-SS.zip</div>
                 <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-conversation</div>

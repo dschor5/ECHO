@@ -31,6 +31,41 @@ class MessagesDao extends Dao
         parent::__construct('messages', 'message_id');
     }
 
+    // Must be ran in the context of a transaction.
+    private function updateSiteMessageId(string $toDate, bool $ownTransaction=true)
+    {
+        if($ownTransaction)
+        {
+            $this->startTransaction();
+        }
+        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+
+        // Set mysql variable id_hab.
+        $queryStr = 'SELECT @id_hab := COALESCE(MAX(message_id_hab),0) FROM messages';
+        $this->database->query($queryStr);
+        
+        // Update id for messages from the perspective of the habitat
+        $queryStr = 'UPDATE messages SET message_id_hab=@id_hab:=@id_hab+1 '. 
+                    'WHERE message_id_hab IS NULL AND recv_time_hab <= '.$qToDate.' '. 
+                    'ORDER BY recv_time_hab';
+        $this->database->query($queryStr);
+
+        // Set mysql variable id_mcc.
+        $queryStr = 'SELECT @id_mcc := COALESCE(MAX(message_id_mcc),0) FROM messages';
+        $this->database->query($queryStr);
+        
+        // Update id for messages from the perspective of mcc
+        $queryStr = 'UPDATE messages SET message_id_mcc=@id_mcc:=@id_mcc+1 '. 
+                    'WHERE message_id_mcc IS NULL AND recv_time_mcc <= '.$qToDate.' '. 
+                    'ORDER BY recv_time_mcc';
+        $this->database->query($queryStr);
+
+        if($ownTransaction)
+        {
+            $this->endTransaction();
+        }
+    }
+
     /**
      * Write new message to the database. 
      *
@@ -45,17 +80,18 @@ class MessagesDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
 
-        
+        $ids = array('message_id' => null, 'message_id_hab' => null, 'message_id_mcc' => null);
+
         $this->database->queryExceptionEnabled(true);
         try 
         {
             $this->startTransaction();
-            $messageId = $this->insert($msgData);
-            if($messageId !== false)
+            $ids['message_id'] = $this->insert($msgData);
+            if($ids['message_id']  !== false)
             {
                 if(count($fileData) > 0)
                 {
-                    $fileData['message_id'] = $messageId;
+                    $fileData['message_id'] = $ids['message_id'] ;
                     $msgFileDao->insert($fileData);
                 }
 
@@ -64,30 +100,44 @@ class MessagesDao extends Dao
                 foreach($participants as $userId => $isCrew)
                 {
                     $msgStatusData[] = array(
-                        'message_id' => $messageId,
+                        'message_id' => $ids['message_id'] ,
                         'user_id' => $userId,
                         'is_read' => ($userId == $msgData['user_id']),
                     );
                 }
                 $messageStatusDao->insertMultiple($msgStatusData);
                 $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
+                
+                $this->updateSiteMessageId($msgData['sent_time'], false);
+               
+                if (($result = $this->select('*', $ids['message_id'] )) !== false)
+                {
+                    if ($result->num_rows > 0) 
+                    {
+                        if(($msgIdData = $result->fetch_assoc()) != null)
+                        {
+                            $ids['message_id_mcc'] = $msgIdData['message_id_mcc'];
+                            $ids['message_id_hab'] = $msgIdData['message_id_hab'];
+                        }
+                    }
+                }               
                 $this->endTransaction();
             }
             else
             {
-                $messageId = false;
+                $ids = false;
                 $this->endTransaction(false);
             }
         }
         catch(Exception $e)
         {
-            $messageId = false;
+            $ids = false;
             $this->endTransaction(false);
             Logger::warning('messagesDao::sendMessage failed.', $e);
         }
         $this->database->queryExceptionEnabled(false);
 
-        return $messageId;
+        return $ids;
     }
 
 
@@ -145,6 +195,7 @@ class MessagesDao extends Dao
 
     
         $this->startTransaction();
+        $this->updateSiteMessageId($toDate, false);
 
         if(($result = $this->database->query($queryStr)) !== false)
         {
@@ -197,6 +248,7 @@ class MessagesDao extends Dao
         try
         {
             $this->startTransaction();
+            $this->updateSiteMessageId($toDate, false);
 
             if(($result = $this->database->query($queryStr)) !== false)
             {
@@ -301,6 +353,10 @@ class MessagesDao extends Dao
         
         $messages = array();
 
+        $this->startTransaction();
+        $currTime = new DelayTime();
+        $this->updateSiteMessageId($currTime->getTime(), false);
+        
         if(($result = $this->database->query($queryStr)) !== false)
         {
             if($result->num_rows > 0)
@@ -311,6 +367,7 @@ class MessagesDao extends Dao
                 }
             }
         }
+        $this->endTransaction();
      
         return $messages;
     }

@@ -5,7 +5,8 @@ function saveArchive(downloadType) {
         data: {
             action: 'admin',
             subaction: downloadType,
-            timezone: $('#archive-tz option:selected').val()
+            timezone: $('#archive-tz option:selected').val(),
+            perspective: $('#archive-perspective option:selected').val()
         },
         dataType: 'json',
         success: function(data) {
