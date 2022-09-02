@@ -868,6 +868,7 @@ class AdminModule extends DefaultModule
         );
 
         $tzSelected = $_POST['timezone'] ?? '';
+        $isCrew = !(isset($_POST['perspective']) && $_POST['perspective'] == 'mcc');
         $timezones = DateTimeZone::listIdentifiers();
         if(!in_array($tzSelected, $timezones))
         {
@@ -912,7 +913,7 @@ class AdminModule extends DefaultModule
                         continue;
                     }
 
-                    if(!$convo->archiveConvo($zip, $tzSelected, $sepThreads, $parentName))
+                    if(!$convo->archiveConvo($zip, $tzSelected, $sepThreads, $parentName, $isCrew))
                     {
                         Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
                         $response['success'] = false;

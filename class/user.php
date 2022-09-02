@@ -103,7 +103,7 @@ class User
      */
     public function isValidPassword(string $password): bool
     {
-        return (User::encryptPassword($password) == $this->data['password']);
+        return (User::encryptPassword($password) == $this->password);
     }
 
     /**
@@ -125,9 +125,9 @@ class User
      */
     public function createNewSession() : string
     {
-        $this->data['session_id'] = dechex(rand(0,time())).
+        $this->session_id = dechex(rand(0,time())).
             dechex(rand(0,time())).dechex(rand(0,time()));
-        return $this->data['session_id'];
+        return $this->session_id;
     }
 
     /**
@@ -140,7 +140,7 @@ class User
     public function isValidSession(string $cmpKey) : bool
     {
         $valid=false;
-        if ($cmpKey == $this->data['session_id'])
+        if ($cmpKey == $this->session_id)
         {
             $valid=true;
         }
