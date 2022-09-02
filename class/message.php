@@ -154,7 +154,7 @@ class Message
         $perspective = $crewPerspective ? 'recv_time_hab' : 'recv_time_mcc';
 
         $msg = $this->compileMsgText();
-        if($this->data['type'] != self::TEXT && $this->file != null && $this->file->exists())
+        if($this->type != self::TEXT && $this->file != null && $this->file->exists())
         {
             $msg = $this->file->original_name.' ('.$this->file->getSize().')';
 
@@ -169,14 +169,16 @@ class Message
         }
 
         $missionConfig = MissionConfig::getInstance();
-        $planet = ($participants[$this->data['user_id']]['is_crew'] ? $missionConfig->hab_planet : $missionConfig->mcc_planet);
+        $planet = ($participants[$this->user_id]['is_crew'] ? $missionConfig->hab_planet : $missionConfig->mcc_planet);
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%id%/'        => $this->message_id,
                   '/%from-user%/' => $participants[$this->user_id]['username'],
                   '/%sent-time%/' => DelayTime::convertTimestampTimezone($this->sent_time, 'UTC', $tz),
                   '/%recv-time-mcc%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
+                  '/%id_mcc%/'    => $this->message_id_mcc,
                   '/%recv-time-hab%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
+                  '/%id_hab%/'    => $this->message_id_hab,
                   '/%msg%/'       => $msg,
             ));
     }
@@ -211,31 +213,32 @@ class Message
     public function compileArray(User &$userPerspective, bool $remoteDest) : array
     {
         $msgData = array(
-            'message_id'       => $this->data['message_id'],
-            'user_id'          => $this->data['user_id'],
-            'is_crew'          => $this->data['is_crew'],
-            'author'           => htmlspecialchars($this->data['alias']),
+            'message_id'       => $this->message_id,
+            'message_id_alt'   => ($userPerspective->is_crew) ? $this->message_id_hab : $this->message_id_mcc,
+            'user_id'          => $this->user_id,
+            'is_crew'          => $this->is_crew,
+            'author'           => htmlspecialchars($this->alias),
             'message'          => $this->compileMsgText(),
             'type'             => self::TEXT,
-            'sent_time'        => DelayTime::convertTsForJs($this->data['sent_time']),
-            'recv_time_mcc'    => DelayTime::convertTsForJs($this->data['recv_time_mcc']),
-            'recv_time_hab'    => DelayTime::convertTsForJs($this->data['recv_time_hab']),
+            'sent_time'        => DelayTime::convertTsForJs($this->sent_time),
+            'recv_time_mcc'    => DelayTime::convertTsForJs($this->recv_time_mcc),
+            'recv_time_hab'    => DelayTime::convertTsForJs($this->recv_time_hab),
             'recv_time'        => DelayTime::convertTsForJs($this->getReceivedTime($remoteDest)),
             'delivered_status' => $this->getMsgStatus($remoteDest),
-            'sent_from'        => $this->data['is_crew'],
+            'sent_from'        => $this->is_crew, // TODO - Why is this the same as is_crew?
             'remoteDest'       => $remoteDest,
         );
             
         // Flag as important
-        if($this->data['type'] == self::IMPORTANT) 
+        if($this->type == self::IMPORTANT) 
         {
             $msgData['type'] = self::IMPORTANT;
         }
         
         // If not null, add the details on the file attachment. 
-        if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT && $this->file != null)
+        if($this->type != self::TEXT && $this->type != self::IMPORTANT && $this->file != null)
         {
-            Logger::warning(var_dump($this->file).'   '.$this->data['type']);
+            Logger::warning(var_dump($this->file).'   '.$this->type);
 
             if($this->file->exists())
             {
@@ -249,7 +252,7 @@ class Message
         // Set the format of who authored the message. 
         // Sending the avatars is somewhat redundant given the source field, 
         // however, this may provide more functionality in future releases.
-        if($userPerspective->user_id == $this->data['user_id'])
+        if($userPerspective->user_id == $this->user_id)
         {
             // Current user
             $msgData['source'] = 'usr';
