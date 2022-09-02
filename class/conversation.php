@@ -141,13 +141,11 @@ class Conversation
         return $participants;
     }
 
-    public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName) : bool
+    public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName, bool $isCrew) : bool
     {
         $success = true;
         $messagesDao = MessagesDao::getInstance();
         $missionConfig = MissionConfig::getInstance();
-        
-        $isCrew = true;
         
         $mccStr = $missionConfig->mcc_planet;
         $habStr = $missionConfig->hab_planet;
@@ -195,7 +193,7 @@ class Conversation
         {
             foreach($messages as $msg)
             {
-                $msgResponse = $msg->archiveMessage($zip, $folderName, $convoParticipants, $isCrew, $tz);
+                $msgResponse = $msg->archiveMessage($zip, $folderName, $convoParticipants, $tz);
                 if($msgResponse === false)
                 {
                     $success = false;

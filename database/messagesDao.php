@@ -354,7 +354,8 @@ class MessagesDao extends Dao
         $messages = array();
 
         $this->startTransaction();
-        $this->updateSiteMessageId($toDate, false);
+        $currTime = new DelayTime();
+        $this->updateSiteMessageId($currTime->getTime(), false);
         
         if(($result = $this->database->query($queryStr)) !== false)
         {

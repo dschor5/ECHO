@@ -149,12 +149,10 @@ class Message
         return $ret;
     }
 
-    public function archiveMessage(ZipArchive &$zip, string $folder, array &$participants, bool $crewPerspective, string $tz) 
+    public function archiveMessage(ZipArchive &$zip, string $folder, array &$participants, string $tz) 
     {
-        $perspective = $crewPerspective ? 'recv_time_hab' : 'recv_time_mcc';
-
         $msg = $this->compileMsgText();
-        if($this->type != self::TEXT && $this->file != null && $this->file->exists())
+        if($this->type != self::TEXT && $this->type != self::IMPORTANT && $this->file != null && $this->file->exists())
         {
             $msg = $this->file->original_name.' ('.$this->file->getSize().')';
 
@@ -168,18 +166,25 @@ class Message
             }
         }
 
+        $important = '';
+        if($this->type == self::IMPORTANT)
+        {
+            $important = '<p style="color: red; font-weight: bold; font-size: 140%;">IMPORTANT:</p>';
+        }
+
         $missionConfig = MissionConfig::getInstance();
         $planet = ($participants[$this->user_id]['is_crew'] ? $missionConfig->hab_planet : $missionConfig->mcc_planet);
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
-            array('/%id%/'        => $this->message_id,
-                  '/%from-user%/' => $participants[$this->user_id]['username'],
-                  '/%sent-time%/' => DelayTime::convertTimestampTimezone($this->sent_time, 'UTC', $tz),
-                  '/%recv-time-mcc%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
-                  '/%id_mcc%/'    => $this->message_id_mcc,
-                  '/%recv-time-hab%/' => DelayTime::convertTimestampTimezone($this->data[$perspective], 'UTC', $tz),
-                  '/%id_hab%/'    => $this->message_id_hab,
-                  '/%msg%/'       => $msg,
+            array('/%message_id%/'     => $this->message_id,
+                  '/%from-user%/'      => $participants[$this->user_id]['username'],
+                  '/%sent-time%/'      => DelayTime::convertTimestampTimezone($this->sent_time, 'UTC', $tz),
+                  '/%recv-time-mcc%/'  => DelayTime::convertTimestampTimezone($this->recv_time_mcc, 'UTC', $tz),
+                  '/%message_id_mcc%/' => $this->message_id_mcc,
+                  '/%recv-time-hab%/'  => DelayTime::convertTimestampTimezone($this->recv_time_hab, 'UTC', $tz),
+                  '/%message_id_hab%/' => $this->message_id_hab,
+                  '/%msg%/'            => $msg,
+                  '/%important%/'      => $important,
             ));
     }
 
@@ -238,8 +243,6 @@ class Message
         // If not null, add the details on the file attachment. 
         if($this->type != self::TEXT && $this->type != self::IMPORTANT && $this->file != null)
         {
-            Logger::warning(var_dump($this->file).'   '.$this->type);
-
             if($this->file->exists())
             {
                 $msgData['filename'] = $this->file->original_name;
