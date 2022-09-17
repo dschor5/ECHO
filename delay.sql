@@ -36,6 +36,7 @@ CREATE TABLE `messages` (
   `text` text CHARACTER SET utf8 DEFAULT NULL,
   `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
   `sent_time` datetime NOT NULL,
+  `from_crew` tinyint(1) NOT NULL,
   `recv_time_hab` datetime NOT NULL,
   `message_id_hab` int(10) UNSIGNED DEFAULT NULL,
   `recv_time_mcc` datetime NOT NULL,

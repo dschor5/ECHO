@@ -32,38 +32,52 @@ class MessagesDao extends Dao
     }
 
     // Must be ran in the context of a transaction.
-    private function updateSiteMessageId(string $toDate, bool $ownTransaction=true)
+    public function renumberSiteMessageId(bool $threadsEnabled)
     {
-        if($ownTransaction)
+        $this->startTransaction();
+
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversations = $conversationsDao->getConversations();
+
+        foreach($conversations as $convoId => $convo) 
         {
-            $this->startTransaction();
-        }
-        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+            if($threadsEnabled == false)
+            {
+                if($convo->parent_conversation_id == null)
+                {
+                    $convoIds = array_merge(array($convoId), $convo->thread_ids);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                $convoIds = array($convoId);
+            }
 
-        // Set mysql variable id_hab.
-        $queryStr = 'SELECT @id_hab := COALESCE(MAX(message_id_hab),0) FROM messages';
-        $this->database->query($queryStr);
-        
-        // Update id for messages from the perspective of the habitat
-        $queryStr = 'UPDATE messages SET message_id_hab=@id_hab:=@id_hab+1 '. 
-                    'WHERE message_id_hab IS NULL AND recv_time_hab <= '.$qToDate.' '. 
-                    'ORDER BY recv_time_hab';
-        $this->database->query($queryStr);
+            $qConvoIds = implode(',',$convoIds);
 
-        // Set mysql variable id_mcc.
-        $queryStr = 'SELECT @id_mcc := COALESCE(MAX(message_id_mcc),0) FROM messages';
-        $this->database->query($queryStr);
-        
-        // Update id for messages from the perspective of mcc
-        $queryStr = 'UPDATE messages SET message_id_mcc=@id_mcc:=@id_mcc+1 '. 
-                    'WHERE message_id_mcc IS NULL AND recv_time_mcc <= '.$qToDate.' '. 
-                    'ORDER BY recv_time_mcc';
-        $this->database->query($queryStr);
+            // Initialize internal mysql variables.
+            $idQueryStr = 'SET @id_hab := 0, @id_mcc := 0;';
+            $this->database->query($idQueryStr);
+            
+            // Update id for messages from the perspective of the habitat
+            $updateQueryStr = 'UPDATE messages SET messages.message_id_hab=@id_hab:=@id_hab+1 '. 
+                'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=1 ';
+                'ORDER BY messages.sent_time ASC';
+            $this->database->query($updateQueryStr);
+            
+            // Update id for messages from the perspective of mcc
+            $updateQueryStr = 'UPDATE messages SET messages.message_id_mcc=@id_mcc:=@id_mcc+1 '. 
+                'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=0 ';
+                'ORDER BY messages.sent_time ASC';
+            $this->database->query($updateQueryStr);
+        }        
 
-        if($ownTransaction)
-        {
-            $this->endTransaction();
-        }
+        Logger::info('MessagesDao::renumberSiteMessageId() complete.');
+        $this->endTransaction();
     }
 
     /**
@@ -73,7 +87,7 @@ class MessagesDao extends Dao
      * @param array $fileData Associative array with file attachment fields.
      * @return int|bool New message id on success. False otherwise. 
      **/
-    public function sendMessage(array $msgData, array $fileData=array())
+    public function sendMessage(User &$user, array $msgData, array $fileData=array())
     {
         $messageStatusDao = MessageStatusDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
@@ -86,9 +100,42 @@ class MessagesDao extends Dao
         try 
         {
             $this->startTransaction();
-            $ids['message_id'] = $this->insert($msgData);
-            if($ids['message_id']  !== false)
+            
+            $insertQueryStr = "insert into messages (";
+            $keys = array();
+            $values = array();
+
+            if($user->is_crew)
             {
+                $idQueryStr = 'SELECT @id_hab := COALESCE(MAX(message_id_hab),0) FROM messages '. 
+                    'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'"';
+                $this->database->query($idQueryStr);
+                $keys[] = 'message_id_hab';
+                $values[] = '@id_hab:=@id_hab+1';
+            }
+            else
+            {
+                $idQueryStr = 'SELECT @id_mcc := COALESCE(MAX(message_id_mcc),0) FROM messages '. 
+                    'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'"';
+                $this->database->query($idQueryStr);
+                $keys[] = 'message_id_mcc';
+                $values[] = '@id_mcc:=@id_mcc+1';
+            }
+
+            foreach ($msgData as $key => $value)
+            {
+                $keys[] = '`'.$key.'`';
+                if ($value === null)
+                    $values[] = 'NULL';
+                else
+                    $values[] = '"'.$this->database->prepareStatement($value).'"';
+            }
+
+            $insertQueryStr .= join(',',$keys).') values ('.join(',',$values).');';
+            if ($this->database->query($insertQueryStr,0) !== false)
+            {
+                $ids['message_id'] = $this->database->getLastInsertId();
+            
                 if(count($fileData) > 0)
                 {
                     $fileData['message_id'] = $ids['message_id'] ;
@@ -108,8 +155,6 @@ class MessagesDao extends Dao
                 $messageStatusDao->insertMultiple($msgStatusData);
                 $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
                 
-                $this->updateSiteMessageId($msgData['sent_time'], false);
-               
                 if (($result = $this->select('*', $ids['message_id'] )) !== false)
                 {
                     if ($result->num_rows > 0) 
@@ -133,7 +178,7 @@ class MessagesDao extends Dao
         {
             $ids = false;
             $this->endTransaction(false);
-            Logger::warning('messagesDao::sendMessage failed.', $e);
+            Logger::warning('messagesDao::sendMessage failed.', $e->getMessage());
         }
         $this->database->queryExceptionEnabled(false);
 
@@ -178,7 +223,7 @@ class MessagesDao extends Dao
         $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, users.is_crew, msg_status.is_read, '.
+                        'users.username, users.alias, msg_status.is_read, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -195,7 +240,6 @@ class MessagesDao extends Dao
 
     
         $this->startTransaction();
-        $this->updateSiteMessageId($toDate, false);
 
         if(($result = $this->database->query($queryStr)) !== false)
         {
@@ -229,7 +273,7 @@ class MessagesDao extends Dao
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, users.is_crew, msg_status.is_read, '.
+                        'users.username, users.alias, msg_status.is_read, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -248,7 +292,6 @@ class MessagesDao extends Dao
         try
         {
             $this->startTransaction();
-            $this->updateSiteMessageId($toDate, false);
 
             if(($result = $this->database->query($queryStr)) !== false)
             {
@@ -355,7 +398,6 @@ class MessagesDao extends Dao
 
         $this->startTransaction();
         $currTime = new DelayTime();
-        $this->updateSiteMessageId($currTime->getTime(), false);
         
         if(($result = $this->database->query($queryStr)) !== false)
         {

@@ -99,7 +99,7 @@ class Conversation
     {
         if(!in_array($threadId, $this->thread_ids))
         {
-            $this->thread_ids[] = $threadId;
+            $this->data['thread_ids'][] = $threadId;
         }
     }
 
