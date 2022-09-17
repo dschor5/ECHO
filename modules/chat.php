@@ -405,8 +405,7 @@ class ChatModule extends DefaultModule
                         $fileData, 
                         array(
                             'message_id' => $messageIds['message_id'],
-                            'message_id_mcc' => $messageIds['message_id_mcc'],
-                            'message_id_hab' => $messageIds['message_id_hab'],
+                            'message_id_alt' => $messageIds['message_id_alt'],
                             'username' => $this->user->username, 
                             'alias'    => $this->user->alias, 
                             'is_crew'  => $this->user->is_crew)
@@ -489,8 +488,7 @@ class ChatModule extends DefaultModule
                         $msgData, 
                         array(
                             'message_id' => $messageIds['message_id'],
-                            'message_id_mcc' => $messageIds['message_id_mcc'],
-                            'message_id_hab' => $messageIds['message_id_hab'],
+                            'message_id_alt' => $messageIds['message_id_alt'],
                             'username' => $this->user->username, 
                             'alias' => $this->user->alias, 
                             'is_crew' => $this->user->is_crew)

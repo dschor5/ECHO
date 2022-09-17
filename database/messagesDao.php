@@ -64,13 +64,13 @@ class MessagesDao extends Dao
             $this->database->query($idQueryStr);
             
             // Update id for messages from the perspective of the habitat
-            $updateQueryStr = 'UPDATE messages SET messages.message_id_hab=@id_hab:=@id_hab+1 '. 
+            $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_hab:=@id_hab+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=1 ';
                 'ORDER BY messages.sent_time ASC';
             $this->database->query($updateQueryStr);
             
             // Update id for messages from the perspective of mcc
-            $updateQueryStr = 'UPDATE messages SET messages.message_id_mcc=@id_mcc:=@id_mcc+1 '. 
+            $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_mcc:=@id_mcc+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=0 ';
                 'ORDER BY messages.sent_time ASC';
             $this->database->query($updateQueryStr);
@@ -94,48 +94,22 @@ class MessagesDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
 
-        $ids = array('message_id' => null, 'message_id_hab' => null, 'message_id_mcc' => null);
+        $ids = array('message_id' => null, 'message_id_alt' => null);
 
         $this->database->queryExceptionEnabled(true);
         try 
         {
             $this->startTransaction();
-            
-            $insertQueryStr = "insert into messages (";
-            $keys = array();
-            $values = array();
+            $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM messages '. 
+                'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '. 
+                'AND from_crew='.(($user->is_crew)?'1':'0');
+            $this->database->query($idQueryStr);
 
-            if($user->is_crew)
-            {
-                $idQueryStr = 'SELECT @id_hab := COALESCE(MAX(message_id_hab),0) FROM messages '. 
-                    'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'"';
-                $this->database->query($idQueryStr);
-                $keys[] = 'message_id_hab';
-                $values[] = '@id_hab:=@id_hab+1';
-            }
-            else
-            {
-                $idQueryStr = 'SELECT @id_mcc := COALESCE(MAX(message_id_mcc),0) FROM messages '. 
-                    'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'"';
-                $this->database->query($idQueryStr);
-                $keys[] = 'message_id_mcc';
-                $values[] = '@id_mcc:=@id_mcc+1';
-            }
+            $variables = array('message_id_alt' => '@id_alt:=@id_alt+1');
 
-            foreach ($msgData as $key => $value)
+            $ids['message_id'] = $this->insert($msgData, $variables);
+            if ($ids['message_id'] !== false)
             {
-                $keys[] = '`'.$key.'`';
-                if ($value === null)
-                    $values[] = 'NULL';
-                else
-                    $values[] = '"'.$this->database->prepareStatement($value).'"';
-            }
-
-            $insertQueryStr .= join(',',$keys).') values ('.join(',',$values).');';
-            if ($this->database->query($insertQueryStr,0) !== false)
-            {
-                $ids['message_id'] = $this->database->getLastInsertId();
-            
                 if(count($fileData) > 0)
                 {
                     $fileData['message_id'] = $ids['message_id'] ;
@@ -161,8 +135,7 @@ class MessagesDao extends Dao
                     {
                         if(($msgIdData = $result->fetch_assoc()) != null)
                         {
-                            $ids['message_id_mcc'] = $msgIdData['message_id_mcc'];
-                            $ids['message_id_hab'] = $msgIdData['message_id_hab'];
+                            $ids['message_id_alt'] = $msgIdData['message_id_alt'];
                         }
                     }
                 }               

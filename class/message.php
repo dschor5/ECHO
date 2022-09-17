@@ -174,12 +174,11 @@ class Message
 
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%message_id%/'     => $this->message_id,
+                  '/%message_id_alt%/' => $this->formatAltMessageId(),
                   '/%from-user%/'      => $participants[$this->user_id]['username'],
                   '/%sent-time%/'      => DelayTime::convertTimestampTimezone($this->sent_time, 'UTC', $tz),
                   '/%recv-time-mcc%/'  => DelayTime::convertTimestampTimezone($this->recv_time_mcc, 'UTC', $tz),
-                  '/%message_id_mcc%/' => ($this->message_id_mcc == null) ? '' : $this->message_id_mcc,
                   '/%recv-time-hab%/'  => DelayTime::convertTimestampTimezone($this->recv_time_hab, 'UTC', $tz),
-                  '/%message_id_hab%/' => ($this->message_id_hab == null) ? '' : $this->message_id_hab,
                   '/%msg%/'            => $msg,
                   '/%important%/'      => $important,
             ));
@@ -205,17 +204,17 @@ class Message
         return $result;
     }
 
-    public function getMessageId()
+    public function formatAltMessageId()
     {
         $idStr = '';
 
         if($this->from_crew)
         {
-            $idStr = 'HAB-'.$this->message_id_hab;
+            $idStr = 'HAB-'.$this->message_id_alt;
         }
         else
         {
-            $idStr = 'MCC-'.$this->message_id_mcc;
+            $idStr = 'MCC-'.$this->message_id_alt;
         }
 
         return $idStr;
@@ -232,7 +231,7 @@ class Message
     {
         $msgData = array(
             'message_id'       => $this->message_id,
-            'message_id_alt'   => $this->getMessageId(),
+            'message_id_alt'   => $this->formatAltMessageId(),
             'user_id'          => $this->user_id,
             'from_crew'        => $this->from_crew,
             'author'           => htmlspecialchars($this->alias),

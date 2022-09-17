@@ -37,10 +37,9 @@ CREATE TABLE `messages` (
   `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
   `sent_time` datetime NOT NULL,
   `from_crew` tinyint(1) NOT NULL,
+  `message_id_alt` int(10) UNSIGNED DEFAULT NULL,
   `recv_time_hab` datetime NOT NULL,
-  `message_id_hab` int(10) UNSIGNED DEFAULT NULL,
   `recv_time_mcc` datetime NOT NULL,
-  `message_id_mcc` int(10) UNSIGNED DEFAULT NULL,  
   PRIMARY KEY(`message_id`, `user_id`, `conversation_id`),
   FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
