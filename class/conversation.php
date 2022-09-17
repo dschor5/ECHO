@@ -99,7 +99,7 @@ class Conversation
     {
         if(!in_array($threadId, $this->thread_ids))
         {
-            $this->thread_ids[] = $threadId;
+            $this->data['thread_ids'][] = $threadId;
         }
     }
 
@@ -187,7 +187,7 @@ class Conversation
         $messages = $messagesDao->getMessagesForConvo($ids, $isCrew, $offset, $numMsgs);
         if(count($messages) == 0)
         {
-            $msgStr = '<tr><td colspan="6">No messages</td></tr>';
+            $msgStr = '<tr><td colspan="7">No messages</td></tr>';
         }
         while(count($messages) > 0 && $success)
         {

@@ -151,6 +151,22 @@ class AdminModule extends DefaultModule
                 $data['date_start'], $mission->hab_timezone, 'UTC');
             $data['date_end'] = DelayTime::convertTimestampTimezone(
                 $data['date_end'], $mission->hab_timezone, 'UTC');
+
+            $messagesDao = MessagesDao::getInstance();
+            if($data['feat_convo_threads'] != $mission->feat_convo_threads)
+            {
+                // Turning off threads
+                if($data['feat_convo_threads'] == '0')
+                {                    
+                    $messagesDao->renumberSiteMessageId(false);
+                }
+                // Enabling threads
+                else
+                {
+                    $messagesDao->renumberSiteMessageId(true);
+                }
+            }
+
             $missionDao = MissionDao::getInstance();
             $missionDao->updateMissionConfig($data);
             Logger::info('Save mission settings.', $data);
