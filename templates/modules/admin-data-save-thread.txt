@@ -1,4 +1,4 @@
 <tr>
                 <th colspan="2" class="convo-info-label">Thread:</th>
-                <td colspan="6" class="convo-info-value">%name% (id=%id%)</td>
+                <td colspan="5" class="convo-info-value">%name% (id=%id%)</td>
             </tr>

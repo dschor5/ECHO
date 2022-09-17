@@ -115,11 +115,11 @@ class Message
     {
         if($remoteDest)
         {
-            $receiveTime = $this->is_crew ? $this->recv_time_mcc : $this->recv_time_hab;
+            $receiveTime = $this->from_crew ? $this->recv_time_mcc : $this->recv_time_hab;
         }
         else
         {
-            $receiveTime = $this->is_crew ? $this->recv_time_hab : $this->recv_time_mcc;
+            $receiveTime = $this->from_crew ? $this->recv_time_hab : $this->recv_time_mcc;
         }
 
         return $receiveTime;
@@ -172,17 +172,13 @@ class Message
             $important = '<p style="color: red; font-weight: bold; font-size: 140%;">IMPORTANT:</p>';
         }
 
-        $missionConfig = MissionConfig::getInstance();
-        $planet = ($participants[$this->user_id]['is_crew'] ? $missionConfig->hab_planet : $missionConfig->mcc_planet);
-
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%message_id%/'     => $this->message_id,
+                  '/%message_id_alt%/' => $this->formatAltMessageId(),
                   '/%from-user%/'      => $participants[$this->user_id]['username'],
                   '/%sent-time%/'      => DelayTime::convertTimestampTimezone($this->sent_time, 'UTC', $tz),
                   '/%recv-time-mcc%/'  => DelayTime::convertTimestampTimezone($this->recv_time_mcc, 'UTC', $tz),
-                  '/%message_id_mcc%/' => $this->message_id_mcc,
                   '/%recv-time-hab%/'  => DelayTime::convertTimestampTimezone($this->recv_time_hab, 'UTC', $tz),
-                  '/%message_id_hab%/' => $this->message_id_hab,
                   '/%msg%/'            => $msg,
                   '/%important%/'      => $important,
             ));
@@ -208,6 +204,22 @@ class Message
         return $result;
     }
 
+    public function formatAltMessageId()
+    {
+        $idStr = '';
+
+        if($this->from_crew)
+        {
+            $idStr = 'HAB-'.$this->message_id_alt;
+        }
+        else
+        {
+            $idStr = 'MCC-'.$this->message_id_alt;
+        }
+
+        return $idStr;
+    }
+
     /**
      * Return associative array with message contents to display on the chat applicaiton.
      *
@@ -219,9 +231,9 @@ class Message
     {
         $msgData = array(
             'message_id'       => $this->message_id,
-            'message_id_alt'   => ($userPerspective->is_crew) ? $this->message_id_hab : $this->message_id_mcc,
+            'message_id_alt'   => $this->formatAltMessageId(),
             'user_id'          => $this->user_id,
-            'is_crew'          => $this->is_crew,
+            'from_crew'        => $this->from_crew,
             'author'           => htmlspecialchars($this->alias),
             'message'          => $this->compileMsgText(),
             'type'             => self::TEXT,
@@ -230,7 +242,6 @@ class Message
             'recv_time_hab'    => DelayTime::convertTsForJs($this->recv_time_hab),
             'recv_time'        => DelayTime::convertTsForJs($this->getReceivedTime($remoteDest)),
             'delivered_status' => $this->getMsgStatus($remoteDest),
-            'sent_from'        => $this->is_crew, // TODO - Why is this the same as is_crew?
             'remoteDest'       => $remoteDest,
         );
             
@@ -261,7 +272,7 @@ class Message
             $msgData['source'] = 'usr';
             $msgData['avatar'] = '';
         }
-        elseif($this->data['is_crew'])
+        elseif($this->from_crew)
         {
             // Someone elese in the habitat
             $msgData['source'] = 'hab';
