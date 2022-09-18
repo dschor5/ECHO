@@ -110,12 +110,12 @@ class HelpModule extends DefaultModule
             'overview' => 'Getting Started'
         );
 
-        if($mission->feat_convo_threads)
+        if($this->user->is_admin || $mission->feat_convo_threads)
         {
             $links['threads'] = 'Conversation threads';
         }
 
-        if($mission->feat_markdown_support)
+        if($this->user->is_admin || $mission->feat_markdown_support)
         {
             $links['markdown'] = 'Markdown Basics';
         }
