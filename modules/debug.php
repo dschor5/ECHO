@@ -46,6 +46,7 @@ class DebugModule extends DefaultModule
 
             $msgData = array(
                 'user_id' => $participantId,
+                'from_crew' => $otherUser->is_crew,
                 'conversation_id' => $conversationId,
                 'text' => 'Auto generated debug message #'.$i,
                 'type' => Message::TEXT,
@@ -54,7 +55,7 @@ class DebugModule extends DefaultModule
                 'recv_time_mcc' => $currTime->getTime($otherUser->is_crew),
             );
 
-            if(($messageId = $messagesDao->sendMessage($msgData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
                 echo 'New auto-generated message ID='.$messageId.'<br/>';
             }

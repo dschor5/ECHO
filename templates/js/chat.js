@@ -235,18 +235,21 @@ function compileMsg(data, before){
         msgTime.setAttribute('recv',   data.recv_time);
         msgTime.setAttribute('sent',   data.sent_time);
         msgTime.setAttribute('msg-id', data.message_id);
-            
-        msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id' + data.message_id);
-        msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id' + data.message_id);
+        
+        msgClone.querySelector(".msg-out-seq").setAttribute('id', 'msg-out-seq-id-' + data.message_id);
+        msgClone.querySelector(".msg-out-seq").setAttribute('recipient_crew', 'from' + data.is_crew);
+        msgClone.querySelector(".msg-out-seq").setAttribute('sender_crew', 'msg-out-seq-id-' + data.sent_from);
+
+        msgClone.querySelector(".msg-progress-bar").setAttribute('id', 'progress-msg-id-' + data.message_id);
+        msgClone.querySelector(".msg-progress-bar-fill").setAttribute('id', 'progress-fill-msg-id-' + data.message_id);
         if($('#feat-progress-bar-enabled').length && data.delivered_status != 'Delivered') {
             msgClone.querySelector('.msg-progress-bar').style.display = "block";
         }
         
-        var msgStatus = '[Sent: ' + formatTime(data.sent_time);
+        var msgStatus = 'Sent: ' + formatTime(data.sent_time);
         if($('#feat-est-delivery-status-enabled').length) {
             msgStatus += ', Recv: ' + formatTime(data.recv_time) + ', ' + data.delivered_status;
         }
-        msgStatus += ']';
         msgClone.querySelector(".msg-delivery-status").textContent = msgStatus;
         msgClone.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
@@ -257,6 +260,7 @@ function compileMsg(data, before){
         else {
             document.querySelector('#msg-container').appendChild(msgClone);
         }
+        updateOutOfSeqWarning();
     }
     else
     {
@@ -265,6 +269,38 @@ function compileMsg(data, before){
 }
 
 $(document).ready(setTimeout(updateDeliveryStatus, 1000));
+
+function updateOutOfSeqWarning() {
+    var matches = document.querySelectorAll("time");
+    var prevSentTime = 0;
+    var currSentTime = 0;
+    var prevId;
+    var currId = 0;
+    var index;
+
+    for(index = 1; index < matches.length; index++) {
+
+        currId = matches[index].getAttribute('msg-id');
+        currSentTime = (new Date(matches[index].getAttribute("sent"))).getTime();
+        
+        prevIndex = index - 1;
+        while(prevIndex >= 0) {
+            prevId = matches[prevIndex].getAttribute('msg-id');
+            prevSentTime = (new Date(matches[prevIndex].getAttribute("sent"))).getTime();
+            prevRecvTime = (new Date(matches[prevIndex].getAttribute("recv"))).getTime();
+            
+            if(prevSentTime > currSentTime) {
+                document.querySelector('#msg-out-seq-id-' + prevId).style.display = 'inline';
+                document.querySelector('#msg-out-seq-id-' + currId).style.display = 'inline';
+            }
+            else if(prevRecvTime < currSentTime) {
+                break;
+            }
+
+            prevIndex--;
+        }
+    }
+}
 
 function updateDeliveryStatus() {
     var matches = document.querySelectorAll("time[status='Transit']");
@@ -289,17 +325,16 @@ function updateDeliveryStatus() {
         delay = recvTime - sentTime;
         percent = 100.0 - (recvTime - currTime) / delay * 100.0;
 
-        document.querySelector('#progress-fill-msg-id' + id).style.width = percent + '%';
+        document.querySelector('#progress-fill-msg-id-' + id).style.width = percent + '%';
         if(recvTime <= currTime) {
             match.removeAttribute('status');            
-            var msgStatus = '[Sent: ' + formatTime(sentTime);
+            var msgStatus = 'Sent: ' + formatTime(sentTime);
             if($('#feat-est-delivery-status-enabled').length) {
                 msgStatus += ', Recv: ' + formatTime(recvTime) + ', Delivered';
             }
-            msgStatus += ']';
             document.querySelector('#status-msg-id-' + id).textContent = msgStatus;
-            document.querySelector('#progress-msg-id' + id).style.display = 'none';
-            document.querySelector('#progress-fill-msg-id' + id).style.display = 'none';
+            document.querySelector('#progress-msg-id-' + id).style.display = 'none';
+            document.querySelector('#progress-fill-msg-id-' + id).style.display = 'none';
         }
     });
     setTimeout(updateDeliveryStatus, 1000);
@@ -340,6 +375,9 @@ function openFileModal() {
     $('#dialog-file').dialog('open');
 }
 
+$(document).ready(function() {
+    $(document).tooltip();
+});
 
 $(document).ready(function() {
     if($('#feat-convo-list-order-enabled').length) {
@@ -492,7 +530,6 @@ function uploadMedia(mediaType) {
         //const blobMimeType = (recordedBlobs[0] || {}).type;
         
         const blobMimeType = (mediaType == 'video') ? 'video/webm; codecs="vp8, opus"' : 'audio/ogg; codecs=opus';
-        console.log(blobMimeType);
         const blob = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
         formData.append("data", blob, "recording");
@@ -578,8 +615,6 @@ function loadPrevMsgs() {
     var child = target.querySelector('.msg');
     var msgId = (child == null) ? -1 : child.getAttribute('id').substring(7);
 
-    console.log(msgId);
-
     if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
         $.ajax({
@@ -603,7 +638,6 @@ function loadPrevMsgs() {
                 }
                 else {
                     hasMoreMessages = false;
-                    console.log(resp.error);
                 }
                 if(child == null) {
                     // On-load scroll to the bottom to the newest messages

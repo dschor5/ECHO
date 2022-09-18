@@ -19,28 +19,27 @@
         <table class="conversation" cellspacing="0" cellpadding="0">
             <tr>
                 <th colspan="2" class="convo-info-label">Conversation:</th>
-                <td colspan="6" class="convo-info-value">%name% (id=%id%)</td>
+                <td colspan="5" class="convo-info-value">%name% (id=%id%)</td>
             </tr>
             %thread%
             <tr>
                 <th colspan="2" class="convo-info-label">Participants:</th>
                 <th class="convo-info-label">User</td>
-                <th class="convo-info-label" colspan="5">Base</td>        
+                <th class="convo-info-label" colspan="4">Base</td>        
             </tr>
 %participants%    
             <tr>
                 <th colspan="2" class="convo-info-label">Archive Timezone:</th>
-                <td colspan="6" class="convo-info-value">%archive-tz%</td>
+                <td colspan="5" class="convo-info-value">%archive-tz%</td>
             </tr>
             <tr>
-                <th width="6%">Id</th>
+                <th width="6%">Global Id</th>
+                <th width="6%">Local Id</th>
                 <th width="11%">From</th>
                 <th width="11%">Sent timestamp (author)</th>
-                <th width="6%">HAB Id</th>
                 <th width="11%">Recv timestamp (HAB)</th>
-                <th width="6%">MCC Id</th>
                 <th width="11%">Recv timestamp (MCC)</th>
-                <th width="38%">Message</th>
+                <th width="44%">Message</th>
             </tr>
 %messages%
         </table>

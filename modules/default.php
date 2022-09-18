@@ -152,7 +152,7 @@ abstract class DefaultModule implements Module
             }
 
             // Add help and logout option for all users
-            $navLinks[] = array('url' => 'help',        'name' => 'Help',        'icon' => 'help');
+            $navLinks[] = array('url' => 'help/main',        'name' => 'Help',        'icon' => 'help');
             $navLinks[] = array('url' => 'logout', 'name' => 'Logout', 'icon' => 'power');
 
             // Build url for current path. 
@@ -167,6 +167,13 @@ abstract class DefaultModule implements Module
                 {
                     $htmlLinks .= Main::loadTemplate('nav-link.txt', array(
                         '/%url%/'  => $link['url'],
+                        '/%name%/' => $link['name'],
+                        '/%icon%/' => $link['icon']
+                    ));
+                }
+                else
+                {
+                    $htmlLinks .= Main::loadTemplate('nav-link-disabled.txt', array(
                         '/%name%/' => $link['name'],
                         '/%icon%/' => $link['icon']
                     ));
