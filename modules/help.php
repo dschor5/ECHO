@@ -8,6 +8,7 @@ class HelpModule extends DefaultModule
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array(
             'overview'      => 'showHelpOverview', 
+            'main'          => 'showHelpOverview'
         );
 
         $mission = MissionConfig::getInstance();
