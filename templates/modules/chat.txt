@@ -47,10 +47,12 @@
                     <span class="msg-id"></span>
                 </div>
                 <div class="msg-content"></div>
-                <time/>
+                <time></time>
                 <div class="msg-status">
-                    <div class="msg-out-seq"></div>
-                    <div class="msg-delivery-status"></div>
+                    <div class="msg-status-info">
+                        [<span class="msg-delivery-status"></span>]
+                        <span class="msg-out-seq" title="Messages cross paths in transit"><br/><span class="ui-icon ui-icon-shuffle"></span>Out of sequence<span class="ui-icon ui-icon-shuffle"></span></span>
+                    </div>
                     <div class="msg-progress-bar">
                         <span class="msg-progress-bar-fill"></span>
                     </div>
@@ -89,11 +91,11 @@
     <div id="new-msg">
         <textarea id="new-msg-text" name="newmsg-text" placeholder="Enter Message" onkeypress="detectShiftEnter(event)"></textarea>
         <input type="hidden" id="conversation_id" name="conversation_id" value="%convo_id%">
-        <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')">&#128249;</button>
-        <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')">&#127908;</button>
-        <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()">&#128206;</button>
-        <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage(0)">SEND</button>
-        <button type="button" class="new-msg-btn" id="important-btn" onclick="sendTextMessage(1)">&#8252;</button>
+        <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')" title="Record and send video messages">&#128249;</button>
+        <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')" title="Record and send audio messages">&#127908;</button>
+        <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()" title="Send attachments">&#128206;</button>
+        <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage(0)" title="Send message (SHIFT+ENTER)">SEND</button>
+        <button type="button" class="new-msg-btn" id="important-btn" onclick="sendTextMessage(1)"  title="Send high priority messages">&#8252;</button>
     </div>
     
     <div id="dialog-video" title="Record Video Message" class="dialog-body">

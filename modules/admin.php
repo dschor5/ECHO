@@ -107,6 +107,7 @@ class AdminModule extends DefaultModule
             'feat_markdown_support',
             'feat_important_msgs',
             'feat_convo_threads',    
+            'feat_convo_threads_all',    
             'debug'        
         );
 
@@ -252,6 +253,7 @@ class AdminModule extends DefaultModule
             '/%feat_markdown_support_checked%/'    => $mission->feat_markdown_support    == '1' ? 'checked' : '',
             '/%feat_important_msgs_checked%/'      => $mission->feat_important_msgs      == '1' ? 'checked' : '',
             '/%feat_convo_threads_checked%/'       => $mission->feat_convo_threads       == '1' ? 'checked' : '',
+            '/%feat_convo_threads_all_checked%/'   => $mission->feat_convo_threads_all   == '1' ? 'checked' : '',
             '/%debug_checked%/'                    => $mission->debug                    == '1' ? 'checked' : '',
         ));
     }
