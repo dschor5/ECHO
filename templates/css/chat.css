@@ -260,19 +260,27 @@
 }
 
 .msg-status {
+    font-size: 7.5pt;
+    text-align: right;
+    font-family: Arial;
+    top: 1px;
     width: 100%;
     height: 15px;
-    font-size: 8pt;
     color: #666;
   }
 
-.msg-delivery-status {
-    font-size: 8pt;
-    text-align: right;
-    font-family: Arial;
+.msg-out-seq {
+    display: none;
+}
+
+.msg-out-seq .ui-icon {
+    background-image: url("%http%%site_url%/templates/media/ui-icons_cd0a0a_256x240.png");
+}
+
+.msg-status-info {
+    max-width: 350px;
     float: right; 
     position: relative;
-    top: 1px;
 }
 
 .msg-progress-bar {

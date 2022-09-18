@@ -155,3 +155,12 @@ function showDelayOptions() {
         $('.delay_auto').css('display', 'block');
     }
 }
+
+function threadSuboptions() {
+    if($('#feat_convo_threads').prop('checked')) {
+        $('#feat_convo_threads_all').removeAttr('disabled');
+    }
+    else {
+        $('#feat_convo_threads_all').attr('disabled', true);
+    }
+}

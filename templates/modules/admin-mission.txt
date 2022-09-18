@@ -215,13 +215,23 @@
         <div class="form-row">
             <label for="hab_name">Conversation Threads</label>
             <div class="form-field">
-                <label class="switch"><input type="checkbox" name="feat_convo_threads" id="feat_convo_threads" %feat_convo_threads_checked%><span class="slider"></span></label> 
+                <label class="switch"><input type="checkbox" name="feat_convo_threads" id="feat_convo_threads" onclick="threadSuboptions()" %feat_convo_threads_checked%><span class="slider"></span></label> 
                 <div class="switch-label"> Threads</div>
             </div>
              <div class="form-help">
                 <br/>Enable conversation threads. 
             </div>         
         </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_convo_threads_all" id="feat_convo_threads_all" %feat_convo_threads_all_checked%><span class="slider"></span></label> 
+                <div class="switch-label"> Anyone can create threads</div>
+            </div>
+             <div class="form-help">
+                <br/>Allow all users to create new threads.
+            </div>         
+        </div>        
 
         <div class="form-row">
             <label for="hab_name">Debugging</label>

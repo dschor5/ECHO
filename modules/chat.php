@@ -829,6 +829,12 @@ class ChatModule extends DefaultModule
             (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
             (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '');
 
+        if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
+        {
+            $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
+        }
+            
+
         // Load template. 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'           => htmlspecialchars($this->user->username),
@@ -892,9 +898,15 @@ class ChatModule extends DefaultModule
                             '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'class="thread-selected"' : '',
                         ));
                     }
+
+                    $newThreadLink = ($this->user->is_admin || $mission->feat_convo_threads_all) ?
+                        Main::loadTemplate('chat-room-new-thread.txt') : '';
+
                     $listThreads = Main::loadTemplate('chat-room-thread.txt', array(
                         '/%convo-id%/'    => $convo->conversation_id,
-                        '/%thread-rooms%/'=>$threads));
+                        '/%thread-rooms%/'=> $threads,
+                        '/%new-thread%/'  => $newThreadLink,
+                    ));
                 }
 
                 // Apply the template
