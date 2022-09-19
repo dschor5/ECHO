@@ -12,15 +12,16 @@
         <div class="subheading">Communicaiton Delay</div>
         
         <div class="form-row">
-            <label for="delay_is_manual">Delay Configuration</label>
+            <label for="delay_type">Delay Configuration</label>
             <div class="form-field">
-                <select name="delay_is_manual" id="delay_is_manual" onchange="showDelayOptions()">
-                    %delay_is_manual%
+                <select name="delay_type" id="delay_type" onchange="showDelayOptions()">
+                    %delay_type%
                 </select>
             </div>
             <div class="form-help">
                 Manual delay &rarr; Constant set by administrator.<br>
-                Auto delay &rarr; Predefined as piece-wise function of time.
+                Auto delay &rarr; Predefined as piece-wise function of time.<br>
+                Current Mars delay &arr; Apply current delay between Earth and Mars.
             </div>
         </div>
 
@@ -34,7 +35,7 @@
                     Constant used for the mission. Can be changed in real-time by an administrator. Though, messages in-transit will not be updated to use the new delay.
                 </div>
             </div>
-            <div class="delay_auto">
+            <div class="delay_timed">
                 <label for="delay_auto_config">Piecewise Delay Definition in Seconds</label>
                 <div class="form-field" id="delay-config-opts">
                     %delay_auto%
@@ -46,6 +47,12 @@
                 <template id="delay_auto_template">
                     %delay_auto_tmp%
                 </template>
+            </div>
+            <div class="delay_mars">
+                <label for="delay_mars">Delay in Seconds</label>
+                <div class="form-field">
+                    Uses current delay between Earth and Mars.
+                </div>
             </div>
         </div>
 

@@ -293,9 +293,9 @@ class AdminModule extends DefaultModule
 
         $data = array();
 
-        if(isset($_POST['delay_is_manual']) && $_POST['delay_is_manual'] == 'true')
+        if(isset($_POST['delay_type']) && $_POST['delay_type'] == Delay::MANUAL)
         {
-            $data['delay_is_manual'] = '1';
+            $data['delay_type'] = Delay::MANUAL;
             $temp = $_POST['delay_manual'] ?? '';
             $temp = trim($temp);
             if(!preg_match($FLOAT_FMT, $temp))
@@ -324,9 +324,9 @@ class AdminModule extends DefaultModule
                 
             }
         }
-        elseif(isset($_POST['delay_is_manual']) && $_POST['delay_is_manual'] == 'false')
+        elseif(isset($_POST['delay_type']) && $_POST['delay_type'] == Delay::TIMED)
         {
-            $data['delay_is_manual'] = '0';
+            $data['delay_type'] = Delay::TIMED;
             if(count($_POST['delay_time']) != count($_POST['delay_eq']) && 
                count($_POST['delay_time']) != count($_POST['delay_date']))
             {
@@ -364,6 +364,12 @@ class AdminModule extends DefaultModule
                 }
             }
         }
+        else if(isset($_POST['delay_type']) && $_POST['delay_type'] == Delay::MARS)
+        {
+            $data['delay_type'] = Delay::MARS;
+            $currTimeObj = new DelayTime();
+            $delayConfig = array(array('ts'=>$currTimeObj->getTime(), 'eq'=>0));
+        }
         else
         {
             $response['error'][] = 'Field "Delay Configuration" cannot be empty.';
@@ -388,12 +394,32 @@ class AdminModule extends DefaultModule
         $mission = MissionConfig::getInstance();
 
         $delayIsManualOptions = 
-            $this->makeSelectOption('true',  'Manual Delay Configuration',    $mission->delay_is_manual).
-            $this->makeSelectOption('false', 'Automatic Delay Configuration', !$mission->delay_is_manual);
+            $this->makeSelectOption(Delay::MANUAL,  
+                'Manual Delay Configuration',    
+                ($mission->delay_type == Delay::MANUAL)).
+            $this->makeSelectOption(Delay::TIMED,   
+                'Automatic Delay Configuration', 
+                ($mission->delay_type == Delay::TIMED)).
+            $this->makeSelectOption(Delay::MARS,    
+                'Current Mars Delay', 
+                ($mission->delay_type == Delay::MARS));
 
-        if($mission->delay_is_manual)
+        if($mission->delay_type == Delay::MANUAL)
         {
             $delayManual = floatval(Delay::getInstance()->getDelay());
+
+            $delayAuto = Main::loadTemplate('admin-delay-config.txt', array(
+                '/%delay-date-id%/'    => 'id="delay-date-0"',
+                '/%delay-time-id%/'    => 'id="delay-time-0"',
+                '/%delay-cfg-id%/'     => 'id="delay-cfg-0"',
+                '/%delay-date-value%/' => substr($mission->date_start, 0, 10),
+                '/%delay-time-value%/' => '00:00:00',
+                '/%delay-cfg-value%/'  => 0,
+            ));
+        }
+        else if($mission->delay_type == Delay::MARS)
+        {
+            $delayManual = 0;
 
             $delayAuto = Main::loadTemplate('admin-delay-config.txt', array(
                 '/%delay-date-id%/'    => 'id="delay-date-0"',
@@ -437,7 +463,7 @@ class AdminModule extends DefaultModule
         ));
 
         return Main::loadTemplate('admin-delay.txt', array(
-            '/%delay_is_manual%/' => $delayIsManualOptions,
+            '/%delay_type%/'      => $delayIsManualOptions,
             '/%delay_manual%/'    => $delayManual,
             '/%delay_auto%/'      => $delayAuto,
             '/%delay_auto_tmp%/'  => $delayAutoTemplate,
