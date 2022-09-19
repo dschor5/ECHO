@@ -1,5 +1,5 @@
     <tr>
         <td colspan="2">&nbsp;</td>
         <td class="convo-info-value">%username%</td>
-        <td class="convo-info-value" colspan="5">%home%</td>        
+        <td class="convo-info-value" colspan="4">%home%</td>        
     </tr>

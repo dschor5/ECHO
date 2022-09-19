@@ -375,6 +375,7 @@ class ChatModule extends DefaultModule
             $currTime = new DelayTime();
             $msgData = array(
                 'user_id'         => $this->user->user_id,
+                'from_crew'       => $this->user->is_crew,
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => '',
                 'type'            => Message::FILE,
@@ -393,7 +394,7 @@ class ChatModule extends DefaultModule
 
             // Execute both database queries. 
             $messagesDao = MessagesDao::getInstance();
-            if(($messageIds = $messagesDao->sendMessage($msgData, $fileData)) !== false)
+            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
             {
                 // Get the new message_id and build the Message object 
                 // to compile the response for the user. 
@@ -404,8 +405,7 @@ class ChatModule extends DefaultModule
                         $fileData, 
                         array(
                             'message_id' => $messageIds['message_id'],
-                            'message_id_mcc' => $messageIds['message_id_mcc'],
-                            'message_id_hab' => $messageIds['message_id_hab'],
+                            'message_id_alt' => $messageIds['message_id_alt'],
                             'username' => $this->user->username, 
                             'alias'    => $this->user->alias, 
                             'is_crew'  => $this->user->is_crew)
@@ -470,25 +470,25 @@ class ChatModule extends DefaultModule
         if(strlen($msgText) > 0)
         {
             $msgData = array(
-                'user_id' => $this->user->user_id,
+                'user_id'         => $this->user->user_id,
+                'from_crew'       => $this->user->is_crew,
                 'conversation_id' => $this->currConversation->conversation_id,
-                'text' => $msgText,
-                'type' => $msgImportant,
-                'sent_time' => $currTime->getTime(),
-                'recv_time_hab' => $currTime->getTime(!$this->user->is_crew),
-                'recv_time_mcc' => $currTime->getTime($this->user->is_crew),
+                'text'            => $msgText,
+                'type'            => $msgImportant,
+                'sent_time'       => $currTime->getTime(),
+                'recv_time_hab'   => $currTime->getTime(!$this->user->is_crew),
+                'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
             );
             
             // Send the message. If this fails, then 
-            if(($messageIds = $messagesDao->sendMessage($msgData)) !== false)
+            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
                 $newMsg = new Message(
                     array_merge(
                         $msgData, 
                         array(
                             'message_id' => $messageIds['message_id'],
-                            'message_id_mcc' => $messageIds['message_id_mcc'],
-                            'message_id_hab' => $messageIds['message_id_hab'],
+                            'message_id_alt' => $messageIds['message_id_alt'],
                             'username' => $this->user->username, 
                             'alias' => $this->user->alias, 
                             'is_crew' => $this->user->is_crew)
@@ -829,6 +829,12 @@ class ChatModule extends DefaultModule
             (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
             (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '');
 
+        if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
+        {
+            $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
+        }
+            
+
         // Load template. 
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'           => htmlspecialchars($this->user->username),
@@ -892,9 +898,15 @@ class ChatModule extends DefaultModule
                             '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'class="thread-selected"' : '',
                         ));
                     }
+
+                    $newThreadLink = ($this->user->is_admin || $mission->feat_convo_threads_all) ?
+                        Main::loadTemplate('chat-room-new-thread.txt') : '';
+
                     $listThreads = Main::loadTemplate('chat-room-thread.txt', array(
                         '/%convo-id%/'    => $convo->conversation_id,
-                        '/%thread-rooms%/'=>$threads));
+                        '/%thread-rooms%/'=> $threads,
+                        '/%new-thread%/'  => $newThreadLink,
+                    ));
                 }
 
                 // Apply the template

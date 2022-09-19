@@ -182,11 +182,13 @@ abstract class Dao
 
     /* PUBLIC:  insert
     PURPOSE: Inserts into the current table.
+    Note, the variables are not sanitized and should be used carefully.
     @param:  string[] - an array of strings corresponding to each field in the table.
+    @param:  string[] - an array of strings corresponding to each variable in the table. 
     @return  int or boolean - If successfully, returns the ID of the new entry, otherwise
         false.
     */
-    public function insert($fields)
+    public function insert(array $fields, array $variables=array())
     {
         $query = "insert into `{$this->name}` (";
 
@@ -199,6 +201,12 @@ abstract class Dao
                 $values[] = 'NULL';
             else
                 $values[] = '"'.$this->database->prepareStatement($value).'"';
+        }
+
+        foreach($variables as $key => $variable)
+        {
+            $keys[] = '`'.$key.'`';
+            $values[] = $variable;
         }
 
         $query .= join(',',$keys).') values ('.join(',',$values).');';

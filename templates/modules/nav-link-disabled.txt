@@ -1,0 +1,1 @@
+    <div class="disabled"><span class="ui-icon ui-icon-%icon%"></span> %name%</div>

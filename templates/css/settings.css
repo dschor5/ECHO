@@ -248,6 +248,14 @@
     transition: .4s;
     border-radius: 50%;  
   }
+
+  input:disabled + .slider {
+    background-color: #666666;
+  }
+
+  input:checked:disabled + .slider {
+    background-color: #666666;
+  }
   
   input:checked + .slider {
     background-color: var(--background-dark);

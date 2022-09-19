@@ -12,6 +12,7 @@ $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
 $config['logs_dir'] = 'logs';
 $config['log_file'] = 'analog.log';
+$config['delay_mars_file'] = 'mars_distance_echo.txt';
 
 // Extension => Mime Type
 $config['uploads_allowed'] = array(
