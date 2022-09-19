@@ -12,7 +12,7 @@
  *          {'ts':'2021-01-01 00:00:00', 'eq':0}, 
  *          {'ts':'2021-01-01 00:01:00', 'eq':10}, 
  *      ]
- * Note, the field 'mission_config.delay_is_manual' is only used to select the 
+ * Note, the field 'mission_config.delay_type' is only used to select the 
  * appropriate GUI menu, and thus it is not part of the delay calculation
  * in this class. 
  * 
@@ -78,6 +78,10 @@ class Delay
      */
     const CACHE_TIMEOUT = 1.0;
 
+    const MANUAL = 'manual';
+    const TIMED  = 'timed';
+    const MARS   = 'mars';
+
     /** 
      * Private constructor that initializes to no comms delay. 
      */
@@ -101,6 +105,106 @@ class Delay
         return self::$instance;
     }
 
+    public function getDelay() : float
+    {
+        // If the cached valud is still vaid return it. 
+        if(microtime(true) - $this->lastCheck < Delay::CACHE_TIMEOUT)
+        {
+            return $this->currDelay;
+        }
+
+        // Update cache refresh timestamp
+        $this->lastCheck = microtime(true);
+
+        // Get delay type from mission configuration
+        $mission = MissionConfig::getInstance();
+
+        if($mission->delay_type == Delay::MARS)
+        {
+            $this->currDelay = $this->getMarsDelay();
+        }
+        else
+        {
+            $this->currDelay = $this->getManualOrTimedDelay();
+        }
+
+        return $this->currDelay;
+    }
+
+    private function getMarsDelay() : float
+    {
+        $delay = 0;
+
+        global $config;
+        global $server;
+        $filename = $server['host_address'].$config['logs_dir'].'/'.$config['delay_mars_file'];
+
+        $fp = fopen($filename, 'r');
+        if($fp === false)
+        {
+            Logger::warning('Delay::getMarsDelay() failed to open file.');
+            return $delay;
+        }
+
+        // Read first line to extract starting epoch
+        $line = fgets($fp);
+        $lineLen = ftell($fp);
+        if($line === false)
+        {
+            Logger::warning('Delay::getMarsDelay() failed to read epoch line.');
+            fclose($fp);
+            return $delay;
+        }
+        
+        list($epochStr, ) = explode(',', $line, 2);
+        $epochObj = new DateTime($epochStr, new DateTimeZone('UTC'));
+        $epoch = $epochObj->getTimestamp();
+    
+        // Read second line to extract time jumps
+        fseek($fp, 46);
+        $line = fgets($fp);
+        if($line === false)
+        {
+            Logger::warning('Delay::getMarsDelay() failed to read time jump line.');
+            fclose($fp);
+            return $delay;
+        }
+        
+        list($timeJumpStr, ) = explode(',', $line, 2);
+        $timeJumpObj = new DateTime($timeJumpStr, new DateTimeZone('UTC'));
+        $timeJump = $timeJumpObj->getTimestamp() - $epoch;
+        
+        // Get current time to determine offset in file
+        $nowObj = new DateTime('now', new DateTimeZone('UTC'));
+        $now = $nowObj->getTimestamp() - $epoch;
+
+        // Seek offset
+        fseek($fp, 0); // Reset file
+        $offset = max(0, intdiv($now, $timeJump) );
+        if(fseek($fp, $lineLen * $offset) == -1)
+        {
+            Logger::warning('Delay::getMarsDelay() seek past end of file.');
+            fclose($fp);
+            return $delay;
+        }
+        
+        $line = fgets($fp);
+        if($line === false)
+        {
+            Logger::warning('Delay::getMarsDelay() failed to read time line.');
+            fclose($fp);
+            return $delay;
+        }
+
+        // Read next line and get delay
+        list($time, , $delayStr) = explode(',', $line, 4);
+        
+        // Close file
+        fclose($fp);
+
+        return floatval($delayStr);
+    }
+
     /**
      * Get the current communication delay in seconds. 
      * 
@@ -121,14 +225,8 @@ class Delay
      * 
      * @return float Delay in seconds.
      */
-    public function getDelay(): float
+    private function getManualOrTimedDelay(): float
     {
-        // If the cached valud is still vaid return it. 
-        if(microtime(true) - $this->lastCheck < Delay::CACHE_TIMEOUT)
-        {
-            return $this->currDelay;
-        }
-
         // Get the current mission configuration and parse the delay field. 
         $mission = MissionConfig::getInstance();
         $config = json_decode($mission->delay_config, true);
@@ -151,19 +249,19 @@ class Delay
         {
             // Replace any instance of "time" in the equation with the current MET. 
             // In other words, delay = f(time). 
+            $currDelay = 0;
             $metObj = new DelayTime();
             $config[$i]['eq'] = preg_replace('/time/', $metObj->getMet(), $config[$i]['eq']);
-            eval('$this->currDelay = '.$config[$i]['eq'].';');
+            eval('$currDelay = '.$config[$i]['eq'].';');
             // Ensure the delay >= 0. 
-            $this->currDelay = max(0, $this->currDelay);
-            $this->lastCheck = microtime(true);
+            $currDelay = max(0, $currDelay);
         } 
         catch (Exception $e) 
         {
             Logger::warning("Could not parse equation", $config[$i]['eq']);
-            $this->currDelay = 0;
+            $currDelay = 0;
         }
-        return $this->currDelay;
+        return $currDelay;
     }
 
     /**

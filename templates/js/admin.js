@@ -75,7 +75,7 @@ function getDate(element) {
 }
 
 $(document).ready(function () {
-    if($('#delay_is_manual').length > 0) {
+    if($('#delay_type').length > 0) {
 
         $("body").on("click", ".add_delay_btn", function (e) {
             var template = document.querySelector('#delay_auto_template');
@@ -146,13 +146,19 @@ $(document).ready(function () {
 });
 
 function showDelayOptions() {
-    if($('#delay_is_manual').val() == 'true') {
-        $('.delay_manual').css('display', 'block');
-        $('.delay_auto').css('display', 'none');
+    $('.delay_timed').css('display', 'none');
+    $('.delay_manual').css('display', 'none');
+    $('.delay_mars').css('display', 'none');
+    
+    if($('#delay_type').val() == 'mars') {
+        $('.delay_mars').css('display', 'block');
     }
-    else {
-        $('.delay_manual').css('display', 'none');
-        $('.delay_auto').css('display', 'block');
+    else if($('#delay_type').val() == 'timed') {
+        $('.delay_timed').css('display', 'block');
+    }
+    else 
+    {
+        $('.delay_manual').css('display', 'block');
     }
 }
 
