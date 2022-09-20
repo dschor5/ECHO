@@ -4,10 +4,6 @@
     </div>
     
     <form id="form-contents" method="POST">
-
-        <div class="form-row">
-            <div class="dialog-response"></div>
-        </div>
         
         <div class="subheading">Communicaiton Delay</div>
         
@@ -58,8 +54,14 @@
 
 
         <div class="form-divider"></div>
+
+        <div class="form-row dialog-resp-placeholder">
+            <div class="dialog-response"></div>
+            <div class="dialog-success">Settings saved!</div>
+        </div>
+
         <div class="form-row">
-            <button onclick="saveConfig('delay')" type="button">Save Mission Configuration</button>
+            <button onclick="saveConfig('delay')" type="button">Save Delay Settings</button>
         </div>
 
     </form>
