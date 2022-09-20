@@ -29,6 +29,9 @@ function saveConfig(subaction){
         dataObj[selectName] = selectValue;
     });
 
+    $('.dialog-response').hide();
+    $('.dialog-success').hide();
+
     $.ajax({
         url:  BASE_URL + "/ajax",
         type: "POST",
@@ -36,11 +39,9 @@ function saveConfig(subaction){
         dataType: 'json',
         success: function(resp) {
             if(resp.success) {
-                $('.dialog-response').hide('highlight');
-                location.href = BASE_URL + '/admin/' + subaction;
+                $('.dialog-success').show('highlight');
             }
             else {
-                console.log(resp.success);
                 $('.dialog-response').html(resp.error.join('<br>'));
                 $('.dialog-response').show('highlight');
             }

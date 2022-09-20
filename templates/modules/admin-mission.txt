@@ -4,14 +4,10 @@
     </div>
     
     <form id="form-contents" method="POST">
-
-        <div class="form-row">
-            <div class="dialog-response"></div>
-        </div>
-
+        
         <div class="subheading">Mission Configuration</div>
         <div class="form-row">
-            <label for="name">Mission Name</label>
+            <label for="name">Mission Name</label> 
             <div class="form-field">
                 <input type="text" placeholder="Enter Mission Name" name="name" id="name" value="%name%" required>
             </div>
@@ -260,6 +256,12 @@
         </div>
 
         <div class="form-divider"></div>
+
+        <div class="form-row dialog-resp-placeholder">
+            <div class="dialog-response"></div>
+            <div class="dialog-success">Settings saved!</div>
+        </div>
+        
         <div class="form-row">
             <button onclick="saveConfig('mission')" type="button">Save Mission Configuration</button>
         </div>

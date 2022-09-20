@@ -127,6 +127,9 @@ a:hover {
     background-color: var(--border-dark);
 }
 
+.dialog-resp-placeholder {
+    min-height: 30px;
+}
 
 .dialog-response {
     display: none;
@@ -135,6 +138,15 @@ a:hover {
     background: #FFDDDD;
     padding: 5px;
     margin-bottom: 10px;
+}
+
+.dialog-success {
+    display: none;
+    padding: 5px;
+    margin-bottom: 10px;
+    color: #339933;
+    border: 1px solid #339933;
+    background: #FFFFDD;
 }
 
 .browser-warning {
