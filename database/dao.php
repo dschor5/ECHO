@@ -188,6 +188,14 @@ abstract class Dao
     @return  int or boolean - If successfully, returns the ID of the new entry, otherwise
         false.
     */
+
+    /**
+     * Insert fields and variables (optional) into the current table.
+     *
+     * @param array Associative array with field names and values to be sanitized.
+     * @param array Associative array with field names and values that are not sanitized.
+     * @return int|false ID of row inserted or false on error
+     */
     public function insert(array $fields, array $variables=array())
     {
         $query = "insert into `{$this->name}` (";
@@ -198,9 +206,13 @@ abstract class Dao
         {
             $keys[] = '`'.$key.'`';
             if ($value === null)
+            {
                 $values[] = 'NULL';
+            }
             else
+            {
                 $values[] = '"'.$this->database->prepareStatement($value).'"';
+            }
         }
 
         foreach($variables as $key => $variable)
