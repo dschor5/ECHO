@@ -7,21 +7,21 @@ conversations with every other user.</p>
 <p>Each user has the following fields:</p>
 <dl>
     <dt>
-        <code>username</code>
+        Username
     <dt>
     <dd>
         <p>Unique alphanumeric strings to login to the application that identify the individual in conversation archives.</p>
     </dd>
 
     <dt>
-        <code>alias</code>
+        Alias
     </dt>
     <dd>
         <p>Preferred name or callsign for each individual shown on the application but not in conversation archives. </p>
     </dd>
 
     <dt>
-        <code>Analog Role</code>
+        Analog Role
     </dt>
     <dd>
         <p>Selects between roles for analog crew member and mission control operator. </p>
@@ -29,7 +29,7 @@ conversations with every other user.</p>
     </dd>
 
     <dt>
-        <code>Software Role</code>
+        Software Role
     </dt>
     <dd>
         <p>Options are <code>user</code> for regular accounts or <code>admin</code> for administrator accounts. 
@@ -53,5 +53,5 @@ the password for an account, the password will revert to the default until the f
 <p>New accounts created during a mission will not automatically appear on the "Conversations" panel for 
 logged in users. A refresh is needed to reload the full list of active accounts.</p>
 
-<p><b>Important:</b>Never delete accounts partway through a mission as that will delete all messages sent by 
+<p class="important"><b>Important:</b> Never delete accounts partway through a mission as that will delete all messages sent by 
 that user and private chats with that user.</p>

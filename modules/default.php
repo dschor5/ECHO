@@ -88,7 +88,7 @@ abstract class DefaultModule implements Module
             ($this->user != null && $this->user->is_crew) ? 'chat-hab.css' : 'chat-mcc.css',
             'common.css',
             'jquery-ui.css',
-            'jquery-ui.structure.css', 
+            'jquery-ui.structure.css',
             'jquery-ui.theme.css', 
             'jquery-3.6.0.min.js', 
             'jquery-ui.min.js',
@@ -195,6 +195,12 @@ abstract class DefaultModule implements Module
         ));
     }
 
+    /**
+     * Compile a module by (a) identifying the subaction to execute
+     * and (b) the type of request. 
+     *
+     * @return void
+     */
     public function compile()
     {
         global $server;
@@ -202,6 +208,7 @@ abstract class DefaultModule implements Module
 
         $mission = MissionConfig::getInstance();
 
+        // Get the subaction entered by the user.
         $subaction = '';
         if(isset($_POST['subaction']) && $_POST['subaction'] != null)
         {
@@ -215,32 +222,46 @@ abstract class DefaultModule implements Module
         // Only allow requests from this server. 
         header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
+        // AJAX requests:
         if(isset($_GET['ajax']))
         {
             header('Content-Type: application/json');
+
+            // Check if it is a valid request. 
             if(array_key_exists($subaction, $this->subJsonRequests))
             {
                 $response = $this->compileJson($subaction);   
             }
+            // Otherwise send the default response.
             else
             {
                 $response = array('success' => false);
             }
+
+            // Encode response as JSON
             echo json_encode($response);
         }
+
+        // Event Stream requests
         elseif(isset($_GET['stream']))
         {
+            // Check if it is a valid request. 
             if(array_key_exists($subaction, $this->subStreamRequests))
             {
                 header('Content-Type: text/event-stream');
+                // Note that this funciton oes not return unless it encounters
+                // an error, therefore, unlike AJAX and HTML requests, the 
+                // function will echo data directly.
                 $this->compileStream();
             }
+            // Otherwise send a file not found for invalid requests.
             else
             {
-                // TODO - What HTTP header do we send to show an invalid request?
                 header("HTTP/1.1 404 Not Found");
             }
         }
+
+        // HTML Requests
         else
         {
             header('Content-type: text/html; charset=utf-8');
@@ -248,8 +269,12 @@ abstract class DefaultModule implements Module
             // Configure communicaiton delay
             $commDelay = Delay::getInstance();
 
+            // Default values to use if user is not logged in.
             $inMcc = 'true';
             $timeoutWindow = '';
+
+            // Otherwise, extract user settings and force timeout 
+            // script to run on every HTML page.
             if($this->user != null)
             {
                 $inMcc = ($this->user->is_crew) ? 'false' : 'true';
@@ -257,18 +282,22 @@ abstract class DefaultModule implements Module
                 $timeoutWindow = Main::loadTemplate('timeout-window.txt');
             }
 
+            // Variables replaced on every template loaded. 
             $replace = array(
                 '/%title%/'            => htmlspecialchars($mission->name).' - Comms',
+
+                // Compile HTML page
                 '/%content%/'          => $this->compileHtml($subaction),
                 '/%templates%/'        => $this->getTemplates(),
                 '/%header%/'           => $this->getHeader(),
+
+                // Add mission settings
                 '/%home_planet%/'      => htmlspecialchars($mission->mcc_planet),
                 '/%away_planet%/'      => htmlspecialchars($mission->hab_planet),
                 '/%delay_distance%/'   => $commDelay->getDistanceStr(),
                 '/%delay_time%/'       => $commDelay->getDelayStr(),
                 '/%mission_name%/'     => htmlspecialchars($mission->name),
                 '/%year%/'             => date('Y'),
-                '/%random%/'           => rand(1, 100000),
                 '/%epoch%/'            => DelayTime::getStartTimeUTC(),
                 '/%time_sec_per_day%/' => 24*60*60, // TODO
                 '/%time_day%/'         => htmlspecialchars($mission->hab_day_name),
@@ -278,6 +307,8 @@ abstract class DefaultModule implements Module
                 '/%in_mcc%/'           => $inMcc,
                 '/%timeout-window%/'   => $timeoutWindow,
                 '/%timeout-sec%/'      => $mission->login_timeout,
+
+                // Software version
                 '/%version%/'          => $config['echo_version'],
             );
 
@@ -285,18 +316,27 @@ abstract class DefaultModule implements Module
         }
     }
     
+    /**
+     * Compile HTML responses. 
+     *
+     * @param string $subaction
+     * @return string
+     */
     public function compileHtml(string $subaction): string
     {
         $ret = '';
 
+        // If the subaction is registered, then call the appropriate function.
         if(array_key_exists($subaction, $this->subHtmlRequests))
         {
             $ret = call_user_func(array($this, $this->subHtmlRequests[$subaction]));
         }
+        // Else, check if there is a default subaction. 
         elseif(array_key_exists('default', $this->subHtmlRequests))
         {
             $ret = call_user_func(array($this, $this->subHtmlRequests['default']));
         }
+        // If all else fails, return an error.
         else
         {
             header("HTTP/1.1 404 Not Found");
@@ -305,14 +345,22 @@ abstract class DefaultModule implements Module
         return $ret;
     }
     
+    /**
+     * Compile an AJAX response.
+     *
+     * @param string $subaction
+     * @return array
+     */
     public function compileJson(string $subaction) : array
     {
         $ret = array();
 
+        // If the subaction is registered, then call the appropriate function.
         if(array_key_exists($subaction, $this->subJsonRequests))
         {
             $ret = call_user_func(array($this, $this->subJsonRequests[$subaction]));
         }
+        // Else send a default response with an error.
         else
         {
             $ret['success'] = false;
@@ -322,6 +370,12 @@ abstract class DefaultModule implements Module
         return $ret;
     }
     
+    /**
+     * Stub for responding to a stream request. 
+     * This should be overwritten by subclasses as needed.
+     *
+     * @return void
+     */
     public function compileStream()
     {
         return;
@@ -337,10 +391,12 @@ abstract class DefaultModule implements Module
      */
     protected function sendEventStream(?string $name, ?array $data = null, int $id = null)
     {
+        // Send empty message to keep stream alive.
         if($name == null)
         {
             echo ':'.PHP_EOL.PHP_EOL;
         }
+        // Send real messages identifying the event, id (optional), and JSON encoded data.
         else
         {
             echo 'event: '.$name.PHP_EOL;

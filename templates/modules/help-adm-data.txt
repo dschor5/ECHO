@@ -8,7 +8,7 @@
 
 <dl>
     <dt>
-        <code>Conversations</code>
+        Conversations
     <dt>
     <dd>
         <p>Archive of conversations saved in HTML files. Each conversation is saved in its own file and 
@@ -23,12 +23,15 @@
         <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment1.jpg</div>
         <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment2.pdf</div>
         <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-conversation.html</div>
-        <p>Where CCCCC and MMMMM refer to the unique conversation and message ids respectively.</p>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-TTTTT-thread</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment3.jpg</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-TTTTT-thread.html</div>
+        <p>Where CCCCC, TTTTT, and MMMMM refer to the unique conversation, thread, and message ids respectively.</p>
 
     </dd>
 
     <dt>
-        <code>MySQL </code>
+        MySQL
     <dt>
     <dd>
         <p>Raw MySQL dump of the entire database schema and data. These archives are intended for backup purposes, 
@@ -36,7 +39,7 @@
     </dd>
 
     <dt>
-        <code>System Log</code>
+        System Log
     <dt>
     <dd>
         <p>The system log records errors and warnings captured by the software (e.g., invalid queries). Moreover, 
@@ -44,16 +47,19 @@
         to recreate events after the mission. It is recommended to clear the log before configuring the system 
         for a new mission. </p>
 
+        <p>It is always a good idea to attach copies of this log to any bug reports.</p>
+
         <p><i>Note: The administrator page shows the last 20 messages recorded.</i></p>
 
-        <p><i>Important: A copy of this log should be attach to any bug reports.</i></p>
+        
     </dd>
 </dl>
 
 
 <h3>Reset Applicaiton</h3>
 
-<p><b>Important:</b> Resetting the system log or deletting all messages are irreversible steps.</p>
+<p class="important"><b>Important:</b> Resetting the system log or deletting all messages are irreversible steps. 
+Always backup the database before performing these steps.</p>
 
 <dl>
     <dt>

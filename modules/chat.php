@@ -146,26 +146,40 @@ class ChatModule extends DefaultModule
         return $response;
     }
 
+    /**
+     * Response for asynchronous javascript POST request 
+     * to create a new thread. 
+     * 
+     * The function can be initiated from either another thread
+     * or a parent conversation, however, threads are always added
+     * to the parent conversation. 
+     * 
+     * The thread names must be unique and have 0 < name < 100 chars. 
+     * 
+     * @return array Associative array with response. 
+     */
     protected function createNewThread() : array
     {
-        // Receive a name. If success, return new thread id and let the javascript load that page. 
-        // This should check if it is a unique name. 
         $conversationsDao = ConversationsDao::getInstance();
 
-
+        // Get the name of the thread
         $threadName = $_POST['thread_name'] ?? '';
         $response = array(
             'success' => true,
         );
 
+        // Find the parent conversation to which the thread will be added.
         $currConvo = &$this->currConversation;
         if($this->currConversation->parent_conversation_id != null)
         {
             $currConvo = &$this->conversations[$this->currConversation->parent_conversation_id];
         }
 
+        // Validate the thread name length
         if(strlen($threadName) > 0 && strlen($threadName) < 100)
         {
+            // Iterate through all other threads in this conversation 
+            // to ensure the name is unique.
             foreach($currConvo->thread_ids as $threadId)
             {
                 if($this->conversations[$threadId]->name == $threadName)
@@ -175,9 +189,13 @@ class ChatModule extends DefaultModule
                 }
             }
 
+            // If all the checks passed, then insert the new thread 
+            // into the database and add the participants to it.
             if($response['success'])
             {
                 $threadId = $conversationsDao->newThread($currConvo, $threadName);
+
+                // Generate AJAX responses.
                 if($threadId === false)
                 {
                     $response['success'] = false;
@@ -596,6 +614,11 @@ class ChatModule extends DefaultModule
         } 
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     private function sendNewThreads()
     {
         $mission = MissionConfig::getInstance();
@@ -818,6 +841,8 @@ class ChatModule extends DefaultModule
             $this->addTemplates('threads.js');
         }
 
+        // Add flags & templates for all features enabled. 
+        // The flags can be used by javascripts to enable/disable features.
         $featuresEnabled = ''.
             (($mission->feat_audio_notification)  ? Main::loadTemplate('chat-feat-audio-notification.txt')  : '').
             (($mission->feat_badge_notification)  ? Main::loadTemplate('chat-feat-badge-notification.txt')  : '').
@@ -829,11 +854,11 @@ class ChatModule extends DefaultModule
             (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
             (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '');
 
+        // Determine who can add new threads if the feature is enabled.
         if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
         {
             $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
-        }
-            
+        }   
 
         // Load template. 
         return Main::loadTemplate('chat.txt', 

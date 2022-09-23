@@ -7,7 +7,7 @@ class ErrorModule extends DefaultModule
         parent::__construct($user);
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array(
-            'show'      => 'showError', 
+            'default'      => 'showError', 
         );
 
         $_GET['subaction'] = 'show';

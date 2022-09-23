@@ -7,16 +7,10 @@ class HelpModule extends DefaultModule
         parent::__construct($user);
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array(
-            'overview'      => 'showHelpOverview', 
-            'main'          => 'showHelpOverview'
+            'default'      => 'showHelpOverview', 
         );
 
         $mission = MissionConfig::getInstance();
-
-        if($mission->feat_convo_threads)
-        {
-            $this->subHtmlRequests['threads'] = 'showHelpThreads';
-        }
 
         if($mission->feat_markdown_support)
         {
@@ -39,16 +33,6 @@ class HelpModule extends DefaultModule
         return Main::loadTemplate('help.txt', array(
             '/%menu%/' => $this->showHelpMenu(),
             '/%content%/' => Main::loadTemplate('help-overview.txt'),
-        ));
-    }
-
-    protected function showHelpThreads() : string
-    {
-        $this->addTemplates('common.css', 'settings.css');
-
-        return Main::loadTemplate('help.txt', array(
-            '/%menu%/' => $this->showHelpMenu(),
-            '/%content%/' => Main::loadTemplate('help-threads.txt'),
         ));
     }
 
@@ -109,11 +93,6 @@ class HelpModule extends DefaultModule
         $links = array(
             'overview' => 'Getting Started'
         );
-
-        if($this->user->is_admin || $mission->feat_convo_threads)
-        {
-            $links['threads'] = 'Conversation threads';
-        }
 
         if($this->user->is_admin || $mission->feat_markdown_support)
         {

@@ -29,7 +29,7 @@
     </dd>
 </dl>
 
-<p><b>Important:</b> The new delay setting does not affect messages already in transit. If a message was sent with 
+<p class="important"><b>Important:</b> The new delay setting does not affect messages already in transit. If a message was sent with 
 delay=Xsec, that delay will be enforced even if the Administrator changes the settings to Ysec delays. However, all 
 other messages sent after the new delay setting was applied will use the new delay. To avoid problems it is better 
 to coordinate the time to change the delay settings during periods of low activity.</p>

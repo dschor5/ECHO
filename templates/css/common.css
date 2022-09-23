@@ -196,7 +196,6 @@ a:hover {
     min-width: 390px;
     left: 50%;
     transform: translateX(-50%);
-    border: 1px solid green;
 }
 
 #help-menu {
@@ -232,4 +231,18 @@ a:hover {
 .help-cell {
     padding: 10px 0px;
     border-bottom: 1px dashed gray;
+}
+
+#help-contents dt {
+    font-weight: bold;
+    color: var(--background-dark);
+    
+}
+
+#help-contents .important {
+    border: 1px solid #993333;
+    background-color: #d5949c;
+    border-radius: 5px;
+    padding: 5px;
+    font-style: italic;
 }
