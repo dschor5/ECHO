@@ -629,10 +629,8 @@ class ChatModule extends DefaultModule
             $parentId = $this->currConversation->parent_conversation_id ??
                 $this->currConversation->conversation_id;
 
-            $time = new DelayTime();
-            $timeStr = $time->getTime();
             $newConvos = $conversationsDao->getNewThreads(
-                array_keys($this->conversations), $this->user->user_id, $timeStr);
+                array_keys($this->conversations), $this->user->user_id);
 
             foreach($newConvos as $convoId => $convo)
             {

@@ -228,6 +228,12 @@ class HomeModule extends DefaultModule
         return 'Logging out, please wait while you are redirected to the homepage.';
     }    
 
+    /**
+     * Handle AJAX request to reset the user password. 
+     * The only purpose is to reset the cookie. 
+     *
+     * @return array
+     */
     protected function heartbeat() : array 
     {
         return array('success' => ($this->user != null));

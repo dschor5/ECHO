@@ -1,7 +1,16 @@
 <?php
 
+/**
+ * HelpModule displays the help pages. 
+ */
 class HelpModule extends DefaultModule
 {
+    /**
+     * Constructor. Loads valid options based on whether the 
+     * user is an administrator and what options are enabled.
+     *
+     * @param User $user Current logged in user. 
+     */
     public function __construct(&$user)
     {
         parent::__construct($user);
@@ -24,8 +33,13 @@ class HelpModule extends DefaultModule
             $this->subHtmlRequests['mission'] = 'showHelpAdmMission';
             $this->subHtmlRequests['data'] = 'showHelpAdmData';
         }
-   }
+    }
 
+    /**
+     * Show help overview page.
+     *
+     * @return string HTML output
+     */
     protected function showHelpOverview() : string
     {
         $this->addTemplates('common.css', 'settings.css');
@@ -36,6 +50,11 @@ class HelpModule extends DefaultModule
         ));
     }
 
+    /**
+     * Show help Markdown page
+     *
+     * @return string HTML output
+     */
     protected function showHelpMarkdown() : string
     {
         $this->addTemplates('common.css', 'settings.css');
@@ -46,6 +65,11 @@ class HelpModule extends DefaultModule
         ));
     }
 
+    /**
+     * Show help page for managing user accounts.
+     *
+     * @return string HTML output
+     */
     protected function showHelpAdmUsers() : string
     {
         $this->addTemplates('common.css', 'settings.css');
@@ -56,6 +80,11 @@ class HelpModule extends DefaultModule
         ));
     }
 
+    /**
+     * Show help page for managing communication delay settings.
+     *
+     * @return string HTML output
+     */
     protected function showHelpAdmDelay() : string
     {
         $this->addTemplates('common.css', 'settings.css');
@@ -66,6 +95,11 @@ class HelpModule extends DefaultModule
         ));
     }
 
+    /**
+     * Show help page for managing mission settings.
+     *
+     * @return string HTML output
+     */
     protected function showHelpAdmMission() : string
     {
         $this->addTemplates('common.css', 'settings.css');
@@ -76,6 +110,11 @@ class HelpModule extends DefaultModule
         ));
     }
 
+    /**
+     * Show help page for saving archives, SQL backups, and logs.
+     * 
+     * @return string HTML output
+     */
     protected function showHelpAdmData() : string
     {
         $this->addTemplates('common.css', 'settings.css');
@@ -86,6 +125,11 @@ class HelpModule extends DefaultModule
         ));
     }
 
+    /**
+     * Builds links for help menu.
+     *
+     * @return string HTML output
+     */
     private function showHelpMenu() : string 
     {
         $mission = MissionConfig::getInstance();

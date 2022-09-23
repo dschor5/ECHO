@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * Data Abstraction Object for the messages table. Implements custom 
+ * queries to search and update conversations as needed. 
+ * 
+ * @link https://github.com/dschor5/ECHO
+ */
 class MessagesDao extends Dao
 {
     /**
      * Singleton instance for MessageDao object.
      * @access private
-     * @var ConversationsDao
+     * @var MessagesDao
      **/
     private static $instance = null;
 
@@ -31,7 +37,12 @@ class MessagesDao extends Dao
         parent::__construct('messages', 'message_id');
     }
 
-    // Must be ran in the context of a transaction.
+    /**
+     * Renumber alternate message ids based on whether threads are enabled or not.
+     *
+     * @param boolean $threadsEnabled
+     * @return void
+     */
     public function renumberSiteMessageId(bool $threadsEnabled)
     {
         $this->startTransaction();
@@ -41,6 +52,10 @@ class MessagesDao extends Dao
 
         foreach($conversations as $convoId => $convo) 
         {
+            // If threads are disabled, then apply renumbering to the parent 
+            // conversation and all the threads by combining their ids. 
+            // And skip all the threads as they would have been caught by 
+            // the parent conversation.
             if($threadsEnabled == false)
             {
                 if($convo->parent_conversation_id == null)
@@ -52,6 +67,7 @@ class MessagesDao extends Dao
                     continue;
                 }
             }
+            // Otherwise, if therads are enable, renumber each one individually.
             else
             {
                 $convoIds = array($convoId);
@@ -96,26 +112,36 @@ class MessagesDao extends Dao
 
         $ids = array('message_id' => null, 'message_id_alt' => null);
 
+        // Query exceptions are used to avoid too many levels of nested if-statements.
         $this->database->queryExceptionEnabled(true);
         try 
         {
             $this->startTransaction();
+            
+            // Define query to find the next alternate id to assign to the new message
             $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM messages '. 
                 'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '. 
                 'AND from_crew='.(($user->is_crew)?'1':'0');
             $this->database->query($idQueryStr);
 
+            // Insert the new message into the database and automatically assign it 
+            // an alternate id based on the previous query.
             $variables = array('message_id_alt' => '@id_alt:=@id_alt+1');
-
             $ids['message_id'] = $this->insert($msgData, $variables);
+
+            // If the message was successfully added to the database, then 
+            // proceed to create entries in other tables that need to reference
+            // the newly created message id.
             if ($ids['message_id'] !== false)
             {
+                // Add file attachments if any.
                 if(count($fileData) > 0)
                 {
                     $fileData['message_id'] = $ids['message_id'] ;
                     $msgFileDao->insert($fileData);
                 }
 
+                // Create message status entries for the new entry.
                 $participants = $participantsDao->getParticipantIds($msgData['conversation_id']);
                 $msgStatusData = array();
                 foreach($participants as $userId => $isCrew)
@@ -128,8 +154,11 @@ class MessagesDao extends Dao
                 }
                 $keys = array('message_id', 'user_id', 'is_read');
                 $messageStatusDao->insertMultiple($keys, $msgStatusData);
+
+                // Update the date the conversation was last updated.
                 $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
                 
+                // Finally, run a query to get the data recently entered into the database. 
                 if (($result = $this->select('*', $ids['message_id'] )) !== false)
                 {
                     if ($result->num_rows > 0) 
@@ -144,12 +173,14 @@ class MessagesDao extends Dao
             }
             else
             {
+                // If the message was not created retract the database query.
                 $ids = false;
                 $this->endTransaction(false);
             }
         }
         catch(Exception $e)
         {
+            // If the message was not created retract the database query.
             $ids = false;
             $this->endTransaction(false);
             Logger::warning('messagesDao::sendMessage failed.', $e->getMessage());
@@ -159,8 +190,13 @@ class MessagesDao extends Dao
         return $ids;
     }
 
-
-
+    /**
+     * Grant new users access to previous messages on a given conversation.
+     *
+     * @param integer $convoId
+     * @param integer $userId
+     * @return void
+     */
     public function newUserAccessToPrevMessages(int $convoId, int $userId)
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
@@ -169,8 +205,11 @@ class MessagesDao extends Dao
         // TODO - Inneficient if there are a large number of messages. 
         //        Would need to get count and use that to break up the 
         //        request into batches. 
+        // Get a list of all message ids in a given conversation. 
         if (($result = $this->select('message_id', 'conversation_id='.$qConvoId)) !== false)
         {
+            // Iterate through results and create new entries to the message status
+            // table for the new user id.
             if ($result->num_rows > 0)
             {
                 $msgStatus = array();
@@ -188,13 +227,28 @@ class MessagesDao extends Dao
         }
     }   
 
+    /**
+     * Get new messages.
+     *
+     * @param array $convoIds Conversation ids to include in the query. 
+     *                        If threads are disabled, the query can get all the messages
+     *                        in the conversation and its subthreads.
+     * @param integer $userId Checks msg_status for this user
+     * @param boolean $isCrew Used to select receive time perspective
+     * @param string $toDate  Messages received before this date
+     * @param integer $offset Offset if trying to get lots of messages
+     * @return array Array of Message objects
+     */
     public function getNewMessages(array $convoIds, int $userId, bool $isCrew, string $toDate, int $offset=0) : array
     {
+        // Build query
         $qConvoIds = implode(',',$convoIds);
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+
+        // Hardcoded value to get new messages received in the last 3 seconds.
         $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
 
         $queryStr = 'SELECT messages.*, '. 
@@ -216,6 +270,7 @@ class MessagesDao extends Dao
     
         $this->startTransaction();
 
+        // Get all messages
         if(($result = $this->database->query($queryStr)) !== false)
         {
             if($result->num_rows > 0)
@@ -227,6 +282,7 @@ class MessagesDao extends Dao
             }
         }
         
+        // Update message read status 
         if(count($messages) > 0)
         {
             $messageIds = '('.implode(', ', array_keys($messages)).')';
@@ -239,6 +295,19 @@ class MessagesDao extends Dao
         return $messages;
     }
 
+    /**
+     * Get old messages in a conversation. 
+     *
+     * @param array $convoIds    Conversation ids to include in the query. 
+     *                           If threads are disabled, the query can get all the messages
+     *                           in the conversation and its subthreads.
+     * @param integer $userId    Checks msg_status for this user
+     * @param boolean $isCrew    Used to select receive time perspective
+     * @param string $toDate     Messages received before this date
+     * @param int $lastMsgId     Last message id received
+     * @param integer $numMsgs   Max number of messages to retrieve in query
+     * @return array
+     */
     public function getOldMessages(array $convoIds, int $userId, bool $isCrew, string $toDate, int $lastMsgId=PHP_INT_MAX, int $numMsgs=20) : array
     {
         $qConvoIds = implode(',',$convoIds);
@@ -268,6 +337,7 @@ class MessagesDao extends Dao
         {
             $this->startTransaction();
 
+            // Get old messages 
             if(($result = $this->database->query($queryStr)) !== false)
             {
                 if($result->num_rows > 0)
@@ -279,6 +349,7 @@ class MessagesDao extends Dao
                 }
             }
             
+            // Update msg_status database to mark all those as read.
             $queryStr = 'UPDATE msg_status '.
                 'JOIN messages ON msg_status.message_id=messages.message_id '.
                 'SET msg_status.is_read=1 '. 
@@ -301,6 +372,16 @@ class MessagesDao extends Dao
         return array_reverse($messages, true);
     }
 
+    /**
+     * Get new message notifications. These are the total number of new messages
+     * on each conversation/thread and how many of those are flagged as important.
+     *
+     * @param integer $conversationId Conversation id to check.
+     * @param integer $userId
+     * @param boolean $isCrew
+     * @param string $toDate
+     * @return void
+     */
     public function getMsgNotifications(int $conversationId, int $userId, bool $isCrew, string $toDate)
     {
         $notifications = array();
@@ -310,6 +391,9 @@ class MessagesDao extends Dao
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
+        // Build query that counts new new messages and number of important messages. 
+        // We leave it to the applicaiton to determine if the number changed from the
+        // last time the query was ran or not. 
         $queryStr = 'SELECT messages.conversation_id, '. 
                         'COUNT(*) AS num_new, '. 
                         "SUM(IF(messages.type = 'important', 1, 0)) AS num_important ".

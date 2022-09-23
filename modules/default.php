@@ -160,7 +160,8 @@ abstract class DefaultModule implements Module
             $subaction = $_GET['subaction'] ?? '';
             $currUrl   = $action.(strlen($subaction) > 0 ? '/'.$subaction : '');
 
-            // Build every link. Skip if it mathes the current path. 
+            // Build every link. Use a different template for disabled links 
+            // that match the current path.
             foreach($navLinks as $link)
             {
                 if($currUrl != $link['url'])
