@@ -158,7 +158,8 @@ class UsersDao extends Dao
                 );
                 $messagesDao->newUserAccessToPrevMessages($convoId, $newUserId);
             }
-            $participantsDao->insertMultiple($newParticipants);
+            $keys = array('conversation_id', 'user_id');
+            $participantsDao->insertMultiple($keys, $newParticipants);
 
             foreach($users as $otherUserId=>$user)
             {
@@ -180,7 +181,8 @@ class UsersDao extends Dao
                             'user_id' => $otherUserId,
                         ),
                     );
-                    $participantsDao->insertMultiple($newParticipants);
+                    $keys = array('conversation_id', 'user_id');
+                    $participantsDao->insertMultiple($keys, $newParticipants);
                 }
             }
             $this->endTransaction(true);

@@ -231,7 +231,7 @@ class Message
      */
     public function formatAltMessageId() : string
     {
-        return ($this->from_crew ? 'HAB-', 'MCC-').$this->message_id_alt;    
+        return (($this->from_crew) ? 'HAB-' : 'MCC-').$this->message_id_alt;    
     }
 
     /**

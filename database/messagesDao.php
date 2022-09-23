@@ -126,7 +126,8 @@ class MessagesDao extends Dao
                         'is_read' => ($userId == $msgData['user_id']),
                     );
                 }
-                $messageStatusDao->insertMultiple($msgStatusData);
+                $keys = array('message_id', 'user_id', 'is_read');
+                $messageStatusDao->insertMultiple($keys, $msgStatusData);
                 $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
                 
                 if (($result = $this->select('*', $ids['message_id'] )) !== false)
@@ -181,7 +182,8 @@ class MessagesDao extends Dao
                         'is_read' => 0
                     );
                 }
-                $msgStatusDao->insertMultiple($msgStatus);
+                $keys = array('message_id', 'user_id', 'is_read');
+                $msgStatusDao->insertMultiple($keys, $msgStatus);
             }
         }
     }   

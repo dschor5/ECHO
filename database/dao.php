@@ -238,7 +238,8 @@ abstract class Dao
     /**
      * Insert multiple rows into a table in a single database transaction.
      *
-     * @param array 2D associative array containing rows with field names 
+     * @param array $colNames Array of column names.
+     * @param array $rowEntries 2D associative array containing rows with field names 
      *              and values to be sanitized.
      * @return int|false Number of rows inserted or false on errors.
      */
@@ -247,7 +248,7 @@ abstract class Dao
         $valuesStr = array();
         
         // There must be at least one row to enter.
-        if(count($entries) == 0)
+        if(count($rowEntries) == 0)
         {
             return 0;
         }
@@ -263,7 +264,7 @@ abstract class Dao
         // Iterate through each row and make sure they all 
         // contain the same fields in teh same order. 
         // If not, return false and log an error.
-        foreach($rowEntries as $rows)
+        foreach($rowEntries as $row)
         {
             $values = array();
             foreach($colNames as $col)
