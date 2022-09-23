@@ -724,7 +724,7 @@ class AdminModule extends DefaultModule
                 '/%text%/'=>'Download'
             ));
             $tools[] = Main::loadTemplate('link-js.txt', array(
-                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getDesc().'\')', 
+                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getType().' created on '.$archive->getTimestamp().'\')', 
                 '/%text%/'=>'Delete'
             ));
 

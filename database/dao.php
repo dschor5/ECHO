@@ -179,40 +179,55 @@ abstract class Dao
         return $this->database->query($query);
     }
 
-
-    /* PUBLIC:  insert
-    PURPOSE: Inserts into the current table.
-    Note, the variables are not sanitized and should be used carefully.
-    @param:  string[] - an array of strings corresponding to each field in the table.
-    @param:  string[] - an array of strings corresponding to each variable in the table. 
-    @return  int or boolean - If successfully, returns the ID of the new entry, otherwise
-        false.
-    */
+    /**
+     * Insert fields and variables (optional) into the current table.
+     *
+     * @param array Associative array with field names and values to be sanitized.
+     * @param array Associative array with field names and values that are neither
+     *              sanitized nor put in quotes. This can include both expressions
+     *              or MySQL variables.
+     * @return int|false ID of row inserted or false on error
+     */
     public function insert(array $fields, array $variables=array())
     {
+        // Build query string
         $query = "insert into `{$this->name}` (";
 
+        // Get all fields to enter
         $keys = array();
         $values = array();
         foreach ($fields as $key => $value)
         {
             $keys[] = '`'.$key.'`';
             if ($value === null)
+            {
                 $values[] = 'NULL';
+            }
             else
+            {
                 $values[] = '"'.$this->database->prepareStatement($value).'"';
+            }
         }
 
+        // Get all variables to enter
         foreach($variables as $key => $variable)
         {
             $keys[] = '`'.$key.'`';
-            $values[] = $variable;
+            if ($value === null)
+            {
+                $values[] = 'NULL';
+            }
+            else
+            {
+                $values[] = $variable;
+            }
         }
 
+        // Finish building the query and then execute it.
         $query .= join(',',$keys).') values ('.join(',',$values).');';
         if ($this->database->query($query,0))
         {
-            // get the insert ID.
+            // Always get the last insert id.
             $id = $this->database->getLastInsertId();
             return $id;
 
@@ -220,28 +235,56 @@ abstract class Dao
         return false;
     }
 
-    public function insertMultiple($entries)
+    /**
+     * Insert multiple rows into a table in a single database transaction.
+     *
+     * @param array 2D associative array containing rows with field names 
+     *              and values to be sanitized.
+     * @return int|false Number of rows inserted or false on errors.
+     */
+    public function insertMultiple(array $colNames, array $rowEntries)
     {
         $valuesStr = array();
         
+        // There must be at least one row to enter.
         if(count($entries) == 0)
         {
-            return true;
+            return 0;
         }
-        
-        foreach($entries as $fields)
+
+        // Sanitize the keys for the insert operation.
+        $keys = array();
+        foreach($colNames as $col)
+        {
+            $keys[] = '`'.$col.'`';
+        }
+        $keysStr = join(',', $keys);
+
+        // Iterate through each row and make sure they all 
+        // contain the same fields in teh same order. 
+        // If not, return false and log an error.
+        foreach($rowEntries as $rows)
         {
             $values = array();
-            $keys = array();
-            foreach ($fields as $key => $value)
+            foreach($colNames as $col)
             {
-                $keys[] = '`'.$key.'`';
-                if ($value === null)
-                    $values[] = 'NULL';
+                if(isset($row[$col]))
+                {
+                    if ($row[$col] === null)
+                    {
+                        $values[] = 'NULL';
+                    }
+                    else
+                    {
+                        $values[] = '"'.$this->database->prepareStatement($row[$col]).'"';
+                    }
+                }
                 else
-                    $values[] = '"'.$this->database->prepareStatement($value).'"';
+                {
+                    Logger::error('Dao::insertMultiple() invalid column. ', array($this->name, $row, $col));
+                    return false;
+                }
             }
-            $keysStr = join(',', $keys);
             $valuesStr[] = '('.join(',', $values).')';
         }
 
@@ -255,102 +298,93 @@ abstract class Dao
         return false;
     }
 
-
-    /* PUBLIC:  replace
-    PURPOSE: Replaces into the current table.
-    @param:  string[] - an array of strings corresponding to each field in the table.
-    @return  int or boolean - If successfully, returns the ID of the new entry, otherwise
-        false.
-    */
-    public function replace($fields)
+    /**
+     * Update specific fields in the database.
+     *
+     * @param array $fields Associative array of fields to update in the database. 
+     * @param string $where Clause used to select which rows to update in the table.
+     *                      If an int is provided, then treat it as the unique id
+     *                      to drop. Otherwise, assume it is the WHERE clause.
+     *                      Default to '*' which would select all rows.
+     * @return mysqli_result|bool Result from query or bool if not keeping results.
+     */
+    public function update(array $fields, string $where = '*')
     {
-        $query = "replace into `{$this->name}` values(";
-
-        $values = array();
-        foreach ($fields as $value)
-            $values[] = '"'.$this->database->prepareStatement($value).'"';
-
-        $query .= join(',',$values) . ');';
-
-        if ($this->database->query($query,0))
-        {
-            // get the insert ID.
-            $id = $this->database->insert_id();
-            return $id;
-
-        } else
-            return false;
-    }
-
-
-    /* PUBLIC: update
-    PURPOSE: Updates the entries in a table as specified.
-    @param  string[] - An associative array whose keys are the names
-              of the fields to change and the values are the new
-              values to use.
-
-    @param  string   - The where clause (* for all) or specific ID to use
-    @return boolean
-    */
-    public function update($fields,$where = '*')
-    {
-
+        // Build update query 
         $query = "update `{$this->name}` set ";
 
+        // Sanitize values to update based on the key-value pairs.
         $tmp = array();
         foreach ($fields as $key=>$value)
+        {
             $tmp[]= ($value === null)?
                 "`$key`=null":
                 "`$key`='".$this->database->prepareStatement($value)."'";
+        }
 
         $query .= join(', ',$tmp);
 
+        // Apply where clause. 
         if (intval($where) > 0)
+        {
             $query .= " where `{$this->id}` = '$where'";
+        }
         else if ($where != '*')
+        {
             $query .= " where " . $where;
+        }
 
         $query.=';';
 
         return $this->database->query($query, false);
     }
 
-
-    /* PUBLIC searchClause
-       PURPOSE: Generates a where clause used for searching.
-
-       method == self::SEARCH_ANY
-       method == self::SEARCH_ALL
-       method == self::SEARCH_PHRASE
-
-       @param String[]  columns
-       @param String searchString
-       @param int method
-       @result String whereClause
-     */
-    protected function searchClause(array $search, string $keywords, int $method=0)
+    /** 
+     * Build a search clause to use in a query. 
+     *
+     * @param array $search Column names to search within the table.
+     * @param string $keywords Keywords to search for. 
+     * @param int $method SEARCH_ANY, SEARCH_ALL, or SEARCH_PHRASE.
+     * @return string Search string to use in WHERE clause. 
+     **/
+    protected function searchClause(array $search, string $keywords, int $method=0) : string 
     {
+        // Must search at least one column.
         if (count($search) > 0)
         {
             $keywords=trim($keywords);
             $search_terms = array();
 
+            // If searching for a PHRASE, then sanitize the statement. 
+            // Otherwise, split all the keywords.
             $keywords = ($method == self::SEARCH_PHRASE ? array($this->database->prepareStatement($keywords)):preg_split("/\s+/",$keywords));
             foreach ($keywords as $key)
             {
+                // Skip keywords shorter than 3 letters (conjunctions)
                 if (strlen($key) >= 3)
                 {
+                    // Build search string depending on whether we need ALL or ANY of the keywords
                     $tmp = array();
                     foreach ($search as $col)
+                    {
                         if ($method == self::SEARCH_ALL)
+                        {
                             $tmp[] = $col . " like '%" .$this->database->prepareStatement($key). "%'";
+                        }
                         else
+                        {
                             $search_terms[] = $col . " like '%" .$this->database->prepareStatement($key). "%'";
+                        }
+                    }
 
                     if ($method == self::SEARCH_ALL)
+                    {
                         $search_terms[] = '('.join(' or ',$tmp).')';
+                    }
                 }
             }
+
+            // Build the search query and return it.
             return (count($search_terms) > 0)? join(($method == self::SEARCH_ALL)? " and ": " or ",$search_terms) : '*';
         }
         return '*';
