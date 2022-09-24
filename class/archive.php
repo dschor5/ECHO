@@ -4,6 +4,14 @@
  * MissionArchive objects represent an archive of all conversations/attachments.  
  * Encapsulates 'mission_archives' row from database.
  * 
+ * Table Structure: 'archives'
+ * - archive_id     (int)       Unique id for each archive.
+ * - server_name    (string)    Server name where archive is stored
+ * - notes          (string)    Notes saved with the archive (RFU)
+ * - mime_type      (string)    Mime type for current archive
+ * - timestamp      (datetime)  UTC timestamp when the archive was created
+ * - content_tz     (string)    Timezone used in archive
+ * 
  * Implementation Notes:
  * - Archives are renamed with a unique id of numeric characters
  *   with extension TMP before being saved to the logs directory. 
@@ -63,7 +71,7 @@
     {
         $type = '';
 
-        if(in_array($this->mime_type, MissionArchive::ARCHIVE_TYPES))
+        if(array_key_exists($this->mime_type, MissionArchive::ARCHIVE_TYPES))
         {
             $type = MissionArchive::ARCHIVE_TYPES[$this->mime_type]['desc'];
         }
@@ -84,7 +92,7 @@
     {
         $type = '';
 
-        if(in_array($this->mime_type, MissionArchive::ARCHIVE_TYPES))
+        if(array_key_exists($this->mime_type, MissionArchive::ARCHIVE_TYPES))
         {
             $type = MissionArchive::ARCHIVE_TYPES[$this->mime_type]['ext'];
         }

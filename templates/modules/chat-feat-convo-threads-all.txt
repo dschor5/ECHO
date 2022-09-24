@@ -1,4 +1,5 @@
-    <div id="feat-convo-threads-all-enabled"><<div id="dialog-thread" title="New Thread" class="dialog-body">
+    <div id="feat-convo-threads-all-enabled" style="display: none;">
+        <div id="dialog-thread" title="New Thread" class="dialog-body">
             <div class="dialog-response"></div>
             <form method="POST">
                 <label for="thread_name">New Thread Name</label>

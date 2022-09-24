@@ -1,1 +1,1 @@
-    <div id="feat-unread-msg-counts-enabled"></div>
+    <div id="feat-unread-msg-counts-enabled" style="display: none;"></div>

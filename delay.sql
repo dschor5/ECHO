@@ -105,7 +105,8 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('feat_markdown_support',    'bool', '1'),
 ('feat_important_msgs',      'bool', '1'),
 ('feat_convo_threads',       'bool', '1'), 
-('debug',                    'bool', '1');
+('feat_convo_threads_all',   'bool', '1'),
+('debug',                    'bool', '0');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
 (1, 'admin', 'Admin', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
@@ -121,16 +122,16 @@ INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
 (2, 'user1', 'Flight Director', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 0, NULL, 1, ''),
 (3, 'user2', 'Blueberry', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 1, NULL, 1, ''),
-(4, 'user3', 'Tangirine', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 1, NULL, 1, '');
+(4, 'user3', 'Tangerine', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 1, NULL, 1, '');
 
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
 (2, 'Admin-Flight Director', NULL, '2021-08-03 23:14:48', '0000-00-00 00:00:00'),
 (3, 'Admin-Blueberry', NULL, '2021-08-03 23:14:59', '0000-00-00 00:00:00'),
 (4, 'Flight Director-Blueberry', NULL, '2021-08-03 23:14:59', '0000-00-00 00:00:00'),
-(5, 'Admin-Tangirine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
-(6, 'Flight Director-Tangirine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
-(7, 'Blueberry-Tangirine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00');
+(5, 'Admin-Tangerine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
+(6, 'Flight Director-Tangerine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
+(7, 'Blueberry-Tangerine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00');
 
 
 INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES

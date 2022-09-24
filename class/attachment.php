@@ -4,6 +4,12 @@
  * FileUpload objects represent any file attached to a message on the chat. 
  * Encapsulates 'msg_files' row from database.
  * 
+ * Table Structure: msg_files
+ * - message_id         (int)       Message id containing this attachment
+ * - server_name        (string)    Name of file on the server
+ * - original_name      (string)    Original filename
+ * - mime_type          (string)    Mime type for attachment
+ * 
  * Implementation Notes:
  * - Files uploaded are renamed with a unique id of numeric characters
  *   with extension TMP before being saved to the uploads directory. 

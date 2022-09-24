@@ -3,6 +3,7 @@
 class AdminModule extends DefaultModule
 {
     const TIMEOUT_OPS_SEC = array(
+            '20' => '20 sec',
           '1800' => '30 min', 
           '3600' => '60 min (1 hr)', 
           '7200' => '120 min (2 hr)', 
@@ -513,7 +514,7 @@ class AdminModule extends DefaultModule
         
         $response = array('success'=>false, 'error'=>'');
 
-        $userId = $_POST['user_id'] ?? 0;
+        $userId = (isset($_POST['user_id']) && $_POST['user_id'] != null) ? intval($_POST['user_id']) : 0;
 
         if($userId > 0 && $userId != $this->user->user_id)
         {
@@ -546,21 +547,28 @@ class AdminModule extends DefaultModule
         $response = array('success'=>false, 'error'=>'');
 
         $usersDao = UsersDao::getInstance();
-        $user = $usersDao->getByUsername($username);
-        if($user == null)
+        if($userId == 0)
         {
-            $response['error'] = 'Invalid user id.';
-            Logger::warning('Admin::editUser() - Invalid user id.');
+            $user = $usersDao->getByUsername($username);
         }
-        else if($username == '' || strlen($username) < 4 || strlen($username) > 12 || !ctype_alnum($username))
+        else
+        {
+            $user = $usersDao->getById($userId);
+        }
+        
+        if($username == '' || strlen($username) < 4 || strlen($username) > 12 || !ctype_alnum($username))
         {
             $response['error'] = 'Invalid username. Requires min 4 / max 12 alphanumeric characters.';
         }
-        elseif($user !== false && $user->user_id != $userId && $user->username == $username)
+        elseif($user != null && $user->user_id != $userId && $user->username == $username)
         {
             $response['error'] = 'Username already in use.';
         }
-        elseif($user !== false && $user->is_admin != $isAdmin)
+        elseif($user != null && $this->user->user_id == $userId && $user->username != $username)
+        {
+            $response['error'] = 'Cannot change username for logged in user.';
+        }
+        elseif($user != null && $user->is_admin != $isAdmin)
         {
             $response['error'] = 'Cannot remove your own admin priviledges.';
         }   

@@ -4,6 +4,35 @@
  * Message objects represent one message within the chat application.
  * Encapsulates 'messages' row from database. 
  * 
+ * Table Structure: 'messages'
+ * - message_id                 (int)       Global message id unique to this table.
+ * - user_id                    (int)       User id who authored the message.
+ * - conversation_id            (int)       Conversation where the message belongs.
+ * - text                       (text)      Text stored in the message.
+ * - type                       (enum)      Enumerated value indicating:
+ *                                          - TEXT - plaintext message
+ *                                          - IMPORTANT - plaintext message but important
+ *                                          - VIDEO - video recording
+ *                                          - AUDIO - audio recording
+ *                                          - FILE - any other file attachment
+ * - sent_time                  (datetime)  UTC timestamp when the message was sent
+ * - from_crew                  (bool)      Boolean to indicate the message was sent from the crew (HAB)
+ * - message_id_alt             (int)       Alternate message id (HAB-# or MCC-#) that is
+ *                                          unique to each conversation/thread. 
+ *                                          Note the same conversaiton can have a HAB-1 and MCC-1 
+ *                                          because that's the id they were assigned by the sender. 
+ * - recv_time_hab              (datetime)  UTC timestamp when the message is visible by HAB
+ * - recv_time_mcc              (datetime)  UTC timestamp when the message is visible by MCC
+ * 
+ * Additional Fields:
+ * - users.username             (string)    Username for message author
+ * - users.alias                (string)    Alias for message author
+ * - msg_status.is_read         (bool)      Flag indicating if the msg was delivered 
+ *                                          to the current logged in user
+ * - msg_files.original_name    (string)    Original filename for attachment (if any)
+ * - msg_files.server_name      (string)    Server filename for attachment (if any)
+ * - msg_files.mime_type        (string)    Mime type for attachment (if any)
+ * 
  * Implementation Notes:
  * - Each message is assigned a type from: TEXT, IMPORTANT, FILE, AUDIO, or VIDEO. 
  * 

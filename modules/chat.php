@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Main chat window that processes new messages/files and displays 
+ * any messages received.
+ */
 class ChatModule extends DefaultModule
 {
     /**
@@ -56,9 +60,9 @@ class ChatModule extends DefaultModule
         parent::__construct($user);
         
         $this->subJsonRequests = array(
-            'send' => 'textMessage', 
-            'upload'   => 'uploadFile',
-            'prevMsgs' => 'getPrevMessages',
+            'send'      => 'textMessage', 
+            'upload'    => 'uploadFile',
+            'prevMsgs'  => 'getPrevMessages',
             'newThread' => 'createNewThread'
         );
         $this->subHtmlRequests = array(
@@ -476,6 +480,7 @@ class ChatModule extends DefaultModule
         $messagesDao = MessagesDao::getInstance();
         $currTime = new DelayTime();
 
+        // Get message type and body.
         $msgText = $_POST['msgBody'] ?? '';
         $msgImportant = filter_var($_POST['msgType'] ?? false, FILTER_VALIDATE_BOOLEAN) ?
             Message::IMPORTANT : Message::TEXT;
@@ -485,8 +490,10 @@ class ChatModule extends DefaultModule
             'message_id' => -1
         );
 
+        // Message has to have at least 1 character (e.g., "k")
         if(strlen($msgText) > 0)
         {
+            // Fields to enter into the database.
             $msgData = array(
                 'user_id'         => $this->user->user_id,
                 'from_crew'       => $this->user->is_crew,
@@ -498,9 +505,10 @@ class ChatModule extends DefaultModule
                 'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
             );
             
-            // Send the message. If this fails, then 
+            // Send message.
             if(($messageIds = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
+                // Combine with the remaining fields for a message. 
                 $newMsg = new Message(
                     array_merge(
                         $msgData, 
@@ -615,28 +623,32 @@ class ChatModule extends DefaultModule
     }
 
     /**
-     * Undocumented function
-     *
-     * @return void
+     * Sends event stream message 'delay' anytime the current 
+     * communicaiton delay changes. 
      */
     private function sendNewThreads()
     {
         $mission = MissionConfig::getInstance();
+
+        // Only execute if threads are enabled.
         if($mission->feat_convo_threads)
         {
             $conversationsDao = ConversationsDao::getInstance();
 
-            $parentId = $this->currConversation->parent_conversation_id ??
-                $this->currConversation->conversation_id;
-
+            // Gets new threads. The query excludes all known conversation ids
+            // to only get the new threads.
             $newConvos = $conversationsDao->getNewThreads(
                 array_keys($this->conversations), $this->user->user_id);
 
+            // For each new thread
             foreach($newConvos as $convoId => $convo)
             {
+                // Update our cached knowledge base
                 $this->conversations[$convoId] = $convo;
                 $this->conversations[$convo->parent_conversation_id]->addThreadId($convoId);
                 
+                // If it does not have a parent, then send it even if it does not belong to 
+                // the active conversation. 
                 if($convo->parent_conversation_id != null)
                 {
                     $this->sendEventStream(
@@ -752,33 +764,44 @@ class ChatModule extends DefaultModule
             $tempNotifications = array();
             foreach($currNotifications as $convoId => $convo)
             {
+                // If no threads AND message received in a thread (would only happen if disabling threads during a mission)
+                // OR threads are enabled and you receive a message in a different coversation, then 
+                // consolidate notifications for parent. 
                 if((!$mission->feat_convo_threads && $this->conversations[$convoId]->parent_conversation_id != null) ||
-                ($mission->feat_convo_threads && !in_array($convoId, $thisConvoAndThreads)))
+                   ($mission->feat_convo_threads && !in_array($convoId, $thisConvoAndThreads)))
                 {
+                    // Consolidate notifications for parent conversation
                     $id = $convoId;
                     if($this->conversations[$convoId]->parent_conversation_id != null)
                     {
                         $id = $this->conversations[$convoId]->parent_conversation_id;
                     }
 
+                    // Initialize the notification for that convo
                     if(!isset($tempNotifications[$id]))
                     {
                         $tempNotifications[$id]['num_new'] = 0;
                         $tempNotifications[$id]['num_important'] = 0;
                     }
 
+                    // Assign results from query for number of new messages and important messages
                     $tempNotifications[$id]['num_new'] += $convo['num_new'];
                     $tempNotifications[$id]['num_important'] += $convo['num_important'];
                 }
+                // Otherwise, assume the notifications can be sent with the thread/conversation id. 
                 else
                 {
                     $tempNotifications[$convoId] = $convo;
                 }
             }
 
+            // Save notifications. 
             $currNotifications = $tempNotifications;
 
-            // Ensure we only send new notifications. 
+            // Ensure we only send new notifications by iterating through the list of new
+            // notificaitons and comparing that to the previous list sent. 
+            // Note that num_important is sent as a binary flag (either there were important 
+            // messages or not).
             $newNotifications = array();
             foreach($currNotifications as $convoId => $msgs)
             {
@@ -889,29 +912,35 @@ class ChatModule extends DefaultModule
                 // Get the list of participants for each conversation to 
                 // figure out what name to give this chat. 
                 $participants = $convo->getParticipants($this->user->user_id);
-                if(count($participants) > 1 || $convo->conversation_id == 1)
+
+                // Global "mission chat"
+                if($convo->conversation_id == 1)
                 {
                     $name = $convo->name;
                 }
+                // Other conversations
                 else
                 {
                     $userInfo = array_pop($participants);
                     $name = 'Private: '.(strlen($userInfo['alias']) != 0) ? $userInfo['alias'] : $userInfo['username'];
                 }
                 
+                // Add flag if this is the current conversation room.
                 $roomSelected = '';
                 if($this->currConversation->conversation_id == $convo->conversation_id)
                 {
                     $roomSelected = 'room-selected';
                 }
 
+                // If threads are enabled, then only add the list for the 
+                // current parent conversation.
                 $listThreads = '';
-
                 $mission = MissionConfig::getInstance();
                 if($mission->feat_convo_threads && 
                   ($this->currConversation->parent_conversation_id == $convo->conversation_id ||
                    $this->currConversation->conversation_id == $convo->conversation_id))
                 {
+                    // Add threads.
                     $threads = '';
                     foreach($convo->thread_ids as $threadId)
                     {
@@ -922,6 +951,7 @@ class ChatModule extends DefaultModule
                         ));
                     }
 
+                    // Link for new threads always visible for admins, but others depend on a configuration flag.
                     $newThreadLink = ($this->user->is_admin || $mission->feat_convo_threads_all) ?
                         Main::loadTemplate('chat-room-new-thread.txt') : '';
 
