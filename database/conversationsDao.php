@@ -219,8 +219,11 @@ class ConversationsDao extends Dao
 
                 foreach($conversations as $convoId => $convo)
                 {
-                    // Update parent with new thread id reference
-                    self::$cache[$convo->parent_conversation_id]->addThreadId($convoId);
+                    if($convo->parent_conversation_id != null)
+                    {
+                        // Update parent with new thread id reference
+                        self::$cache[$convo->parent_conversation_id]->addThreadId($convoId);
+                    }
 
                     // Update cache
                     self::$cache[$convoId] = $convo;
