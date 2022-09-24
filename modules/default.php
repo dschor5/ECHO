@@ -8,7 +8,6 @@
  * 
  * @link https://github.com/dschor5/ECHO
  */
- */
 abstract class DefaultModule implements Module
 {
     /**
