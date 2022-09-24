@@ -1,10 +1,13 @@
 <?php
 
 /**
- * Abstract class to define an applicaiton module defining 
- * a specific group of user interactions. 
+ * Abstract class to define an applicaiton modules including:
+ * - Registration for different HTML, AJAX/JSON, and STREAM requests.
+ * - Registration for additional JS or CSS files needed for a page.
+ * - Creating page header with menus.
  * 
- * 
+ * @link https://github.com/dschor5/ECHO
+ */
  */
 abstract class DefaultModule implements Module
 {

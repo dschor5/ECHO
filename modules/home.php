@@ -1,7 +1,9 @@
 <?php
 
 /**
- * HomeModule manages main screen, login, and logout. 
+ * HomeModule manages main screen, login, and logout.
+ * 
+ * @link https://github.com/dschor5/ECHO 
  */
 class HomeModule extends DefaultModule
 {

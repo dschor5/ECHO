@@ -2,6 +2,8 @@
 
 /**
  * ErrorModule displays the error page and logs an error.
+ * 
+ * @link https://github.com/dschor5/ECHO
  */
 class ErrorModule extends DefaultModule
 {

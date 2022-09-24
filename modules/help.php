@@ -1,7 +1,9 @@
 <?php
 
 /**
- * HelpModule displays the help pages. 
+ * HelpModule displays the help pages.
+ * 
+ * @link https://github.com/dschor5/ECHO 
  */
 class HelpModule extends DefaultModule
 {

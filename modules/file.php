@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * FileModule allows users to access:
+ * - Attachments - Protected content
+ * - Archives - Protected content
+ * - CSS/JS - Customized for site
+ * 
+ * @link https://github.com/dschor5/ECHO
+ */
 class FileModule implements Module
 {
     private $user;
