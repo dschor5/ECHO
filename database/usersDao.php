@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Data Abstraction Object for the users table. Implements custom 
+ * queries to get users, create, and delete users.
+ * 
+ * @link https://github.com/dschor5/ECHO
+ */
 class UsersDao extends Dao
 {
     /**

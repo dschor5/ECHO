@@ -4,10 +4,6 @@
  * Data Abstraction Object for the Conversations table. Implements custom 
  * queries to search and update conversations as needed. 
  * 
- * Implementation Notes:
- * - 
- * 
- * 
  * @link https://github.com/dschor5/ECHO
  */
 class ConversationsDao extends Dao

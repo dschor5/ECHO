@@ -423,14 +423,27 @@ class MessagesDao extends Dao
         return $notifications;
     }
 
+    /**
+     * Clear messages and threads to initialize database for new mission.
+     *
+     * @return void
+     */
     public function clearMessagesAndThreads()
     {
         $conversationsDao = ConversationsDao::getInstance();
 
         $this->startTransaction();
+
+        // Delete all messags
         $this->database->query('DELETE FROM messages');
+
+        // Reset message counter
         $this->database->query('ALTER TABLE messages AUTO_INCREMENT = 1');
+
+        // Delete all threads
         $this->database->query('DELETE FROM conversations WHERE parent_conversation_id IS NOT NULL');
+
+        // Update date for date created and last message.
         $conversationsDao->update(
             array(
                 'date_created' => '0000-00-00 00:00:00',
@@ -440,11 +453,21 @@ class MessagesDao extends Dao
         $this->endTransaction();
     }
 
+    /**
+     * Get list of new messages for a particular conversation
+     *
+     * @param array $convoIds   Array of conversation ids to check
+     * @param boolean $isCrew   Flag to select receive time for HAB or MCC
+     * @param integer $offset   Offset for piecewise queries
+     * @param integer $numMsgs  Number of messages per query
+     * @return array Message objects
+     */
     public function getMessagesForConvo(array $convoIds, bool $isCrew, int $offset, int $numMsgs) : array
     {
         $qConvoIds = implode(',',$convoIds);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         
+        // Build query
         $queryStr = 'SELECT messages.*, '. 
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
@@ -454,10 +477,8 @@ class MessagesDao extends Dao
                     'LIMIT '.$offset.', '.$numMsgs;
         
         $messages = array();
-
-        $this->startTransaction();
-        $currTime = new DelayTime();
-        
+       
+        // Get all messages.
         if(($result = $this->database->query($queryStr)) !== false)
         {
             if($result->num_rows > 0)
@@ -468,8 +489,7 @@ class MessagesDao extends Dao
                 }
             }
         }
-        $this->endTransaction();
-     
+    
         return $messages;
     }
 
