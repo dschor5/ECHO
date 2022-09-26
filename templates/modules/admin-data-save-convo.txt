@@ -113,12 +113,13 @@
         </table>
 
     </div>
+
+    <div id="credit">
+        Archived from ECHO v%version% saved on %save-date%.
+    </div>
 </div>
 </center>
 
-<div id="credit">
-    ECHO v%version% archive saved on %save-date%.
-</div>
 
 </body>
 </html>
