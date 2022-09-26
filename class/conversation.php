@@ -233,7 +233,7 @@ class Conversation
                       '/%messages%/'     => $msgStr,
                       '/%archive-tz%/'   => $tz,
                       '/%title%/'        => 'ECHO Archive for '.htmlspecialchars($name),
-                      '/%version%/'      => $config['version'],
+                      '/%version%/'      => $config['echo_version'],
                       '/%save-date%/'    => $time->getTime(),
                 ));
 
