@@ -224,7 +224,7 @@ class Conversation
                           '/%name%/' => htmlspecialchars($this->name)));
             }
 
-            $time = DelayTime('now', $tz);
+            $time = new DelayTime('now', $tz);
             $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
                 array('/%name%/'         => htmlspecialchars($name),
                       '/%id%/'           => $id,
