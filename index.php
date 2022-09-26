@@ -6,6 +6,15 @@ date_default_timezone_set("UTC");
 require_once('config.inc.php');
 header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
+function echoErrorHandler($errno, $errstr, $errfile, $errline)
+{    
+    global $server;
+    Logger::error('Main::compile()', 
+        array('errno'=>$errno, 'errstr'=>$errstr, 'errfile'=>$errfile, 'errline'=>$errline));
+    header('Location: '.$server['http'].$server['site_url'].'/error');
+}
+set_error_handler("echoErrorHandler");
+
 try
 {
     // Force HTTPS. 
@@ -28,6 +37,7 @@ try
 catch (Exception $e) 
 {
     Logger::error("Main::compile()", array($e));
+    header('Location: '.$server['http'].$server['site_url'].'/error');
 }
 
 /**

@@ -4,6 +4,14 @@
  * MissionArchive objects represent an archive of all conversations/attachments.  
  * Encapsulates 'mission_archives' row from database.
  * 
+ * Table Structure: 'archives'
+ * - archive_id     (int)       Unique id for each archive.
+ * - server_name    (string)    Server name where archive is stored
+ * - notes          (string)    Notes saved with the archive (RFU)
+ * - mime_type      (string)    Mime type for current archive
+ * - timestamp      (datetime)  UTC timestamp when the archive was created
+ * - content_tz     (string)    Timezone used in archive
+ * 
  * Implementation Notes:
  * - Archives are renamed with a unique id of numeric characters
  *   with extension TMP before being saved to the logs directory. 
@@ -11,16 +19,25 @@
  *      - original_name --> Original filename as uploaded by the user.
  *      - server_name   --> New name assiged by the application.
  * - Renaming helps to:
- *      1. Prevents accidentally overriding files if a user uploads 
- *         multiple version of the same file. 
+ *      1. Prevents filename collisions.
  *      2. Hides upload file names to reduce the likelihood of someone 
  *         being able to read information they are not suppowed to see. 
- * 
  * 
  * @link https://github.com/dschor5/ECHO
  */
  class MissionArchive extends ServerFile
 {
+    /**
+     * Constant definition of valid archive types.
+     * @access private
+     * @var array
+     */
+    const ARCHIVE_TYPES = array(
+        'application/sql' => array('ext' => 'sql', 'desc' => 'SQL Backup (sql)'),
+        'application/zip' => array('ext' => 'zip', 'desc' => 'Conversation Backup (zip)'),
+        'application/txt' => array('ext' => 'txt', 'desc' => 'System Log Backup (txt)'),
+    );
+
     /**
      * MissionArchive constructor. Appends object with field 'size' that
      * contains the size of the file in bytes.
@@ -33,61 +50,58 @@
         parent::__construct($data, $config['logs_dir']);
     }
 
-    public function getTimestamp() : string
+    /**
+     * Returns the timestamp in the MCC timezone when the archive was created. 
+     *
+     * @param string $format Format for timestamp. Default DATE_FORMAT.
+     * @return string Timestamp in MCC timezone and format selected.
+     **/
+    public function getTimestamp(string $format=DelayTime::DATE_FORMAT) : string
     {
         $mission = MissionConfig::getInstance();
-        return DelayTime::convertTimestampTimezone($this->timestamp, 'UTC', $mission->mcc_timezone);
+        return DelayTime::convertTimestampTimezone($this->timestamp, 'UTC', $mission->mcc_timezone, $format);
     }
 
-    public function getFilenameTimestamp() : string
-    {
-        $mission = MissionConfig::getInstance();
-        return DelayTime::convertFilenameTimestamp($this->timestamp, $mission->mcc_timezone);
-    }
-
+    /**
+     * Gets description of archive type based on mime type in database.
+     *
+     * @return string 
+     */
     public function getType() : string
     {
         $type = '';
 
-        if($this->mime_type == 'application/sql')
+        if(array_key_exists($this->mime_type, MissionArchive::ARCHIVE_TYPES))
         {
-            $type = 'SQL Backup (sql)'; 
+            $type = MissionArchive::ARCHIVE_TYPES[$this->mime_type]['desc'];
         }
-        else if($this->mime_type == 'application/txt')
+        else 
         {
-            $type = 'System Log Backup (txt)';
-        }
-        else
-        {
-            $type = 'Conversation Backup (zip)';
-        }
+            Logger::warning('MissionArchive::getType() invalid mime_type='.$this->mime_type);
+	    }
 
         return $type;
     }
 
+    /**
+     * Gets extension of archive type based on mime type in database.
+     *
+     * @return string 
+     */
     public function getExtension() : string
     {
-        $ext = '';
+        $type = '';
 
-        if($this->mime_type == 'application/sql')
+        if(array_key_exists($this->mime_type, MissionArchive::ARCHIVE_TYPES))
         {
-            $ext = 'sql'; 
+            $type = MissionArchive::ARCHIVE_TYPES[$this->mime_type]['ext'];
         }
-        else if($this->mime_type == 'application/txt')
+        else 
         {
-            $ext = 'txt';
-        }
-        else
-        {
-            $ext = 'zip';
-        }
+            Logger::warning('MissionArchive::getExtension() invalid mime_type='.$this->mime_type);
+	    }
 
-        return $ext;
-    }
-
-    public function getDesc() : string
-    {
-        return $this->getType().' created on '.$this->getTimestamp();
+        return $type;
     }
 }
 

@@ -1,0 +1,36 @@
+- Annotated general view EARTH
+- Annotated general view MARS
+- Annotated send text message
+- Zoomed in text message
+- Zoomed in audio message
+- Annotated rec audio message
+- Zoomed in video message
+- Annotated rec video message
+- Zoomed in Chrome permissions for camera + mic
+- Annotated send attachment
+- Zoomed in image attachment
+- Zoomed in file attachment
+- Annotated send important message
+- Zoomed in important message
+- Annotated / Zoomed in Markdown 
+- Zoomed in transit progress bar
+- Zoomed in delivered
+- Sample out of sequence EARTH / MARS
+- Zoomed in out of sequence
+- Zoomed in create new thread
+- Zoomed in conversations no threads
+- Zoomed in conversations with threads
+- Zoomed in conversations with options to create threads
+- Annotated private conversation
+- Annotated public conversation
+- Menu (help + logout)
+
+
+FD - Flight Director (mcc)
+FS - Flight Surgeon (mcc)
+MC - Mission Commander (hab)
+FE - Flight Engineer (hab)
+PS - Payload Specialist (hab)
+
+FD - Good morning crew. Reminder to 
+MC - Good morning. Crew checking in. Preparing for EVA. 

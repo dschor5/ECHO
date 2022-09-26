@@ -103,7 +103,12 @@ class DelayTime
         return $this->ts - self::getStartTimeUTC();
     }
 
-    public function getTimestamp()
+    /**
+     * Get the UNIT timestamp for the current date object.
+     *
+     * @return int 
+     **/
+    public function getTimestamp() : int
     {
         return $this->ts;
     }
@@ -127,20 +132,14 @@ class DelayTime
      * @param string $timestamp Date and time in DATE_FORMAT. 
      * @param string $fromTz Name of timezone to interpret timestamp. 
      * @param string $toTz Name of timezone to convert the timestamp to. 
-     * @return string Timestamp in new timezone formatted as DATE_FORMAT.
+     * @param string $format Fomrat for string output. Defaults to DATE_FORMAT.
+     * @return string Timestamp in new timezone and format.
      */
-    public static function convertTimestampTimezone(string $timestamp, string $fromTz, string $toTz) : string
+    public static function convertTimestampTimezone(string $timestamp, string $fromTz, string $toTz, string $format=DelayTime::DATE_FORMAT) : string
     {
         $ts = new DateTime($timestamp, new DateTimeZone($fromTz));
         $ts->setTimezone(new DateTimeZone($toTz));
-        return $ts->format(self::DATE_FORMAT);
-    }
-
-    public static function convertFilenameTimestamp(string $timestamp, string $toTz) : string
-    {
-        $ts = new DateTime($timestamp, new DateTimeZone('UTC'));
-        $ts->setTimezone(new DateTimeZone($toTz));
-        return $ts->format(self::DATE_FORMAT_FILE);
+        return $ts->format($format);
     }
 
     /**

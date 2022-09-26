@@ -1,4 +1,4 @@
-    <div id="feat-audio-notification-enabled">
+    <div id="feat-audio-notification-enabled" style="display: none;">
         <audio id="new-msg-sound">
             <source src="%http%%site_url%/%templates_dir%/media/new_msg.ogg" type="audio/ogg">
             <source src="%http%%site_url%/%templates_dir%/media/new_msg.m4r" type="audio/aac">

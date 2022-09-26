@@ -1,7 +1,7 @@
 const HEARTBEAT_FREQ_MSEC   = 60 * 1000; 
 const HEARTBEAT_RETRY_MSEC  = 10 * 1000;
 const HEARTBEAT_RETRY_LIMIT = 5;
-const SHOW_TIMEOUT_SEC      = 300;  
+const SHOW_TIMEOUT_SEC      = 10;  
 
 var countdownInterval;
 var nextHeartbeat = Date.now() + HEARTBEAT_FREQ_MSEC;
@@ -90,7 +90,8 @@ function updateExpiredTime() {
 function updateCountdown() {
     expiredTime = localStorage.getItem("_expiredTime");
     
-    timeLeftSec = Math.round((expiredTime - Date.now()) / 1000);
+    // Rount to nearest second and make sure it never becomes negative.
+    timeLeftSec = Math.max(0, Math.round((expiredTime - Date.now()) / 1000));
     $('#timeout-counter').text(timeLeftSec);
 
     if(timeLeftSec < SHOW_TIMEOUT_SEC) {

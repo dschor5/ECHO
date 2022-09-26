@@ -69,6 +69,11 @@ class ArchiveDao extends Dao
         return $file;
     }
 
+    /**
+     * Get list of all archives. 
+     *
+     * @return array 
+     */
     public function getArchives(): array
     {
         $archives = array();

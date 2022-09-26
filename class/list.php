@@ -69,6 +69,7 @@ class ListGenerator
 
     /**
      * Build the table. 
+     * 
      * @return string HTML table. 
      */
     public function build() : string

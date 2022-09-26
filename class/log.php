@@ -67,6 +67,9 @@ class Logger
         // Do nothing. 
     }
 
+    /** 
+     * Initialize logger to INFO level unless DEBUG is enabled.
+     */
     public static function init()
     {
         $missionConfig = MissionConfig::getInstance();
@@ -202,6 +205,7 @@ class Logger
     /**
 	 * Slightly modified version of http://www.geekality.net/2011/05/28/php-tail-tackling-large-files/
      * Modified by Dario Schor to work with different EOL configurations.
+     *
 	 * @author Torleif Berger, Lorenzo Stanco
 	 * @link http://stackoverflow.com/a/15025877/995958
 	 * @license http://creativecommons.org/licenses/by/3.0/

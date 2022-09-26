@@ -95,6 +95,11 @@ class Conversation
         return $result;
     }
 
+    /**
+     * Adds to the list of thread ids within this conversation.
+     *
+     * @param int $threadId 
+     **/
     public function addThreadId(int $threadId)
     {
         if(!in_array($threadId, $this->thread_ids))
@@ -141,6 +146,16 @@ class Conversation
         return $participants;
     }
 
+    /**
+     * Archive a conversation and add it to the zip archive.
+     *
+     * @param ZipArchive $zip Zip file to add conversation files to. 
+     * @param string $tz Convert all timestamps to this timezone.
+     * @param bool $sepThreads If true, then save all threads to individual files. 
+     * @param string $parentName Name of parent conversation (in case of a thread)
+     * @param bool $isCrew If true, order messages based on the HAB received time.
+     * @return bool Success
+     **/
     public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName, bool $isCrew) : bool
     {
         global $config;
@@ -148,15 +163,12 @@ class Conversation
         $messagesDao = MessagesDao::getInstance();
         $missionConfig = MissionConfig::getInstance();
         
-        $mccStr = $missionConfig->mcc_planet;
-        $habStr = $missionConfig->hab_planet;
-
-        $offset = 0;
-        $numMsgs = 20;
-        
+        // Include list of participants and their role in the archive.
         $convoStr = '';
         $convoParticipants = $this->getParticipants();
         $participantsStr = '';
+        $mccStr = $missionConfig->mcc_planet;
+        $habStr = $missionConfig->hab_planet;
         foreach($convoParticipants as $participant)
         {
             $participantsStr .= Main::loadTemplate('admin-data-save-user.txt', 
@@ -165,9 +177,15 @@ class Conversation
                 ));
         }
         
-        $msgStr = '';
-        $offset = 0;
-
+        // Create folder name for this conversation. 
+        // --> Threads disabled: XXXXX-conversation 
+        // --> Threads enabled:  XXXXX-YYYYY-thread 
+        // Where XXXXX is the conversation id and YYYYY is the thread id.
+        //
+        // The same if-statements are used to identify the list of conversation ids
+        // to use in subsequent queries. 
+        // --> Threads disabled: list of ids contain parent and all threads (if any)
+        // --> Threads enabled:  each conversation id is processed separately.
         $folderName = sprintf('%05d', $this->conversation_id).'-conversation';
         $ids = array($this->conversation_id);
         if($sepThreads)
@@ -184,16 +202,26 @@ class Conversation
         }
         $zip->addEmptyDir($folderName);
 
-
+        // Throttle queries to get conversation messages. 
+        $msgStr = '';   // HTML content for conversation archive.
+        $offset = 0;    // Offset into database table for throttling queries
+        $numMsgs = 50;  // Number of messages to get per query
         $messages = $messagesDao->getMessagesForConvo($ids, $isCrew, $offset, $numMsgs);
+        
+        // Add explicit message if conversation is empty. 
         if(count($messages) == 0)
         {
             $msgStr = '<tr><td colspan="7">No messages</td></tr>';
         }
+
+        // Query database as long as there are more messages.
         while(count($messages) > 0 && $success)
         {
+            // Each message is processed and added to the HTML content in $msgStr.
             foreach($messages as $msg)
             {
+                // Add the message string and any attachments to the corresponding folder 
+                // of the zip archive. 
                 $msgResponse = $msg->archiveMessage($zip, $folderName, $convoParticipants, $tz);
                 if($msgResponse === false)
                 {
@@ -209,12 +237,14 @@ class Conversation
             $messages = $messagesDao->getMessagesForConvo($ids, $isCrew, $offset, $numMsgs);
         }
 
+        // If no errors were encountered:
         if($success)
         {
             $id     = $this->conversation_id;
             $name   = $this->name;
             $thread = '';
 
+            // If threads are enabled, add the thread name and id to the archive.
             if($sepThreads && $this->parent_conversation_id != null)
             {
                 $id     = $this->parent_conversation_id;
@@ -224,6 +254,7 @@ class Conversation
                           '/%name%/' => htmlspecialchars($this->name)));
             }
 
+            // Finally, build the HTML file and add it to the archive.
             $time = new DelayTime('now', $tz);
             $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
                 array('/%name%/'         => htmlspecialchars($name),

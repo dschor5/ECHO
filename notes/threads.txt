@@ -1,9 +1,0 @@
-Threads GUI:
-- Click "+" sign on the conversation. 
-    - Pops up a window to assign a name to the thread. 
-- Only the active conversation shows list of Threads
-    - Small inset listing threads 
-- Messages get: conversation id from the thread
-- Conversation links to the parent. 
-- Thus, conversation queries can link both, but may need
-  unique identifier to avoid duplicating messages. 

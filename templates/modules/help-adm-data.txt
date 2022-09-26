@@ -1,0 +1,92 @@
+<h3>Data Management Overview</h3>
+
+<p>The Data Management page allows Administrators to download archives, view system logs, and reset the application.</p>
+
+<hr/>
+
+<h3>Backup Conversations</h3>
+
+<p>There are three types of backups used for different purposes. </p>
+
+<dl>
+    <dt>
+        Conversations
+    <dt>
+    <dd>
+        <p>Archive of conversations saved in HTML files. Each conversation is saved in its own file and 
+        contains a table listing the id, author, sent timestamp, receive timestamp, and content for every message. 
+        If threads are enabled, then each thread is saved separately and identifies the converation it belongs to
+        (e.g., Mission Chat). Each file identifies the conversation, participants (by <code>username</code> only), and all messages. 
+        </p>
+
+        <p>File structure:</p>
+        <div>&nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> archive-YYYY-MM-DDTHH-MM-SS.zip</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-conversation</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment1.jpg</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment2.pdf</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-conversation.html</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-TTTTT-thread</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment3.jpg</div>
+        <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-TTTTT-thread.html</div>
+        <p>Where CCCCC, TTTTT, and MMMMM refer to the unique conversation, thread, and message ids respectively.</p>
+
+    </dd>
+
+    <dt>
+        MySQL
+    <dt>
+    <dd>
+        <p>Raw MySQL dump of the entire database schema and data. These archives are intended for backup purposes, 
+        but are provided to administrators in case it facilitates queries for data analysis.</p>
+    </dd>
+
+    <dt>
+        System Log
+    <dt>
+    <dd>
+        <p>The system log records errors and warnings captured by the software (e.g., invalid queries). Moreover, 
+        it saves a record of every setting changed in the application along with a UTC timestamp. This can be used
+        to recreate events after the mission. It is recommended to clear the log before configuring the system 
+        for a new mission. </p>
+
+        <p>It is always a good idea to attach copies of this log to any bug reports.</p>
+
+        <p><i>Note: The administrator page shows the last 20 messages recorded.</i></p>
+
+        
+    </dd>
+</dl>
+
+<hr/>
+
+<h3>Reset Applicaiton</h3>
+
+<p class="important"><b>Important:</b> Resetting the system log or deletting all messages are irreversible steps. 
+Always backup the database before performing these steps.</p>
+
+<dl>
+    <dt>
+        Reset Sysetm Log
+    <dt>
+    <dd>
+        <p>Clear the system log.</p>
+    </dd>
+
+    <dt>
+        Delete All Data
+    <dt>
+    <dd>
+        <p>Deletes all threads, text, audio, video, and file attachments, but preserves all user accounts.</p>
+    </dd>
+</dl>
+
+<p>The recommended sequence of events is shown below. The order ensures that there is 
+record of the mission configuration saved to the System Log at the beginning of each mission.</p>
+
+<ol>
+    <li><i>Optional</i> Create backups</li>
+    <li>Reset System Log</li>
+    <li>Delete All Data</li>
+    <li>Configure mission settings</li>
+</ol>
+

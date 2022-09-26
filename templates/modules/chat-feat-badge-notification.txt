@@ -1,1 +1,1 @@
-    <div id="feat-badge-notification-enabled"></div>
+    <div id="feat-badge-notification-enabled" style="display: none;"></div>

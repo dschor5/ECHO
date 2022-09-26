@@ -4,10 +4,6 @@
  * Data Abstraction Object for the Conversations table. Implements custom 
  * queries to search and update conversations as needed. 
  * 
- * Implementation Notes:
- * - 
- * 
- * 
  * @link https://github.com/dschor5/ECHO
  */
 class ConversationsDao extends Dao
@@ -73,39 +69,6 @@ class ConversationsDao extends Dao
         return $convos;
     }
 
-    public function newThread(&$convo, $threadName)
-    {
-        $this->startTransaction();
-        $currTime = new DelayTime();
-        $convoFields = array(
-            'name'                   => $threadName,
-            'parent_conversation_id' => $convo->conversation_id,
-            'date_created'           => $currTime->getTime(),
-        );
-        $convoId = $this->insert($convoFields);
-        if($convoId === false)
-        {
-            Logger::error('Cannot create new thread for '.$convo->conversation_id.'.');
-            $this->endTransaction(false);
-            return false;
-        }
-
-        $participantsDao = ParticipantsDao::getInstance();
-        $participants = explode(',', $convo->participants_id);
-        $participantsFields = array();
-        foreach($participants as $userId)
-        {
-            $participantsFields[] = array(
-                'conversation_id' => $convoId,
-                'user_id' => $userId,
-            );
-        }
-        $participantsDao->insertMultiple($participantsFields);
-        $this->endTransaction();
-
-        return $convoId;
-    }
-
     /**
      * Get all conversations. If provided, only get those for the particular userId.
      *
@@ -168,12 +131,65 @@ class ConversationsDao extends Dao
         return $conversations;
     }
 
-    public function getNewThreads(array $convoIds, int $userId, string $toDate) : array
+    /**
+     * Create a new thread for the given conversation.
+     * 
+     * Assumes that the calling function already checked that the 
+     * thread name was valid and unique.
+     *
+     * @param Conversation $convo parent conversation.
+     * @return int|false Conversation id or false on error. 
+     */
+    public function newThread(Conversation &$convo, string $threadName)
+    {
+        $this->startTransaction();
+
+        // Create new conversation
+        $currTime = new DelayTime();
+        $convoFields = array(
+            'name'                   => $threadName,
+            'parent_conversation_id' => $convo->conversation_id,
+            'date_created'           => $currTime->getTime(),
+        );
+        $convoId = $this->insert($convoFields);
+
+        if($convoId === false)
+        {
+            Logger::error('Cannot create new thread for '.$convo->conversation_id.'.');
+            $this->endTransaction(false);
+            return false;
+        }
+
+        // Copy over the participants from teh parent conversation to the thread
+        $participantsDao = ParticipantsDao::getInstance();
+        $participants = explode(',', $convo->participants_id);
+        $participantsFields = array();
+        foreach($participants as $userId)
+        {
+            $participantsFields[] = array(
+                'conversation_id' => $convoId,
+                'user_id' => $userId,
+            );
+        }
+        $keys = array('conversation_id', 'user_id');
+        $participantsDao->insertMultiple($keys, $participantsFields);
+
+        $this->endTransaction();
+
+        return $convoId;
+    }    
+
+    /**
+     * Get all new threads for a given conversation.
+     *
+     * @param array $convoIds Conversation ids to exclude in search
+     * @param integer $userId Current user id
+     * @return array of Conversation objects
+     */
+    public function getNewThreads(array $convoIds, int $userId) : array
     {
         $qConvoIds = implode(',',$convoIds);
         $qUserId   = '\''.$this->database->prepareStatement($userId).'\'';
-        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
-        $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
 
         $queryStr = 'SELECT conversations.*, '.
             'GROUP_CONCAT( participants.user_id) AS participants_id, '.
@@ -186,7 +202,6 @@ class ConversationsDao extends Dao
             'JOIN users ON users.user_id=participants.user_id '.
             'WHERE conversations.conversation_id NOT IN ('.$qConvoIds.') '. 
                 'AND users.user_id='.$qUserId.' '.
-                //'AND (conversations.date_created BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
             'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
         
         $conversations = array();
@@ -195,6 +210,7 @@ class ConversationsDao extends Dao
         {
             if($result->num_rows > 0)
             {
+                // Retreieve results from query
                 while(($conversationData=$result->fetch_assoc()) != null)
                 {
                     $currConversation = new Conversation($conversationData);
@@ -203,8 +219,11 @@ class ConversationsDao extends Dao
 
                 foreach($conversations as $convoId => $convo)
                 {
-                    // Update parent with new thread id reference
-                    self::$cache[$convo->parent_conversation_id]->addThreadId($convoId);
+                    if($convo->parent_conversation_id != null)
+                    {
+                        // Update parent with new thread id reference
+                        self::$cache[$convo->parent_conversation_id]->addThreadId($convoId);
+                    }
 
                     // Update cache
                     self::$cache[$convoId] = $convo;

@@ -3,18 +3,34 @@
 /**
  * Delay object used to parse/interpret the user configurable comms delay.
  * 
- * The delays are stored in the 'mission_config.delay_config' field as 
- * a JSON encoded array where each entry contains a timestamp and expression
- * to calculate the delay. For instance, the following example says that 
- * for the first minute in 2021, the delay is 0sec, but after that it will 
- * increase to 10sec. 
+ * The field 'mission_config.delay_type' selects whether to use:
+ * --> Manual delay -       Can be changed anytime before, during, or after a 
+ *                          mission and takes effect immediately.
+ *
+ * --> Automatic delay -    Automatic delays allow Administrators to define 
+ *                          delays as a piecewise function of time. Each 
+ *                          piecewise component is defined by an equation 
+ *                          and a timestamp when that delay will activate.
+ *
+ * --> Current Mars delay - Applies the current delay assuming direct 
+ *                          point-to-point contact with Mars ignoring 
+ *                          interference from the Sun, use of the Deep 
+ *                          Space Network, planet rotation, etc. The delays 
+ *                          were simulated on 4hr intervals until 2040 using 
+ *                          the JPL DE440S Ephemeris Data Set.
+ *
+ * The manual and automatic delays are stored in the 'mission_config.delay_config' 
+ * field as a JSON encoded array where each entry contains a timestamp and 
+ * expression to calculate the delay. For instance, the following example 
+ * says that for the first minute in 2021, the delay is 0sec, but after that 
+ * it will increase to 10sec. 
  *      [
  *          {'ts':'2021-01-01 00:00:00', 'eq':0}, 
  *          {'ts':'2021-01-01 00:01:00', 'eq':10}, 
  *      ]
- * Note, the field 'mission_config.delay_type' is only used to select the 
- * appropriate GUI menu, and thus it is not part of the delay calculation
- * in this class. 
+ * 
+ * Whereas the current Mars delay is read from a file containing the distance
+ * between Earth and Mars computed every four hours from 2020-2040.
  * 
  * Implementation Notes:
  * - Singleton implementation.
@@ -78,6 +94,11 @@ class Delay
      */
     const CACHE_TIMEOUT = 1.0;
 
+    /**
+     * Constants matching delay_type. 
+     * @access private
+     * @var string
+     */
     const MANUAL = 'manual';
     const TIMED  = 'timed';
     const MARS   = 'mars';
@@ -105,9 +126,17 @@ class Delay
         return self::$instance;
     }
 
+    /**
+     * Get current onw-way light time communication delay based on the 
+     * selected delay_type.
+     *
+     * @return float Delay in sec.
+     **/
     public function getDelay() : float
     {
         // If the cached valud is still vaid return it. 
+        // The cache is used to avoid extra queries/calculations for 
+        // the stream of data that sends the current delay to the user GUI.
         if(microtime(true) - $this->lastCheck < Delay::CACHE_TIMEOUT)
         {
             return $this->currDelay;
@@ -116,9 +145,8 @@ class Delay
         // Update cache refresh timestamp
         $this->lastCheck = microtime(true);
 
-        // Get delay type from mission configuration
+        // Get current delay based on the delay type.
         $mission = MissionConfig::getInstance();
-
         if($mission->delay_type == Delay::MARS)
         {
             $this->currDelay = $this->getMarsDelay();
@@ -131,6 +159,20 @@ class Delay
         return $this->currDelay;
     }
 
+    /** 
+     * Get the current Mars delay from a file containing simulated 
+     * delays on 4hr intervals between 2020 and 2024 using the 
+     * JPL DE440S Ephemeris Data Set. 
+     *
+     * The csv file contains two fixed width columns with:
+     * - Timestamp (YYYY-MM-DD HH:MM:SS) [19 chars]
+     * - Delay in sec                    []
+     * Thus, rather than reading through the entire file looking for a 
+     * particular timestamp, this function fast-forwards X bytes 
+     * to find the appropriate delay for the current UTC time.
+     *
+     * @return float 
+     **/
     private function getMarsDelay() : float
     {
         $delay = 0;
@@ -139,6 +181,7 @@ class Delay
         global $server;
         $filename = $server['host_address'].$config['logs_dir'].'/'.$config['delay_mars_file'];
 
+        // Open file containing delay
         $fp = fopen($filename, 'r');
         if($fp === false)
         {
@@ -155,7 +198,7 @@ class Delay
             fclose($fp);
             return $delay;
         }
-        
+
         list($epochStr, ) = explode(',', $line, 2);
         $epochObj = new DateTime($epochStr, new DateTimeZone('UTC'));
         $epoch = $epochObj->getTimestamp();
@@ -188,6 +231,7 @@ class Delay
             return $delay;
         }
         
+        // Read line after byte offset. 
         $line = fgets($fp);
         if($line === false)
         {
@@ -197,7 +241,7 @@ class Delay
         }
 
         // Read next line and get delay
-        list($time, , $delayStr) = explode(',', $line, 4);
+        list(, , $delayStr) = explode(',', $line, 4);
         
         // Close file
         fclose($fp);

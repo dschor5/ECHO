@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Data Abstraction Object for the users table. Implements custom 
+ * queries to get users, create, and delete users.
+ * 
+ * @link https://github.com/dschor5/ECHO
+ */
 class UsersDao extends Dao
 {
     /**
@@ -42,22 +48,30 @@ class UsersDao extends Dao
         parent::__construct('users', 'user_id');
     }
 
-
-    public function getById(int $id)
+    /**
+     * Get User by its user_id field.
+     *
+     * @param integer $id
+     * @return User|null
+     */
+    public function getById(int $id) 
     {
+        // Sanitize value
+        $id = intval($id);
         $user = null;
 
+        // Send cache User if available.
         if(isset(self::$cache[$id]))
         {
             $user = self::$cache[$id];
         }
-
-        if($user == null)
+        else
         {
+            // Query database.
             $queryStr = 'SELECT users.*, ('. 
-                    'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
-                    'WHERE participants.user_id=users.user_id) AS conversations '. 
-                'FROM users WHERE users.user_id='.$id;
+                            'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
+                            'WHERE participants.user_id=users.user_id) AS conversations '. 
+                        'FROM users WHERE users.user_id='.$id;
 
             if (($result = $this->database->query($queryStr)) !== false)
             {
@@ -72,10 +86,17 @@ class UsersDao extends Dao
         return $user;
     }
 
+    /**
+     * Get User by its username field.
+     *
+     * @param string $username
+     * @return User|null
+     */
     public function getByUsername(string $username)
     {
-        $user = false;
+        $user = null;
 
+        // Check if the user is already in the cache.
         foreach(self::$cache as $userId => $cachedUser)
         {
             if(strcmp($cachedUser->username, $username) === 0)
@@ -85,14 +106,15 @@ class UsersDao extends Dao
             }
         }
 
-        if($user === false)
+        if($user == null)
         {
+            // Query database for user.
             $qUsername = '\''.$this->database->prepareStatement($username).'\'';
 
             $queryStr = 'SELECT users.*, ('. 
-                    'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
-                    'WHERE participants.user_id=users.user_id) AS conversations '. 
-                'FROM users WHERE users.username='.$qUsername;
+                            'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
+                            'WHERE participants.user_id=users.user_id) AS conversations '. 
+                        'FROM users WHERE users.username='.$qUsername;
 
             if (($result = $this->database->query($queryStr)) !== false)
             {
@@ -108,8 +130,18 @@ class UsersDao extends Dao
         return $user;
     }
 
+    /**
+     * Get all users.
+     *
+     * @param string $sort Name of field to sort list by.
+     * @param string $order 'ASC' or 'DESC' to order list.
+     * @return array
+     */
     public function getUsers(string $sort='user_id', string $order='ASC'): array
     {
+        // If teh cache is full (flag set by this funciton only), then 
+        // return list of users. Otherwise, query database and update
+        // the cache.
         if(self::$cacheFull === false)
         {
             if(($result = $this->select('*','*',$sort,$order)) !== false)
@@ -130,7 +162,13 @@ class UsersDao extends Dao
         return self::$cache;
     }
 
-    public function createNewUser($fields)
+    /**
+     *  Create a new user. 
+     *
+     * @param array $fields Associative array of fields to create a new user.
+     * @return int User id added or -1 on error.
+     */
+    public function createNewUser(array $fields)
     {
         $conversationsDao = ConversationsDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
@@ -141,14 +179,19 @@ class UsersDao extends Dao
         try
         {
             $this->startTransaction();
-            $newUserId = $this->insert($fields);
             
+            // Add user to database.
+            $newUserId = $this->insert($fields);
 
+            // Get list of all users to create new private conversations 
+            // with the newly added user account.
             $users = $this->getUsers();
 
             // Give the new user access to all the previous mission messges
             $convos = $conversationsDao->getGlobalConvos();
             
+            // Create msg_status entries for all the old messages 
+            // already in the database Mission Chat and its threads.
             $newParticipants = array();
             foreach($convos as $convoId)
             {
@@ -158,18 +201,22 @@ class UsersDao extends Dao
                 );
                 $messagesDao->newUserAccessToPrevMessages($convoId, $newUserId);
             }
-            $participantsDao->insertMultiple($newParticipants);
+            $keys = array('conversation_id', 'user_id');
+            $participantsDao->insertMultiple($keys, $newParticipants);
 
+            // Create new private conversations with the new user. 
             foreach($users as $otherUserId=>$user)
             {
                 if($newUserId != $user->user_id)
                 {
+                    // Create new conversation
                     $newConvoData = array(
                         'name' => $user->alias.'-'.$users[$newUserId]->alias,
                         'parent_conversation_id' => null,
                     );
                     $newConvoId = $conversationsDao->insert($newConvoData);
 
+                    // Add list of participants for the new private conversation.
                     $newParticipants = array(
                         array(
                             'conversation_id' => $newConvoId,
@@ -180,11 +227,13 @@ class UsersDao extends Dao
                             'user_id' => $otherUserId,
                         ),
                     );
-                    $participantsDao->insertMultiple($newParticipants);
+                    $keys = array('conversation_id', 'user_id');
+                    $participantsDao->insertMultiple($keys, $newParticipants);
                 }
             }
             $this->endTransaction(true);
         }
+        // Catch errors.
         catch(Exception $e)
         {
             $this->endTransaction(false);
@@ -197,7 +246,16 @@ class UsersDao extends Dao
         return $newUserId;
     }    
 
-    public function deleteUser($userId)
+    /**
+     * Delete a user by its user_id. The database schema will automatically delete
+     * all of the user's messages and conversaitons to which they belong. 
+     * This means that if you had a private conversation with this user, that 
+     * conversation will also be deleted along with all the messages therein.
+     *
+     * @param int $userId
+     * @return bool True on success
+     */
+    public function deleteUser(int $userId) : bool
     {
         $result = false;
         $participantsDao = ParticipantsDao::getInstance();
@@ -207,9 +265,12 @@ class UsersDao extends Dao
         try 
         {
             $this->startTransaction();
-            $this->drop($userId);
-            $convosToDelete = $participantsDao->getConvosWithSingleParticipant();
 
+            // Delete user. 
+            $this->drop($userId);
+
+            // Delete all convos with a single participant except for the mission chat and its threads
+            $convosToDelete = $participantsDao->getConvosWithSingleParticipant();
             if(count($convosToDelete) > 0)
             {
                 $conversationsDao->drop('conversation_id IN ('.implode(',', $convosToDelete).')');
@@ -220,7 +281,7 @@ class UsersDao extends Dao
         catch(Exception $e)
         {
             $this->endTransaction(false);
-            Logger::warning('usersDao::deleteUser', $e);
+            Logger::warning('usersDao::deleteUser', array($e));
         }
         $this->database->queryExceptionEnabled(false);
 

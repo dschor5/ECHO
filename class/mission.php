@@ -5,9 +5,9 @@
  * Encapsulates 'mission_config' row from database.
  * 
  * Table Structure: 'mission_config'
- * - name  (string) Configuration field name
- * - value (string) Value for configuration field saved as a string.
- * - type  (string) Variable type for parsing/interpreting config field.
+ * - name   (string)    Configuration field name
+ * - value  (string)    Value for configuration field saved as a string.
+ * - type   (string)    Variable type for parsing/interpreting config field.
  * 
  * Implementation Notes:
  * - Singleton implementation. 

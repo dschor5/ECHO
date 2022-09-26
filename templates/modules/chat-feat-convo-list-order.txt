@@ -1,1 +1,1 @@
-    <div id="feat-convo-list-order-enabled"></div>
+    <div id="feat-convo-list-order-enabled" style="display: none;"></div>

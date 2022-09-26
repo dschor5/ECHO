@@ -32,7 +32,10 @@
                 <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment1.jpg</div>
                 <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment2.pdf</div>
                 <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-conversation.html</div>
-                Where CCCCC and MMMMM refer to the unique conversation and message ids respectively.
+                <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-TTTTT-thread</div>
+                <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> MMMMM-attachment3.jpg</div>
+                <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-document"></span> CCCCC-TTTTT-thread.html</div>
+                Where CCCCC and MMMMM refer to the unique conversation and global message ids respectively.
             </div>
         </div>
 

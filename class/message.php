@@ -4,8 +4,37 @@
  * Message objects represent one message within the chat application.
  * Encapsulates 'messages' row from database. 
  * 
+ * Table Structure: 'messages'
+ * - message_id                 (int)       Global message id unique to this table.
+ * - user_id                    (int)       User id who authored the message.
+ * - conversation_id            (int)       Conversation where the message belongs.
+ * - text                       (text)      Text stored in the message.
+ * - type                       (enum)      Enumerated value indicating:
+ *                                          - TEXT - plaintext message
+ *                                          - IMPORTANT - plaintext message but important
+ *                                          - VIDEO - video recording
+ *                                          - AUDIO - audio recording
+ *                                          - FILE - any other file attachment
+ * - sent_time                  (datetime)  UTC timestamp when the message was sent
+ * - from_crew                  (bool)      Boolean to indicate the message was sent from the crew (HAB)
+ * - message_id_alt             (int)       Alternate message id (HAB-# or MCC-#) that is
+ *                                          unique to each conversation/thread. 
+ *                                          Note the same conversaiton can have a HAB-1 and MCC-1 
+ *                                          because that's the id they were assigned by the sender. 
+ * - recv_time_hab              (datetime)  UTC timestamp when the message is visible by HAB
+ * - recv_time_mcc              (datetime)  UTC timestamp when the message is visible by MCC
+ * 
+ * Additional Fields:
+ * - users.username             (string)    Username for message author
+ * - users.alias                (string)    Alias for message author
+ * - msg_status.is_read         (bool)      Flag indicating if the msg was delivered 
+ *                                          to the current logged in user
+ * - msg_files.original_name    (string)    Original filename for attachment (if any)
+ * - msg_files.server_name      (string)    Server filename for attachment (if any)
+ * - msg_files.mime_type        (string)    Mime type for attachment (if any)
+ * 
  * Implementation Notes:
- * - Each message is assigned a type from: TEXT, FILE, AUDIO, or VIDEO. 
+ * - Each message is assigned a type from: TEXT, IMPORTANT, FILE, AUDIO, or VIDEO. 
  * 
  * @link https://github.com/dschor5/ECHO
  */
@@ -113,10 +142,14 @@ class Message
      */
     private function getReceivedTime(bool $remoteDest) : string
     {
+        // Message was sent to remote destination, so use the receive timestamp 
+        // that does not match the originator timestamp. 
         if($remoteDest)
         {
             $receiveTime = $this->from_crew ? $this->recv_time_mcc : $this->recv_time_hab;
         }
+        // Message was sent to the same destination, so use the receive timestamp 
+        // matching the originator timestamp.
         else
         {
             $receiveTime = $this->from_crew ? $this->recv_time_hab : $this->recv_time_mcc;
@@ -149,9 +182,23 @@ class Message
         return $ret;
     }
 
+    /**
+     * Archive the message by (i) returning a string representation of the content
+     * and (ii) adding any attachments to the zip file. 
+     *
+     * @param ZipArchive $zip Zip file to which attachments are added
+     * @param string $folder Folder within the zip file to add attachments
+     * @param array $participants List of participants to get usename for message author
+     * @param string $tz Timezone to use when displaying the send/recv time. 
+     * @return string HTML representation of the message of false on error.
+     */
     public function archiveMessage(ZipArchive &$zip, string $folder, array &$participants, string $tz) 
     {
+        // Compile message text
         $msg = $this->compileMsgText();
+
+        // If the message had an attachment, then copy the file to the correct
+        // folder in the zip archive.
         if($this->type != self::TEXT && $this->type != self::IMPORTANT && $this->file != null && $this->file->exists())
         {
             $msg = $this->file->original_name.' ('.$this->file->getSize().')';
@@ -166,12 +213,14 @@ class Message
             }
         }
 
+        // Add indicator that this message was sent with high importance.
         $important = '';
         if($this->type == self::IMPORTANT)
         {
             $important = '<p style="color: red; font-weight: bold; font-size: 140%;">IMPORTANT:</p>';
         }
 
+        // Compile message HTML for archive 
         return Main::loadTemplate('admin-data-save-msg.txt', 
             array('/%message_id%/'     => $this->message_id,
                   '/%message_id_alt%/' => $this->formatAltMessageId(),
@@ -204,20 +253,14 @@ class Message
         return $result;
     }
 
-    public function formatAltMessageId()
+    /**
+     * Get message id from sender (HAB or MCC) to display on the screen.
+     *
+     * @return string 
+     */
+    public function formatAltMessageId() : string
     {
-        $idStr = '';
-
-        if($this->from_crew)
-        {
-            $idStr = 'HAB-'.$this->message_id_alt;
-        }
-        else
-        {
-            $idStr = 'MCC-'.$this->message_id_alt;
-        }
-
-        return $idStr;
+        return (($this->from_crew) ? 'HAB-' : 'MCC-').$this->message_id_alt;    
     }
 
     /**
