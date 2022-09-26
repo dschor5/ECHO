@@ -222,6 +222,17 @@ a:hover {
     margin: 20px 0px 0px 0px;
 }
 
+#help-contents h3 {
+    color: var(--background-dark);
+}
+
+#help-contents hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-top: 1px dashed #666;
+    width: 60%;
+}
+
 .help-cell-head {
     padding: 10px 0px;
     border-bottom: 1px solid black;
@@ -235,8 +246,7 @@ a:hover {
 
 #help-contents dt {
     font-weight: bold;
-    color: var(--background-dark);
-    
+    color: var(--background-dark);    
 }
 
 #help-contents .important {
@@ -245,4 +255,8 @@ a:hover {
     border-radius: 5px;
     padding: 5px;
     font-style: italic;
+}
+
+#help-contents .new-msg-button {
+    font-family: "symbols";    
 }

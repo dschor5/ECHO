@@ -1,5 +1,114 @@
+<h3>Overview</h3>
+
+<p>ECHO is a delay emulation tool for analog space missions. It allows users to send and receive messages 
+both in a public and private setting. Public messages are sent to every user (both on the analog habitat
+and mission control), while private messages are 1-on-1 discussions with another individual. The application
+allows used to send text, audio, video, and file attachments. </p>
+
+<hr/>
+
 <h3>User Interface</h3>
 
-<p></p>
+<img src="%http%%site_url%/templates/media/help-gui-panels.jpg" width="500"/>
 
-<h3>
+<dl>
+    <dt>
+        Menu Bar Panel
+    <dt>
+    <dd>
+        <p>Top panel that shows the current mission (left) and logged in user (right). Moving the mouse over the
+        username allows you to see a menu to access the help and logout. Administrators can also use this menu 
+        to configure ECHO settings.</p>
+    </dd>
+
+    <dt>
+        Conversations Panel
+    </dt>
+    <dd>
+        <p>Top-Left panel shows the various rooms/conversations within ECHO. </p>
+        <ul>
+            <li>The <i>Mission Chat</i> is available to all ECHO users (crew sand MCC).</li>
+            <li>All the other conversations are private between the logged in user and the username shown.</li>
+        </ul>
+        
+        %threads%
+    </dd>
+
+    <dt>
+        Mission Parameters Panel
+    </dt>
+    <dd>
+        <p>Shows the current delay settings and date. </p>
+    </dd>
+
+    <dt>
+        Chat Panel
+    </dt>
+    <dd>
+        <p>Shows all incoming and outgoing messages (text, audio, video, and file attachments).</p>
+    </dd>
+
+    <dt>
+        New Message Panel
+    </dt>
+    <dd>
+        <p>Allows the logged in user to send a new message.</p>
+    </dd>
+</dl>
+
+<hr/>
+
+<h3>Sending New Messages</h3>
+
+<dl>
+    <dt>
+        Text Messages
+    </dt>
+    <dd>
+        <p>To send a <i>text</i> message, simply enter the text in the New Message Panel and click on the <i>SEND</i> button. 
+        You can also press <i>SHIFT+ENTER</i> to send the message.</p>
+
+        %important%
+
+        %markdown%
+    </dd>
+
+    <dt>
+        Audio Messages <span class="new-msg-button">&#127908;</span>
+    </dt>
+    <dd>
+        <p>To record and send audio messages, click on the <span class="new-msg-button">&#127908;</span>. 
+        A window will pop up where you can record, preview, and then send the message.</p>
+
+        <p><i>Note: Google Chrome requires permission to use the microphone. If you are having problems, 
+        use the top right menu on the browser to access the Settings. Then click on the "Privacy and Security" menu, 
+        followed by "Site Settings", and then "Camera or Microphone". It is recommended that you add an exception for 
+        ECHO to allow use of the microphone without changing your default settings for other websites.</i></p>
+    </dd>
+
+    <dt>
+        Video Messages <span class="new-msg-button">&#128249;</span>
+    </dt>
+    <dd>
+        <p>To record and send audio messages, click on the <span class="new-msg-button">&#128249;</span>. 
+        A window will pop up where you can record, preview, and then send the message.</p>
+
+        <p><i>Note: Google Chrome requires permission to use the microphone and camera. If you are having problems, 
+        use the top right menu on the browser to access the Settings. Then click on the "Privacy and Security" menu, 
+        followed by "Site Settings", and then "Camera or Microphone". It is recommended that you add an exception for 
+        ECHO to allow use of the microphone and camera without changing your default settings for other websites.</i></p>
+    </dd>
+
+    <dt>
+        File attachments <span class="new-msg-button">&#128206;</span>
+    </dt>
+    <dd>
+        <p>To send a file attachment, click on the <span class="new-msg-button">&#128206;</span>. 
+        A window will appear allowing you to send one file at a time.</p>
+    </dd>
+</dl>
+
+
+
+
+

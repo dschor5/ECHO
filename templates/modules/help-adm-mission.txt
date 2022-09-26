@@ -1,6 +1,10 @@
-<h3>Mission Settings</h3>
+<h3>Mission Settings Overview</h3>
 
 <p>ECHO allows administrators to configure various mission parameters. </p>
+
+<hr/>
+
+<h3>Configurable Settings</h3>
 
 <dl>
     <!-- Mission Configuration --> 
@@ -82,6 +86,7 @@
 
 </dl>
 
+<hr/>
 
 <h3>User Interface Features</h3>
 

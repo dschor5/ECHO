@@ -1,7 +1,10 @@
-<h3>Overview</h3>
+<h3>User Accounts Overview</h3>
+
 <p>ECHO is design to support individual accounts for each analog participant and mission control operator. 
 All accounts will have access to the public chat ("Mission Chat") and also private channels for 1-on-1 
 conversations with every other user.</p>
+
+<hr/>
 
 <h3>User Accounts</h3>
 <p>Each user has the following fields:</p>

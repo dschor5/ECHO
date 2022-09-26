@@ -1,6 +1,8 @@
-<h3>Overview</h3>
+<h3>Data Management Overview</h3>
 
 <p>The Data Management page allows Administrators to download archives, view system logs, and reset the application.</p>
+
+<hr/>
 
 <h3>Backup Conversations</h3>
 
@@ -55,6 +57,7 @@
     </dd>
 </dl>
 
+<hr/>
 
 <h3>Reset Applicaiton</h3>
 

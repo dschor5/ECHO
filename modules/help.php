@@ -21,15 +21,9 @@ class HelpModule extends DefaultModule
             'default'      => 'showHelpOverview', 
         );
 
-        $mission = MissionConfig::getInstance();
-
-        if($mission->feat_markdown_support)
-        {
-            $this->subHtmlRequests['markdown'] = 'showHelpMarkdown';
-        }
-
         if($this->user->is_admin)
         {
+            $this->subHtmlRequests['markdown'] = 'showHelpMarkdown';
             $this->subHtmlRequests['users'] = 'showHelpAdmUsers';
             $this->subHtmlRequests['delay'] = 'showHelpAdmDelay';
             $this->subHtmlRequests['mission'] = 'showHelpAdmMission';
@@ -46,9 +40,32 @@ class HelpModule extends DefaultModule
     {
         $this->addTemplates('common.css', 'settings.css');
 
+        $mission = MissionConfig::getInstance();
+
+        $markdown = '';
+        if($mission->feat_markdown_support)
+        {
+            $markdown = Main::loadTemplate('help-overview-markdown.txt');
+        }
+
+        $important = '';
+        if($mission->feat_important_msgs)
+        {
+            $important = Main::loadTemplate('help-overview-important.txt');
+        }
+
+        $threads = '';
+        if($mission->feat_convo_threads)
+        {
+            $threads = Main::loadTemplate('help-overview-threads.txt');
+        }
+
         return Main::loadTemplate('help.txt', array(
             '/%menu%/' => $this->showHelpMenu(),
             '/%content%/' => Main::loadTemplate('help-overview.txt'),
+            '/%markdown%/' => $markdown,
+            '/%important%/' => $important,
+            '/%threads%/' => $threads
         ));
     }
 

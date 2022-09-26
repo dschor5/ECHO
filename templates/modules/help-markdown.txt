@@ -1,5 +1,11 @@
+<h3>Markdown Overview</h3>
+
 <p>Markdown is a markup language for converting plain-text into formatted HTML. 
 This allows users to format messages to make them easier to read. </p>
+
+<hr/>
+
+<h3>Markdown Commands</h3>
 
 <p>The following examples show how to use Markdown to format messages.</p>
 
