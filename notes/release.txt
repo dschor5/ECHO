@@ -1,0 +1,39 @@
+# Create new issue to update rev number on Github
+
+# Update version number in config.inc.php. 
+
+# Commit and merge the issue back to main. 
+
+# In local repo, view current ags
+git tag
+
+# In local repo, create annotated tag
+git tag -a v3.1 -m "Release v3.1"
+
+# In local repo, push to origin
+git push origin v3.1
+
+# On Github, go to release and create new release. 
+# Choose a tag. 
+# Generate release notes
+# Publish release
+
+# On UND server
+# If there are database changes:
+mysql --user=? --password="?" --host="?" analog
+
+SET FOREIGN_KEY_CHECKS = 0;
+drop table if exists conversations;
+drop table if exists messages;
+drop table if exists mission_archives;
+drop table if exists mission_config;
+drop table if exists msg_files;
+drop table if exists msg_status;
+drop table if exists participants;
+drop table if exists users;
+SET FOREIGN_KEY_CHECKS = 1;
+
+# Load SQL 
+
+# Checkout tag
+git checkout v3.1

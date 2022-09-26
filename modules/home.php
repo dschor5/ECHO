@@ -1,7 +1,9 @@
 <?php
 
 /**
- * HomeModule manages main screen, login, and logout. 
+ * HomeModule manages main screen, login, and logout.
+ * 
+ * @link https://github.com/dschor5/ECHO 
  */
 class HomeModule extends DefaultModule
 {
@@ -192,7 +194,7 @@ class HomeModule extends DefaultModule
             $user = $usersDao->getByUsername($_POST['uname']);
 
             // Check if the password provided matches what the user account.
-            if($user !== false && $user->isValidPassword($_POST['upass']))
+            if($user != null && $user->isValidPassword($_POST['upass']))
             {
                 // If so, crease a new session and update the database.
                 $this->user = $user;
@@ -228,6 +230,12 @@ class HomeModule extends DefaultModule
         return 'Logging out, please wait while you are redirected to the homepage.';
     }    
 
+    /**
+     * Handle AJAX request to reset the user password. 
+     * The only purpose is to reset the cookie. 
+     *
+     * @return array
+     */
     protected function heartbeat() : array 
     {
         return array('success' => ($this->user != null));

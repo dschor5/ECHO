@@ -15,6 +15,9 @@
  * - is_password_reset (bool)     True to force password reset on next login
  * - preferences       (string)   JSON string to store user preferences
  * 
+ * Additional Fields:
+ * - conversations     (int[])    Array of conversation ids the user belongs to
+ * 
  * Implementation Notes:
  */
 class User

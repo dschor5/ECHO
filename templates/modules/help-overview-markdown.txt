@@ -1,0 +1,2 @@
+<p>Text messages may also contain Markdown formatting. See 
+<a href="%http%%site_url%/help/markdown">Markdown</a> help for details.</p>

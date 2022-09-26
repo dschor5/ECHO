@@ -1,19 +1,31 @@
 <?php
 
+/**
+ * ErrorModule displays the error page and logs an error.
+ * 
+ * @link https://github.com/dschor5/ECHO
+ */
 class ErrorModule extends DefaultModule
 {
+    /**
+     * Constructor. 
+     *
+     * @param User $user Current logged in user (if any)
+     */
     public function __construct(&$user)
     {
         parent::__construct($user);
         $this->subJsonRequests = array();
         $this->subHtmlRequests = array(
-            'show'      => 'showError', 
+            'default'      => 'showError', 
         );
-
-        $_GET['subaction'] = 'show';
-        $_POST['subaction'] = 'show';
     }
 
+    /**
+     * Show error page and log the event.
+     *
+     * @return string
+     */
     protected function showError() : string
     {
         $this->addTemplates('common.css', 'settings.css');

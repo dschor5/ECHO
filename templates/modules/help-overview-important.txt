@@ -1,0 +1,3 @@
+<p>Text messages can also be sent as "high priority" by clicking <span class="new-msg-button">&#8252;</span> instead
+of the regular <i>SEND</i> button. This will put a red border around the message to draw attention to its content.</p>
+

@@ -1,0 +1,255 @@
+<h3>Mission Settings Overview</h3>
+
+<p>ECHO allows administrators to configure various mission parameters. </p>
+
+<hr/>
+
+<h3>Configurable Settings</h3>
+
+<dl>
+    <!-- Mission Configuration --> 
+
+    <dt>
+        Mission Name
+    <dt>
+    <dd>
+        <p>Name of the mission appearing on the GUI and all archives.</p>
+    </dd>
+
+    <dt>
+        Mission Start & End Date
+    </dt>
+    <dd>
+        <p>Date when the mission starts and ends. Used to calculate the mission epoch.</p>
+    </dd>
+
+    <!-- Mission Control --> 
+
+    <dt>
+        Name for Mission Control
+    </dt>
+    <dd>
+        <p>Name used for Mission Control (e.g., Huston). Used in conversation archives.</p>
+    </dd>
+
+    <dt>
+        Location for Mission Control
+    </dt>
+    <dd>
+        <p>Planet or City where mission control is located. Used in conversation archives.</p>
+    </dt>
+
+    <dt>
+        User Role for Mission Control Operators
+    </dt>
+    <dd>
+        <p>What to call Mission Control Operators. Used in admin menu and conversation archives.</p>
+    </dt>
+
+    <dt>
+        Timezone for Mission Control
+    </dt>
+    <dd>
+        <p>Timezone used to display information for mission control. This is added to allow Mission Control
+        Operators to participate from anywhere in the world and see the same timestamps as other MCC operators.</p>
+    </dt>
+
+    <!-- Analog Habitat --> 
+
+    <dt>
+        Name for Analog Habitat
+    </dt>
+    <dd>
+        <p>Name used for Analog Habitat (e.g., ILMAH). Used in conversation archives.</p>
+    </dd>
+
+    <dt>
+        Location for Analog Habitat
+    </dt>
+    <dd>
+        <p>Celestial body where the habitat is supposed to be located. Used in conversation archives.</p>
+    </dt>
+
+    <dt>
+        User Role for Analog Crew Members
+    </dt>
+    <dd>
+        <p>What to call analog crew members. Used in admin menu and conversation archives.</p>
+    </dt>
+
+    <dt>
+        Timezone for Analog Habitat
+    </dt>
+    <dd>
+        <p>Timezone used to display information for analog habitat participants.</p>
+    </dt>
+
+</dl>
+
+<hr/>
+
+<h3>User Interface Features</h3>
+
+<p>ECHO allows administrators to turn on/off various user interface features to evaluate their effectiveness 
+when working with interplanetary communication delays.</p>
+
+<dl>
+    <!-- Notifications --> 
+
+    <dt>
+        Sound Notifications
+    <dt>
+    <dd>
+        <p>Play an audio alerts for every incoming message. </p>
+        
+        <p>If <i>Important Messages</i> are enabled, 
+        then the system uses a different sound to draw attention to those messages.</p>
+
+        <p><i>Note: Chrome requires that users interact with the page before allowing an application to play sounds.</i></p>
+    </dd>
+
+    <dt>
+        Badge Notifications
+    <dt>
+    <dd>
+        <p>Connect to the operating system badge notification to alert users of incoming messages.</p>
+        <p><i>Note: Users will be prompted to allow badge notifications for the application.</i></p>
+    </dd>
+
+    <dt>
+        Unread Message Count
+    <dt>
+    <dd>
+        <p>Display the number of unread messages on other conversations. </p>
+        
+        <p>If <i>Important Messages</i> are enabled,
+        then the system will add red exclamation marks to show that an important message was received on 
+        another conversation.</p>
+
+        <p>If <i>Threads</i> are enabled, then the unread message count for other conversations will 
+        show a cumulative total of all new messages in that conversation and its threads.</p>
+    </dd>
+
+    <dt>
+        Conversation Ordering
+    <dt>
+    <dd>
+        <p>Reorder converstion panel based on incoming messages. </p>
+        
+        <p>If a new message was received on a conversation,
+        that conversation will appear at the top of the list so the user does not need to scroll down to see
+        if new messages were received.</p>
+        
+        <p>If <i>Threads</i> are enabled, the same logic is applied to reorder 
+        threads on the current conversation.</p>
+    </dd>
+
+    <!-- Delay Reminders --> 
+
+    <dt>
+        Show Transit/Delivered Status
+    </dt>
+    <dd>
+        <p>Adds the expected received time and status to each message.</p>
+        
+        <p>The received time is an estimate of when the message will be delivered to all the participants 
+        of that conversation or thread. Conversations that include both crew members and mission controllers
+        estimate the received time by adding the sent time and the delay at the time the message was sent. 
+        Whereas conversations that only include participants at one site (e.g., 1-on-1 chat between two 
+        mission controllers) do not add a delay to the estimate. </p>
+        
+        <p>The status can be either <i>"Transit"</i> or <i>"Delivered"</i>. Note that this is not a 
+        "received receipt" as that would imply a two-way delay to get a confirmation that the message 
+        was indeed received.</p>
+    </dd>
+
+    <dt>
+        Message Progress Bar
+    </dt>
+    <dd>
+        <p>Adds a progress bar to all messages in <i>"Transit"</i> (see Show Transit/Delivered Status)
+        to visualize that the signal containing the message is still propagating through space and 
+        has not reached its destination.</p>
+    </dd>
+
+    <!-- Message Formatting -->
+
+    <dt>
+        Markdown support
+    </dt>
+    <dd>
+        <p>Allows users to use Markdown to format text messages (e.g., bold, italics, lists). For details
+        refer to the <a href="%http%%site_url%/help/markdown">Markdown</a> help page.</p>
+
+        <p>Note, non-administrators will only see the Markdown help page if the feature is enabled.</p>
+    </dd>
+
+    <dt>
+        Important messages
+    </dt>
+    <dd>
+        <p>Allows users to send <i>"Important"</i> messages to draw attention to high priority items.</p>
+
+        <p>The important messages have a thick red border to stand out in the chat. Moreover, if sound 
+        notifications are enabled, they will make a different sound to alert users of an incoming important
+        message.</p>
+    </dd>
+    
+    <!-- Conversation Threads -->
+
+    <dt>
+        Threads
+    </dt>
+    <dd>
+        <p>Allows users to create threads within a conversation to organize information. Each conversation 
+        (sometimes refered to as parent conversation) can have as many threads as needed, but they must 
+        have unique names. Threads can be created at any point during a mission and will automatically 
+        appear on other user's screens without the need to refresh the screen.</p>
+
+        <p>It is recommended to keep threads either enabled or disabled for an entire mission. However, if
+        needed for research purposes, it is important to understand that no messages will be lost, but 
+        rather they will be rearranged either into the parent conversation or their original threads 
+        based on the following rules:</p>
+
+        <ul>
+            <li>If starting amission with without threads, the menu will appear to add threads, but 
+            messages will remain in the parent conversation. Only new messages sent within a thread will 
+            appear in the thread itself.</li>
+
+            <li>If disabling during a mission, the messages from all the threads are combined into the parent 
+            conversation based on the received timestmaps and their ids are recalculated.</li>
+
+            <li>If re-enabling during a mission, then any message previously sent in a thread will return to 
+            the original thread, but any messages sent while threads were disabled will remain in the
+            parent conversation.</li>
+        </ul>
+    </dd>
+
+    <dt>
+        Anyone can create threads
+    </dt>
+    <dd>
+        <p>If threads are enabled, this option selects whether administrators or all users can create new threads.
+        The option was added to help organize conversations and prevent frivolous threads from being created.</p>
+    </dd>
+
+    <!-- Debug -->
+
+    <dt>
+        Debug
+    </dt>
+    <dd>
+        <p>Enable debugging mode where additional information is saved to the System Log. 
+        This setitng should be turned off at all times unless there is a specific need as it 
+        may affect overall system performance.</p>
+    </dd>
+
+    <!-- Login Timeout -->
+
+    <dt>
+        Login Timeout
+    </dt>
+    <dd>
+        <p>Selects how many minutes of inactivity to wait before logging out users.</p>
+    </dd>
+</dl>

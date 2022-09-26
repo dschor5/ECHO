@@ -86,15 +86,17 @@ class ParticipantsDao extends Dao
      * Get an array of converation ids containing a single participants. 
      * This is used when deleting users to help cleanup orphan conversations. 
      *
-     * @return array 
+     * @return array of conversation ids to delete.
      **/
     public function getConvosWithSingleParticipant() : array
     {
-        // Query to get all conversations that excludes conversation_id=1 (mission chat).
-        // However, this will delete subsediaries to the mission chat. 
-        $queryStr = 'SELECT conversation_id, COUNT(user_id) AS active_participants '.
-                    'FROM participants WHERE conversation_id != 1 '.
-                    'GROUP BY conversation_id HAVING active_participants = 1';
+        // Query to get all conversations that excludes conversation_id=1 (mission chat) and its threads.
+        $queryStr = 'SELECT participants.conversation_id, COUNT(participants.user_id) AS active_participants '.
+                    'FROM participants '. 
+                    'JOIN conversations ON participants.conversation_id=conversations.conversation_id '.
+                    'WHERE conversations.conversation_id != 1 AND '. 
+                        '(conversations.parent_conversation_id IS NULL OR conversations.parent_conversation_id != 1) '.
+                    'GROUP BY participants.conversation_id HAVING active_participants = 1';
 
         $convoIds = array();
 

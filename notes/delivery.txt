@@ -1,6 +1,0 @@
-SELECT messages.message_id, messages.is_delivered, users.user_id, users.is_crew 
-FROM messages 
-JOIN users ON messages.user_id=users.user_id 
-WHERE messages.conversation_id=1 
-    AND messages.is_delivered=0 
-    AND messages.recv_time_hab >= CAST('2021-08-06 13:41:00' AS DATETIME)

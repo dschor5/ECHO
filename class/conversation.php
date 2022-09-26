@@ -158,6 +158,7 @@ class Conversation
      **/
     public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName, bool $isCrew) : bool
     {
+        global $config;
         $success = true;
         $messagesDao = MessagesDao::getInstance();
         $missionConfig = MissionConfig::getInstance();
@@ -254,6 +255,7 @@ class Conversation
             }
 
             // Finally, build the HTML file and add it to the archive.
+            $time = new DelayTime('now', $tz);
             $convoStr .= Main::loadTemplate('admin-data-save-convo.txt', 
                 array('/%name%/'         => htmlspecialchars($name),
                       '/%id%/'           => $id,
@@ -261,7 +263,9 @@ class Conversation
                       '/%participants%/' => $participantsStr,
                       '/%messages%/'     => $msgStr,
                       '/%archive-tz%/'   => $tz,
-                      '/%title%/'        => htmlspecialchars($name),
+                      '/%title%/'        => 'ECHO Archive for '.htmlspecialchars($name),
+                      '/%version%/'      => $config['echo_version'],
+                      '/%save-date%/'    => $time->getTime(),
                 ));
 
             $fileName = $folderName.'.html';

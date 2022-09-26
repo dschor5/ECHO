@@ -1,0 +1,45 @@
+<h3>Delay Settings Overview</h3>
+
+<p>ECHO supports both manual, automatic, and real-time Martian delays. </p>
+
+<hr/>
+
+<h3>Types of Delays</h3>
+
+<dl>
+    <dt>
+        Manual Delay
+    <dt>
+    <dd>
+        <p>Administrator sets the one-way-light-time delay in seconds. 
+        Can be changed anytime before, during, or after a mission and takes effect immediately.</p>
+    </dd>
+
+    <dt>
+        Automatic Delay
+    <dt>
+    <dd>
+        <p>Automatic delays allow Administrators to define delays as a piecewise function of time. Each piecewise component
+        is defined by an equation and a timestamp when that delay will activate. </p>
+
+        <!-- TODO: Add Example -->
+    </dd>
+
+    <dt>
+        Current Mars Delay
+    <dt>
+    <dd>
+        <p>Applies the current delay assuming direct point-to-point contact with Mars ignoring interference from the Sun,
+        use of the Deep Space Network, planet rotation, etc. The delays were simulated on 4hr intervals until 2040 using 
+        the <a href="https://ssd.jpl.nasa.gov/planets/eph_export.html" target="blank">JPL DE440S Ephemeris Data Set</a>.</p>
+    </dd>
+</dl>
+
+<p class="important"><b>Important:</b> The new delay setting does not affect messages already in transit. If a message was sent with 
+delay=Xsec, that delay will be enforced even if the Administrator changes the settings to Ysec delays. However, all 
+other messages sent after the new delay setting was applied will use the new delay. To avoid problems it is better 
+to coordinate the time to change the delay settings during periods of low activity.</p>
+
+
+
+

@@ -29,6 +29,7 @@ function getUser(id) {
                 $('#is_crew').val(1).change();
                 $('#dialog-edit-user').dialog({title: 'Create User'});
             }
+            $('div.dialog-response').hide();
             $('#dialog-edit-user').dialog('open');
         }
     });

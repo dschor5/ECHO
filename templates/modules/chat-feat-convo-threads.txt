@@ -1,1 +1,1 @@
-    <div id="feat-convo-threads-enabled"></div>
+    <div id="feat-convo-threads-enabled" style="display: none;"></div>
