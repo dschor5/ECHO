@@ -6,7 +6,7 @@ ini_set('display_errors', '1');
 require_once('server.inc.php');
 
 $config = array();
-$config['echo_version'] = '3.2rc';
+$config['echo_version'] = '3.2';
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
