@@ -5,10 +5,57 @@
     <title>%title%</title>
     <meta charset="UTF-8" />
     <meta name="keywords" content="human spaceflight, analog mission, communication delay" />
-    <meta name="description" content="Emulator for Interplanetary Human Spaceflight" />
+    <meta name="description" content="ECHO Archive" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" type="image/x-icon" href="%http%%site_url%/%templates_dir%/images/favicon.ico"/>
-    <link rel="stylesheet" type="text/css" href="%http%%site_url%/css/print-convo.css" />
+    <style>
+        body, html {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 10pt;
+            margin: 0px;
+            padding: 0px;
+            background-color: #FFF;
+            height: 100%;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #canvas {
+            position: absolute;
+            background-color: #FFF;
+            color: #000;
+            height: 100%;
+            text-align: left;
+            width: 100%;
+            max-width: 1200px;
+            flex-grow: 1;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #container {
+            display: block;
+        }
+
+        #credit {
+            display: block;
+        }
+
+        .conversation td, .conversation th{
+            border: 1px solid black;
+            padding: 3px;
+        }
+
+        .conversation {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -45,8 +92,13 @@
         </table>
 
     </div>
+
+    <div id="credit">
+        Archived from ECHO v%version% saved on %save-date%.
+    </div>
 </div>
 </center>
+
 
 </body>
 </html>
