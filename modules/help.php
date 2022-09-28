@@ -21,9 +21,14 @@ class HelpModule extends DefaultModule
             'default'      => 'showHelpOverview', 
         );
 
-        if($this->user->is_admin)
+        $mission = MissionConfig::getInstance();
+        if($mission->feat_markdown_support)
         {
             $this->subHtmlRequests['markdown'] = 'showHelpMarkdown';
+        }
+
+        if($this->user->is_admin)
+        {            
             $this->subHtmlRequests['users'] = 'showHelpAdmUsers';
             $this->subHtmlRequests['delay'] = 'showHelpAdmDelay';
             $this->subHtmlRequests['mission'] = 'showHelpAdmMission';
