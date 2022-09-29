@@ -802,6 +802,11 @@ class ChatModule extends DefaultModule
                     $newNotifications[$convoId] = $currNotifications[$convoId];
                     $newNotifications[$convoId]['notif_important'] = ($msgs['num_important'] > 0) ? 1:0;
                 }
+                else if(!isset($prevNotifications[$convoId]))
+                {
+                    $newNotifications[$convoId] = $currNotifications[$convoId];
+                    $newNotifications[$convoId]['notif_important'] = ($currNotifications[$convoId]['num_important']) ? 1:0;
+                }
                 else if($prevNotifications[$convoId]['num_new'] != $currNotifications[$convoId]['num_new'])
                 {
                     $newNotifications[$convoId] = $currNotifications[$convoId];
