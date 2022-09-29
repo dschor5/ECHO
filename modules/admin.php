@@ -882,6 +882,8 @@ class AdminModule extends DefaultModule
         $fromPath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
         $toPath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
+        $response = array('success' => true);
+
         if(copy($fromPath, $toPath))
         {
             $archiveDao = ArchiveDao::getInstance();

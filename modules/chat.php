@@ -573,14 +573,6 @@ class ChatModule extends DefaultModule
             return;
         }
 
-        $missionConfig = MissionConfig::getInstance();
-
-        // Get a list of all conversations to monitor for msg notifications. 
-        // Essentially, all the conversations the user belongs to except the 
-        // active conversations. 
-        $conversationIds   = array_keys(array_diff_key(
-            $this->conversations, array($this->currConversation->conversation_id => 0)));
-
         // Sleep 0.5sec to avoid interfering with initial msg load.
         usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
         

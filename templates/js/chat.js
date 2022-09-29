@@ -50,7 +50,7 @@ function scrollToBottom() {
  * @param {event} Key event.
  */
 function detectShiftEnter(event) {
-    if(event.keyCode == 13 && event.shiftKey) {
+    if(event.keyCode == 13 && event.shiftKey && !event.repeat) {
         event.preventDefault();
         sendTextMessage();
     }
