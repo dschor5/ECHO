@@ -57,7 +57,7 @@ CREATE TABLE `msg_status` (
 CREATE TABLE `msg_files` (
   `message_id` int(10) UNSIGNED NOT NULL,
   `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
-  `original_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `original_name` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY(`message_id`),
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE

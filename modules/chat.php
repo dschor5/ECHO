@@ -325,7 +325,21 @@ class ChatModule extends DefaultModule
         {
             $fileName  = trim($_FILES['data']['name'] ?? '');
             $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
-            $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
+            if(finfo_open(FILEINFO_MIME_TYPE) !== false)
+            {
+                $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
+            }
+            else
+            {
+                $fileMime = array_search(
+                    pathinfo($_FILES['data']['tmp_name'], PATHINFO_EXTENSION),
+                    $config['uploads_allowed'], 
+                    true);
+                if($fileMime === false) 
+                {
+                    $fileMime = 'unknown';
+                }
+            }            
         }
         // Otherwise, Video and Audio messages will create a custom filename
         // based on the current timestamp and force the extension & mime type. 
@@ -363,9 +377,9 @@ class ChatModule extends DefaultModule
             $result['error'] = 'Invalid upload type.';
         }
         // Validate filename. Min 1 char filename + period + extension. 
-        else if(strlen($fileName) < 3)
+        else if(strlen($fileName) < 3 && strlen($fileName) >= 240)
         {
-            $result['error'] = 'Invalid filename.';
+            $result['error'] = 'Invalid filename (3 < length =< 240).';
         }
         // Validate file type. 
         else if(!isset($config['uploads_allowed'][$fileMime]))
