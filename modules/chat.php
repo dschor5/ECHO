@@ -320,8 +320,23 @@ class ChatModule extends DefaultModule
         // Get the file type. 
         $fileType  = trim($_POST['type'] ?? Message::FILE);
 
-        // For regular attachments, get the filename, extension, and mime type. 
-        if($fileType == Message::FILE)
+        // The VIDEO and AUDIO types are fixed for Google Chrome. 
+        // Future versions of ECHO can expand this to work with more browsers. 
+        if($fileType == Message::VIDEO)
+        {
+            $fileExt  = 'mkv';
+            $fileMime = 'video/webm';
+            $dt = new DateTime('NOW');
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
+        }
+        elseif($fileType == Message::AUDIO)
+        {
+            $fileExt  = 'mkv';
+            $fileMime = 'audio/webm';
+            $dt = new DateTime('NOW');
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
+        }
+        else // Catch-all for regular attachments
         {
             $fileName  = trim($_FILES['data']['name'] ?? '');
             $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
@@ -346,23 +361,6 @@ class ChatModule extends DefaultModule
                     $fileMime = 'unknown';
                 }
             }            
-        }
-        // Otherwise, Video and Audio messages will create a custom filename
-        // based on the current timestamp and force the extension & mime type. 
-        // TODO: Can we support more multimedia types?
-        elseif($fileType == Message::VIDEO)
-        {
-            $fileExt  = 'mkv';
-            $fileMime = 'video/webm';
-            $dt = new DateTime('NOW');
-            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
-        }
-        elseif($fileType == Message::AUDIO)
-        {
-            $fileExt  = 'mkv';
-            $fileMime = 'audio/webm';
-            $dt = new DateTime('NOW');
-            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
         }
         
         // Get the file size regardless of the type. 
