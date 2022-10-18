@@ -338,6 +338,7 @@ class ChatModule extends DefaultModule
         }
         else // Catch-all for regular attachments
         {
+            $fileType = Message::FILE;
             $fileName  = trim($_FILES['data']['name'] ?? '');
             $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
             if(finfo_open(FILEINFO_MIME_TYPE) !== false)
@@ -418,7 +419,7 @@ class ChatModule extends DefaultModule
                 'from_crew'       => $this->user->is_crew,
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => '',
-                'type'            => Message::FILE,
+                'type'            => $fileType,
                 'sent_time'       => $currTime->getTime(),
                 'recv_time_hab'   => $currTime->getTime(!$this->user->is_crew),
                 'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
