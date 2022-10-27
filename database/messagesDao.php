@@ -249,9 +249,6 @@ class MessagesDao extends Dao
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
 
-        // Hardcoded value to get new messages received in the last 3 seconds.
-        $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
-
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
