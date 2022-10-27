@@ -148,11 +148,10 @@ class MessagesDao extends Dao
                 {
                     $msgStatusData[] = array(
                         'message_id' => $ids['message_id'] ,
-                        'user_id' => $userId,
-                        'is_read' => ($userId == $msgData['user_id']),
+                        'user_id' => $userId
                     );
                 }
-                $keys = array('message_id', 'user_id', 'is_read');
+                $keys = array('message_id', 'user_id');
                 $messageStatusDao->insertMultiple($keys, $msgStatusData);
 
                 // Update the date the conversation was last updated.
@@ -218,10 +217,9 @@ class MessagesDao extends Dao
                     $msgStatus[] = array(
                         'message_id' => $msgData['message_id'],
                         'user_id' => $userId,
-                        'is_read' => 0
                     );
                 }
-                $keys = array('message_id', 'user_id', 'is_read');
+                $keys = array('message_id', 'user_id');
                 $msgStatusDao->insertMultiple($keys, $msgStatus);
             }
         }
@@ -252,7 +250,7 @@ class MessagesDao extends Dao
         $qFromDate = 'SUBTIME(CAST(\''.$toDate.'\' AS DATETIME), \'00:00:03\')';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, msg_status.is_read, '.
+                        'users.username, users.alias, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -260,7 +258,7 @@ class MessagesDao extends Dao
                         'AND msg_status.user_id='.$qUserId.' '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
-                        'AND msg_status.is_read=0 '.    
+                        'AND msg_status.message_id IS NULL '.    
                         'AND (messages.'.$qRefTime.' BETWEEN '.$qFromDate.' AND '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
@@ -287,7 +285,7 @@ class MessagesDao extends Dao
         {
             $messageIds = '('.implode(', ', array_keys($messages)).')';
             $messageStatusDao = MessageStatusDao::getInstance();
-            $messageStatusDao->update(array('is_read'=>'1'), 'user_id='.$qUserId.' AND message_id IN '.$messageIds);
+            $messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
         }
         
         $this->endTransaction();
@@ -317,12 +315,10 @@ class MessagesDao extends Dao
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, msg_status.is_read, '.
+                        'users.username, users.alias, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
-                    'JOIN msg_status ON messages.message_id=msg_status.message_id '.
-                        'AND msg_status.user_id='.$qUserId.' '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
@@ -349,15 +345,12 @@ class MessagesDao extends Dao
                 }
             }
             
-            // Update msg_status database to mark all those as read.
-            $queryStr = 'UPDATE msg_status '.
-                'JOIN messages ON msg_status.message_id=messages.message_id '.
-                'SET msg_status.is_read=1 '. 
-                'WHERE msg_status.user_id='.$qUserId.' '.
-                    'AND messages.conversation_id IN ('.$qConvoIds.') '. 
-                    'AND messages.'.$qRefTime.' <= '.$qToDate;
-
-            $this->database->query($queryStr);
+            if(count($messages) > 0)
+            {
+                $messageIds = '('.implode(', ', array_keys($messages)).')';
+                $messageStatusDao = MessageStatusDao::getInstance();
+                $messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
+            }
             $this->endTransaction();
 
             
@@ -400,7 +393,7 @@ class MessagesDao extends Dao
                     'FROM messages '.
                     'JOIN msg_status ON messages.message_id=msg_status.message_id '. 
                     'WHERE messages.conversation_id<>'.$qConvoId.' '. 
-                        'AND msg_status.is_read=0 '.
+                        'AND msg_status.message_id IS NOT NULL '.
                         'AND msg_status.user_id='.$qUserId.' '. 
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
                     'GROUP BY messages.conversation_id '.
