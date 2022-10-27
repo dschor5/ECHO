@@ -146,10 +146,13 @@ class MessagesDao extends Dao
                 $msgStatusData = array();
                 foreach($participants as $userId => $isCrew)
                 {
-                    $msgStatusData[] = array(
-                        'message_id' => $ids['message_id'] ,
-                        'user_id' => $userId
-                    );
+                    if($user->user_id != $userId)
+                    {
+                        $msgStatusData[] = array(
+                            'message_id' => $ids['message_id'] ,
+                            'user_id' => $userId
+                        );
+                    }
                 }
                 $keys = array('message_id', 'user_id');
                 $messageStatusDao->insertMultiple($keys, $msgStatusData);
