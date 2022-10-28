@@ -721,11 +721,14 @@ class ChatModule extends DefaultModule
             // Use the id field to identify unique events 
             foreach($messages as $msgId => $msg)
             {
-                $this->sendEventStream(
-                    'msg', 
-                    $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
-                    $msgId, 
-                );
+                if($msg->user_id != $this->user->user_id)
+                {
+                    $this->sendEventStream(
+                        'msg', 
+                        $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
+                        $msgId, 
+                    );
+                }
             }
 
             $offset += count($messages);
