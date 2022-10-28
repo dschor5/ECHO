@@ -229,6 +229,73 @@ class MessagesDao extends Dao
     }   
 
     /**
+     * Get messages lost when a stream is disconnected.
+     *
+     * @param array $convoIds Conversation ids to include in the query. 
+     *                        If threads are disabled, the query can get all the messages
+     *                        in the conversation and its subthreads.
+     * @param integer $userId Checks msg_status for this user
+     * @param boolean $isCrew Used to select receive time perspective
+     * @param string $toDate  Messages received before this date
+     * @param integer $lastId ID of last message successfully sent
+     * @param integer $offset Offset if trying to get lots of messages
+     * @return array Array of Message objects
+     */
+    public function getMissedMessages(array $convoIds, int $userId, bool $isCrew, string $toDate, int $lastId, int $offset=0) : array
+    {
+        // Build query
+        $qConvoIds = implode(',',$convoIds);
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $qOffset  = $this->database->prepareStatement($offset);
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qLastId  = intval($lastId);
+        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+
+        $queryStr = 'SELECT messages.*, '. 
+                        'users.username, users.alias, '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                    'FROM messages '.
+                    'JOIN users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                        'AND msg_status.user_id='.$qUserId.' '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+                        'AND messages.message_id > '.$qLastId.' '.
+                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
+                    'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
+                    'LIMIT '.$qOffset.', 25';
+        
+        $messages = array();
+
+    
+        $this->startTransaction();
+
+        // Get all messages
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                while(($rowData=$result->fetch_assoc()) != null)
+                {
+                    $messages[$rowData['message_id']] = new Message($rowData);
+                }
+            }
+        }
+        
+        // Update message read status 
+        if(count($messages) > 0)
+        {
+            $messageIds = '('.implode(', ', array_keys($messages)).')';
+            $messageStatusDao = MessageStatusDao::getInstance();
+            $messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
+        }
+        
+        $this->endTransaction();
+        
+        return $messages;
+    }
+
+    /**
      * Get new messages.
      *
      * @param array $convoIds Conversation ids to include in the query. 

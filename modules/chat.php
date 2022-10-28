@@ -588,8 +588,11 @@ class ChatModule extends DefaultModule
         // every few seconds. 
         $iter = 1;
 
-        foreach (getallheaders() as $name => $value) {
-            Logger::info("$name: $value");
+        // Check if the server sent a last-event-id header indicating it is reconnecting
+        $headers = getallheaders();
+        if(isset($headers['Last-Event-Id']) && $headers['Last-Event-Id'] > 0)
+        {
+            $this->sendMissedMessages($headers['Last-Event-Id']);
         }
 
         // Infinite loop processing data. 
@@ -693,6 +696,50 @@ class ChatModule extends DefaultModule
             );
             $prevDelay = $delay;
         }
+    }
+
+    /**
+     * Sends event stream message 'msg' for each new message 
+     * received for the current conversation. 
+     */
+    private function sendMissedMessages(int $lastId)
+    {
+        // Get new messages
+        $time = new DelayTime();
+        $timeStr = $time->getTime();
+        $messagesDao = MessagesDao::getInstance();
+        $mission = MissionConfig::getInstance();
+        $convoIds = array();
+        $convoIds[] = $this->currConversation->conversation_id;
+        if(!$mission->feat_convo_threads)
+        {
+            $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
+        }
+
+        $offset = 0;
+        $messages = $messagesDao->getMissedMessages(
+            $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+
+        while(count($messages) > 0)
+        {
+            // Iterate through the new messages and send a unique event 
+            // for each one where the msg data is JSON encoded. 
+            // Use the id field to identify unique events 
+            foreach($messages as $msgId => $msg)
+            {
+                $this->sendEventStream(
+                    'msg', 
+                    $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
+                    $msgId, 
+                );
+            }
+
+            $offset += count($message);
+
+            $messages = $messagesDao->getMissedMessages(
+                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+        }
+        
     }
 
     /**
