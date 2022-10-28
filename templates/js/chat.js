@@ -95,8 +95,13 @@ function createEventSource() {
     return newEventSource;
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function handleEventSourceError(event) {
     evtSource.close();
+    sleep(1000);
     evtSource = createEventSource();
 }
 
