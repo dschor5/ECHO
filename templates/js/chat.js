@@ -74,36 +74,14 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
     return;
 }
 
-var evtSource;
-$(document).ready(function() {
-    evtSource = createEventSource();
-});
-
-function createEventSource() {
-    var lastId = 0;
-    if($('.msg:last').length > 0) {
-        let id = $('.msg:last').attr('id');
-        lastId = id.slice(id.lastIndexOf('-')+1);
-    }
-
-    var newEventSource = new EventSource(BASE_URL + '/chatstream?lastid=' + lastId);
-    newEventSource.addEventListener("msg", handleEventSourceNewMessage);
-    newEventSource.addEventListener("notification", handleEventSourceNotification);
-    newEventSource.addEventListener("delay", handleEventSourceDelay);
-    newEventSource.addEventListener("thread", handleEventSourceThread);
-    newEventSource.addEventListener("error", handleEventSourceError);
-    return newEventSource;
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function handleEventSourceError(event) {
-    evtSource.close();
-    sleep(1000);
-    evtSource = createEventSource();
-}
+const evtSource = new EventSource(BASE_URL + '/chatstream');
+evtSource.addEventListener("msg", handleEventSourceNewMessage);
+evtSource.addEventListener("notification", handleEventSourceNotification);
+evtSource.addEventListener("delay", handleEventSourceDelay);
+evtSource.addEventListener("thread", handleEventSourceThread);
+evtSource.onerror = function(e) {
+    console.log(e);
+};
 
 // Wrapper so that the function can be grouped with other thread functions
 // and only included if threads are enabled. 

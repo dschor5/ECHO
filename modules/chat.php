@@ -588,6 +588,10 @@ class ChatModule extends DefaultModule
         // every few seconds. 
         $iter = 1;
 
+        foreach (getallheaders() as $name => $value) {
+            Logger::info("$name: $value");
+        }
+
         // Infinite loop processing data. 
         while(true)
         {
