@@ -82,7 +82,8 @@ $(document).ready(function() {
 function createEventSource() {
     var lastId = 0;
     if($('.msg:last').length > 0) {
-        lastId = $('.msg:last').attr('id').slice(text.lastIndexOf('-')+1);;
+        let id = $('.msg:last').attr('id');
+        lastId = id.slice(id.lastIndexOf('-')+1);
     }
 
     var newEventSource = new EventSource(BASE_URL + '/chatstream/' + lastId);
