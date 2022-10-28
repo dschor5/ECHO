@@ -86,7 +86,7 @@ function createEventSource() {
         lastId = id.slice(id.lastIndexOf('-')+1);
     }
 
-    var newEventSource = new EventSource(BASE_URL + '/chatstream/' + lastId);
+    var newEventSource = new EventSource(BASE_URL + '/chatstream?lastid=' + lastId);
     newEventSource.addEventListener("msg", handleEventSourceNewMessage);
     newEventSource.addEventListener("notification", handleEventSourceNotification);
     newEventSource.addEventListener("delay", handleEventSourceDelay);
