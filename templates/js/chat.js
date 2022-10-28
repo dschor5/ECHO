@@ -74,8 +74,9 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
     return;
 }
 
+var evtSource;
 $(document).ready(function() {
-    var evtSource = createEventSource();
+    evtSource = createEventSource();
 });
 
 function createEventSource() {
