@@ -734,7 +734,7 @@ class ChatModule extends DefaultModule
                 );
             }
 
-            $offset += count($message);
+            $offset += count($messages);
 
             $messages = $messagesDao->getMissedMessages(
                 $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
