@@ -78,7 +78,7 @@ $(document).ready(function() {
     var evtSource = createEventSource();
 });
 
-function creeateEventSource() {
+function createEventSource() {
     var lastId = 0;
     if($('.msg:last').length > 0) {
         lastId = $('.msg:last').attr('id').slice(text.lastIndexOf('-')+1);;
