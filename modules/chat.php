@@ -416,31 +416,12 @@ class ChatModule extends DefaultModule
 
             // Execute both database queries. 
             $messagesDao = MessagesDao::getInstance();
-            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
             {
-                // Get the new message_id and build the Message object 
-                // to compile the response for the user. 
-                $fileData['message_id'] = $messageIds['message_id'];
-                $newMsg = new Message(
-                    array_merge(
-                        $msgData, 
-                        $fileData, 
-                        array(
-                            'message_id' => $messageIds['message_id'],
-                            'message_id_alt' => $messageIds['message_id_alt'],
-                            'username' => $this->user->username, 
-                            'alias'    => $this->user->alias, 
-                            'is_crew'  => $this->user->is_crew)
-                        )
-                    );
-                
-                // Compile message to send back to the calling javascript.
-                // This part takes into account whether to use the MCC or HAB 
-                // timestamp for the message even though we know the user should
-                // be receiving their own message immediately. 
-                $newMsgData = $newMsg->compileArray($this->user, 
-                    $this->currConversation->participants_both_sites);
-                $result = array_merge(array('success' => true), $newMsgData);
+                $result = array(
+                    'success' => true, 
+                    'message_id' => $messageId,
+                );
             }
             else
             {

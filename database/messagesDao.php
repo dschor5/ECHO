@@ -146,33 +146,17 @@ class MessagesDao extends Dao
                 $msgStatusData = array();
                 foreach($participants as $userId => $isCrew)
                 {
-                    //if($user->user_id != $userId)
-                    //{
-                        $msgStatusData[] = array(
-                            'message_id' => $id,
-                            'user_id' => $userId
-                        );
-                    //}
+                    $msgStatusData[] = array(
+                        'message_id' => $id,
+                        'user_id' => $userId
+                    );
                 }
                 $keys = array('message_id', 'user_id');
                 $messageStatusDao->insertMultiple($keys, $msgStatusData);
 
                 // Update the date the conversation was last updated.
                 $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
-                
-                // Finally, run a query to get the data recently entered into the database. 
-                /*
-                if (($result = $this->select('*', $ids['message_id'] )) !== false)
-                {
-                    if ($result->num_rows > 0) 
-                    {
-                        if(($msgIdData = $result->fetch_assoc()) != null)
-                        {
-                            $ids['message_id_alt'] = $msgIdData['message_id_alt'];
-                        }
-                    }
-                } 
-                */              
+                    
                 $this->endTransaction();
             }
             else

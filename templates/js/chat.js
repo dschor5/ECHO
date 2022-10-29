@@ -25,8 +25,6 @@ function sendTextMessage(msgImportant) {
         // On success, build the message to display on the screen.
         success: function(resp) {
             if(resp.success) {
-                //compileMsg(resp, false);
-                //scrollToBottom();
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
@@ -567,8 +565,6 @@ function uploadMedia(mediaType) {
         },
         success: function(resp) {
             if(resp.success) {
-                compileMsg(resp, false);
-                scrollToBottom();
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
