@@ -509,7 +509,7 @@ class ChatModule extends DefaultModule
             if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
                 $result = array(
-                    'success' => false, 
+                    'success' => true, 
                     'message_id' => $messageId,
                 );
             }
