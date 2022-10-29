@@ -78,10 +78,10 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    $( "#reconnecting" ).fadeToggle( "slow", "linear" );
+    $( "#reconnecting" ).show( "slow", "linear" );
 };
 evtSource.onopen = function(e) {
-    $( "#reconnecting" ).fadeToggle( "slow", "linear" );
+    $( "#reconnecting" ).fadeOut( "slow", "linear" );
 }
 
 // Wrapper so that the function can be grouped with other thread functions
