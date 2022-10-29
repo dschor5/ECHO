@@ -78,8 +78,11 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    console.log(e);
+    console.log(evtSource.readyState);
 };
+evtSource.onopen = function(e) {
+    console.log(evtSource.readyState);
+}
 
 // Wrapper so that the function can be grouped with other thread functions
 // and only included if threads are enabled. 
