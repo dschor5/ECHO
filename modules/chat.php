@@ -506,28 +506,12 @@ class ChatModule extends DefaultModule
             );
             
             // Send message.
-            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
-                // Combine with the remaining fields for a message. 
-                $newMsg = new Message(
-                    array_merge(
-                        $msgData, 
-                        array(
-                            'message_id' => $messageIds['message_id'],
-                            'message_id_alt' => $messageIds['message_id_alt'],
-                            'username' => $this->user->username, 
-                            'alias' => $this->user->alias, 
-                            'is_crew' => $this->user->is_crew)
-                        )
-                    );
-
-                // Compile message to send back to the calling javascript.
-                // This part takes into account whether to use the MCC or HAB 
-                // timestamp for the message even though we know the user should
-                // be receiving their own message immediately. 
-                $newMsgData = $newMsg->compileArray($this->user, 
-                    $this->currConversation->participants_both_sites);
-                $result = array_merge(array('success' => true), $newMsgData);
+                $result = array(
+                    'success' => false, 
+                    'message_id' => $messageId,
+                );
             }
             else
             {

@@ -110,7 +110,7 @@ class MessagesDao extends Dao
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
 
-        $ids = array('message_id' => null, 'message_id_alt' => null);
+        $id = null;
 
         // Query exceptions are used to avoid too many levels of nested if-statements.
         $this->database->queryExceptionEnabled(true);
@@ -127,17 +127,17 @@ class MessagesDao extends Dao
             // Insert the new message into the database and automatically assign it 
             // an alternate id based on the previous query.
             $variables = array('message_id_alt' => '@id_alt:=@id_alt+1');
-            $ids['message_id'] = $this->insert($msgData, $variables);
+            $id = $this->insert($msgData, $variables);
 
             // If the message was successfully added to the database, then 
             // proceed to create entries in other tables that need to reference
             // the newly created message id.
-            if ($ids['message_id'] !== false)
+            if ($id !== false)
             {
                 // Add file attachments if any.
                 if(count($fileData) > 0)
                 {
-                    $fileData['message_id'] = $ids['message_id'] ;
+                    $fileData['message_id'] = $id;
                     $msgFileDao->insert($fileData);
                 }
 
@@ -146,13 +146,13 @@ class MessagesDao extends Dao
                 $msgStatusData = array();
                 foreach($participants as $userId => $isCrew)
                 {
-                    if($user->user_id != $userId)
-                    {
+                    //if($user->user_id != $userId)
+                    //{
                         $msgStatusData[] = array(
-                            'message_id' => $ids['message_id'] ,
+                            'message_id' => $id,
                             'user_id' => $userId
                         );
-                    }
+                    //}
                 }
                 $keys = array('message_id', 'user_id');
                 $messageStatusDao->insertMultiple($keys, $msgStatusData);
@@ -161,6 +161,7 @@ class MessagesDao extends Dao
                 $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
                 
                 // Finally, run a query to get the data recently entered into the database. 
+                /*
                 if (($result = $this->select('*', $ids['message_id'] )) !== false)
                 {
                     if ($result->num_rows > 0) 
@@ -170,26 +171,27 @@ class MessagesDao extends Dao
                             $ids['message_id_alt'] = $msgIdData['message_id_alt'];
                         }
                     }
-                }               
+                } 
+                */              
                 $this->endTransaction();
             }
             else
             {
                 // If the message was not created retract the database query.
-                $ids = false;
+                $id = false;
                 $this->endTransaction(false);
             }
         }
         catch(Exception $e)
         {
             // If the message was not created retract the database query.
-            $ids = false;
+            $id = false;
             $this->endTransaction(false);
             Logger::warning('messagesDao::sendMessage failed.', $e->getMessage());
         }
         $this->database->queryExceptionEnabled(false);
 
-        return $ids;
+        return $id;
     }
 
     /**
