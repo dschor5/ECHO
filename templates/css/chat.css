@@ -203,6 +203,18 @@
     padding-top: 80px;
 }
 
+#reconnecting {
+    position: absolute;
+    top: 40px;
+    height: 30px;
+    left: calc(253px + 22px);
+    right: 22px;
+    background: #d14141;
+    color: #000;
+    padding: 10px;
+    display: none;
+}
+
 .msg {
     border: 2px solid #dedede;
     background-color: #f1f1f1;

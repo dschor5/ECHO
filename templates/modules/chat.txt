@@ -32,6 +32,10 @@
 
     <div id="content">
 
+        <div id="reconnecting">
+            <p>Error connecting to the server.</p>
+        </div>
+
         <div id="msg-container">
             <!-- Messages loaded here via javascript. -->
         </div>
