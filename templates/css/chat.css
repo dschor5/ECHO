@@ -204,9 +204,8 @@
 }
 
 #reconnecting {
-    position: absolute;
+    position: fixed;
     top: 40px;
-    height: 30px;
     left: calc(253px + 22px);
     right: 22px;
     background: #d14141;

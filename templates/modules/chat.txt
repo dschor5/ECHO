@@ -33,7 +33,7 @@
     <div id="content">
 
         <div id="reconnecting">
-            <p>Error connecting to the server.</p>
+            Lost server connection. Attempting to reconnect.
         </div>
 
         <div id="msg-container">
