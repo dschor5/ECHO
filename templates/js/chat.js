@@ -78,7 +78,7 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    $( "#reconnecting" ).show( "slow", "linear" );
+    $( "#reconnecting" ).fadeIn( "slow", "linear" );
 };
 evtSource.onopen = function(e) {
     $( "#reconnecting" ).fadeOut( "slow", "linear" );
