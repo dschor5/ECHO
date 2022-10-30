@@ -32,8 +32,8 @@
 
     <div id="content">
 
-        <div id="reconnecting">
-            Lost server connection. Attempting to reconnect.
+        <div id="msg-error">
+            <!-- Errors reported here via javascript. -->    
         </div>
 
         <div id="msg-container">
