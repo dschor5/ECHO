@@ -28,13 +28,15 @@ function sendTextMessage(msgImportant) {
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
-                $( "#msg-error" ).text = 'Failed to send message.';
-                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             }
             else {
-                $( "#msg-error" ).text = 'Failed to send message.';
-                $( "#msg-error" ).fadeOut(3000);
+                $( "#msg-error" ).text = 'Failed to send message (1).';
+                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $( "#msg-error" ).text = 'Failed to send message (2).';
+            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
         },
     });
 }
@@ -581,8 +583,13 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').text(resp.error);
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-                console.error(resp.error);
+                $( "#msg-error" ).text = 'Failed load previous messages.';
+                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $( "#msg-error" ).text = 'Failed to upload message.';
+            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
         },
     });
 }
@@ -660,9 +667,9 @@ function loadPrevMsgs() {
 
                 oldMsgQueryInProgress = false;               
             },
-            error: function(jqHR, textStatus, errorThrown) {
-                //location.href = BASE_URL + '/chat';
-                // TODO - Add error showing messages could not be loaded.
+            error: function(xhr, ajaxOptions, thrownError) {
+                $( "#msg-error" ).text = 'Failed load previous messages.';
+                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             },
         });
     }
