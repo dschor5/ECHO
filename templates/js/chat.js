@@ -30,7 +30,8 @@ function sendTextMessage(msgImportant) {
                 console.info("Sent message_id=" + resp.message_id);
             }
             else {
-                console.error(resp.error);
+                $( "#msg-error" ).text = 'Failed to send message.';
+                $( "#msg-error" ).fadeOut(3000);
             }
         },
     });
@@ -78,10 +79,12 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    $( "#reconnecting" ).fadeIn( "slow", "linear" );
+    $( "#msg-error" ).text = 'Lost server connection. Attempting to reconnect.';
+    $( "#msg-error" ).fadeIn( "slow", "linear" );
 };
 evtSource.onopen = function(e) {
-    $( "#reconnecting" ).fadeOut( "slow", "linear" );
+    $( "#msg-error" ).text = '';
+    $( "#msg-error" ).fadeOut( "slow", "linear" );
 }
 
 // Wrapper so that the function can be grouped with other thread functions
