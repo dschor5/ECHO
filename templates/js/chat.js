@@ -28,6 +28,8 @@ function sendTextMessage(msgImportant) {
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
+                $( "#msg-error" ).text = 'Failed to send message.';
+                $( "#msg-error" ).fadeOut(3000);
             }
             else {
                 $( "#msg-error" ).text = 'Failed to send message.';
