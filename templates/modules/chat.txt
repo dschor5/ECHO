@@ -89,7 +89,7 @@
     </div>
 
     <div id="new-msg">
-        <textarea id="new-msg-text" name="newmsg-text" placeholder="Enter Message" onkeypress="detectShiftEnter(event)"></textarea>
+        <textarea id="new-msg-text" name="newmsg-text" placeholder="Enter Message" onkeyup="detectShiftEnter(event)"></textarea>
         <input type="hidden" id="conversation_id" name="conversation_id" value="%convo_id%">
         <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')" title="Record and send video messages">&#128249;</button>
         <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')" title="Record and send audio messages">&#127908;</button>
