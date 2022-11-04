@@ -32,7 +32,9 @@ class ErrorModule extends DefaultModule
         $username = ($this->user == null) ? 'n/a' : $this->user->username;
         Logger::warning('error:compileHtml user='.$username.
             ', GET='.json_encode($_GET).
-            ', POST='.json_encode($_POST));
+            ', POST='.json_encode($_POST). 
+            ', SERVER_REQUEST_URI='.json_encode($_SERVER['REQUEST_URI']). 
+            ', SERVER_REDIRECT_URL='.json_encode($_SERVER['REDIRECT_URL']));
         return Main::loadTemplate('error.txt');
     }    
 }

@@ -5,6 +5,7 @@ function sendTextMessage(msgImportant) {
 
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
+    $('#new-msg-text').val("");
     if(newMsgText.length == 0) {
         return;
     }
@@ -53,7 +54,7 @@ function scrollToBottom() {
  * @param {event} Key event.
  */
 function detectShiftEnter(event) {
-    if(event.keyCode == 13 && event.shiftKey) {
+    if(event.keyCode == 13 && event.shiftKey && !event.repeat) {
         event.preventDefault();
         sendTextMessage();
     }

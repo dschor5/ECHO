@@ -320,17 +320,9 @@ class ChatModule extends DefaultModule
         // Get the file type. 
         $fileType  = trim($_POST['type'] ?? Message::FILE);
 
-        // For regular attachments, get the filename, extension, and mime type. 
-        if($fileType == Message::FILE)
-        {
-            $fileName  = trim($_FILES['data']['name'] ?? '');
-            $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
-            $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
-        }
-        // Otherwise, Video and Audio messages will create a custom filename
-        // based on the current timestamp and force the extension & mime type. 
-        // TODO: Can we support more multimedia types?
-        elseif($fileType == Message::VIDEO)
+        // The VIDEO and AUDIO types are fixed for Google Chrome. 
+        // Future versions of ECHO can expand this to work with more browsers. 
+        if($fileType == Message::VIDEO)
         {
             $fileExt  = 'mkv';
             $fileMime = 'video/webm';
@@ -343,6 +335,33 @@ class ChatModule extends DefaultModule
             $fileMime = 'audio/webm';
             $dt = new DateTime('NOW');
             $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
+        }
+        else // Catch-all for regular attachments
+        {
+            $fileType = Message::FILE;
+            $fileName  = trim($_FILES['data']['name'] ?? '');
+            $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
+            if(finfo_open(FILEINFO_MIME_TYPE) !== false)
+            {
+                try {
+                    Logger::info('user= '.$this->user->username.'  '.
+                                'finfo_open(FILEINFO_MIME_TYPE) = '.finfo_open(FILEINFO_MIME_TYPE). 
+                                '  $_FILES[data][tmp_name] = '.$_FILES['data']['tmp_name'], $_FILES);
+                }
+                catch(Exception $e) {}
+                $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
+            }
+            else
+            {
+                $fileMime = array_search(
+                    pathinfo($_FILES['data']['tmp_name'], PATHINFO_EXTENSION),
+                    $config['uploads_allowed'], 
+                    true);
+                if($fileMime === false) 
+                {
+                    $fileMime = 'unknown';
+                }
+            }            
         }
         
         // Get the file size regardless of the type. 
@@ -363,9 +382,9 @@ class ChatModule extends DefaultModule
             $result['error'] = 'Invalid upload type.';
         }
         // Validate filename. Min 1 char filename + period + extension. 
-        else if(strlen($fileName) < 3)
+        else if(strlen($fileName) < 3 && strlen($fileName) >= 240)
         {
-            $result['error'] = 'Invalid filename.';
+            $result['error'] = 'Invalid filename (3 < length =< 240).';
         }
         // Validate file type. 
         else if(!isset($config['uploads_allowed'][$fileMime]))
@@ -400,7 +419,7 @@ class ChatModule extends DefaultModule
                 'from_crew'       => $this->user->is_crew,
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => '',
-                'type'            => Message::FILE,
+                'type'            => $fileType,
                 'sent_time'       => $currTime->getTime(),
                 'recv_time_hab'   => $currTime->getTime(!$this->user->is_crew),
                 'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
@@ -822,6 +841,11 @@ class ChatModule extends DefaultModule
                 {
                     $newNotifications[$convoId] = $currNotifications[$convoId];
                     $newNotifications[$convoId]['notif_important'] = ($msgs['num_important'] > 0) ? 1:0;
+                }
+                else if(!isset($prevNotifications[$convoId]))
+                {
+                    $newNotifications[$convoId] = $currNotifications[$convoId];
+                    $newNotifications[$convoId]['notif_important'] = ($currNotifications[$convoId]['num_important']) ? 1:0;
                 }
                 else if($prevNotifications[$convoId]['num_new'] != $currNotifications[$convoId]['num_new'])
                 {
