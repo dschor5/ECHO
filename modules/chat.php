@@ -435,31 +435,12 @@ class ChatModule extends DefaultModule
 
             // Execute both database queries. 
             $messagesDao = MessagesDao::getInstance();
-            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
             {
-                // Get the new message_id and build the Message object 
-                // to compile the response for the user. 
-                $fileData['message_id'] = $messageIds['message_id'];
-                $newMsg = new Message(
-                    array_merge(
-                        $msgData, 
-                        $fileData, 
-                        array(
-                            'message_id' => $messageIds['message_id'],
-                            'message_id_alt' => $messageIds['message_id_alt'],
-                            'username' => $this->user->username, 
-                            'alias'    => $this->user->alias, 
-                            'is_crew'  => $this->user->is_crew)
-                        )
-                    );
-                
-                // Compile message to send back to the calling javascript.
-                // This part takes into account whether to use the MCC or HAB 
-                // timestamp for the message even though we know the user should
-                // be receiving their own message immediately. 
-                $newMsgData = $newMsg->compileArray($this->user, 
-                    $this->currConversation->participants_both_sites);
-                $result = array_merge(array('success' => true), $newMsgData);
+                $result = array(
+                    'success' => true, 
+                    'message_id' => $messageId,
+                );
             }
             else
             {
@@ -525,28 +506,12 @@ class ChatModule extends DefaultModule
             );
             
             // Send message.
-            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
-                // Combine with the remaining fields for a message. 
-                $newMsg = new Message(
-                    array_merge(
-                        $msgData, 
-                        array(
-                            'message_id' => $messageIds['message_id'],
-                            'message_id_alt' => $messageIds['message_id_alt'],
-                            'username' => $this->user->username, 
-                            'alias' => $this->user->alias, 
-                            'is_crew' => $this->user->is_crew)
-                        )
-                    );
-
-                // Compile message to send back to the calling javascript.
-                // This part takes into account whether to use the MCC or HAB 
-                // timestamp for the message even though we know the user should
-                // be receiving their own message immediately. 
-                $newMsgData = $newMsg->compileArray($this->user, 
-                    $this->currConversation->participants_both_sites);
-                $result = array_merge(array('success' => true), $newMsgData);
+                $result = array(
+                    'success' => true, 
+                    'message_id' => $messageId,
+                );
             }
             else
             {
@@ -592,12 +557,21 @@ class ChatModule extends DefaultModule
             return;
         }
 
-        // Sleep 0.5sec to avoid interfering with initial msg load.
-        usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
-        
         // Iteration counter. Used to send keep-alive messages 
         // every few seconds. 
         $iter = 1;
+
+        // Check if the server sent a last-event-id header indicating it is reconnecting
+        $headers = getallheaders();
+        if(isset($headers['Last-Event-Id']) && $headers['Last-Event-Id'] > 0)
+        {
+            $this->sendMissedMessages($headers['Last-Event-Id']);
+        }
+        else
+        {
+            // Sleep 0.5sec to avoid interfering with initial msg load.
+            usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
+        }
 
         // Infinite loop processing data. 
         while(true)
@@ -700,6 +674,53 @@ class ChatModule extends DefaultModule
             );
             $prevDelay = $delay;
         }
+    }
+
+    /**
+     * Sends event stream message 'msg' for each new message 
+     * received for the current conversation. 
+     */
+    private function sendMissedMessages(int $lastId)
+    {
+        // Get new messages
+        $time = new DelayTime();
+        $timeStr = $time->getTime();
+        $messagesDao = MessagesDao::getInstance();
+        $mission = MissionConfig::getInstance();
+        $convoIds = array();
+        $convoIds[] = $this->currConversation->conversation_id;
+        if(!$mission->feat_convo_threads)
+        {
+            $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
+        }
+
+        $offset = 0;
+        $messages = $messagesDao->getMissedMessages(
+            $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+
+        while(count($messages) > 0)
+        {
+            // Iterate through the new messages and send a unique event 
+            // for each one where the msg data is JSON encoded. 
+            // Use the id field to identify unique events 
+            foreach($messages as $msgId => $msg)
+            {
+                if($msg->user_id != $this->user->user_id)
+                {
+                    $this->sendEventStream(
+                        'msg', 
+                        $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
+                        $msgId, 
+                    );
+                }
+            }
+
+            $offset += count($messages);
+
+            $messages = $messagesDao->getMissedMessages(
+                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+        }
+        
     }
 
     /**

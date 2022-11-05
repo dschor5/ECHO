@@ -27,8 +27,6 @@
  * Additional Fields:
  * - users.username             (string)    Username for message author
  * - users.alias                (string)    Alias for message author
- * - msg_status.is_read         (bool)      Flag indicating if the msg was delivered 
- *                                          to the current logged in user
  * - msg_files.original_name    (string)    Original filename for attachment (if any)
  * - msg_files.server_name      (string)    Server filename for attachment (if any)
  * - msg_files.mime_type        (string)    Mime type for attachment (if any)

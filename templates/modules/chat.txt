@@ -32,6 +32,10 @@
 
     <div id="content">
 
+        <div id="msg-error">
+            <!-- Errors reported here via javascript. -->    
+        </div>
+
         <div id="msg-container">
             <!-- Messages loaded here via javascript. -->
         </div>
