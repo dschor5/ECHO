@@ -417,7 +417,7 @@ abstract class DefaultModule implements Module
      */
     protected function sendEventStreamRetry($retry)
     {
-        echo 'retry: '.intval($retry).PHP_EOL.PHP_EOL;
+        echo 'retry: '.intval($retry * 1000).PHP_EOL.PHP_EOL;
     }
 }
 
