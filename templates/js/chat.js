@@ -27,7 +27,6 @@ function sendTextMessage(msgImportant) {
         success: function(resp) {
             if(resp.success) {
                 $('#new-msg-text').val("");
-                $('#new-msg-text').removeAttr('disabled');
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
             }
@@ -35,10 +34,12 @@ function sendTextMessage(msgImportant) {
                 $( "#msg-error-ajax" ).text('Failed to send message (1).');
                 $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
             }
+            $('#new-msg-text').removeAttr('disabled');
         },
         error: function(xhr, ajaxOptions, thrownError) {
             $( "#msg-error-ajax" ).text('Failed to send message (2).');
             $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
+            $('#new-msg-text').removeAttr('disabled');
         },
     });
 }
