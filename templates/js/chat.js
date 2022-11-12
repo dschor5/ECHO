@@ -86,7 +86,7 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    $( "#msg-error-stream" ).text('Lost server connection. Attempting to reconnect.');
+    $( "#msg-error-stream" ).text('Lost server connection. Attempting to reconnect in 30 sec.');
     $( "#msg-error-stream" ).fadeIn( "slow", "linear" );
 };
 evtSource.onopen = function(e) {
