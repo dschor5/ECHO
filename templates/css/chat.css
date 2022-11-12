@@ -208,6 +208,11 @@
     top: 40px;
     left: calc(253px + 22px);
     right: 22px;
+}
+
+#msg-error-stream, #msg-error-ajax {
+    float: left;
+    width: 100%;
     background: #d14141;
     color: #000;
     padding: 10px;

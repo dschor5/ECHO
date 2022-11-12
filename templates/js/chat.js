@@ -31,13 +31,13 @@ function sendTextMessage(msgImportant) {
                 console.info("Sent message_id=" + resp.message_id);
             }
             else {
-                $( "#msg-error" ).text = 'Failed to send message (1).';
-                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+                $( "#msg-error-ajax" ).text = 'Failed to send message (1).';
+                $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            $( "#msg-error" ).text = 'Failed to send message (2).';
-            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+            $( "#msg-error-ajax" ).text = 'Failed to send message (2).';
+            $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
         },
     });
 }
@@ -84,12 +84,12 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    $( "#msg-error" ).text = 'Lost server connection. Attempting to reconnect.';
-    $( "#msg-error" ).fadeIn( "slow", "linear" );
+    $( "#msg-error-stream" ).text = 'Lost server connection. Attempting to reconnect.';
+    $( "#msg-error-stream" ).fadeIn( "slow", "linear" );
 };
 evtSource.onopen = function(e) {
-    $( "#msg-error" ).text = '';
-    $( "#msg-error" ).fadeOut( "slow", "linear" );
+    $( "#msg-error-stream" ).text = '';
+    $( "#msg-error-stream" ).fadeOut( "slow", "linear" );
 }
 
 // Wrapper so that the function can be grouped with other thread functions
@@ -584,13 +584,13 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').text(resp.error);
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-                $( "#msg-error" ).text = 'Failed load previous messages.';
-                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+                $( "#msg-error-ajax" ).text = 'Failed load previous messages.';
+                $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            $( "#msg-error" ).text = 'Failed to upload message.';
-            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+            $( "#msg-error-ajax" ).text = 'Failed to upload message.';
+            $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
         },
     });
 }
@@ -669,8 +669,8 @@ function loadPrevMsgs() {
                 oldMsgQueryInProgress = false;               
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                $( "#msg-error" ).text = 'Failed load previous messages.';
-                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+                $( "#msg-error-ajax" ).text = 'Failed load previous messages.';
+                $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
             },
         });
     }
