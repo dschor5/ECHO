@@ -562,7 +562,7 @@ class ChatModule extends DefaultModule
         $iter = 1;
 
         // Set reconnection retry 
-        $this->sendEventStreamRetry(30);
+        $this->sendEventStreamRetry(10);
 
         // Check if the server sent a last-event-id header indicating it is reconnecting
         $headers = getallheaders();
