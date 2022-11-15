@@ -415,9 +415,9 @@ abstract class DefaultModule implements Module
      *
      * @param int $retry Num sec before retrying to re-establish a lost connection
      */
-    protected function sendEventStreamRetry($retry)
+    protected function sendEventStreamRetry(int $retry)
     {
-        echo 'retry: '.intval($retry * 1000).PHP_EOL.PHP_EOL;
+        echo 'retry: '.(intval($retry) * 1000).PHP_EOL.PHP_EOL;
     }
 }
 
