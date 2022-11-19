@@ -252,16 +252,16 @@ abstract class DefaultModule implements Module
             if(array_key_exists($subaction, $this->subStreamRequests))
             {
                 header('Content-Type: text/event-stream');
-                // Note that this funciton oes not return unless it encounters
+                // Note that this funciton does not return unless it encounters
                 // an error, therefore, unlike AJAX and HTML requests, the 
                 // function will echo data directly.
                 $this->compileStream();
             }
             // Otherwise send a file not found for invalid requests.
-            else
-            {
-                header("HTTP/1.1 404 Not Found");
-            }
+            //else
+            //{
+            //    header("HTTP/1.1 404 Not Found");
+           // }
         }
 
         // HTML Requests
