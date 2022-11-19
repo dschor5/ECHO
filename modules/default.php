@@ -223,7 +223,7 @@ abstract class DefaultModule implements Module
         }
 
         // Only allow requests from this server. 
-        header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
+        //header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
         // AJAX requests:
         if(isset($_GET['ajax']))
@@ -249,19 +249,19 @@ abstract class DefaultModule implements Module
         elseif(isset($_GET['stream']))
         {
             // Check if it is a valid request. 
-            //if(array_key_exists($subaction, $this->subStreamRequests))
-            //{
+            if(array_key_exists($subaction, $this->subStreamRequests))
+            {
                 header('Content-Type: text/event-stream');
                 // Note that this funciton oes not return unless it encounters
                 // an error, therefore, unlike AJAX and HTML requests, the 
                 // function will echo data directly.
                 $this->compileStream();
-            //}
+            }
             // Otherwise send a file not found for invalid requests.
-            //else
-            //{
-            //    header("HTTP/1.1 404 Not Found");
-            //}
+            else
+            {
+                header("HTTP/1.1 404 Not Found");
+            }
         }
 
         // HTML Requests
@@ -390,7 +390,6 @@ abstract class DefaultModule implements Module
      * @param string|null $name Name of event. If null, assume it is a keep alive message.
      * @param array|null $data  Data to send with the event. 
      * @param integer|null $id Unique id given to the event (or null if not applicable).
-     * @return integer
      */
     protected function sendEventStream(?string $name, ?array $data = null, int $id = null)
     {
@@ -409,6 +408,16 @@ abstract class DefaultModule implements Module
             }
             echo 'data: '.json_encode($data).PHP_EOL.PHP_EOL;
         }
+    }
+
+     /**
+     * Send retry settings from the server. 
+     *
+     * @param int $retry Num sec before retrying to re-establish a lost connection
+     */
+    protected function sendEventStreamRetry(int $retry)
+    {
+        echo 'retry: '.(intval($retry) * 1000).PHP_EOL.PHP_EOL;
     }
 }
 
