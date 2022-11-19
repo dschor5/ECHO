@@ -621,7 +621,7 @@ class ChatModule extends DefaultModule
                 $this->sendRoom(
                     $convoId, 
                     $convo->getName($this->user->user_id),
-                    ($this->currConversation->conversationId == $convoId)
+                    ($this->currConversation->conversation_id == $convoId)
                 );
             }
         }
