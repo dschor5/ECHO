@@ -59,7 +59,7 @@ function createThread()
 }
 
 function addThreadToMenu(conversation_id, thread_id, thread_name, thread_selected) {
-    if($('#room-name-' + thread_id).length == 0) {
+    if($('#thread-name-' + thread_id).length == 0) {
         var linkTag = document.createElement('a');
         linkTag.setAttribute('href', BASE_URL + '/chat/' + thread_id);
         if(thread_selected) {
