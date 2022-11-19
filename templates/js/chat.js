@@ -140,7 +140,7 @@ function handleEventSourceNewRoom(event) {
         divRoom.appendChild(divRoomName);
 
         if(threadsDiv != null) {
-            divRoom.appendChild(newThread);
+            divRoom.appendChild(threadsDiv);
         }
 
         document.getElementById('rooms').appendChild(divRoom);
