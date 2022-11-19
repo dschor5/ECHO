@@ -103,15 +103,25 @@ function handleEventSourceNewRoom(event) {
         var divRoomName = document.createElement('div');
         divRoomName.classList.add('room');
 
-        var newThread = null;
+        var threadsDiv = null;
 
         if(data.convo_selected) {
             divRoomName.classList.add('selected');
-            var newThread = document.createElement('a');
-            newThread.setAttribute('id', 'new-thread');
-            newThread.setAttribute('href', '#');
-            newThread.setAttribute('onclick', 'openThreadModal()');
-            newThread.innerText = '+ New Thread';
+
+            if($('#feat-convo-threads-enabled').length) {
+                threadsDiv = document.createElement('div');
+                threadsDiv.setAttribute('id', 'room-thread-' + data.convo_id);
+                threadsDiv.setAttribute('class', 'room-thread');
+
+                var newThread = document.createElement('a');
+                newThread.setAttribute('id', 'new-thread');
+                newThread.setAttribute('href', '#');
+                newThread.setAttribute('onclick', 'openThreadModal()');
+                newThread.innerText = '+ New Thread';
+
+                threadsDiv.appendChild(newThread);
+            }
+            
         }
         
         var divRoomLink = document.createElement('a');
@@ -129,7 +139,7 @@ function handleEventSourceNewRoom(event) {
         divRoomName.appendChild(divRoomLink);
         divRoom.appendChild(divRoomName);
 
-        if(newThread != null) {
+        if(threadsDiv != null) {
             divRoom.appendChild(newThread);
         }
 
