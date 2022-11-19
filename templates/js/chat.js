@@ -84,6 +84,7 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceNewThread);
 evtSource.addEventListener("room", handleEventSourceNewRoom);
+evtSource.addEventListener("announcement", handleEventSourceAnnouncement);
 evtSource.onerror = function(e) {
     $( "#msg-error" ).text = 'Lost server connection. Attempting to reconnect.';
     $( "#msg-error" ).fadeIn( "slow", "linear" );
@@ -93,9 +94,13 @@ evtSource.onopen = function(e) {
     $( "#msg-error" ).fadeOut( "slow", "linear" );
 }
 
+function handleEventSourceAnnouncement(event) {
+    const data = JSON.parse(event.data);
+    
+}
+
 function handleEventSourceNewRoom(event) {
     const data = JSON.parse(event.data);
-    console.log(data);
     if($('#room-' + data.convo_id).length == 0) {
         var divRoom = document.createElement('div');
         divRoom.setAttribute('id', 'room-' + data.convo_id);
