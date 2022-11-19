@@ -860,6 +860,13 @@ class ChatModule extends DefaultModule
             $tempNotifications = array();
             foreach($currNotifications as $convoId => $convo)
             {
+                if(!isset($this->conversations[$convoId]))
+                {
+                    $conversationsDao = ConversationsDao::getInstance();
+                    $this->conversations = $conversationsDao->getConversations($this->user->user_id);
+                    $this->sendRoomMenus();
+                }
+
                 // If no threads AND message received in a thread (would only happen if disabling threads during a mission)
                 // OR threads are enabled and you receive a message in a different coversation, then 
                 // consolidate notifications for parent. 
