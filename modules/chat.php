@@ -629,8 +629,7 @@ class ChatModule extends DefaultModule
         // Send threads for active conversation
         foreach($this->conversations as $convoId => $convo)
         {
-            if($convo->parent_conversation_id != null && 
-               $this->currConversation->conversation_id == $convoId)
+            if($convo->parent_conversation_id != $this->currConversation->conversation_id)
             {
                 $this->sendThread(
                     $convo->parent_conversation_id,
