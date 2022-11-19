@@ -618,13 +618,10 @@ class ChatModule extends DefaultModule
         {
             if($convo->parent_conversation_id == null)
             {
-                $this->sendEventStream(
-                    'room', 
-                    array(
-                        'convo_id' => $convoId,
-                        'convo_name' => $convo->getName($this->user->user_id),
-                        'convo_selected' => ($this->conversationId == $convoId)
-                    )
+                $this->sendRoom(
+                    $convoId, 
+                    $convo->getName($this->user->user_id),
+                    ($this->conversationId == $convoId)
                 );
             }
         }
@@ -635,16 +632,39 @@ class ChatModule extends DefaultModule
             if($convo->parent_conversation_id != null && 
                $this->currConversation->conversation_id == $convoId)
             {
-                $this->sendEventStream(
-                    'thread', 
-                    array(
-                        'convo_id'    => $convo->parent_conversation_id,
-                        'thread_id'   => $convo->conversation_id,
-                        'thread_name' => htmlspecialchars($convo->name),
-                    )
+                $this->sendThread(
+                    $convo->parent_conversation_id,
+                    $convo->conversation_id,
+                    htmlspecialchars($convo->name),
+                    false,
                 );
             }
         }
+    }
+
+    private function sendRoom(int $convoId, string $name, bool $selected)
+    {
+        $this->sendEventStream(
+            'room', 
+            array(
+                'convo_id' => $id,
+                'convo_name' => htmlspecialchars($name),
+                'convo_selected' => $selected
+            )
+        );
+    }
+
+    private function sendThread(int $convoId, int $threadId, string $name, bool $selected)
+    {
+        $this->sendEventStream(
+            'thread', 
+            array(
+                'convo_id'    => $convoId,
+                'thread_id'   => $threadId,
+                'thread_name' => htmlspecialchars($name),
+                'thread_selected' => $selected,
+            )
+        );
     }
 
     /**

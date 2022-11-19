@@ -258,10 +258,10 @@ abstract class DefaultModule implements Module
                 $this->compileStream();
             }
             // Otherwise send a file not found for invalid requests.
-            //else
-            //{
-            //    header("HTTP/1.1 404 Not Found");
-           // }
+            else
+            {
+                header("HTTP/1.1 404 Not Found");
+            }
         }
 
         // HTML Requests
