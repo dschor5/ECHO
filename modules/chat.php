@@ -641,7 +641,7 @@ class ChatModule extends DefaultModule
                         $convo->parent_conversation_id,
                         $convo->conversation_id,
                         htmlspecialchars($convo->name),
-                        false,
+                        $this->currConversation->conversation_id == $convoId,
                     );
                 }
             }

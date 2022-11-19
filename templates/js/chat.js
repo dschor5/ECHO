@@ -152,7 +152,7 @@ function handleEventSourceNewRoom(event) {
 function handleEventSourceNewThread(event) {
     try {
         const data = JSON.parse(event.data);
-        addThreadToMenu(data.convo_id, data.thread_id, data.thread_name);
+        addThreadToMenu(data.convo_id, data.thread_id, data.thread_name, data.thread_selected);
     }
     catch (e) {}
 }
