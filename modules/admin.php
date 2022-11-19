@@ -568,7 +568,7 @@ class AdminModule extends DefaultModule
         {
             $response['error'] = 'Cannot change username for logged in user.';
         }
-        elseif($user != null && $user->is_admin != $isAdmin)
+        elseif($user != null && $this->user->user_id == $userId && $user->is_admin != $isAdmin)
         {
             $response['error'] = 'Cannot remove your own admin priviledges.';
         }   
