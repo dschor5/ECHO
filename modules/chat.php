@@ -618,10 +618,13 @@ class ChatModule extends DefaultModule
         {
             if($convo->parent_conversation_id == null)
             {
+                $selected = $this->currConversation->conversation_id == $convoId;
+
                 $this->sendRoom(
                     $convoId, 
                     $convo->getName($this->user->user_id),
-                    ($this->currConversation->conversation_id == $convoId)
+                    $selected || $this->currConversation->parent_conversation_id == $convoId,
+                    $selected,
                 );
             }
         }
@@ -645,13 +648,14 @@ class ChatModule extends DefaultModule
         }
     }
 
-    private function sendRoom(int $convoId, string $name, bool $selected)
+    private function sendRoom(int $convoId, string $name, bool $current, bool $selected)
     {
         $this->sendEventStream(
             'room', 
             array(
                 'convo_id' => $convoId,
                 'convo_name' => htmlspecialchars($name),
+                'convo_current' => $current,
                 'convo_selected' => $selected
             )
         );
