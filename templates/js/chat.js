@@ -98,14 +98,14 @@ function handleEventSourceNewRoom(event) {
     console.log(data);
     if(!$('#room-' + data.conversation_id).length) {
         var divRoom = document.createElement('div');
-        divRoom.setAttribute('id', 'room-' + data.conversation_id);
+        divRoom.setAttribute('id', 'room-' + data.convo_id);
         
         var divRoomName = document.createElement('div');
         divRoomName.classList.add('room');
 
         var newThread = null;
 
-        if(data.is_selected) {
+        if(data.convo_selected) {
             divRoomName.classList.add('selected');
             var newThread = document.createElement('a');
             newThread.setAttribute('id', 'new-thread');
@@ -115,15 +115,15 @@ function handleEventSourceNewRoom(event) {
         }
         
         var divRoomLink = document.createElement('a');
-        divRoomLink.setAttribute('href', '%http%%site_url%/chat/' + data.conversation_id);
+        divRoomLink.setAttribute('href', '%http%%site_url%/chat/' + data.convo_id);
         
         var span = document.createElement('span');
-        span.setAttribute('id', 'room-name-' + data.conversation_id);
-        span.innerHTML = data.conversation_name;
+        span.setAttribute('id', 'room-name-' + data.convo_id);
+        span.innerHTML = data.convo_name;
         divRoomLink.appendChild(span);
 
         span = document.createElement('span');
-        span.setAttribute('id', 'room-new' + data.conversation_id);
+        span.setAttribute('id', 'room-new' + data.convo_id);
         divRoomLink.appendChild(span);
 
         divRoomName.appendChild(divRoomLink);
