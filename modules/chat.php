@@ -618,31 +618,28 @@ class ChatModule extends DefaultModule
         {
             if($convo->parent_conversation_id == null)
             {
-                $selected = $this->currConversation->conversation_id == $convoId;
-
+                $roomSelected = $this->currConversation->conversation_id == $convoId;
+                
                 $this->sendRoom(
                     $convoId, 
                     $convo->getName($this->user->user_id),
-                    $selected || $this->currConversation->parent_conversation_id == $convoId,
-                    $selected,
+                    $roomSelected || $this->currConversation->parent_conversation_id == $convoId,
+                    $roomSelected,
                 );
-            }
-        }
 
-        $mission = MissionConfig::getInstance();
-        if($mission->feat_convo_threads)
-        {
-            // Send threads for active conversation
-            foreach($this->conversations as $convoId => $convo)
-            {
-                if($convo->parent_conversation_id != null)
+
+                $mission = MissionConfig::getInstance();
+                if($roomSelected && $mission->feat_convo_threads)
                 {
-                    $this->sendThread(
-                        $convo->parent_conversation_id,
-                        $convo->conversation_id,
-                        htmlspecialchars($convo->name),
-                        $this->currConversation->conversation_id == $convoId,
-                    );
+                    foreach($convo->thread_ids as $threadId)
+                    {
+                        $this->sendThread(
+                            $convoId,
+                            $threadId,
+                            htmlspecialchars($this->conversations[$threadId]->name),
+                            $this->currConversation->conversation_id == $threadId,
+                        );
+                    }
                 }
             }
         }
