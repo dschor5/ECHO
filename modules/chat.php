@@ -1,5 +1,7 @@
 <?php
 
+use function PHPSTORM_META\map;
+
 /**
  * Main chat window that processes new messages/files and displays 
  * any messages received.
@@ -557,6 +559,8 @@ class ChatModule extends DefaultModule
             return;
         }
 
+        $this->sendRoomMenus();
+
         // Iteration counter. Used to send keep-alive messages 
         // every few seconds. 
         $iter = 1;
@@ -605,6 +609,42 @@ class ChatModule extends DefaultModule
             usleep(self::STREAM_WAIT_BETWEEN_ITER_SEC * self::SEC_TO_MSEC);
             $iter++;
         } 
+    }
+
+    private function sendRoomMenus() 
+    {
+        // Initialize conversations menu
+        foreach($this->conversations as $convoId => $convo)
+        {
+            if($convo->parent_conversation_id == null)
+            {
+                $this->sendEventStream(
+                    'room', 
+                    array(
+                        'convo_id' => $convoId,
+                        'convo_name' => $convo->getName(),
+                        'convo_selected' => ($this->conversationId == $convoId)
+                    )
+                );
+            }
+        }
+
+        // Send threads for active conversation
+        foreach($this->conversations as $convoId => $convo)
+        {
+            if($convo->parent_conversation_id != null && 
+               $this->currConversation->conversation_id == $convoId)
+            {
+                $this->sendEventStream(
+                    'thread', 
+                    array(
+                        'convo_id'    => $convo->parent_conversation_id,
+                        'thread_id'   => $convo->conversation_id,
+                        'thread_name' => htmlspecialchars($convo->name),
+                    )
+                );
+            }
+        }
     }
 
     /**
@@ -922,7 +962,7 @@ class ChatModule extends DefaultModule
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'           => htmlspecialchars($this->user->username),
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
-                  '/%chat_rooms%/'         => $this->getConversationList(),
+                  '/%chat_rooms%/'         => '',//$this->getConversationList(),
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
                   '/%max_upload_size%/'    => ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
@@ -946,22 +986,6 @@ class ChatModule extends DefaultModule
         {
             if($convo->parent_conversation_id == null)
             {
-                // Get the list of participants for each conversation to 
-                // figure out what name to give this chat. 
-                $participants = $convo->getParticipants($this->user->user_id);
-
-                // Global "mission chat"
-                if($convo->conversation_id == 1)
-                {
-                    $name = $convo->name;
-                }
-                // Other conversations
-                else
-                {
-                    $userInfo = array_pop($participants);
-                    $name = 'Private: '.(strlen($userInfo['alias']) != 0) ? $userInfo['alias'] : $userInfo['username'];
-                }
-                
                 // Add flag if this is the current conversation room.
                 $roomSelected = '';
                 if($this->currConversation->conversation_id == $convo->conversation_id)
@@ -1002,7 +1026,7 @@ class ChatModule extends DefaultModule
                 // Apply the template
                 $content .= Main::loadTemplate('chat-rooms.txt', array(
                     '/%room_id%/'   => $convo->conversation_id,
-                    '/%room_name%/' => htmlspecialchars($name),
+                    '/%room_name%/' => htmlspecialchars($convo->getName($this->user->user_id)),
                     '/%selected%/'  => $roomSelected,
                     '/%threads%/'   => $listThreads,
                 ));

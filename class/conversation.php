@@ -96,6 +96,31 @@ class Conversation
     }
 
     /**
+     * Get current conversation name. 
+     *
+     * @param integer $userId In private convos (1-on-1), excludes current user in name.
+     * @return string Conversation name
+     */
+    public function getName(int $userId) : string
+    {
+        // Valid for Mission Chat only.
+        $name = $this->name;
+
+        // Overwritten otherwise for all other conversations.
+        if($this->conversation_id != 1)
+        {
+            // Get the list of participants for each conversation to 
+            // figure out what name to give this chat. 
+            $participants = $this->getParticipants($userId);
+
+            $userInfo = array_pop($participants);
+            $name = 'Private: '.(strlen($userInfo['alias']) != 0) ? $userInfo['alias'] : $userInfo['username'];
+        }
+
+        return $name;
+    }
+
+    /**
      * Adds to the list of thread ids within this conversation.
      *
      * @param int $threadId 

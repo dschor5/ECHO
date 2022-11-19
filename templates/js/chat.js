@@ -82,7 +82,8 @@ const evtSource = new EventSource(BASE_URL + '/chatstream');
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
-evtSource.addEventListener("thread", handleEventSourceThread);
+evtSource.addEventListener("thread", handleEventSourceNewThread);
+evtSource.addEventListener("room", handleEventSourceNewRoom);
 evtSource.onerror = function(e) {
     $( "#msg-error" ).text = 'Lost server connection. Attempting to reconnect.';
     $( "#msg-error" ).fadeIn( "slow", "linear" );
@@ -92,9 +93,52 @@ evtSource.onopen = function(e) {
     $( "#msg-error" ).fadeOut( "slow", "linear" );
 }
 
+function handleEventSourceNewRoom(event) {
+    const data = JSON.parse(event.data);
+    if(!$('#room-' + data.conversation_id).length) {
+        var divRoom = document.createElement('div');
+        divRoom.setAttribute('id', 'room-' + data.conversation_id);
+        
+        var divRoomName = document.createElement('div');
+        divRoomName.classList.add('room');
+
+        var newThread = null;
+
+        if(data.is_selected) {
+            divRoomName.classList.add('selected');
+            var newThread = document.createElement('a');
+            newThread.setAttribute('id', 'new-thread');
+            newThread.setAttribute('href', '#');
+            newThread.setAttribute('onclick', 'openThreadModal()');
+            newThread.innerText = '+ New Thread';
+        }
+        
+        var divRoomLink = document.createElement('a');
+        divRoomLink.setAttribute('href', '%http%%site_url%/chat/' + data.conversation_id);
+        
+        var span = document.createElement('span');
+        span.setAttribute('id', 'room-name-' + data.conversation_id);
+        span.innerHTML = data.conversation_name;
+        divRoomLink.appendChild(span);
+
+        span = document.createElement('span');
+        span.setAttribute('id', 'room-new' + data.conversation_id);
+        divRoomLink.appendChild(span);
+
+        divRoomName.appendChild(divRoomLink);
+        divRoom.appendChild(divRoomName);
+
+        if(newThread != null) {
+            divRoom.appendChild(newThread);
+        }
+
+        document.getElementById('rooms').appendChild(divRoom);
+    }
+}
+
 // Wrapper so that the function can be grouped with other thread functions
 // and only included if threads are enabled. 
-function handleEventSourceThread(event) {
+function handleEventSourceNewThread(event) {
     try {
         const data = JSON.parse(event.data);
         addThreadToMenu(data.convo_id, data.thread_id, data.thread_name);
