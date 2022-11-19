@@ -105,7 +105,7 @@ function handleEventSourceNewRoom(event) {
 
         var threadsDiv = null;
 
-        if(data.convo_active) {
+        if(data.convo_current) {
             divRoomName.classList.add('room-selected');
 
             if($('#feat-convo-threads-enabled').length) {
