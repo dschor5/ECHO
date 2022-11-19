@@ -626,17 +626,21 @@ class ChatModule extends DefaultModule
             }
         }
 
-        // Send threads for active conversation
-        foreach($this->conversations as $convoId => $convo)
+        $mission = MissionConfig::getInstance();
+        if($mission->feat_convo_threads)
         {
-            if($convo->parent_conversation_id != $this->currConversation->conversation_id)
+            // Send threads for active conversation
+            foreach($this->conversations as $convoId => $convo)
             {
-                $this->sendThread(
-                    $convo->parent_conversation_id,
-                    $convo->conversation_id,
-                    htmlspecialchars($convo->name),
-                    false,
-                );
+                if($convo->parent_conversation_id == $this->currConversation->conversation_id)
+                {
+                    $this->sendThread(
+                        $convo->parent_conversation_id,
+                        $convo->conversation_id,
+                        htmlspecialchars($convo->name),
+                        false,
+                    );
+                }
             }
         }
     }
