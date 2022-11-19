@@ -621,7 +621,7 @@ class ChatModule extends DefaultModule
                 $this->sendRoom(
                     $convoId, 
                     $convo->getName($this->user->user_id),
-                    ($this->conversationId == $convoId)
+                    ($this->currConversation->conversationId == $convoId)
                 );
             }
         }
@@ -647,7 +647,7 @@ class ChatModule extends DefaultModule
         $this->sendEventStream(
             'room', 
             array(
-                'convo_id' => $id,
+                'convo_id' => $convoId,
                 'convo_name' => htmlspecialchars($name),
                 'convo_selected' => $selected
             )
