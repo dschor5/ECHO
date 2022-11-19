@@ -95,6 +95,7 @@ evtSource.onopen = function(e) {
 
 function handleEventSourceNewRoom(event) {
     const data = JSON.parse(event.data);
+    console.log(data);
     if(!$('#room-' + data.conversation_id).length) {
         var divRoom = document.createElement('div');
         divRoom.setAttribute('id', 'room-' + data.conversation_id);
