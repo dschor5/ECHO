@@ -622,7 +622,7 @@ class ChatModule extends DefaultModule
                     'room', 
                     array(
                         'convo_id' => $convoId,
-                        'convo_name' => $convo->getName(),
+                        'convo_name' => $convo->getName($this->user->user_id),
                         'convo_selected' => ($this->conversationId == $convoId)
                     )
                 );
