@@ -222,6 +222,7 @@
 .msg-error-close {
     float: right; 
     width: 50px;
+    display: block;
 }
 
 .msg {
