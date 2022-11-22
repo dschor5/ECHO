@@ -208,6 +208,7 @@
     top: 40px;
     left: calc(253px + 22px);
     right: 42px;
+    z-index: 2;
 }
 
 .msg-error-ajax {

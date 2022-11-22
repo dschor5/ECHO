@@ -90,7 +90,7 @@ evtSource.onerror = function(e) {
     }
 };
 evtSource.onopen = function(e) {
-    if(evtSourceConnectionError > 0) {
+    if(evtSourceConnectionError >= 0) {
         closeConnectionError(evtSourceConnectionError);
     }
 }
