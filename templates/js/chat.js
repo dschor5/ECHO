@@ -674,6 +674,7 @@ function loadPrevMsgs() {
 }
 
 function showAjaxError(msg) {
+    console.log(msg);
     var prevErrors = $('.msg-error-ajax').length;
     var errorDiv = document.createElement('div');
     errorDiv.setAttribute('class', 'msg-error-ajax');
