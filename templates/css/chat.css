@@ -206,8 +206,8 @@
 #msg-error {
     position: fixed;
     top: 40px;
-    left: calc(253px + 22px - 20px);
-    right: 22px;
+    left: calc(253px + 22px);
+    right: 42px;
 }
 
 #msg-error-stream, .msg-error-ajax {
