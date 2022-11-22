@@ -209,6 +209,9 @@
     left: calc(253px + 22px);
     right: 42px;
     z-index: 2;
+}
+
+#msg-error-preload {
     background-image: url("%http%%site_url%/templates/media/ui-icons_222222_256x240.png");
 }
 
@@ -223,9 +226,7 @@
 
 .msg-error-close {
     float: right; 
-    width: 50px;
     display: block;
-    border: 1px solid blue;
     background-image: url("%http%%site_url%/templates/media/ui-icons_222222_256x240.png");
 }
 
