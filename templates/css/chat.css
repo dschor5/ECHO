@@ -210,7 +210,7 @@
     right: 42px;
 }
 
-#msg-error-stream, .msg-error-ajax {
+.msg-error-ajax {
     float: left;
     width: 100%;
     background: #d14141;
@@ -219,7 +219,7 @@
     display: none;
 }
 
-.msg-error-ajax .msg-error-close {
+.msg-error-close {
     float: right; 
     width: 50px;
 }

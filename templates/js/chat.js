@@ -31,12 +31,12 @@ function sendTextMessage(msgImportant) {
                 console.info("Sent message_id=" + resp.message_id);
             }
             else {
-                showAjaxError('Failed to send message (1).');
+                showConnectionError('Failed to send message (1).');
             }
             $('#new-msg-text').removeAttr('disabled');
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            showAjaxError('Failed to send message (2).');
+            showConnectionError('Failed to send message (2).');
             $('#new-msg-text').removeAttr('disabled');
         },
     });
@@ -79,17 +79,18 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
 }
 
 const evtSource = new EventSource(BASE_URL + '/chatstream');
+var evtSourceConnectionError = -1;
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    $( "#msg-error-stream" ).text('Lost server connection. Attempting to reconnect in 10 sec.');
-    $( "#msg-error-stream" ).fadeIn( "slow", "linear" );
+    showConnectionError('Lost server connection. Attempting to reconnect in 10 sec.');
 };
 evtSource.onopen = function(e) {
-    $( "#msg-error-stream" ).text('');
-    $( "#msg-error-stream" ).fadeOut( "slow", "linear" );
+    if(evtSourceConnectionError > 0) {
+        closeConnectionError(evtSourceConnectionError);
+    }
 }
 
 // Wrapper so that the function can be grouped with other thread functions
@@ -584,11 +585,11 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').text(resp.error);
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-                showAjaxError('Failed to upload message (1).');
+                showConnectionError('Failed to upload message (1).');
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            showAjaxError('Failed to upload message (2).');
+            showConnectionError('Failed to upload message (2).');
         },
     });
 }
@@ -667,33 +668,37 @@ function loadPrevMsgs() {
                 oldMsgQueryInProgress = false;               
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                showAjaxError('Failed loading previous messages.');
+                showConnectionError('Failed loading previous messages.');
             },
         });
     }
 }
 
-function showAjaxError(msg) {
+function showConnectionError(msg, canClose) {
     
     var prevErrors = $('.msg-error-ajax').length;
-    console.log(msg);
-    console.log(prevErrors);
     var errorDiv = document.createElement('div');
     errorDiv.setAttribute('class', 'msg-error-ajax');
     errorDiv.setAttribute('id', 'msg-error-' + prevErrors);
+
     var errorText = document.createElement('div');
     errorText.innerText = msg;
-    var errorClose = document.createElement('div');
-    errorClose.setAttribute('class', 'msg-error-close');
-    errorClose.text = 
-        '<a href="#" onclick="closeAjaxError(' + prevErrors + 
-        ')"><span class="ui-icon ui-icon-close"></span></a>';
     errorDiv.appendChild(errorText);
-    errorDiv.appendChild(errorClose);  
+
+    if(canClose) {
+        var errorClose = document.createElement('div');
+        errorClose.setAttribute('class', 'msg-error-close');
+        errorClose.text = 
+            '<a href="#" onclick="closeConnectionError(' + prevErrors + 
+            ')"><span class="ui-icon ui-icon-close"></span></a>';
+        errorDiv.appendChild(errorClose);  
+    }
+    
     document.getElementById('msg-error').appendChild(errorDiv);
+    $( "#msg-error-" + prevErrors ).fadeIn( "slow", "linear" );
 }
 
-function closeAjaxError(id) {
+function closeConnectionError(id) {
     var div = document.getElementById("msg-error" + id);
     if(div) {
         div.remove();

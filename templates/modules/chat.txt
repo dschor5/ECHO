@@ -34,7 +34,6 @@
 
         <div id="msg-error">
             <!-- Errors reported here via javascript. -->
-            <div id="msg-error-stream"></div>   
         </div>
 
         <div id="msg-container">
