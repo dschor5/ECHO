@@ -690,7 +690,7 @@ function showConnectionError(msg, canClose) {
     if(canClose) {
         var errorClose = document.createElement('div');
         errorClose.setAttribute('class', 'msg-error-close');
-        errorClose.text = 
+        errorClose.innerHTML = 
             '<a href="#" onclick="closeConnectionError(' + prevErrors + 
             ')"><span class="ui-icon ui-icon-close"></span></a>';
         errorDiv.appendChild(errorClose);  
