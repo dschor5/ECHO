@@ -685,7 +685,7 @@ function showAjaxError(msg) {
     errorText.text = msg;
     var errorClose = document.createElement('div');
     errorClose.setAttribute('class', 'msg-error-close');
-    errorClose.innerHTML = 
+    errorClose.text = 
         '<a href="#" onclick="closeAjaxError(' + prevErrors + 
         ')"><span class="ui-icon ui-icon-close"></span></a>';
     errorDiv.appendChild(errorText);
