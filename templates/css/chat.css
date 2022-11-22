@@ -224,6 +224,7 @@
     float: right; 
     width: 50px;
     display: block;
+    border: 1px solid blue;
 }
 
 .msg {

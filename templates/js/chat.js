@@ -705,7 +705,7 @@ function showConnectionError(msg, canClose) {
 
 function closeConnectionError(id) {
     console.log('close = ' + id);
-    var div = document.getElementById("msg-error" + id);
+    var div = document.getElementById("msg-error-" + id);
     if(div) {
         div.remove();
     }
