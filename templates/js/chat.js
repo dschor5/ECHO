@@ -699,7 +699,7 @@ function showConnectionError(msg, canClose) {
     document.getElementById('msg-error').appendChild(errorDiv);
     $( "#msg-error-" + prevErrors ).fadeIn( "slow", "linear" );
 
-    console.log('open = ' + id);
+    console.log('open = ' + prevErrors);
     return prevErrors;
 }
 
