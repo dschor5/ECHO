@@ -31,12 +31,12 @@ function sendTextMessage(msgImportant) {
                 console.info("Sent message_id=" + resp.message_id);
             }
             else {
-                showConnectionError('Failed to send message (1).');
+                showConnectionError('Failed to send message (1).', true);
             }
             $('#new-msg-text').removeAttr('disabled');
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            showConnectionError('Failed to send message (2).');
+            showConnectionError('Failed to send message (2).', true);
             $('#new-msg-text').removeAttr('disabled');
         },
     });
@@ -86,7 +86,7 @@ evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
     if(evtSourceConnectionError < 0) {
-        evtSourceConnectionError = showConnectionError('Lost server connection. Attempting to reconnect in 10 sec.');
+        evtSourceConnectionError = showConnectionError('Lost server connection. Attempting to reconnect in 10 sec.', false);
     }
 };
 evtSource.onopen = function(e) {
@@ -587,11 +587,11 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').text(resp.error);
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-                showConnectionError('Failed to upload message (1).');
+                showConnectionError('Failed to upload message (1).', true);
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            showConnectionError('Failed to upload message (2).');
+            showConnectionError('Failed to upload message (2).', true);
         },
     });
 }
@@ -670,7 +670,7 @@ function loadPrevMsgs() {
                 oldMsgQueryInProgress = false;               
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                showConnectionError('Failed loading previous messages.');
+                showConnectionError('Failed loading previous messages.', true);
             },
         });
     }
