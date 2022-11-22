@@ -85,7 +85,9 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    showConnectionError('Lost server connection. Attempting to reconnect in 10 sec.');
+    if(evtSourceConnectionError < 0) {
+        evtSourceConnectionError = showConnectionError('Lost server connection. Attempting to reconnect in 10 sec.');
+    }
 };
 evtSource.onopen = function(e) {
     if(evtSourceConnectionError > 0) {
@@ -696,6 +698,8 @@ function showConnectionError(msg, canClose) {
     
     document.getElementById('msg-error').appendChild(errorDiv);
     $( "#msg-error-" + prevErrors ).fadeIn( "slow", "linear" );
+
+    return prevErrors;
 }
 
 function closeConnectionError(id) {
