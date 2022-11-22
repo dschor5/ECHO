@@ -682,7 +682,7 @@ function showAjaxError(msg) {
     errorDiv.setAttribute('class', 'msg-error-ajax');
     errorDiv.setAttribute('id', 'msg-error-' + prevErrors);
     var errorText = document.createElement('div');
-    errorText.text = msg;
+    errorText.innerText = msg;
     var errorClose = document.createElement('div');
     errorClose.setAttribute('class', 'msg-error-close');
     errorClose.text = 
