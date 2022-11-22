@@ -222,11 +222,11 @@
     color: #000;
     padding: 10px;
     display: none;
+    border: 1px solid #840d0d;
 }
 
 .msg-error-close {
     float: right; 
-    display: block;
     background-image: url("%http%%site_url%/templates/media/ui-icons_222222_256x240.png");
 }
 

@@ -684,6 +684,7 @@ function showConnectionError(msg, canClose) {
     errorDiv.setAttribute('id', 'msg-error-' + prevErrors);
 
     var errorText = document.createElement('div');
+    errorText.setAttribute('style', 'float: left;');
     errorText.innerText = msg;
     errorDiv.appendChild(errorText);
 
