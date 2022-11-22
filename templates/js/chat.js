@@ -31,14 +31,12 @@ function sendTextMessage(msgImportant) {
                 console.info("Sent message_id=" + resp.message_id);
             }
             else {
-                $( "#msg-error-ajax" ).text('Failed to send message (1).');
-                $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
+                showAjaxError('Failed to send message (1).');
             }
             $('#new-msg-text').removeAttr('disabled');
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            $( "#msg-error-ajax" ).text('Failed to send message (2).');
-            $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
+            showAjaxError('Failed to send message (2).');
             $('#new-msg-text').removeAttr('disabled');
         },
     });
@@ -586,13 +584,11 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').text(resp.error);
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-                $( "#msg-error-ajax" ).text('Failed load previous messages.');
-                $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
+                showAjaxError('Failed to upload message (1).');
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            $( "#msg-error-ajax" ).text('Failed to upload message.');
-            $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
+            showAjaxError('Failed to upload message (2).');
         },
     });
 }
@@ -671,9 +667,31 @@ function loadPrevMsgs() {
                 oldMsgQueryInProgress = false;               
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                $( "#msg-error-ajax" ).text('Failed load previous messages.');
-                $( "#msg-error-ajax" ).show().delay(3000).fadeOut('slow', 'linear');
+                showAjaxError('Failed loading previous messages.');
             },
         });
+    }
+}
+
+function showAjaxError(msg) {
+    var prevErrors = $('.msg-error-ajax').length;
+    var errorDiv = document.createElement('div');
+    errorDiv.setAttribute('class', 'msg-error-ajax');
+    errorDiv.setAttribute('id', 'msg-error-' + prevErrors);
+    var errorText = document.createElement('div');
+    errorText.text = msg;
+    var errorClose = document.createElement('div');
+    errorClose.setAttribute('class', 'msg-error-close');
+    errorClose.innerHTML = 
+        '<a href="#" onclick="closeAjaxError(' + prevErrors + 
+        ')"><span class="ui-icon ui-icon-close"></span></a>';
+    errorDiv.appendChild(errorText);
+    errorDiv.appendChild(errorClose);   
+}
+
+function closeAjaxError(id) {
+    var div = document.getElementById("msg-error" + id);
+    if(div) {
+        div.remove();
     }
 }
