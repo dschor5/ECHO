@@ -686,7 +686,8 @@ function showAjaxError(msg) {
         '<a href="#" onclick="closeAjaxError(' + prevErrors + 
         ')"><span class="ui-icon ui-icon-close"></span></a>';
     errorDiv.appendChild(errorText);
-    errorDiv.appendChild(errorClose);   
+    errorDiv.appendChild(errorClose);  
+    document.getElementById('msg-error').appendChild(errorDiv);
 }
 
 function closeAjaxError(id) {
