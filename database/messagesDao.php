@@ -214,7 +214,7 @@ class MessagesDao extends Dao
         }
     }   
 
-    public function getLastMessageId(array $convoIds, int $userId, bool $isCrew, string $toDate) : array
+    public function getLastMessageId(array $convoIds, int $userId, bool $isCrew, string $toDate) : int
     {
         // Build query
         $qConvoIds = implode(',',$convoIds);
@@ -236,6 +236,8 @@ class MessagesDao extends Dao
                     'LIMIT 1, 1';
 
         $this->startTransaction();
+
+        $messageId = -1;
 
         // Get all messages
         if(($result = $this->database->query($queryStr)) !== false && $result->num_rows == 1)
