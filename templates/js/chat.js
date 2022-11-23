@@ -85,11 +85,13 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
+    console.log(evtSource.readyState);
     if(evtSourceConnectionError < 0) {
         evtSourceConnectionError = showConnectionError('Lost server connection. Attempting to reconnect in 10 sec.', false);
     }
 };
 evtSource.onopen = function(e) {
+    console.log(evtSource.readyState);
     if(evtSourceConnectionError >= 0) {
         closeConnectionError(evtSourceConnectionError);
         evtSourceConnectionError = -1;
