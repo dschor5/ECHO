@@ -726,13 +726,16 @@ class ChatModule extends DefaultModule
         }
         else
         {
-            $msg = $messagesDao->getLastMessage(
+            $messages = $messagesDao->getLastMessage(
                 $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr);
-            $this->sendEventStream(
-                'msg', 
-                $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
-                $msg->message_id, 
-            );
+            foreach($messages as $msgId => $msg)
+            {   
+                $this->sendEventStream(
+                    'msg', 
+                    $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
+                    $msgId, 
+                );
+            }
         }
         
     }
