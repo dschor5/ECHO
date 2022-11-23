@@ -419,6 +419,11 @@ abstract class DefaultModule implements Module
     {
         echo 'retry: '.(intval($retry) * 1000).PHP_EOL.PHP_EOL;
     }
+
+    protected function setLastEventId(int $id)
+    {
+        echo 'id: '.(intval($id)).PHP_EOL.PHP_EOL;
+    }
 }
 
 ?>

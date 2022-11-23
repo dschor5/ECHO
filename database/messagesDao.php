@@ -235,34 +235,25 @@ class MessagesDao extends Dao
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
                     'LIMIT 1, 1';
 
-        $messages = array();
-
-
         $this->startTransaction();
 
         // Get all messages
-        if(($result = $this->database->query($queryStr)) !== false)
+        if(($result = $this->database->query($queryStr)) !== false && $result->num_rows == 1)
         {
-            if($result->num_rows > 0)
+            if($result->num_rows == 1)
             {
-                while(($rowData=$result->fetch_assoc()) != null)
-                {
-                    $messages[$rowData['message_id']] = new Message($rowData);
-                }
-            }
-        }
+                $rowData = $result->fetch_assoc();
+                $messageId = $rowData['messageId'];
 
-        // Update message read status 
-        if(count($messages) > 0)
-        {
-            $messageIds = '('.implode(', ', array_keys($messages)).')';
-            $messageStatusDao = MessageStatusDao::getInstance();
-            $messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
+                // Update message read status
+                $messageStatusDao = MessageStatusDao::getInstance();
+                $messageStatusDao->drop('user_id='.$qUserId.' AND message_id='.$messageId);
+            }
         }
 
         $this->endTransaction();
 
-        return $messages;
+        return $messageId;
     }
 
     /**
