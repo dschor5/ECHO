@@ -697,18 +697,18 @@ class ChatModule extends DefaultModule
             $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
         }
 
-        $offset = 0;
-        $messages = $messagesDao->getMissedMessages(
-            $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
-
-        while(count($messages) > 0)
+        if($lastId > 0) 
         {
-            // Iterate through the new messages and send a unique event 
-            // for each one where the msg data is JSON encoded. 
-            // Use the id field to identify unique events 
-            foreach($messages as $msgId => $msg)
+            $offset = 0;
+            $messages = $messagesDao->getMissedMessages(
+                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+
+            while(count($messages) > 0)
             {
-                if($msg->user_id != $this->user->user_id)
+                // Iterate through the new messages and send a unique event 
+                // for each one where the msg data is JSON encoded. 
+                // Use the id field to identify unique events 
+                foreach($messages as $msgId => $msg)
                 {
                     $this->sendEventStream(
                         'msg', 
@@ -716,12 +716,22 @@ class ChatModule extends DefaultModule
                         $msgId, 
                     );
                 }
+
+                $offset += count($messages);
+
+                $messages = $messagesDao->getMissedMessages(
+                    $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
             }
-
-            $offset += count($messages);
-
-            $messages = $messagesDao->getMissedMessages(
-                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+        }
+        else
+        {
+            $msg = $messagesDao->getLastMessage(
+                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr);
+            $this->sendEventStream(
+                'msg', 
+                $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
+                $msg->message_id, 
+            );
         }
         
     }

@@ -214,6 +214,57 @@ class MessagesDao extends Dao
         }
     }   
 
+    public function getLastMessage(array $convoIds, int $userId, bool $isCrew, string $toDate) : array
+    {
+        // Build query
+        $qConvoIds = implode(',',$convoIds);
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+
+        $queryStr = 'SELECT messages.*, '. 
+                        'users.username, users.alias, '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                    'FROM messages '.
+                    'JOIN users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                        'AND msg_status.user_id='.$qUserId.' '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
+                    'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+                    'LIMIT 1, 1';
+
+        $messages = array();
+
+
+        $this->startTransaction();
+
+        // Get all messages
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                while(($rowData=$result->fetch_assoc()) != null)
+                {
+                    $messages[$rowData['message_id']] = new Message($rowData);
+                }
+            }
+        }
+
+        // Update message read status 
+        if(count($messages) > 0)
+        {
+            $messageIds = '('.implode(', ', array_keys($messages)).')';
+            $messageStatusDao = MessageStatusDao::getInstance();
+            $messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
+        }
+
+        $this->endTransaction();
+
+        return $messages;
+    }
+
     /**
      * Get messages lost when a stream is disconnected.
      *
