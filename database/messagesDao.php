@@ -245,7 +245,7 @@ class MessagesDao extends Dao
             if($result->num_rows == 1)
             {
                 $rowData = $result->fetch_assoc();
-                $messageId = $rowData['messageId'];
+                $messageId = $rowData['message_id'];
 
                 // Update message read status
                 $messageStatusDao = MessageStatusDao::getInstance();
