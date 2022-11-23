@@ -214,7 +214,7 @@ class MessagesDao extends Dao
         }
     }   
 
-    public function getLastMessage(array $convoIds, int $userId, bool $isCrew, string $toDate) : array
+    public function getLastMessageId(array $convoIds, int $userId, bool $isCrew, string $toDate) : array
     {
         // Build query
         $qConvoIds = implode(',',$convoIds);
