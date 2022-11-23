@@ -572,6 +572,7 @@ class ChatModule extends DefaultModule
         }
         else
         {
+            $this->sendMissedMessages();
             // Sleep 0.5sec to avoid interfering with initial msg load.
             usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
         }
@@ -683,7 +684,7 @@ class ChatModule extends DefaultModule
      * Sends event stream message 'msg' for each new message 
      * received for the current conversation. 
      */
-    private function sendMissedMessages(int $lastId)
+    private function sendMissedMessages(int $lastId = -1)
     {
         // Get new messages
         $time = new DelayTime();
