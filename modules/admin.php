@@ -761,7 +761,7 @@ class AdminModule extends DefaultModule
     {
         global $config;
         global $server;
-
+        
         $messagesDao = MessagesDao::getInstance();
         $messagesDao->clearMessagesAndThreads(); 
         $files = scandir($server['host_address'].$config['uploads_dir']);
@@ -772,7 +772,7 @@ class AdminModule extends DefaultModule
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
         }
-        Logger::info("Cleared log.");
+        Logger::info("Cleared mission data.");
 
         return array('success' => true);
     }
