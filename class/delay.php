@@ -295,7 +295,7 @@ class Delay
             // In other words, delay = f(time). 
             $currDelay = 0;
             $metObj = new DelayTime();
-            $config[$i]['eq'] = preg_replace('/time/', $metObj->getMet(), $config[$i]['eq']);
+            $config[$i]['eq'] = preg_replace('/time/i', $metObj->getMet(), $config[$i]['eq']);
             eval('$currDelay = '.$config[$i]['eq'].';');
             // Ensure the delay >= 0. 
             $currDelay = max(0, $currDelay);
