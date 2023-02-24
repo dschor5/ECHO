@@ -111,7 +111,7 @@ class FileModule implements Module
         }
         header('Content-Length: ' . $filesize);
         header("Content-Type: ".$mimeType);
-        ob_end_clean();
+        //ob_end_clean();
         readfile($filepath);
     }
 
@@ -191,7 +191,7 @@ class FileModule implements Module
         header('Content-Disposition: attachment; filename='.basename($origName));
         header('Content-Length: ' . $filesize);
         header("Content-Type: ".$mimeType);
-        ob_end_clean();
+        //ob_end_clean();
         readfile($filepath);
     }
 }
