@@ -108,7 +108,6 @@ class FileModule implements Module
         {
             // Force file download
             header('Content-Disposition: attachment; filename='.basename($origName));
-            ob_end_clean();
         }
         header('Content-Length: ' . $filesize);
         header("Content-Type: ".$mimeType);
