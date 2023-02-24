@@ -85,7 +85,7 @@ class DelayTime
 
         // Create a new timestamp
         $time = new DateTime();
-        $time->setTimestamp($this->ts + $delay);
+        $time->setTimestamp(intval($this->ts + $delay));
         $time->setTimezone(new DateTimeZone("UTC"));
 
         // Format and return the timestamp
