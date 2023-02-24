@@ -756,14 +756,21 @@ class AdminModule extends DefaultModule
         ));
     }
 
-    
+    /**
+     * Delete all messages and threads while keeping user accounts. 
+     * 
+     * @return array
+     */
     protected function clearMissionData() : array
     {
         global $config;
         global $server;
         
+        // Delete all messages and threads. 
         $messagesDao = MessagesDao::getInstance();
         $messagesDao->clearMessagesAndThreads(); 
+
+        // Delete all message attachments. 
         $files = scandir($server['host_address'].$config['uploads_dir']);
         foreach($files as $f)
         {
@@ -772,6 +779,8 @@ class AdminModule extends DefaultModule
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
         }
+
+        // Report status. 
         Logger::info("Cleared mission data.");
 
         return array('success' => true);
