@@ -175,7 +175,7 @@ class Delay
      **/
     private function getMarsDelay() : float
     {
-        $delay = 0;
+        $delay = 0.0;
 
         global $config;
         global $server;
@@ -346,8 +346,8 @@ class Delay
         $delayStr = '';
 
         // Get the number of hours, minutes, and seconds for the delay.
-        $hrs = intdiv($currDelay, self::SEC_PER_HOUR);
-        $min = intdiv($currDelay - $hrs * self::SEC_PER_HOUR, self::SEC_PER_MIN);
+        $hrs = intdiv(intval($currDelay), self::SEC_PER_HOUR);
+        $min = intdiv(intval($currDelay - $hrs * self::SEC_PER_HOUR), self::SEC_PER_MIN);
         $sec = $this->currDelay - $hrs * self::SEC_PER_HOUR - $min * self::SEC_PER_MIN;
 
         // Format the output

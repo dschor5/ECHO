@@ -95,6 +95,7 @@ class FileModule implements Module
         $origName = $file->original_name;
         $filesize = $file->size;
         $templateType = $file->getTemplateType();
+        
 
         // The download will use the original file name, however, the data is retrieved 
         // from the server location that uses a different name altogether.
@@ -111,6 +112,7 @@ class FileModule implements Module
         }
         header('Content-Length: ' . $filesize);
         header("Content-Type: ".$mimeType);
+        ob_end_clean();
         readfile($filepath);
     }
 
