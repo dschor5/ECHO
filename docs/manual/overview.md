@@ -7,7 +7,7 @@ permalink: /manual/overview
 # Overview
 ECHO is a delay emulation tool for analog space missions. It allows users to send and receive messages both in a public and private setting. Public messages are sent to every user (both on the analog habitat and mission control), while private messages are 1-on-1 discussions with another individual. The application allows used to send text, audio, video, and file attachments.
 
-![ECHO interface panels](ECHO/assets/images/help-gui-panels.jpg)
+![ECHO interface panels](ECHO/docs/assets/images/help-gui-panels.jpg)
 
 ## Menu Bar Panel
 Top panel that shows the current mission (left) and logged in user (right). Moving the mouse over the username allows you to see a menu to access the help and logout. Administrators can also use this menu to configure ECHO settings.
