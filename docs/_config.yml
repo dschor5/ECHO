@@ -1,4 +1,4 @@
 #theme: jekyll-theme-slate
-remote_theme: readthedocs/sphinx_rtd_theme
+remote_theme: rundocs/jekyll-rtd-theme
 title: ECHO 
 description: Communicaiton tool for analog interplanetary missions
