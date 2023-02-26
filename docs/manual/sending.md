@@ -1,3 +1,9 @@
+---
+layout: default
+title: Sending Messages
+nav_order: 2
+---
+
 # Sending New Messages
 
 ## Text Messages
