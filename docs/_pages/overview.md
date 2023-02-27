@@ -3,7 +3,8 @@ title: ECHO Overview
 author: Dario Schor
 date: 2022-02-04
 category: Manual
-layout: page
+layout: post
+
 ---
 
 
