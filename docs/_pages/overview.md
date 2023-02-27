@@ -1,8 +1,11 @@
 ---
-layout: default
 title: ECHO Overview
-nav_order: 1
+author: Dario Schor
+date: 2022-02-04
+category: Manual
+layout: page
 ---
+
 
 # Overview
 ECHO is a delay emulation tool for analog space missions. It allows users to send and receive messages both in a public and private setting. Public messages are sent to every user (both on the analog habitat and mission control), while private messages are 1-on-1 discussions with another individual. The application allows used to send text, audio, video, and file attachments.

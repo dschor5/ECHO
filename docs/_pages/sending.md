@@ -1,7 +1,9 @@
 ---
-layout: default
 title: Sending Messages
-nav_order: 2
+author: Dario Schor
+date: 2022-02-04
+category: Manual
+layout: post
 ---
 
 # Sending New Messages
