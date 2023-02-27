@@ -3,14 +3,7 @@ title:            ECHO
 longtitle:        ECHO
 author:           Dario Schor
 email:            schor@ieee.org
-description: >
-  Communication tool for analog interplanetary missions
-version:          1.0
-gitbook_version:  3.2.3
-
-url:              'https://dschor5.github.io'
-baseurl:          '/ECHO'
-rss:              RSS
+description:      Communication tool for analog interplanetary missions
 
 # bootstrap: use the remote theme for the site itself
 remote_theme: sighingnow/jekyll-gitbook
