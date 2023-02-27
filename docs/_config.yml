@@ -1,23 +1,62 @@
-#theme: jekyll-theme-slate
-#remote_theme: rundocs/jekyll-rtd-theme
-remote_theme: sighingnow/jekyll-gitbook
-title: ECHO 
-description: Communicaiton tool for analog interplanetary missions
+# Configurations
+title:            ECHO
+longtitle:        ECHO
+author:           Dario Schor
+email:            schor@ieee.org
+description: >
+  Communication tool for analog interplanetary missions
+version:          1.0
+gitbook_version:  3.2.3
 
-# Specific to this theme
-site_author: Dario Schor
-repo_url: 'https://github.com/dschor/ECHO '
-edit_on_github: true
-github_docs_folder: true
-logo: 'https://your.url/image.png'
-site_favicon: 'https://your.url/here.ico'
-sticky_navigation: true
-prev_next_buttons_location: None
-prev_next_buttons_location: top
-prev_next_buttons_location: bottom
-prev_next_buttons_location: both
-search_enabled: true
-#google_analytics: UA-XXXXX-Y
-#google_analytics_anonymize_ip: true
-# The highlight.js library provides 79 different colours for their syntax highlighting. The default is github-gist.
-hljs_style: github-gist
+url:              'https://dschor5.github.io'
+baseurl:          '/ECHO'
+rss:              RSS
+
+# bootstrap: use the remote theme for the site itself
+remote_theme: sighingnow/jekyll-gitbook
+
+toc:
+  enabled: true
+  h_min: 1
+  h_max: 3
+
+# customize the link favicon in header, will be {{site.baseurl}}/{{site.favicon_path}}
+favicon_path:     /assets/gitbook/images/favicon.ico
+
+# markdown render engine.
+markdown:         kramdown
+kramdown:
+  auto_ids:               true
+  input:                  GFM
+  math_engine:            mathjax
+  smart_quotes:           lsquo,rsquo,ldquo,rdquo
+  toc_levels:             1..6
+  syntax_highlighter:     rouge
+  syntax_highlighter_opts:
+    guess_lang:           true
+
+syntax_highlighter_style: colorful
+
+markdown_ext:     markdown,mkdown,mkdn,mkd,md
+
+# Permalinks
+permalink:        /:categories/:year-:month-:day-:title:output_ext
+
+exclude:
+  - _drafts
+
+collections:
+  pages:
+    output: true
+    permalink: /:collection/:path/
+
+page_width: 800px
+
+destination:      ./_site
+incremental:      false
+regenerate:       true
+
+plugins:
+  - jekyll-feed
+  - jekyll-readme-index
+  - jemoji
