@@ -21,7 +21,3 @@ search_enabled: true
 #google_analytics_anonymize_ip: true
 # The highlight.js library provides 79 different colours for their syntax highlighting. The default is github-gist.
 hljs_style: github-gist
-
-n (i) the challenges while working in a high latency environment with ECHO, 
-(ii) what worked in terms of the user interface, 
-(iii) improvements and recommendations for the communication tool.
