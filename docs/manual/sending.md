@@ -1,3 +1,7 @@
+---
+sort: 2
+---
+
 # Sending Messages
 
 ## Text Messages

@@ -2,6 +2,6 @@
 sort: 1
 ---
 
-# Docs folder
+# User Manual
 
 {% include list.liquid all=true %}

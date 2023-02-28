@@ -11,8 +11,11 @@ exclude:
   - Makefile
   - Gemfile
   - Gemfile.lock
+  - minimal
 
 plugins:
   - jemoji
   - jekyll-avatar
   - jekyll-mentions
+
+
