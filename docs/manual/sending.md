@@ -5,9 +5,9 @@ sort: 2
 # Sending Messages
 
 ## Text Messages
-To send a text message, simply enter the text in the New Message Panel and click on the SEND button. You can also press SHIFT+ENTER to send the message.
+To send a text message, simply enter the text in the New Message Panel and click on the `SEND` button. You can also press SHIFT+ENTER to send the message.
 
-Text messages can also be sent as "high priority" by clicking ‼ instead of the regular SEND button. This will put a red border around the message to draw attention to its content.
+Text messages can also be sent as "high priority" by clicking ‼ instead of the regular `SEND` button. This will put a red border around the message to draw attention to its content.
 
 Text messages may also contain Markdown formatting. See Markdown help for details.
 
