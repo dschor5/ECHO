@@ -5,6 +5,7 @@ function sendTextMessage(msgImportant) {
 
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
+    $('#new-msg-text').val("");
     if(newMsgText.length == 0) {
         return;
     }
@@ -25,15 +26,18 @@ function sendTextMessage(msgImportant) {
         // On success, build the message to display on the screen.
         success: function(resp) {
             if(resp.success) {
-                compileMsg(resp, false);
-                scrollToBottom();
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
             }
             else {
-                console.error(resp.error);
+                $( "#msg-error" ).text = 'Failed to send message (1).';
+                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $( "#msg-error" ).text = 'Failed to send message (2).';
+            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
         },
     });
 }
@@ -50,7 +54,7 @@ function scrollToBottom() {
  * @param {event} Key event.
  */
 function detectShiftEnter(event) {
-    if(event.keyCode == 13 && event.shiftKey) {
+    if(event.keyCode == 13 && event.shiftKey && !event.repeat) {
         event.preventDefault();
         sendTextMessage();
     }
@@ -80,8 +84,13 @@ evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
 evtSource.onerror = function(e) {
-    console.log(e);
+    $( "#msg-error" ).text = 'Lost server connection. Attempting to reconnect.';
+    $( "#msg-error" ).fadeIn( "slow", "linear" );
 };
+evtSource.onopen = function(e) {
+    $( "#msg-error" ).text = '';
+    $( "#msg-error" ).fadeOut( "slow", "linear" );
+}
 
 // Wrapper so that the function can be grouped with other thread functions
 // and only included if threads are enabled. 
@@ -114,7 +123,10 @@ function handleEventSourceNewMessage(event) {
         }, 250);
     }
 
-    newMessageNotification(data.author, data.type == 'important');
+    if(data.send_notification == true)
+    {
+        newMessageNotification(data.author, data.type == 'important');
+    }
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
@@ -567,8 +579,6 @@ function uploadMedia(mediaType) {
         },
         success: function(resp) {
             if(resp.success) {
-                compileMsg(resp, false);
-                scrollToBottom();
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
@@ -577,8 +587,13 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').text(resp.error);
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-                console.error(resp.error);
+                $( "#msg-error" ).text = 'Failed load previous messages.';
+                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $( "#msg-error" ).text = 'Failed to upload message.';
+            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
         },
     });
 }
@@ -656,9 +671,9 @@ function loadPrevMsgs() {
 
                 oldMsgQueryInProgress = false;               
             },
-            error: function(jqHR, textStatus, errorThrown) {
-                //location.href = BASE_URL + '/chat';
-                // TODO - Add error showing messages could not be loaded.
+            error: function(xhr, ajaxOptions, thrownError) {
+                $( "#msg-error" ).text = 'Failed load previous messages.';
+                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             },
         });
     }

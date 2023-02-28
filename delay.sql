@@ -48,7 +48,6 @@ CREATE TABLE `messages` (
 CREATE TABLE `msg_status` (
   `message_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Recipient',
-  `is_read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Rx Perspective',
   PRIMARY KEY(`message_id`, `user_id`),
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -57,7 +56,7 @@ CREATE TABLE `msg_status` (
 CREATE TABLE `msg_files` (
   `message_id` int(10) UNSIGNED NOT NULL,
   `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
-  `original_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `original_name` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY(`message_id`),
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE

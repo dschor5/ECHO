@@ -320,17 +320,9 @@ class ChatModule extends DefaultModule
         // Get the file type. 
         $fileType  = trim($_POST['type'] ?? Message::FILE);
 
-        // For regular attachments, get the filename, extension, and mime type. 
-        if($fileType == Message::FILE)
-        {
-            $fileName  = trim($_FILES['data']['name'] ?? '');
-            $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
-            $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
-        }
-        // Otherwise, Video and Audio messages will create a custom filename
-        // based on the current timestamp and force the extension & mime type. 
-        // TODO: Can we support more multimedia types?
-        elseif($fileType == Message::VIDEO)
+        // The VIDEO and AUDIO types are fixed for Google Chrome. 
+        // Future versions of ECHO can expand this to work with more browsers. 
+        if($fileType == Message::VIDEO)
         {
             $fileExt  = 'mkv';
             $fileMime = 'video/webm';
@@ -344,7 +336,36 @@ class ChatModule extends DefaultModule
             $dt = new DateTime('NOW');
             $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
         }
+        else // Catch-all for regular attachments
+        {
+            $fileType = Message::FILE;
+            $fileName  = trim($_FILES['data']['name'] ?? '');
+            $fileExt   = strtolower(substr($fileName, strrpos($fileName, '.') + 1));
+            if(finfo_open(FILEINFO_MIME_TYPE) !== false)
+            {
+                try {
+                    Logger::info('user= '.$this->user->username.'  '.
+                                'finfo_open(FILEINFO_MIME_TYPE) = '.(finfo_open(FILEINFO_MIME_TYPE) !== false). 
+                                '  $_FILES[data][tmp_name] = '.$_FILES['data']['tmp_name'], $_FILES);
+                }
+                catch(Exception $e) {}
+                $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
+            }
+            else
+            {
+                $fileMime = array_search(
+                    strtolower(pathinfo($_FILES['data']['tmp_name'], PATHINFO_EXTENSION)),
+                    $config['uploads_allowed'], 
+                    true);
+                if($fileMime === false) 
+                {
+                    $fileMime = 'unknown';
+                }
+            }            
+        }
         
+        $fileMime = strtolower($fileMime);
+
         // Get the file size regardless of the type. 
         $fileSize  = intval($_FILES['data']['size'] ?? 0);
 
@@ -363,9 +384,9 @@ class ChatModule extends DefaultModule
             $result['error'] = 'Invalid upload type.';
         }
         // Validate filename. Min 1 char filename + period + extension. 
-        else if(strlen($fileName) < 3)
+        else if(strlen($fileName) < 3 && strlen($fileName) >= 240)
         {
-            $result['error'] = 'Invalid filename.';
+            $result['error'] = 'Invalid filename (3 < length =< 240).';
         }
         // Validate file type. 
         else if(!isset($config['uploads_allowed'][$fileMime]))
@@ -400,7 +421,7 @@ class ChatModule extends DefaultModule
                 'from_crew'       => $this->user->is_crew,
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => '',
-                'type'            => Message::FILE,
+                'type'            => $fileType,
                 'sent_time'       => $currTime->getTime(),
                 'recv_time_hab'   => $currTime->getTime(!$this->user->is_crew),
                 'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
@@ -416,31 +437,12 @@ class ChatModule extends DefaultModule
 
             // Execute both database queries. 
             $messagesDao = MessagesDao::getInstance();
-            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
             {
-                // Get the new message_id and build the Message object 
-                // to compile the response for the user. 
-                $fileData['message_id'] = $messageIds['message_id'];
-                $newMsg = new Message(
-                    array_merge(
-                        $msgData, 
-                        $fileData, 
-                        array(
-                            'message_id' => $messageIds['message_id'],
-                            'message_id_alt' => $messageIds['message_id_alt'],
-                            'username' => $this->user->username, 
-                            'alias'    => $this->user->alias, 
-                            'is_crew'  => $this->user->is_crew)
-                        )
-                    );
-                
-                // Compile message to send back to the calling javascript.
-                // This part takes into account whether to use the MCC or HAB 
-                // timestamp for the message even though we know the user should
-                // be receiving their own message immediately. 
-                $newMsgData = $newMsg->compileArray($this->user, 
-                    $this->currConversation->participants_both_sites);
-                $result = array_merge(array('success' => true), $newMsgData);
+                $result = array(
+                    'success' => true, 
+                    'message_id' => $messageId,
+                );
             }
             else
             {
@@ -506,28 +508,12 @@ class ChatModule extends DefaultModule
             );
             
             // Send message.
-            if(($messageIds = $messagesDao->sendMessage($this->user, $msgData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
-                // Combine with the remaining fields for a message. 
-                $newMsg = new Message(
-                    array_merge(
-                        $msgData, 
-                        array(
-                            'message_id' => $messageIds['message_id'],
-                            'message_id_alt' => $messageIds['message_id_alt'],
-                            'username' => $this->user->username, 
-                            'alias' => $this->user->alias, 
-                            'is_crew' => $this->user->is_crew)
-                        )
-                    );
-
-                // Compile message to send back to the calling javascript.
-                // This part takes into account whether to use the MCC or HAB 
-                // timestamp for the message even though we know the user should
-                // be receiving their own message immediately. 
-                $newMsgData = $newMsg->compileArray($this->user, 
-                    $this->currConversation->participants_both_sites);
-                $result = array_merge(array('success' => true), $newMsgData);
+                $result = array(
+                    'success' => true, 
+                    'message_id' => $messageId,
+                );
             }
             else
             {
@@ -573,20 +559,21 @@ class ChatModule extends DefaultModule
             return;
         }
 
-        $missionConfig = MissionConfig::getInstance();
-
-        // Get a list of all conversations to monitor for msg notifications. 
-        // Essentially, all the conversations the user belongs to except the 
-        // active conversations. 
-        $conversationIds   = array_keys(array_diff_key(
-            $this->conversations, array($this->currConversation->conversation_id => 0)));
-
-        // Sleep 0.5sec to avoid interfering with initial msg load.
-        usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
-        
         // Iteration counter. Used to send keep-alive messages 
         // every few seconds. 
         $iter = 1;
+
+        // Check if the server sent a last-event-id header indicating it is reconnecting
+        $headers = getallheaders();
+        if(isset($headers['Last-Event-Id']) && $headers['Last-Event-Id'] > 0)
+        {
+            $this->sendMissedMessages($headers['Last-Event-Id']);
+        }
+        else
+        {
+            // Sleep 0.5sec to avoid interfering with initial msg load.
+            usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
+        }
 
         // Infinite loop processing data. 
         while(true)
@@ -689,6 +676,53 @@ class ChatModule extends DefaultModule
             );
             $prevDelay = $delay;
         }
+    }
+
+    /**
+     * Sends event stream message 'msg' for each new message 
+     * received for the current conversation. 
+     */
+    private function sendMissedMessages(int $lastId)
+    {
+        // Get new messages
+        $time = new DelayTime();
+        $timeStr = $time->getTime();
+        $messagesDao = MessagesDao::getInstance();
+        $mission = MissionConfig::getInstance();
+        $convoIds = array();
+        $convoIds[] = $this->currConversation->conversation_id;
+        if(!$mission->feat_convo_threads)
+        {
+            $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
+        }
+
+        $offset = 0;
+        $messages = $messagesDao->getMissedMessages(
+            $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+
+        while(count($messages) > 0)
+        {
+            // Iterate through the new messages and send a unique event 
+            // for each one where the msg data is JSON encoded. 
+            // Use the id field to identify unique events 
+            foreach($messages as $msgId => $msg)
+            {
+                if($msg->user_id != $this->user->user_id)
+                {
+                    $this->sendEventStream(
+                        'msg', 
+                        $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
+                        $msgId, 
+                    );
+                }
+            }
+
+            $offset += count($messages);
+
+            $messages = $messagesDao->getMissedMessages(
+                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+        }
+        
     }
 
     /**
@@ -809,6 +843,11 @@ class ChatModule extends DefaultModule
                 {
                     $newNotifications[$convoId] = $currNotifications[$convoId];
                     $newNotifications[$convoId]['notif_important'] = ($msgs['num_important'] > 0) ? 1:0;
+                }
+                else if(!isset($prevNotifications[$convoId]))
+                {
+                    $newNotifications[$convoId] = $currNotifications[$convoId];
+                    $newNotifications[$convoId]['notif_important'] = ($currNotifications[$convoId]['num_important']) ? 1:0;
                 }
                 else if($prevNotifications[$convoId]['num_new'] != $currNotifications[$convoId]['num_new'])
                 {

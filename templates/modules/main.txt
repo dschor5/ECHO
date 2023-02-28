@@ -8,6 +8,8 @@
     <meta name="description" content="Emulator for Interplanetary Human Spaceflight" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" type="image/x-icon" href="%http%%site_url%/%templates_dir%/media/favicon.ico"/>
+    <link rel="icon" type="image/png" href="%http%%site_url%/%templates_dir%/media/android-chrome-192x192.png" sizes="192x192"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="%http%%site_url%/%templates_dir%/media/apple-touch-icon.png"/>
     <script type="text/javascript">
         const BASE_URL      = '%http%%site_url%';
         const EPOCH_UTC     = new Date(%epoch% * 1000); // sec

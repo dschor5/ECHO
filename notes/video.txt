@@ -24,7 +24,7 @@ if type != "TEXT"
 https://stackoverflow.com/questions/38509334/full-secure-image-upload-script
 
 
-SELECT messages.*, users.username, users.alias, users.is_crew, msg_status.is_read FROM messages JOIN users ON users.user_id=messages.user_id JOIN msg_status ON messages.message_id=msg_status.message_id AND msg_status.user_id='1' LEFT JOIN msg_files ON messages.message_id=msg_files.message_id WHERE messages.conversation_id='1' AND messages.recv_time_mcc <= '2021-08-17 20:34:13' ORDER BY messages.recv_time_mcc LIMIT 0, 25
+SELECT messages.*, users.username, users.alias, users.is_crew, FROM messages JOIN users ON users.user_id=messages.user_id JOIN msg_status ON messages.message_id=msg_status.message_id AND msg_status.user_id='1' LEFT JOIN msg_files ON messages.message_id=msg_files.message_id WHERE messages.conversation_id='1' AND messages.recv_time_mcc <= '2021-08-17 20:34:13' ORDER BY messages.recv_time_mcc LIMIT 0, 25
 
     
 <video controls src="https://s3.eu-central-1.amazonaws.com/pipe.public.content/short.mp4" poster="https://s3.eu-central-1.amazonaws.com/pipe.public.content/poster.png" preload="none"> </video>

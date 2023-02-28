@@ -19,7 +19,7 @@ try
 {
     // Force HTTPS. 
     if ((strstr($server['http'], 'https') !== false) && 
-        (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off")) 
+        (!isset($_SERVER['HTTPS']) || empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off"))
     {
         header('HTTP/1.1 301 Moved Permanently');
         if(isset($_SERVER['HTTP_HOST']))
@@ -210,7 +210,7 @@ class Main
     public static function deleteCookie()
     {
         global $config;
-        setcookie($config['cookie_name'], null, -1, '/');
+        setcookie($config['cookie_name'], '', -1, '/');
     }
 
     public static function getCookieValue(string $key) 

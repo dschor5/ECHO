@@ -40,6 +40,8 @@ $config['uploads_allowed'] = array(
     'video/x-matroska' => 'mkv' ,
     'application/zip' => 'zip' ,
     'application/x-7z-compressed' => '7z',
+    'video/mp4' => 'mp4',
+    'audio/mp4' => 'mp4',
 );
 
 // this is the array of modules that are allowed to run
