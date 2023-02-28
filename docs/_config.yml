@@ -1,6 +1,29 @@
-title: Your awesome title
-lang: en
-description: Write an awesome description for your new site here
+title:       ECHO
+lang:        en
+description: Communication tool for human space analog missions
+author:      Dario Schor
+email:       schor@ieee.org
+
+toc:
+  enabled: true
+  h_min: 1
+  h_max: 3
+
+# markdown render engine.
+markdown:         kramdown
+kramdown:
+  auto_ids:               true
+  input:                  GFM
+  math_engine:            mathjax
+  smart_quotes:           lsquo,rsquo,ldquo,rdquo
+  toc_levels:             1..6
+  syntax_highlighter:     rouge
+  syntax_highlighter_opts:
+    guess_lang:           true
+
+syntax_highlighter_style: colorful
+
+markdown_ext:     markdown,mkdown,mkdn,mkd,md  
 
 remote_theme: rundocs/jekyll-rtd-theme
 
@@ -17,5 +40,6 @@ plugins:
   - jemoji
   - jekyll-avatar
   - jekyll-mentions
+  - mathcad
 
 
