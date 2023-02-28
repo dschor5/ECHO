@@ -9,7 +9,7 @@ allows used to send text, audio, video, and file attachments. </p>
 
 <h3>User Interface</h3>
 
-<img src="%http%%site_url%/templates/media/help-gui-panels.jpg" width="500"/>
+<img src="%http%%site_url%/docs/_static/help-gui-panels.jpg" width="500"/>
 
 <dl>
     <dt>
