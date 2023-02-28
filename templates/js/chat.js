@@ -123,7 +123,10 @@ function handleEventSourceNewMessage(event) {
         }, 250);
     }
 
-    newMessageNotification(data.author, data.type == 'important');
+    if(data.send_notification == true)
+    {
+        newMessageNotification(data.author, data.type == 'important');
+    }
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {

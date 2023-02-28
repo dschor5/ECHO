@@ -293,17 +293,27 @@ class Delay
         {
             // Replace any instance of "time" in the equation with the current MET. 
             // In other words, delay = f(time). 
-            $currDelay = 0;
+            $currDelay = 0.0;
             $metObj = new DelayTime();
-            $config[$i]['eq'] = preg_replace('/time/', $metObj->getMet(), $config[$i]['eq']);
+            $config[$i]['eq'] = preg_replace(
+                array(
+                    '/time/i', 
+                    '/\^/'
+                ),
+                array(
+                    '('.($metObj->getMet()).')',
+                    '**'
+                ),
+                $config[$i]['eq']
+            );
             eval('$currDelay = '.$config[$i]['eq'].';');
             // Ensure the delay >= 0. 
-            $currDelay = max(0, $currDelay);
+            $currDelay = max(0.0, floatval($currDelay));
         } 
         catch (Exception $e) 
         {
             Logger::warning("Could not parse equation", $config[$i]['eq']);
-            $currDelay = 0;
+            $currDelay = 0.0;
         }
         return $currDelay;
     }

@@ -275,7 +275,7 @@ class AdminModule extends DefaultModule
         $number = '(?:\d+(?:[,.]\d+)?|pi|π|time)'; // What is a number
         $functions = '(?:sinh?|cosh?|tanh?|abs|acosh?|asinh?|atanh?|exp|log10|deg2rad|rad2deg|sqrt|ceil|floor|round)'; // Allowed PHP functions
         $operators = '[+\/*\^%-]'; // Allowed math operators
-        $regexp = '/^(('.$number.'|'.$functions.'\s*\((?1)+\)|\((?1)+\))(?:'.$operators.'(?2))?)+$/'; // Final regexp, heavily using recursive patterns
+        $regexp = '/^(('.$number.'|'.$functions.'\s*\((?1)+\)|\((?1)+\))(?:'.$operators.'(?2))?)+$/i'; // Final regexp, heavily using recursive patterns
 
         return preg_match($regexp, $eq);
     }
@@ -756,14 +756,21 @@ class AdminModule extends DefaultModule
         ));
     }
 
-    
+    /**
+     * Delete all messages and threads while keeping user accounts. 
+     * 
+     * @return array
+     */
     protected function clearMissionData() : array
     {
         global $config;
         global $server;
-
+        
+        // Delete all messages and threads. 
         $messagesDao = MessagesDao::getInstance();
         $messagesDao->clearMessagesAndThreads(); 
+
+        // Delete all message attachments. 
         $files = scandir($server['host_address'].$config['uploads_dir']);
         foreach($files as $f)
         {
@@ -772,7 +779,9 @@ class AdminModule extends DefaultModule
                 unlink($server['host_address'].$config['uploads_dir'].'/'.$f);
             }
         }
-        Logger::info("Cleared log.");
+
+        // Report status. 
+        Logger::info("Cleared mission data.");
 
         return array('success' => true);
     }

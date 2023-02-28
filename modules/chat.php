@@ -340,12 +340,12 @@ class ChatModule extends DefaultModule
         {
             $fileType = Message::FILE;
             $fileName  = trim($_FILES['data']['name'] ?? '');
-            $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
+            $fileExt   = strtolower(substr($fileName, strrpos($fileName, '.') + 1));
             if(finfo_open(FILEINFO_MIME_TYPE) !== false)
             {
                 try {
                     Logger::info('user= '.$this->user->username.'  '.
-                                'finfo_open(FILEINFO_MIME_TYPE) = '.finfo_open(FILEINFO_MIME_TYPE). 
+                                'finfo_open(FILEINFO_MIME_TYPE) = '.(finfo_open(FILEINFO_MIME_TYPE) !== false). 
                                 '  $_FILES[data][tmp_name] = '.$_FILES['data']['tmp_name'], $_FILES);
                 }
                 catch(Exception $e) {}
@@ -354,7 +354,7 @@ class ChatModule extends DefaultModule
             else
             {
                 $fileMime = array_search(
-                    pathinfo($_FILES['data']['tmp_name'], PATHINFO_EXTENSION),
+                    strtolower(pathinfo($_FILES['data']['tmp_name'], PATHINFO_EXTENSION)),
                     $config['uploads_allowed'], 
                     true);
                 if($fileMime === false) 
@@ -364,6 +364,8 @@ class ChatModule extends DefaultModule
             }            
         }
         
+        $fileMime = strtolower($fileMime);
+
         // Get the file size regardless of the type. 
         $fileSize  = intval($_FILES['data']['size'] ?? 0);
 

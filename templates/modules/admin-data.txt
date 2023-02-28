@@ -80,7 +80,7 @@
         <div class="form-divider"></div>
         <div class="subheading">Reset Application</div>
         <div class="form-row">
-            <label for="name">Dalete All Data</label>
+            <label for="name">Delete All Data</label>
             <div class="form-field">
                 <button type="button" class="form-button" onclick="confirmAction('clear', 0, '')">Delete All Data</button>
             </div>
