@@ -182,7 +182,7 @@ class Database
      */
     public function prepareStatement(string $value): string
     {
-        return $this->db->real_escape_string(stripslashes($value));
+        return $this->db->real_escape_string($value);
     }
 
     /**
