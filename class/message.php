@@ -245,7 +245,7 @@ class Message
             $parsedown = new Parsedown();
             $parsedown->setSafeMode(true);
             $parsedown->setBreaksEnabled(true);
-            $result = $parsedown->text(htmlspecialchars($this->text));
+            $result = $parsedown->text(htmlspecialchars(str_replace('\\', '\\\\', $this->text)));
         }
         
         return $result;
