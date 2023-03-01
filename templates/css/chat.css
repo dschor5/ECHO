@@ -477,7 +477,20 @@
     width: var(--width);
     height: calc(var(--width) * 0.5625);
     background-color: #000;
-    border-radius: 10px;
+    border-radius: 5px;
+}
+
+#dialog-video #video-caption, #dialog-audio #audio-caption, #dialog-file #file-caption {
+    width: calc(100% - 12px);
+    top: 10px;
+    left: 10px;
+    height: 48px;
+    resize: none;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 0px;
+    border: 1px solid black;
+    font-size: 11pt;
 }
 
 #dialog-audio audio {
