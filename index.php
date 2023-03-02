@@ -210,7 +210,7 @@ class Main
     public static function deleteCookie()
     {
         global $config;
-        setcookie($config['cookie_name'], null, -1, '/');
+        setcookie($config['cookie_name'], '', -1, '/');
     }
 
     public static function getCookieValue(string $key) 

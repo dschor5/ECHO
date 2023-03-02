@@ -29,6 +29,8 @@ class User
      */
     private $data;
 
+    private $session_id;
+
     /**
      * User constructor. 
      * 

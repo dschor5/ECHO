@@ -54,7 +54,7 @@ class HomeModule extends DefaultModule
         }
         elseif($subaction == 'checkLogin')
         {
-            if($this->user->is_password_reset)
+            if($this->user != null && $this->user->is_password_reset)
             {
                 return $this->showResetPage();
             }

@@ -5,7 +5,7 @@ function sendTextMessage(msgImportant) {
 
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
-    $('#new-msg-text').val("");
+    $('#new-msg-text').prop('disabled', true);
     if(newMsgText.length == 0) {
         return;
     }
@@ -27,17 +27,20 @@ function sendTextMessage(msgImportant) {
         success: function(resp) {
             if(resp.success) {
                 $('#new-msg-text').val("");
+                $('#new-msg-text').prop('disabled', false);
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
             }
             else {
                 $( "#msg-error" ).text = 'Failed to send message (1).';
                 $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+                $('#new-msg-text').prop('disabled', false);
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
             $( "#msg-error" ).text = 'Failed to send message (2).';
             $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+            $('#new-msg-text').prop('disabled', false);
         },
     });
 }
@@ -183,7 +186,10 @@ function handleEventSourceNewMessage(event) {
         }, 250);
     }
 
-    newMessageNotification(data.author, data.type == 'important');
+    if(data.send_notification == true)
+    {
+        newMessageNotification(data.author, data.type == 'important');
+    }
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
@@ -296,6 +302,7 @@ function compileMsg(data, before){
             contentClone.querySelector("a").href = BASE_URL + "/file/" + data.message_id;
             contentClone.querySelector(".filename").textContent = data.filename;
             contentClone.querySelector(".filesize").textContent = data.filesize;
+            msgClone.querySelector(".msg-content").innerHTML = data.message;
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
 
@@ -414,6 +421,9 @@ function closeModal() {
     try { $('#progress-video').progressbar('widget').hide('highlight', 0); } catch(e) {}
     try { $('#progress-audio').progressbar('widget').hide('highlight', 0); } catch(e) {}
     try { $('#progress-file').progressbar('widget').hide('highlight', 0);  } catch(e) {}
+    $('#video-caption').val("");
+    $('#audio-caption').val("");
+    $('#file-caption').val("");
     $('.dialog-response').hide('fade', 0);
     try {
         stream.getTracks().forEach(function(track) {
@@ -467,7 +477,7 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 400,
+        height: 500,
         width: 600,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
@@ -503,7 +513,7 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 300,
+        height: 400,
         width: 600,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
@@ -539,7 +549,7 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 300,
+        height: 400,
         width: 600,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
@@ -591,6 +601,9 @@ function uploadMedia(mediaType) {
     formData.append("action", "chat");
     formData.append("subaction", "upload");
 
+    var captionBox = '#' + mediaType + '-caption';
+    formData.append("caption", $(captionBox).val().trim());
+    
     // For video messages create a new blob to transfer the data.
     if(mediaType === 'video' || mediaType === 'audio') {
         if(recordedBlobs === undefined) {
@@ -629,6 +642,7 @@ function uploadMedia(mediaType) {
         timeout: 60000,
         xhr: function () {
             var myXhr = $.ajaxSettings.xhr();
+            $(captionBox).prop('disabled', true);
             if (myXhr.upload) {
                 myXhr.upload.addEventListener('progress', progressHandling, {active: false});
             }
@@ -639,6 +653,8 @@ function uploadMedia(mediaType) {
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
+                $(captionBox).val("");
+                $(captionBox).prop('disabled', false);
             }
             else {
                 $('.dialog-response').text(resp.error);
@@ -646,11 +662,13 @@ function uploadMedia(mediaType) {
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
                 $( "#msg-error" ).text = 'Failed load previous messages.';
                 $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+                $(captionBox).prop('disabled', false);
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
             $( "#msg-error" ).text = 'Failed to upload message.';
             $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+            $(captionBox).prop('disabled', false);
         },
     });
 }

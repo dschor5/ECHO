@@ -342,12 +342,12 @@ class ChatModule extends DefaultModule
         {
             $fileType = Message::FILE;
             $fileName  = trim($_FILES['data']['name'] ?? '');
-            $fileExt   = substr($fileName, strrpos($fileName, '.') + 1);
+            $fileExt   = strtolower(substr($fileName, strrpos($fileName, '.') + 1));
             if(finfo_open(FILEINFO_MIME_TYPE) !== false)
             {
                 try {
                     Logger::info('user= '.$this->user->username.'  '.
-                                'finfo_open(FILEINFO_MIME_TYPE) = '.finfo_open(FILEINFO_MIME_TYPE). 
+                                'finfo_open(FILEINFO_MIME_TYPE) = '.(finfo_open(FILEINFO_MIME_TYPE) !== false). 
                                 '  $_FILES[data][tmp_name] = '.$_FILES['data']['tmp_name'], $_FILES);
                 }
                 catch(Exception $e) {}
@@ -356,7 +356,7 @@ class ChatModule extends DefaultModule
             else
             {
                 $fileMime = array_search(
-                    pathinfo($_FILES['data']['tmp_name'], PATHINFO_EXTENSION),
+                    strtolower(pathinfo($_FILES['data']['tmp_name'], PATHINFO_EXTENSION)),
                     $config['uploads_allowed'], 
                     true);
                 if($fileMime === false) 
@@ -366,6 +366,8 @@ class ChatModule extends DefaultModule
             }            
         }
         
+        $fileMime = strtolower($fileMime);
+
         // Get the file size regardless of the type. 
         $fileSize  = intval($_FILES['data']['size'] ?? 0);
 
@@ -414,13 +416,15 @@ class ChatModule extends DefaultModule
             // file to the uploads directory, then the last step is to add the 
             // information to the database. 
 
+            $msgText = $_POST['caption'] ?? '';
+
             // Create entry for messages table. 
             $currTime = new DelayTime();
             $msgData = array(
                 'user_id'         => $this->user->user_id,
                 'from_crew'       => $this->user->is_crew,
                 'conversation_id' => $this->currConversation->conversation_id,
-                'text'            => '',
+                'text'            => $msgText,
                 'type'            => $fileType,
                 'sent_time'       => $currTime->getTime(),
                 'recv_time_hab'   => $currTime->getTime(!$this->user->is_crew),
