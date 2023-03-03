@@ -5,11 +5,7 @@ function sendTextMessage(msgImportant) {
 
     // Get text and make sure it is not empty.
     var newMsgText = ($('#new-msg-text').val()).trim();
-<<<<<<< HEAD
     $('#new-msg-text').attr('disabled', true);
-=======
-    $('#new-msg-text').prop('disabled', true);
->>>>>>> main
     if(newMsgText.length == 0) {
         return;
     }
@@ -596,7 +592,7 @@ function uploadMedia(mediaType) {
         timeout: 60000,
         xhr: function () {
             var myXhr = $.ajaxSettings.xhr();
-            $(captionBox).prop('disabled', true);
+            $(captionBox).attr('disabled', true);
             if (myXhr.upload) {
                 myXhr.upload.addEventListener('progress', progressHandling, {active: false});
             }
@@ -608,7 +604,7 @@ function uploadMedia(mediaType) {
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
                 $(captionBox).val("");
-                $(captionBox).prop('disabled', false);
+                $(captionBox).attr('disabled', false);
             }
             else {
                 $('.dialog-response').text(resp.error);
@@ -619,7 +615,7 @@ function uploadMedia(mediaType) {
         },
         error: function(xhr, ajaxOptions, thrownError) {
             showConnectionError('Failed to upload message (2).', true);
-            $(captionBox).prop('disabled', false);
+            $(captionBox).attr('disabled', false);
         },
     });
 }
