@@ -245,7 +245,7 @@ class Message
             $parsedown = new Parsedown();
             $parsedown->setSafeMode(true);
             $parsedown->setBreaksEnabled(true);
-            $result = $parsedown->text(htmlspecialchars($this->text));
+            $result = $parsedown->text(htmlspecialchars(str_replace('\\', '\\\\', $this->text)));
         }
         
         return $result;
@@ -284,6 +284,7 @@ class Message
             'recv_time'        => DelayTime::convertTsForJs($this->getReceivedTime($remoteDest)),
             'delivered_status' => $this->getMsgStatus($remoteDest),
             'remoteDest'       => $remoteDest,
+            'send_notification'=> ($userPerspective->user_id != $this->user_id) ? true : false,
         );
             
         // Flag as important
