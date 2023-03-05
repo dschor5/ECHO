@@ -80,20 +80,25 @@ function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
     return;
 }
 
-const evtSource = new EventSource(BASE_URL + '/chatstream');
+const evtSource = new EventSource(BASE_URL + '/chatstream', { withCredentials: true });
 var evtSourceConnectionError = -1;
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
-evtSource.onerror = function(e) {
-    console.log(evtSource.readyState);
+evtSource.addEventListener("error", handleEventSourceError);
+
+function handleEventSourceError(event) {
+    console.log("ERROR - " + evtSource.readyState);
     if(evtSourceConnectionError < 0) {
         evtSourceConnectionError = showConnectionError('Lost server connection. Attempting to reconnect in 10 sec.', false);
     }
-};
-evtSource.onopen = function(e) {
-    console.log(evtSource.readyState);
+}
+
+evtSource.addEventListener("open", handleEventSourceOpen);
+
+function handleEventSourceOpen(event) {
+    console.log("CONNECTED - " + evtSource.readyState);
     if(evtSourceConnectionError >= 0) {
         closeConnectionError(evtSourceConnectionError);
         evtSourceConnectionError = -1;
