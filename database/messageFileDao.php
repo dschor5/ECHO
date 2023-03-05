@@ -18,7 +18,7 @@ class MessageFileDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return MessageFileDao
      */
     public static function getInstance()
     {

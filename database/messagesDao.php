@@ -18,7 +18,7 @@ class MessagesDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return MessagesDao
      */
     public static function getInstance()
     {
@@ -171,7 +171,7 @@ class MessagesDao extends Dao
             // If the message was not created retract the database query.
             $id = false;
             $this->endTransaction(false);
-            Logger::warning('messagesDao::sendMessage failed.', $e->getMessage());
+            Logger::warning('messagesDao::sendMessage failed.', [$e->getMessage()]);
         }
         $this->database->queryExceptionEnabled(false);
 
@@ -455,7 +455,7 @@ class MessagesDao extends Dao
         catch (Exception $e) 
         {
             $this->endTransaction(false);
-            Logger::warning('messagesDao::getOldMessages failed.', $e);
+            Logger::warning('messagesDao::getOldMessages failed.', [$e->getMessage()]);
         }
         $this->database->queryExceptionEnabled(false);
 
@@ -470,7 +470,7 @@ class MessagesDao extends Dao
      * @param integer $userId
      * @param boolean $isCrew
      * @param string $toDate
-     * @return void
+     * @return array
      */
     public function getMsgNotifications(int $conversationId, int $userId, bool $isCrew, string $toDate)
     {

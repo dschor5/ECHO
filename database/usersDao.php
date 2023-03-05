@@ -29,7 +29,7 @@ class UsersDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return UsersDao
      */
     public static function getInstance()
     {
