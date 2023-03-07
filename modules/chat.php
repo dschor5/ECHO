@@ -45,10 +45,17 @@ class ChatModule extends DefaultModule
     /**
      * Send keep alive event stream message every X iterations. 
      * Should be set with STREAM_WAIT_BETWEEN_ITER_SEC in mind. 
+     * 
+     * "Legacy proxy servers are known to, in certain cases, drop
+     * HTTP connections after a short timeout. To protect against
+     * such proxy servers, authors can include a comment line (one
+     * starting with a ':' character) every 15 seconds or so."
+     * Ref: https://html.spec.whatwg.org/multipage/server-sent-events.html
+     * 
      * @access private
      * @var int
      */
-    const STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE = 5;    
+    const STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE = 15;    
 
     /**
      * Constructor. Loads current conversation information from DB. 
@@ -584,17 +591,19 @@ class ChatModule extends DefaultModule
         // Infinite loop processing data. 
         while(true)
         {
+            // Force update on delay settings regularly to keep the connection alive
+            $forceIfNoChange = false;
+            if($iter == self::STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE)
+            {
+                $iter = 1;
+                $forceIfNoChange = true;    
+            }
+
             // Send events with updates. 
-            $this->sendDelayEvents();
+            $this->sendDelayEvents($forceIfNoChange);
             $this->sendNewMsgEvents();
             $this->sendNewThreads();
             $this->sendNotificationEvents();
-
-            // Send keep-alive message every X seconds of inactivity. 
-            if($iter % self::STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE == 0)
-            {
-                $this->sendEventStream(null);
-            }
 
             // Flush output to the user. 
             while (ob_get_level() > 0) 
@@ -604,7 +613,7 @@ class ChatModule extends DefaultModule
             flush();
 
             // Check if the connection was aborted by the user (e.g., closed browser)
-            if(connection_aborted())
+            if(connection_status() != CONNECTION_NORMAL)
             {
                 break;
             }
@@ -660,8 +669,10 @@ class ChatModule extends DefaultModule
     /**
      * Sends event stream message 'delay' anytime the current 
      * communicaiton delay changes. 
+     * 
+     * @param bool $forceIfNoChange Sends message even if the delay has not changed.
      */
-    private function sendDelayEvents()
+    private function sendDelayEvents($forceIfNoChange=false)
     {
         // Keep track of previous delay as long as the object is active. 
         static $prevDelay = -1;
@@ -671,7 +682,7 @@ class ChatModule extends DefaultModule
         $delay = $delayObj->getDelay();
 
         // Send event if the value differs from the past messages. 
-        if($delay != $prevDelay)
+        if($delay != $prevDelay || $forceIfNoChange)
         {
             $this->sendEventStream(
                 'delay', 
