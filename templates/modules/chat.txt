@@ -33,8 +33,7 @@
     <div id="content">
 
         <div id="msg-error">
-            <!-- Errors reported here via javascript. -->
-            <div id="msg-error-preload"></div>
+            <!-- Errors reported here via javascript. -->    
         </div>
 
         <div id="msg-container">

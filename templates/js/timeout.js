@@ -80,6 +80,13 @@ function updateExpiredTime() {
                         localStorage.setItem("_expiredTime", Date.now() - 1000);
                     }
                 }
+            },
+            error: function(data) {
+                heartbeatRetry++;
+                nextHeartbeat = Date.now() + HEARTBEAT_RETRY_MSEC;
+                if(heartbeatRetry > HEARTBEAT_RETRY_LIMIT) {
+                    localStorage.setItem("_expiredTime", Date.now() - 1000);
+                }
             }
         });
         

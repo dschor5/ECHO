@@ -279,7 +279,7 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qLastId  = intval($lastId);
-        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+        $qToDate   = 'ADDTIME(CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME), "0.5")';
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, '.
@@ -356,7 +356,7 @@ class MessagesDao extends Dao
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
-                        'AND (messages.'.$qRefTime.' < '.$qToDate.') '.
+                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
         

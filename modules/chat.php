@@ -52,10 +52,13 @@ class ChatModule extends DefaultModule
      * starting with a ':' character) every 15 seconds or so."
      * Ref: https://html.spec.whatwg.org/multipage/server-sent-events.html
      * 
+     * Purposely made shorter to account for reconnect timeout
+     * on the client side. So, worst-case total before retries is 15sec.
+     * 
      * @access private
      * @var int
      */
-    const STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE = 15;    
+    const STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE = 10;    
 
     /**
      * Constructor. Loads current conversation information from DB. 
@@ -246,20 +249,37 @@ class ChatModule extends DefaultModule
     {
         // Default settings used when the page loads
         $msgId   = PHP_INT_MAX;
+        $dt = new DelayTime();
+        $msgsRecvBefore = $dt->getTime();
         $numMsgs = 25;
-        
-        // If a message id was provided via a POST request (AJAX call), then 
-        // refine the query parameters to load up to 10 older messages. 
-        if(isset($_POST['message_id']) && 
-           intval($_POST['message_id']) > 0 && 
-           intval($_POST['message_id']) < PHP_INT_MAX) 
+
+        // If the oldest message time was provided, use that to refine hte 
+        // search and load older messages. 
+        // Limit load to 10 messages at a time. 
+        if(isset($_POST['last_recv_time']) && 
+          ($ts = strtotime($_POST['last_recv_time'])) !== false) 
+        {
+            $dt = new DateTime('now', new DateTimeZone('UTC'));
+            $dt->setTimestamp($ts);
+            $msgsRecvBefore = $dt->format('Y-m-d H:i:s');
+            $msgId   = PHP_INT_MAX;
+            $numMsgs = 10;
+        }
+        // If the oldest message date was not given, then consider 
+        // using the id of the oldest messages received by the client. 
+        // Note that this alone is not reliable as it is possible to 
+        // generate conditions in which messages are in-transit while the 
+        // delay settings are changed, so you get cross-overs messages
+        // within the same site. 
+        else if(isset($_POST['message_id']) && 
+            intval($_POST['message_id']) > 0 && 
+            intval($_POST['message_id']) < PHP_INT_MAX) 
         {
             $msgId   = intval($_POST['message_id']);
             $numMsgs = 10;
         }
 
         // The query is further constrained by the current timestamp. 
-        $time = new DelayTime();
         $response = array();
 
         // Query for old messages received. 
@@ -273,7 +293,7 @@ class ChatModule extends DefaultModule
         }
         $messages = $messagesDao->getOldMessages(
             $convoIds, $this->user->user_id, 
-            $this->user->is_crew, $time->getTime(), $msgId, $numMsgs);
+            $this->user->is_crew, $msgsRecvBefore, $msgId, $numMsgs);
         
         // Build response with an array of messages. 
         $response['success'] = true;
@@ -573,7 +593,7 @@ class ChatModule extends DefaultModule
         $iter = 1;
 
         // Set reconnection retry 
-        $this->sendEventStreamRetry(10);
+        $this->sendEventStreamRetry(5);
 
         // Check if the server sent a last-event-id header indicating it is reconnecting
         $headers = getallheaders();
