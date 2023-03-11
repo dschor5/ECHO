@@ -45,10 +45,20 @@ class ChatModule extends DefaultModule
     /**
      * Send keep alive event stream message every X iterations. 
      * Should be set with STREAM_WAIT_BETWEEN_ITER_SEC in mind. 
+     * 
+     * "Legacy proxy servers are known to, in certain cases, drop
+     * HTTP connections after a short timeout. To protect against
+     * such proxy servers, authors can include a comment line (one
+     * starting with a ':' character) every 15 seconds or so."
+     * Ref: https://html.spec.whatwg.org/multipage/server-sent-events.html
+     * 
+     * Purposely made shorter to account for reconnect timeout
+     * on the client side. So, worst-case total before retries is 15sec.
+     * 
      * @access private
      * @var int
      */
-    const STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE = 5;    
+    const STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE = 10;    
 
     /**
      * Constructor. Loads current conversation information from DB. 
@@ -239,20 +249,37 @@ class ChatModule extends DefaultModule
     {
         // Default settings used when the page loads
         $msgId   = PHP_INT_MAX;
+        $dt = new DelayTime();
+        $msgsRecvBefore = $dt->getTime();
         $numMsgs = 25;
-        
-        // If a message id was provided via a POST request (AJAX call), then 
-        // refine the query parameters to load up to 10 older messages. 
-        if(isset($_POST['message_id']) && 
-           intval($_POST['message_id']) > 0 && 
-           intval($_POST['message_id']) < PHP_INT_MAX) 
+
+        // If the oldest message time was provided, use that to refine hte 
+        // search and load older messages. 
+        // Limit load to 10 messages at a time. 
+        if(isset($_POST['last_recv_time']) && 
+          ($ts = strtotime($_POST['last_recv_time'])) !== false) 
+        {
+            $dt = new DateTime('now', new DateTimeZone('UTC'));
+            $dt->setTimestamp($ts);
+            $msgsRecvBefore = $dt->format('Y-m-d H:i:s');
+            $msgId   = PHP_INT_MAX;
+            $numMsgs = 10;
+        }
+        // If the oldest message date was not given, then consider 
+        // using the id of the oldest messages received by the client. 
+        // Note that this alone is not reliable as it is possible to 
+        // generate conditions in which messages are in-transit while the 
+        // delay settings are changed, so you get cross-overs messages
+        // within the same site. 
+        else if(isset($_POST['message_id']) && 
+            intval($_POST['message_id']) > 0 && 
+            intval($_POST['message_id']) < PHP_INT_MAX) 
         {
             $msgId   = intval($_POST['message_id']);
             $numMsgs = 10;
         }
 
         // The query is further constrained by the current timestamp. 
-        $time = new DelayTime();
         $response = array();
 
         // Query for old messages received. 
@@ -266,7 +293,7 @@ class ChatModule extends DefaultModule
         }
         $messages = $messagesDao->getOldMessages(
             $convoIds, $this->user->user_id, 
-            $this->user->is_crew, $time->getTime(), $msgId, $numMsgs);
+            $this->user->is_crew, $msgsRecvBefore, $msgId, $numMsgs);
         
         // Build response with an array of messages. 
         $response['success'] = true;
@@ -565,32 +592,30 @@ class ChatModule extends DefaultModule
         // every few seconds. 
         $iter = 1;
 
+        // Set reconnection retry 
+        $this->sendEventStreamRetry(5);
+
         // Check if the server sent a last-event-id header indicating it is reconnecting
         $headers = getallheaders();
-        if(isset($headers['Last-Event-Id']) && $headers['Last-Event-Id'] > 0)
-        {
-            $this->sendMissedMessages($headers['Last-Event-Id']);
-        }
-        else
-        {
-            // Sleep 0.5sec to avoid interfering with initial msg load.
-            usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
-        }
-
+        $lastEventId = $headers['Last-Event-Id'] ?? -1;
+        $this->sendMissedMessages(intval($lastEventId));
+        
         // Infinite loop processing data. 
         while(true)
         {
+            // Force update on delay settings regularly to keep the connection alive
+            $forceIfNoChange = false;
+            if($iter == self::STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE)
+            {
+                $iter = 1;
+                $forceIfNoChange = true;    
+            }
+
             // Send events with updates. 
-            $this->sendDelayEvents();
+            $this->sendDelayEvents($forceIfNoChange);
             $this->sendNewMsgEvents();
             $this->sendNewThreads();
             $this->sendNotificationEvents();
-
-            // Send keep-alive message every X seconds of inactivity. 
-            if($iter % self::STREAM_MAX_ITER_BETWEEN_KEEP_ALIVE == 0)
-            {
-                $this->sendEventStream(null);
-            }
 
             // Flush output to the user. 
             while (ob_get_level() > 0) 
@@ -600,7 +625,7 @@ class ChatModule extends DefaultModule
             flush();
 
             // Check if the connection was aborted by the user (e.g., closed browser)
-            if(connection_aborted())
+            if(connection_status() != CONNECTION_NORMAL)
             {
                 break;
             }
@@ -656,8 +681,10 @@ class ChatModule extends DefaultModule
     /**
      * Sends event stream message 'delay' anytime the current 
      * communicaiton delay changes. 
+     * 
+     * @param bool $forceIfNoChange Sends message even if the delay has not changed.
      */
-    private function sendDelayEvents()
+    private function sendDelayEvents($forceIfNoChange=false)
     {
         // Keep track of previous delay as long as the object is active. 
         static $prevDelay = -1;
@@ -667,7 +694,7 @@ class ChatModule extends DefaultModule
         $delay = $delayObj->getDelay();
 
         // Send event if the value differs from the past messages. 
-        if($delay != $prevDelay)
+        if($delay != $prevDelay || $forceIfNoChange)
         {
             $this->sendEventStream(
                 'delay', 
@@ -681,16 +708,24 @@ class ChatModule extends DefaultModule
     }
 
     /**
-     * Sends event stream message 'msg' for each new message 
-     * received for the current conversation. 
+     * Send messages starting at lastId (as set by the HTTP header Last-Event-Id)
+     * that were missed because of a connection problem with the server. 
+     * 
+     * If there are no messages to send, then seed the value for Last-Event-Id 
+     * based on the last message received in this conversation. 
+     * 
+     * @param int lastId 
      */
-    private function sendMissedMessages(int $lastId)
+    private function sendMissedMessages(int $lastId = -1)
     {
-        // Get new messages
-        $time = new DelayTime();
-        $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
         $mission = MissionConfig::getInstance();
+        
+        // Current time to query for messages
+        $time = new DelayTime();
+        $timeStr = $time->getTime();
+        
+        // Conversation to query for messages
         $convoIds = array();
         $convoIds[] = $this->currConversation->conversation_id;
         if(!$mission->feat_convo_threads)
@@ -698,18 +733,20 @@ class ChatModule extends DefaultModule
             $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
         }
 
-        $offset = 0;
-        $messages = $messagesDao->getMissedMessages(
-            $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
-
-        while(count($messages) > 0)
+        // If the header Last-Event-Id was set, then use that to query for new
+        // messages. Operation is throttled to avoid large data structures. 
+        if($lastId >= 0)
         {
-            // Iterate through the new messages and send a unique event 
-            // for each one where the msg data is JSON encoded. 
-            // Use the id field to identify unique events 
-            foreach($messages as $msgId => $msg)
+            $offset = 0;
+            $messages = $messagesDao->getMissedMessages(
+                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+
+            while(count($messages) > 0)
             {
-                if($msg->user_id != $this->user->user_id)
+                // Iterate through the new messages and send a unique event 
+                // for each one where the msg data is JSON encoded. 
+                // Use the id field to identify unique events 
+                foreach($messages as $msgId => $msg)
                 {
                     $this->sendEventStream(
                         'msg', 
@@ -717,12 +754,21 @@ class ChatModule extends DefaultModule
                         $msgId, 
                     );
                 }
+
+                // Any more messages?
+                $offset += count($messages);
+                $messages = $messagesDao->getMissedMessages(
+                    $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
             }
-
-            $offset += count($messages);
-
-            $messages = $messagesDao->getMissedMessages(
-                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+        }
+        else
+        {
+            // Get last event id from current time to seed value on client side.
+            $messageId = $messagesDao->getLastMessageId(
+                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr);
+    
+            // Seed last-event id by sending an empty message that is just the event id.
+            $this->setLastEventId($messageId);
         }
         
     }

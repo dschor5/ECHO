@@ -1,16 +1,26 @@
 /**
- * Update time at 1Hz.
+ * Time Module for updating the current time at MCC and the HAB.
  */
-$(document).ready(setTimeout(updateTime, 1000));
+
+$(document).ready(function() {
+
+    // Update time display at 1Hz.
+    setTimeout(updateTime, 1000);
+});
 
 /**
  * Update time diaplay. 
+ * 
+ * Uses flag to 
  */
 function updateTime() {
+
+    // Update 
     var dt = new Date();
     var mccDate = formatTime(null, true);
     $('#time-mcc-value').text(mccDate);   
 
+    // Flag to select HAB format ()
     if(HAB_FORMAT) {
         dt = new Date();
         var habMet = 0;

@@ -25,7 +25,7 @@ class ParticipantsDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return ParticipantsDao
      */
     public static function getInstance()
     {
