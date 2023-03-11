@@ -95,6 +95,7 @@ class FileModule implements Module
         $origName = $file->original_name;
         $filesize = $file->size;
         $templateType = $file->getTemplateType();
+        
 
         // The download will use the original file name, however, the data is retrieved 
         // from the server location that uses a different name altogether.
@@ -107,10 +108,13 @@ class FileModule implements Module
         {
             // Force file download
             header('Content-Disposition: attachment; filename='.basename($origName));
-            ob_end_clean();
         }
         header('Content-Length: ' . $filesize);
         header("Content-Type: ".$mimeType);
+        if(ob_get_level() > 0) 
+        {
+            ob_end_clean();
+        }
         readfile($filepath);
     }
 
@@ -190,7 +194,10 @@ class FileModule implements Module
         header('Content-Disposition: attachment; filename='.basename($origName));
         header('Content-Length: ' . $filesize);
         header("Content-Type: ".$mimeType);
-        ob_end_clean();
+        if(ob_get_level() > 0) 
+        {
+            ob_end_clean();
+        }
         readfile($filepath);
     }
 }

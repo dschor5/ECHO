@@ -18,7 +18,7 @@ class ArchiveDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return ArchiveDao
      */
     public static function getInstance()
     {

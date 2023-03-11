@@ -25,7 +25,7 @@ class ConversationsDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return ConversationsDao
      */
     public static function getInstance()
     {

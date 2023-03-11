@@ -1,15 +1,24 @@
 /**
- * Sends a text message. 
+ * Send AJAX text/important message to the server. 
+ * 
+ * @param {int} msgImportant  // 0=normal, 1=important
  */
 function sendTextMessage(msgImportant) {
+    // Exit out early if there is no connection to the server.
+    if(serverConnection.active == false) {
+        showError('Failed to send message (3).');
+        return;
+    }
 
-    // Get text and make sure it is not empty.
+    // Get message text and exit early if empty. 
     var newMsgText = ($('#new-msg-text').val()).trim();
-    $('#new-msg-text').val("");
     if(newMsgText.length == 0) {
         return;
     }
-    
+
+    // Disable text field while processing AJAX command.
+    $('#new-msg-text').attr('disabled', true);
+
     // Send AJAX request to save the message. 
     $.ajax({
         url:  BASE_URL + "/ajax",
@@ -22,24 +31,19 @@ function sendTextMessage(msgImportant) {
             msgType: msgImportant,
         },
         dataType: 'json',
-
-        // On success, build the message to display on the screen.
         success: function(resp) {
             if(resp.success) {
                 $('#new-msg-text').val("");
-                closeModal();
-                console.info("Sent message_id=" + resp.message_id);
             }
             else {
-                $( "#msg-error" ).text = 'Failed to send message (1).';
-                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+                showError('Failed to send message (1).');
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            $( "#msg-error" ).text = 'Failed to send message (2).';
-            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+            showError('Failed to send message (2).');
         },
     });
+    $('#new-msg-text').attr('disabled', false);
 }
 
 /**
@@ -51,6 +55,7 @@ function scrollToBottom() {
 
 /**
  * Detect whehter the user pressed SHIFT+ENTER and send the message.
+ * 
  * @param {event} Key event.
  */
 function detectShiftEnter(event) {
@@ -65,31 +70,31 @@ function handleAjaxNewMessage(resp) {
     if(resp.success) {
         $('#new-msg-text').val("");
         closeModal();
-        console.info("Sent message_id=" + resp.message_id);
     }
     else {
-
         console.error(resp.error);
     }
 }
 
-// Handle error respond after sending a new message or upload.
-function handleAjaxNewMessageError(jqHR, textStatus, errorThrown) {
-    return;
-}
-
-const evtSource = new EventSource(BASE_URL + '/chatstream');
+var evtSourceTimeout = setTimeout(handleEventSourceError, 15000);
+let serverConnection = {active: true, errorId: undefined};
+const evtSource = new EventSource(BASE_URL + '/chatstream', { withCredentials: true });
 evtSource.addEventListener("msg", handleEventSourceNewMessage);
 evtSource.addEventListener("notification", handleEventSourceNotification);
 evtSource.addEventListener("delay", handleEventSourceDelay);
 evtSource.addEventListener("thread", handleEventSourceThread);
-evtSource.onerror = function(e) {
-    $( "#msg-error" ).text = 'Lost server connection. Attempting to reconnect.';
-    $( "#msg-error" ).fadeIn( "slow", "linear" );
-};
-evtSource.onopen = function(e) {
-    $( "#msg-error" ).text = '';
-    $( "#msg-error" ).fadeOut( "slow", "linear" );
+evtSource.addEventListener('error', handleEventSourceError);
+
+/**
+ * Display error if the EventSource connection is lost.
+ * 
+ * @param {Event} event 
+ */
+function handleEventSourceError(event) {
+    if(serverConnection.active) {
+        serverConnection.active = false;
+        serverConnection.errorId = showError('Lost server connection. Attempting to reconnect every 10 sec.', true);
+    }
 }
 
 // Wrapper so that the function can be grouped with other thread functions
@@ -106,6 +111,16 @@ function handleEventSourceDelay(event) {
     const data = JSON.parse(event.data);
     $('#owlt-value').text(data.delay);
     $('#distance-value').text(data.distance);
+
+    // Expect message every 15 sec. If not received, 
+    // assume there is a connection error.
+    clearTimeout(evtSourceTimeout);
+    evtSourceTimeout = setTimeout(handleEventSourceError, 15000);
+
+    if(serverConnection.errorId  !== undefined) {
+        closeError(serverConnection.errorId);
+    }
+    serverConnection.active = true;
 }
 
 function handleEventSourceNewMessage(event) {
@@ -123,7 +138,10 @@ function handleEventSourceNewMessage(event) {
         }, 250);
     }
 
-    newMessageNotification(data.author, data.type == 'important');
+    if(data.send_notification == true)
+    {
+        newMessageNotification(data.author, data.type == 'important');
+    }
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
@@ -195,6 +213,20 @@ function handleEventSourceNotification(event) {
  */
 function compileMsg(data, before){
     var template = document.querySelector('#msg-sent-template');
+
+    // Avoid duplicating messages if sent twiece by the server.
+    if($('#msg-id-' + data.message_id).length > 0) {
+        return;
+    }
+
+    // Track oldest message received (not by date, but using ids)
+    if(oldestMsgRecv == null) {
+        oldestMsgRecv = data.message_id;
+    }
+    else {
+        oldestMsgRecv = Math.min(oldestMsgRecv, data.message_id);
+    }
+
     if('content' in document.createElement('template'))
     {
         var msgClone = template.content.cloneNode(true);
@@ -236,6 +268,7 @@ function compileMsg(data, before){
             contentClone.querySelector("a").href = BASE_URL + "/file/" + data.message_id;
             contentClone.querySelector(".filename").textContent = data.filename;
             contentClone.querySelector(".filesize").textContent = data.filesize;
+            msgClone.querySelector(".msg-content").innerHTML = data.message;
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
 
@@ -354,6 +387,9 @@ function closeModal() {
     try { $('#progress-video').progressbar('widget').hide('highlight', 0); } catch(e) {}
     try { $('#progress-audio').progressbar('widget').hide('highlight', 0); } catch(e) {}
     try { $('#progress-file').progressbar('widget').hide('highlight', 0);  } catch(e) {}
+    $('#video-caption').val("");
+    $('#audio-caption').val("");
+    $('#file-caption').val("");
     $('.dialog-response').hide('fade', 0);
     try {
         stream.getTracks().forEach(function(track) {
@@ -381,6 +417,11 @@ function closeModal() {
 
 
 function openFileModal() {
+    // Show error if there is no active connection
+    if(serverConnection.active == false) {
+        $('.dialog-response').text('Lost server connection. Cannot send files, audio, or video.');
+        $('.dialog-response').show('highlight');
+    }    
     $('#dialog-file').dialog('open');
 }
 
@@ -407,7 +448,7 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 400,
+        height: 500,
         width: 600,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
@@ -443,7 +484,7 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 300,
+        height: 400,
         width: 600,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
@@ -479,7 +520,7 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 300,
+        height: 400,
         width: 600,
         position: { my: "center center", at: "center center-25%", of: window },
         buttons: [
@@ -509,15 +550,30 @@ $(document).ready(function() {
 
 });
 
+/**
+ * Show modal with larger version of the image. 
+ * 
+ * @param {img} origImg 
+ */
 function showImage(origImg) {
+
+    // Get larger image placeholder
     var img = document.getElementById('large-msg-img');
-    let ratio = 0.8 * Math.min(window.innerWidth / origImg.naturalWidth, 
-                         window.innerHeight / origImg.naturalHeight);
-    img.width = ratio*origImg.naturalWidth*0.95;
-    img.height = ratio*origImg.naturalHeight*0.95;
-    img.src = origImg.src;
-    $('#dialog-image').dialog('option', 'width', ratio*origImg.naturalWidth);
-    $('#dialog-image').dialog('option', 'height', ratio*origImg.naturalHeight + 35);
+
+    // Calculate ratio to upscale/downscale the image
+    let ratio = 0.8 * Math.min(
+        window.innerWidth / origImg.naturalWidth, 
+        window.innerHeight / origImg.naturalHeight
+        );
+    
+    // Update the image width, height, and set the source. 
+    img.width  = ratio * origImg.naturalWidth  * 0.95;
+    img.height = ratio * origImg.naturalHeight * 0.95;
+    img.src    = origImg.src;
+
+    // Set dimensions for image dialog modal
+    $('#dialog-image').dialog('option', 'width',  ratio * origImg.naturalWidth);
+    $('#dialog-image').dialog('option', 'height', ratio * origImg.naturalHeight + 35);
     $('#dialog-image').dialog('open');
 }
 
@@ -531,14 +587,18 @@ function uploadMedia(mediaType) {
     formData.append("action", "chat");
     formData.append("subaction", "upload");
 
+    var captionBox = '#' + mediaType + '-caption';
+    formData.append("caption", $(captionBox).val().trim());
+    
     // For video messages create a new blob to transfer the data.
     if(mediaType === 'video' || mediaType === 'audio') {
         if(recordedBlobs === undefined) {
             return;
         }
-        //const blobMimeType = (recordedBlobs[0] || {}).type;
         
-        const blobMimeType = (mediaType == 'video') ? 'video/webm; codecs="vp8, opus"' : 'audio/ogg; codecs=opus';
+        const blobMimeType = (mediaType == 'video') ? 
+            'video/webm; codecs="vp8, opus"' : 'audio/ogg; codecs=opus';
+
         const blob = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
         formData.append("data", blob, "recording");
@@ -569,6 +629,7 @@ function uploadMedia(mediaType) {
         timeout: 60000,
         xhr: function () {
             var myXhr = $.ajaxSettings.xhr();
+            $(captionBox).attr('disabled', true);
             if (myXhr.upload) {
                 myXhr.upload.addEventListener('progress', progressHandling, {active: false});
             }
@@ -579,18 +640,20 @@ function uploadMedia(mediaType) {
                 $('#new-msg-text').val("");
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
+                $(captionBox).val("");
             }
             else {
                 $('.dialog-response').text(resp.error);
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-                $( "#msg-error" ).text = 'Failed load previous messages.';
-                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
             }
+            $(captionBox).attr('disabled', false);
         },
         error: function(xhr, ajaxOptions, thrownError) {
-            $( "#msg-error" ).text = 'Failed to upload message.';
-            $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+            $('.dialog-response').text(resp.error);
+            $('.dialog-response').show('highlight');
+            $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
+            $(captionBox).attr('disabled', false);
         },
     });
 }
@@ -607,6 +670,7 @@ function progressHandling(event) {
 
 var oldMsgQueryInProgress = false;
 var hasMoreMessages = true;
+var oldestMsgRecv = null;
 
 $(document).ready(function() {
     
@@ -621,11 +685,28 @@ $(document).ready(function() {
 
 $(document).ready(loadPrevMsgs);
 
+/**
+ * Load previous messages in this conversation. 
+ * Used for two cases:
+ *  1) Loading messages when the page loads. 
+ *  2) Loading older messages when the user scrolls up in the conversation. 
+ */
 function loadPrevMsgs() {
+
+    // The 
+    if(serverConnection.active == false) {
+        showError('Could not load older messages.')
+        return;
+    }
+
     var scrollContainer = document.querySelector('#content');
     var target = document.querySelector('#msg-container');
     var child = target.querySelector('.msg');
-    var msgId = (child == null) ? -1 : child.getAttribute('id').substring(7);
+
+    var recvTime = (new Date()).toISOString();
+    if(child != null) {
+        recvTime = child.querySelector('time').getAttribute('recv');
+    }
 
     if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
@@ -636,7 +717,8 @@ function loadPrevMsgs() {
                 action: 'chat',
                 subaction: 'prevMsgs',
                 conversation_id: $('#conversation_id').val(),
-                message_id: msgId,
+                message_id: (oldestMsgRecv == null) ? -1 : oldestMsgRecv,
+                last_recv_time: recvTime,
             },
             dataType: 'json',
             success: function(resp) {
@@ -669,9 +751,51 @@ function loadPrevMsgs() {
                 oldMsgQueryInProgress = false;               
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                $( "#msg-error" ).text = 'Failed load previous messages.';
-                $( "#msg-error" ).show().delay(3000).fadeOut('slow', 'linear');
+                showError('Failed loading previous messages.');
             },
         });
+    }
+}
+
+/**
+ * Show an error message. If not persistent, the error message
+ * will automatically disappear after 5sec.
+ * 
+ * @param {string} msg 
+ * @param {boolean} persistent 
+ */
+function showError(msg, persistent=false) {
+    
+    var newErrorId = 'msg-error-' + $('.msg-error-text').length + 1;
+    var newError = document.createElement('div');
+    newError.setAttribute('class', 'msg-error-text');
+    newError.setAttribute('id', newErrorId);
+    newError.innerHTML = '<strong>ERROR:</strong> ' + msg;
+    document.getElementById('msg-error').appendChild(newError);
+
+    console.log('Error "' + msg + '", persistent="' + persistent + '"');
+
+
+    if(persistent) {
+        $('#' + newErrorId).fadeIn('slow');
+    }
+    else {
+        $('#' + newErrorId).fadeIn('slow', function() {
+            $(this).delay(5000).fadeOut('slow');
+        });
+    }
+
+    return newErrorId;
+}
+
+/**
+ * Remove an error message by the div id.
+ * 
+ * @param {string} errorId 
+ */
+function closeError(errorId) {
+    var div = document.getElementById(errorId);
+    if(div) {
+        div.remove();
     }
 }

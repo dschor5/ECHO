@@ -18,7 +18,7 @@ class MessageStatusDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return MessageStatusDao
      */
     public static function getInstance()
     {

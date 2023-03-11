@@ -207,10 +207,23 @@
     position: fixed;
     top: 40px;
     left: calc(253px + 22px);
-    right: 22px;
+    right: 33px;
+    z-index: 2;
+    border: 0px;
+}
+
+#msg-error-preload {
+    background-image: url("%http%%site_url%/templates/media/ui-icons_222222_256x240.png");
+}
+
+.msg-error-text {
+    width: calc(100% - 55px);
     background: #d14141;
     color: #000;
-    padding: 10px;
+    padding: 5px 15px;
+    margin: 10px ;
+    border: 1px solid #840d0d;
+    border-radius: 10px;
     display: none;
 }
 
@@ -477,7 +490,20 @@
     width: var(--width);
     height: calc(var(--width) * 0.5625);
     background-color: #000;
-    border-radius: 10px;
+    border-radius: 5px;
+}
+
+#dialog-video #video-caption, #dialog-audio #audio-caption, #dialog-file #file-caption {
+    width: calc(100% - 12px);
+    top: 10px;
+    left: 10px;
+    height: 48px;
+    resize: none;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 0px;
+    border: 1px solid black;
+    font-size: 11pt;
 }
 
 #dialog-audio audio {

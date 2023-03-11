@@ -390,7 +390,6 @@ abstract class DefaultModule implements Module
      * @param string|null $name Name of event. If null, assume it is a keep alive message.
      * @param array|null $data  Data to send with the event. 
      * @param integer|null $id Unique id given to the event (or null if not applicable).
-     * @return integer
      */
     protected function sendEventStream(?string $name, ?array $data = null, int $id = null)
     {
@@ -409,6 +408,36 @@ abstract class DefaultModule implements Module
             }
             echo 'data: '.json_encode($data).PHP_EOL.PHP_EOL;
         }
+    }
+
+     /**
+     * Send retry settings from the server. Minimum is 1sec. 
+     *
+     * @param float $retry Num sec before retrying to re-establish a lost connection
+     */
+    protected function sendEventStreamRetry(float $retry)
+    {
+        // Force minimum num secs for retry
+        if($retry < 1)
+        {
+            $retry = 1;
+        }
+
+        // Convert to milliseconds and rount to an integer.
+        $retry = ceil($retry * 1000);
+
+        echo 'data: '.$retry.PHP_EOL;
+        echo 'retry: '.$retry.PHP_EOL.PHP_EOL;
+    }
+
+    /**
+     * Seed last event id for EventSource stream. 
+     *
+     * @param integer $id 
+     */
+    protected function setLastEventId(int $id)
+    {
+        echo 'id: '.(intval($id)).PHP_EOL.PHP_EOL;
     }
 }
 

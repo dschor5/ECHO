@@ -210,7 +210,7 @@ class Main
     public static function deleteCookie()
     {
         global $config;
-        setcookie($config['cookie_name'], null, -1, '/');
+        setcookie($config['cookie_name'], '', -1, '/');
     }
 
     public static function getCookieValue(string $key) 
@@ -238,7 +238,7 @@ class Main
 
         if($replace != null)
         {
-            $template = preg_replace(array_keys($replace),array_values($replace),$template);
+            $template = preg_replace(array_keys($replace), array_values($replace), $template);
         }
 
         $replace = array(
@@ -246,7 +246,7 @@ class Main
             '/%site_url%/'         => $server['site_url'],
             '/%templates_dir%/'    => $config['templates_dir'],         
         );
-        $template = preg_replace(array_keys($replace),array_values($replace),$template);
+        $template = preg_replace(array_keys($replace), array_values($replace), $template);
 
         return $template;
     }
