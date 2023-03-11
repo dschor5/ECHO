@@ -597,17 +597,9 @@ class ChatModule extends DefaultModule
 
         // Check if the server sent a last-event-id header indicating it is reconnecting
         $headers = getallheaders();
-        if(isset($headers['Last-Event-Id']) && $headers['Last-Event-Id'] > 0)
-        {
-            $this->sendMissedMessages($headers['Last-Event-Id']);
-        }
-        else
-        {
-            $this->sendMissedMessages();
-            // Sleep 0.5sec to avoid interfering with initial msg load.
-            usleep(self::STREAM_INIT_DELAY_SEC * self::SEC_TO_MSEC);
-        }
-
+        $lastEventId = $headers['Last-Event-Id'] ?? -1;
+        $this->sendMissedMessages(intval($lastEventId));
+        
         // Infinite loop processing data. 
         while(true)
         {
@@ -716,16 +708,24 @@ class ChatModule extends DefaultModule
     }
 
     /**
-     * Sends event stream message 'msg' for each new message 
-     * received for the current conversation. 
+     * Send messages starting at lastId (as set by the HTTP header Last-Event-Id)
+     * that were missed because of a connection problem with the server. 
+     * 
+     * If there are no messages to send, then seed the value for Last-Event-Id 
+     * based on the last message received in this conversation. 
+     * 
+     * @param int lastId 
      */
     private function sendMissedMessages(int $lastId = -1)
     {
-        // Get new messages
-        $time = new DelayTime();
-        $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
         $mission = MissionConfig::getInstance();
+        
+        // Current time to query for messages
+        $time = new DelayTime();
+        $timeStr = $time->getTime();
+        
+        // Conversation to query for messages
         $convoIds = array();
         $convoIds[] = $this->currConversation->conversation_id;
         if(!$mission->feat_convo_threads)
@@ -733,7 +733,9 @@ class ChatModule extends DefaultModule
             $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
         }
 
-        if($lastId > 0) 
+        // If the header Last-Event-Id was set, then use that to query for new
+        // messages. Operation is throttled to avoid large data structures. 
+        if($lastId >= 0)
         {
             $offset = 0;
             $messages = $messagesDao->getMissedMessages(
@@ -753,16 +755,19 @@ class ChatModule extends DefaultModule
                     );
                 }
 
+                // Any more messages?
                 $offset += count($messages);
-
                 $messages = $messagesDao->getMissedMessages(
                     $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
             }
         }
         else
         {
+            // Get last event id from current time to seed value on client side.
             $messageId = $messagesDao->getLastMessageId(
                 $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr);
+    
+            // Seed last-event id by sending an empty message that is just the event id.
             $this->setLastEventId($messageId);
         }
         

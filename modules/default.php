@@ -430,6 +430,11 @@ abstract class DefaultModule implements Module
         echo 'retry: '.$retry.PHP_EOL.PHP_EOL;
     }
 
+    /**
+     * Seed last event id for EventSource stream. 
+     *
+     * @param integer $id 
+     */
     protected function setLastEventId(int $id)
     {
         echo 'id: '.(intval($id)).PHP_EOL.PHP_EOL;

@@ -97,10 +97,10 @@ function getSupportedMimeTypes() {
  */
 async function openMediaModal(mediaType) {
 
-    // Do not open if there is no EventStream connection to the server.
-    // TODO: Show message
+    // Show error if there is no active connection
     if(serverConnection.active == false) {
-        return;
+        $('.dialog-response').text('Lost server connection. Cannot send files, audio, or video.');
+        $('.dialog-response').show('highlight');
     }
 
     $('#dialog-' + mediaType).dialog('open');
