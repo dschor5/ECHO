@@ -35,12 +35,17 @@
      */
     private $folder;
 
+
+    const FILE_ARCHIVE = 'archive';
+    const FILE_MESSAGE = 'message';
+    const FILE_AVATAR  = 'avatar';
+
     /**
      * Constant extension used to rename all attachments saved to the server.
      * @access protected
      * @var string
      */
-    const TEMP_EXT = 'tmp';
+    const TEMP_EXT = 'dly';
 
     /**
      * ServerFile constructor. Appends object with field 'size' that
@@ -99,7 +104,7 @@
      * 
      * @return string Random generated filename. 
      */
-    public static function generateFilename(string $folder) : string
+    private static function generateFilename(string $folder) : string
     {
         global $config;
 
@@ -110,6 +115,30 @@
         } while(file_exists($fullpath));
 
         return $filename;
+    }
+
+    /**
+     * Generate a blank entry for the 'files' table. 
+     *
+     * @param string $type Use enum for file type (archive, message, avatar)
+     * @param string $dir  Directory where the file is stored
+     * @return array
+     */
+    protected static function generateEntry(string $type, string $dir) : array
+    {
+        $currTime = new DelayTime();
+        $fileEntryTemplate = array(
+            'file_id'       => 0,
+            'association'   => $type,
+            'server_name'   => ServerFile::generateFilename($dir),
+            'original_name' => '',
+            'uuid'          => 0,
+            'mime_type'     => '',
+            'timestamp'     => $currTime->getTime(),
+            'notes'         => '',
+            'settings'      => '',
+        );
+        return $fileEntryTemplate;
     }
 
     /**

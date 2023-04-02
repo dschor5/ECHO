@@ -28,7 +28,7 @@ function clearData() {
         data: {
             action: 'admin',
             subaction: $('#confirm-subaction').val(),        
-            archive_id: $('#confirm-archive-id').val(),        
+            file_id: $('#confirm-archive-id').val(),        
         },
         dataType: 'json',
         success: function(data) {
@@ -50,17 +50,17 @@ function confirmAction(subaction, id, str) {
 
         if(subaction == 'deletearchive') {
             $('#dialog-confirm').dialog({title: 'Delete Archive'});
-            $('.modal-confirm-body').text("Are you sure you want to delete the " + str + "?");
+            $('.modal-confirm-body').html("Are you sure you want to delete " + str + "?");
             $('#confirm-btn').text('Delete Archive');
         }
         else if(subaction == 'resetlog') {
             $('#dialog-confirm').dialog({title: 'Reset System Log'});
-            $('.modal-confirm-body').text("Are you sure you want to reset the System Log?");
+            $('.modal-confirm-body').html("Are you sure you want to reset the System Log?");
             $('#confirm-btn').text('Reset System Log');
         }
         else {
             $('#dialog-confirm').dialog({title: 'Delete All Data'});
-            $('.modal-confirm-body').text("Are you sure you want to delete all messages and threads?");
+            $('.modal-confirm-body').html("Are you sure you want to delete all messages and threads?");
             $('#confirm-btn').text('Delete All Data');
         }
         

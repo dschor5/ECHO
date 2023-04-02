@@ -3,8 +3,8 @@
 /**
  * Logger class to track errors, warnings, and debugging information. 
  * Log entries are recorded as:
- *      YYYY-MM-DD HH:MM:SS [LOG_TYPE] Message <JSON encoded context>
- *
+ *      YYYY-MM-DD HH:MM:SS [LOG_TYPE] Message <JSON encoded context> [NEW_LINE]
+ * 
  * Implementation Notes:
  * - Implemented as a wrapper for the PHP error_log() function. 
  * - Level Threshold defines the lowest type of message to accept. 
@@ -212,11 +212,12 @@ class Logger
 	 */
 	private static function tailCustom($filepath, $lines = 1, $adaptive = true) 
     {
-		// Open file
+        // Open file
 		$f = @fopen($filepath, "rb");
+        
 		if ($f === false)
         {
-            return false;
+            return '';
         }
 
 		// Sets buffer size, according to the number of lines to retrieve.

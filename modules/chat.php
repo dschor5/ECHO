@@ -399,8 +399,8 @@ class ChatModule extends DefaultModule
         // All files will be renamed and stored in the uploads directory on the server. 
         // This prevents overwriting files if different versions of the same document 
         // are uploaded and also makes it harder for people to guess filenames. 
-        $serverName = ServerFile::generateFilename($config['uploads_dir']);
-        $fullPath = $server['host_address'].$config['uploads_dir'].'/'.$serverName;
+        $fileData = FileUpload::createAttachmentEntry($fileName, $fileMime);
+        $fullPath = $server['host_address'].$config['uploads_dir'].'/'.$fileData['server_name'];
         
         // Start building the response. 
         $result = array('success' => false);
@@ -456,14 +456,6 @@ class ChatModule extends DefaultModule
                 'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
             );
             
-            // Create entry for the msg_files table. 
-            $fileData = array(
-                'message_id'    => 0,
-                'server_name'   => $serverName,
-                'original_name' => $fileName,
-                'mime_type'     => $fileMime,
-            );
-
             // Execute both database queries. 
             $messagesDao = MessagesDao::getInstance();
             if(($messageId = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)

@@ -55,6 +55,22 @@
         return $fileType;
     }
 
+    /**
+     * Create an entry into the 'files' database for attachments. 
+     *
+     * @param string $fileName Name of file being uploaded
+     * @param string $mimeType Mime type for file uploaded.
+     * @return array|false 
+     */
+    public static function createAttachmentEntry(string $fileName, string $mimeType) : array|false 
+    {
+        global $config;
+
+        $fileData = ServerFile::generateEntry(ServerFile::FILE_MESSAGE, $config['uploads_dir']);
+        $fileData['mime_type']     = $mimeType;
+        $fileData['original_name'] = $fileName;
+        return $fileData;
+    }
 }
 
 ?>

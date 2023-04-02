@@ -751,7 +751,6 @@ class AdminModule extends DefaultModule
         }
         
         $headersZip = array(
-            'id' => 'ID',
             'type' => 'Archive Type',
             'timestamp' => 'Date Created (MCC Timezone)',
             'tools' => 'Actions'
@@ -759,24 +758,24 @@ class AdminModule extends DefaultModule
         
         $list = new ListGenerator($headersZip);
 
-        $archiveDao = ArchiveDao::getInstance();
-        $archives = $archiveDao->getArchives();
+        $filesDao = FilesDao::getInstance();
+        $archives = $filesDao->getArchives();
+
 
         foreach($archives as $id => $archive)
         {
             $tools = array();
             $tools[] = Main::loadTemplate('link-url.txt', array(
-                '/%path%/'=>'archive/'.$archive->archive_id, 
+                '/%path%/'=>'archive/'.$archive->file_id, 
                 '/%text%/'=>'Download'
             ));
             $tools[] = Main::loadTemplate('link-js.txt', array(
-                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getType().' created on '.$archive->getTimestamp().'\')', 
+                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \'<strong>'.addslashes($archive->notes).'</strong> created on '.$archive->getTimestamp().'\')', 
                 '/%text%/'=>'Delete'
             ));
 
             $list->addRow(array(
-                'id' => $id,
-                'type' => $archive->getType(),
+                'type' => $archive->notes,
                 'timestamp' => $archive->getTimestamp(),
                 'tools' => join(', ', $tools),
             ));
@@ -785,6 +784,7 @@ class AdminModule extends DefaultModule
         // Get a copy of the system log to display
         $logNum = 50;
         $logEntries = Logger::tailLog($logNum);
+
 
         return Main::loadTemplate('admin-data.txt', array(
             '/%archive_tz%/'=>$archiveTzOptions,
@@ -839,14 +839,7 @@ class AdminModule extends DefaultModule
             'success' => true,
         );
 
-        $currTime = new DelayTime();
-        $archiveData = array();
-        $archiveData['archive_id'] = 0;
-        $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-        $archiveData['notes'] = ''; // Not used for SQL archives.
-        $archiveData['mime_type'] = 'application/sql';
-        $archiveData['timestamp'] = $currTime->getTime();
-        $archiveData['content_tz'] = 'UTC';
+        $archiveData = MissionArchive::createArchiveEntry(MissionArchive::ARCHIVE_SQL);
 
         $filePath    = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
@@ -862,8 +855,8 @@ class AdminModule extends DefaultModule
 
         if($worked == 0)
         {
-            $archiveDao = ArchiveDao::getInstance();
-            $result = $archiveDao->insert($archiveData);
+            $filesDao = FilesDao::getInstance();
+            $result = $filesDao->insert($archiveData);
             
             if($result === false)
             {
@@ -917,39 +910,39 @@ class AdminModule extends DefaultModule
         global $config;
         global $server;
         
-        $currTime = new DelayTime();
-        $archiveData = array();
-        $archiveData['archive_id'] = 0;
-        $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-        $archiveData['notes'] = ''; // Not used for SQL archives.
-        $archiveData['mime_type'] = 'application/txt';
-        $archiveData['timestamp'] = $currTime->getTime();
-        $archiveData['content_tz'] = 'UTC';
-
-        $fromPath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
-        $toPath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
-
-        $response = array('success' => true);
-
-        if(copy($fromPath, $toPath))
+        if(($archiveData = MissionArchive::createArchiveEntry(MissionArchive::ARCHIVE_TXT)) === false)
         {
-            $archiveDao = ArchiveDao::getInstance();
-            $result = $archiveDao->insert($archiveData);
-            
-            if($result === false)
-            {
-                unlink($toPath);
-                Logger::warning('admin::backupSystemLog failed to add archive to database.');
-                $response['success'] = false;
-                $response['error'] = 'Failed to create archive. See system log for details.';
-            }
+            Logger::error('admin::backupSystemLog failed to createArchivEntry().');
+            $response['success'] = false;
+            $response['error'] = 'Failed to create archive entry in database.';
         }
         else
         {
-            Logger::warning('admin::backupSystemLog failed to create "'.$archiveData['server_name'].'"');
-            unlink($toPath);    
-            $response['success'] = false;
-            $response['error'] = 'Failed to create archive. See system log for details.';
+            $fromPath = $server['host_address'].$config['logs_dir'].'/'.$config['log_file'];
+            $toPath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
+    
+            $response = array('success' => true);
+    
+            if(copy($fromPath, $toPath))
+            {
+                $filesDao = FilesDao::getInstance();
+                $result = $filesDao->insert($archiveData);
+                
+                if($result === false)
+                {
+                    unlink($toPath);
+                    Logger::warning('admin::backupSystemLog failed to add archive to database.');
+                    $response['success'] = false;
+                    $response['error'] = 'Failed to create archive. See system log for details.';
+                }
+            }
+            else
+            {
+                Logger::warning('admin::backupSystemLog failed to create "'.$archiveData['server_name'].'"');
+                unlink($toPath);    
+                $response['success'] = false;
+                $response['error'] = 'Failed to create archive. See system log for details.';
+            }
         }
 
         Logger::info('admin::backupSystemLog finished for "'. $archiveData['server_name'].'". ('.$result.')');
@@ -978,14 +971,7 @@ class AdminModule extends DefaultModule
         }
         else
         {
-            $currTime = new DelayTime();
-            $archiveData = array();
-            $archiveData['archive_id'] = 0;
-            $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-            $archiveData['notes'] = ''; // Placeholder to save options used for creating archive (if any).
-            $archiveData['mime_type'] = 'application/zip';
-            $archiveData['timestamp'] = $currTime->getTime();
-            $archiveData['content_tz'] = $tzSelected;
+            $archiveData = MissionArchive::createArchiveEntry(MissionArchive::ARCHIVE_ZIP, $tzSelected);
 
             Logger::info('admin::backupConversations started for "'.$archiveData['server_name'].'"');
             $startTime = microtime(true);
@@ -1026,8 +1012,8 @@ class AdminModule extends DefaultModule
 
                 if($response['success'] === true)
                 {
-                    $archiveDao = ArchiveDao::getInstance();
-                    $result = $archiveDao->insert($archiveData);
+                    $filesDao = FilesDao::getInstance();
+                    $result = $filesDao->insert($archiveData);
 
                     if($result === false)
                     {
@@ -1056,15 +1042,15 @@ class AdminModule extends DefaultModule
     {
         global $config;
         global $server;
-        $archiveDao = ArchiveDao::getInstance();
+        $filesDao = FilesDao::getInstance();
         
         $response = array('success'=>false, 'error'=>'');
 
-        $archiveId = $_POST['archive_id'] ?? 0;
+        $fileId = $_POST['file_id'] ?? 0;
 
-        if($archiveId > 0)
+        if($fileId > 0)
         {
-            $archive = $archiveDao->getArchive($archiveId, $this->user->user_id);
+            $archive = $filesDao->getArchive($fileId, $this->user->user_id);
             if($archive != null)
             {
                 $filepath = $server['host_address'].$config['logs_dir'].'/'.$archive->server_name;
@@ -1072,27 +1058,27 @@ class AdminModule extends DefaultModule
                 if(!unlink($filepath))
                 {
                     Logger::warning('admin::deleteArchive failed to delete '.$archive->server_name.'.');
-                    $response['error'] = 'Failed to delete archive. (archive_id='.$archiveId.')';
+                    $response['error'] = 'Failed to delete archive. (file_id='.$fileId.')';
                 }
-                else if($archiveDao->drop($archiveId) !== true)
+                else if($filesDao->drop($fileId) !== true)
                 {
-                    Logger::warning('admin::deleteArchive failed to delete '.$archive->archive_id.' db entry.');
-                    $response['error'] = 'Failed to delete archive. (archive_id='.$archiveId.')';
+                    Logger::warning('admin::deleteArchive failed to delete '.$archive->file_id.' db entry.');
+                    $response['error'] = 'Failed to delete archive. (file_id='.$fileId.')';
                 }
                 else
                 {
                     $response['success'] = true;
-                    Logger::info('Delete archive_id='.$archiveId);
+                    Logger::info('Delete file_id='.$fileId);
                 }
             }
             else
             {
-                Logger::warning('admin::deleteArchive failed to delete '.$archiveId.' (obj null).');
+                Logger::warning('admin::deleteArchive failed to delete '.$fileId.' (obj null).');
             }
         }
         else
         {
-            Logger::warning('admin::deleteArchive '.$archiveId.' <= 0.');
+            Logger::warning('admin::deleteArchive '.$fileId.' <= 0.');
         }
 
         return $response;

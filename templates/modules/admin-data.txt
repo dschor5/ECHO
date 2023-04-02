@@ -107,6 +107,6 @@
 
 <div id="dialog-confirm" title="" class="dialog-body">
     <div class="modal-confirm-body"><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span></div>
-    <input type="hidden" id="confirm-archive-id" name="archive_id" value="">
+    <input type="hidden" id="confirm-archive-id" name="file_id" value="">
     <input type="hidden" id="confirm-subaction" name="subaction" value="">    
 </div>

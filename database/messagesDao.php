@@ -108,7 +108,7 @@ class MessagesDao extends Dao
         $messageStatusDao = MessageStatusDao::getInstance();
         $conversationsDao = ConversationsDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
-        $msgFileDao = MessageFileDao::getInstance();
+        $filesDao = FilesDao::getInstance();
 
         $id = null;
 
@@ -124,22 +124,14 @@ class MessagesDao extends Dao
                 'AND from_crew='.(($user->is_crew)?'1':'0');
             $this->database->query($idQueryStr);
 
-            // Insert the new message into the database and automatically assign it 
-            // an alternate id based on the previous query.
-            $variables = array('message_id_alt' => '@id_alt:=@id_alt+1');
-            $id = $this->insert($msgData, $variables);
-
-            // If the message was successfully added to the database, then 
-            // proceed to create entries in other tables that need to reference
-            // the newly created message id.
-            if ($id !== false)
+            if(count($fileData) == 0 || (count($fileData) > 0 && ($msgData['file_id'] = $filesDao->insert($fileData)) !== false))
             {
-                // Add file attachments if any.
-                if(count($fileData) > 0)
-                {
-                    $fileData['message_id'] = $id;
-                    $msgFileDao->insert($fileData);
-                }
+                Logger::warning("HELLO WORLD 1");
+
+                // Insert the new message into the database and automatically assign it 
+                // an alternate id based on the previous query.
+                $variables = array('message_id_alt' => '@id_alt:=@id_alt+1');
+                $id = $this->insert($msgData, $variables);
 
                 // Create message status entries for the new entry.
                 $participants = $participantsDao->getParticipantIds($msgData['conversation_id']);
@@ -161,7 +153,6 @@ class MessagesDao extends Dao
             }
             else
             {
-                // If the message was not created retract the database query.
                 $id = false;
                 $this->endTransaction(false);
             }
@@ -224,12 +215,12 @@ class MessagesDao extends Dao
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN files ON messages.file_id=files.file_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
@@ -283,12 +274,12 @@ class MessagesDao extends Dao
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN files ON messages.file_id=files.file_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.message_id > '.$qLastId.' '.
                         'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
@@ -348,18 +339,20 @@ class MessagesDao extends Dao
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN files ON messages.file_id=files.file_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
                         'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
         
+        
+
         $messages = array();
 
     
@@ -413,10 +406,10 @@ class MessagesDao extends Dao
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN files ON messages.file_id=files.file_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
                         'AND messages.message_id < '.$qlastMsgId.' '.
@@ -555,9 +548,9 @@ class MessagesDao extends Dao
         
         // Build query
         $queryStr = 'SELECT messages.*, '. 
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN files ON messages.file_id=files.file_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$offset.', '.$numMsgs;

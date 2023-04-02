@@ -150,7 +150,7 @@ async function initMediaStream(mediaType) {
         recMediaPlayer.srcObject = stream;
     }
     catch(e) {
-        console.error('navigator.getUserMedia error: ', e);
+        console.error('navigator.getUserMedia error: ' + e);
     }
 }
 
@@ -196,7 +196,7 @@ function startRecording(mediaType) {
             mediaRecorder = new MediaRecorder(window.stream);
         }
         catch (e) {
-            console.error('Exception while creating MediaRecorder: ', e);
+            console.error('Exception while creating MediaRecorder: ' + e);
             return;
         }
     }

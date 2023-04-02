@@ -35,6 +35,8 @@ class FileModule implements Module
         $subaction = $_GET['subaction'] ?? '';
         $id = $_GET['id'] ?? '';
 
+
+
         if($subaction == 'archive' && intval($id) > 0)
         {
             // Download archive file
@@ -76,8 +78,8 @@ class FileModule implements Module
         // Only search the database if the user is valid. No point 
         if($this->user != null)
         {
-            $messageFileDao = MessageFileDao::getInstance();
-            $file = $messageFileDao->getFile($fileId, $this->user->user_id);
+            $filesDao = FilesDao::getInstance();
+            $file = $filesDao->getFile($fileId, $this->user->user_id);
         }
 
         // Also catches the case where the user does not have 
@@ -141,21 +143,38 @@ class FileModule implements Module
             exit();
         }
 
-        // Else send the proper HTTP headers.
-        switch($extension)
+        $mimeType = array(
+            'css' => 'text/css',
+            'js'  => 'text/javascript'
+        );
+
+        $buffering = false;
+        if(isset($mimeType[$extension]))
         {
-            case 'css':
-                header('Content-Type: text/css');
-                break;
-            case 'js':
-                header('Content-Type: text/javascript');
-                break;
-            default:
-                header('Content-Type: text/plain');
-                break;
+            header("content-type: ".$mimeType[$extension]);
+            header("cache-control: must-revalidate");
+            // TODO: Increase offset for deployment
+            $offset = 10;
+            header("expires: ".gmdate("D, d M Y H:i:s", time() + $offset)." GMT");
+            if($buffering = ob_start("ob_gzhandler") === false) 
+            {
+                $buffering = ob_start();
+            }
+        }
+        else
+        {
+            header('Content-Type: text/plain');
         }
 
-        echo Main::loadTemplate($filepath, array(), '');
+        echo Main::loadTemplate($filepath, null, '');
+        if($buffering) 
+        {
+            ob_flush();
+        }
+        else
+        {
+            flush();
+        }
     }
 
     /**
@@ -171,8 +190,8 @@ class FileModule implements Module
         // Only admins can get an archive. That is checked by the query. 
         if($this->user != null)
         {
-            $archiveDao = ArchiveDao::getInstance();
-            $archive = $archiveDao->getArchive($archiveId, $this->user->user_id);
+            $filesDao = FilesDao::getInstance();
+            $archive = $filesDao->getArchive($archiveId, $this->user->user_id);
         }
 
         // Also catches the case where the user does not have 
@@ -187,7 +206,7 @@ class FileModule implements Module
 
         $filepath = $archive->getServerPath();
         $mimeType = $archive->mime_type;
-        $origName = 'archive-'.$archive->archive_id.'-'.
+        $origName = 'archive-'.$archive->file_id.'-'.
             $archive->getTimestamp(DelayTime::DATE_FORMAT_FILE).'.'.$archive->getExtension();
         $filesize = $archive->size;
 

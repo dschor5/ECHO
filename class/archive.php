@@ -5,7 +5,7 @@
  * Encapsulates 'mission_archives' row from database.
  * 
  * Table Structure: 'archives'
- * - archive_id     (int)       Unique id for each archive.
+ * - file_id        (int)       Unique id for each archive.
  * - server_name    (string)    Server name where archive is stored
  * - notes          (string)    Notes saved with the archive (RFU)
  * - mime_type      (string)    Mime type for current archive
@@ -27,15 +27,19 @@
  */
  class MissionArchive extends ServerFile
 {
+    const ARCHIVE_SQL = 'application/sql';
+    const ARCHIVE_ZIP = 'applicaiton/zip';
+    const ARCHIVE_TXT = 'application/txt';
+
     /**
      * Constant definition of valid archive types.
      * @access private
      * @var array
      */
     const ARCHIVE_TYPES = array(
-        'application/sql' => array('ext' => 'sql', 'desc' => 'SQL Backup (sql)'),
-        'application/zip' => array('ext' => 'zip', 'desc' => 'Conversation Backup (zip)'),
-        'application/txt' => array('ext' => 'txt', 'desc' => 'System Log Backup (txt)'),
+        MissionArchive::ARCHIVE_SQL => array('ext' => 'sql', 'desc' => 'SQL Backup (sql)'),
+        MissionArchive::ARCHIVE_ZIP => array('ext' => 'zip', 'desc' => 'Conversation Backup (zip)'),
+        MissionArchive::ARCHIVE_TXT => array('ext' => 'txt', 'desc' => 'System Log Backup (txt)'),
     );
 
     /**
@@ -48,6 +52,35 @@
     {
         global $config;
         parent::__construct($data, $config['logs_dir']);
+    }
+
+    /**
+     * Create an entry into the 'files' database for archives. 
+     *
+     * @param string $type ARCHIVE_SQL, ARCHIVE_TXT, or ARCHIVE_TXT.
+     * @param string $timezone Timezone associated with the archive. 
+     * @return array|false 
+     */
+    public static function createArchiveEntry(string $type, string $timezone='UTC') : array|false 
+    {
+        global $config;
+
+        if(array_key_exists($type, MissionArchive::ARCHIVE_TYPES) === false)
+        {
+            Logger::error('Cannot create archive of type "'.$type.'"');
+            return false;
+        }
+
+        $currTime = new DelayTime();
+        $archiveData = ServerFile::generateEntry(ServerFile::FILE_ARCHIVE, $config['logs_dir']);
+        $archiveData['mime_type']     = $type;
+        $archiveData['original_name'] = 'archive-'.
+            $currTime->getTime(false, DelayTime::DATE_FORMAT_FILE).'.'.
+            MissionArchive::ARCHIVE_TYPES[$type]['ext'];
+        $missionConfig = MissionConfig::getInstance();
+        $archiveData['notes']         = $missionConfig->name.' - '.MissionArchive::ARCHIVE_TYPES[$type]['desc'];
+        $archiveData['settings']      = json_encode(array('timezone' => $timezone));
+        return $archiveData;
     }
 
     /**

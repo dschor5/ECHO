@@ -9,15 +9,16 @@ CREATE TABLE `users` (
   `last_login` datetime DEFAULT NULL,
   `is_password_reset` tinyint(1) NOT NULL DEFAULT '1',
   `preferences` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `file_id` int(10) UNSIGNED NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `conversations` (
-  `conversation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `conversation_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-  `parent_conversation_id` int(11) UNSIGNED NULL DEFAULT NULL,
-  `date_created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `last_message` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `parent_conversation_id` int(10) UNSIGNED NULL DEFAULT NULL,
+  `date_created` datetime NOT NULL DEFAULT NOW(),
+  `last_message` datetime NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`conversation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -33,6 +34,7 @@ CREATE TABLE `messages` (
   `message_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Author',
   `conversation_id` int(10) UNSIGNED NOT NULL ,
+  `file_id` int(10) UNSIGNED NULL DEFAULT NULL,
   `text` text CHARACTER SET utf8 DEFAULT NULL,
   `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
   `sent_time` datetime NOT NULL,
@@ -41,6 +43,7 @@ CREATE TABLE `messages` (
   `recv_time_hab` datetime NOT NULL,
   `recv_time_mcc` datetime NOT NULL,
   PRIMARY KEY(`message_id`, `user_id`, `conversation_id`),
+  UNIQUE KEY(`file_id`),
   FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -51,33 +54,28 @@ CREATE TABLE `msg_status` (
   PRIMARY KEY(`message_id`, `user_id`),
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `msg_files` (
-  `message_id` int(10) UNSIGNED NOT NULL,
-  `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
-  `original_name` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY(`message_id`),
-  FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `mission_config` (
   `name` varchar(32) COLLATE utf8_unicode_ci NOT NULL UNIQUE,
   `value` text CHARACTER SET utf8 NOT NULL,
   `type` enum('string','int','float','bool', 'datetime') COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY(`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `mission_archives` (
-  `archive_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
-  `notes` varchar(256) COLLATE utf8_unicode_ci NOT NULL, 
-  `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
-  `timestamp` datetime NOT NULL,
-  `content_tz` varchar(64) COLLATE utf8_unicode_ci NOT NULL, 
-  PRIMARY KEY(`archive_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `files` (
+   `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+   `association` enum('avatar','archive','message') COLLATE utf8_unicode_ci NOT NULL,
+   `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+   `original_name` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+   `uuid` binary(16) NOT NULL,
+   `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+   `timestamp` datetime NOT NULL,
+   `notes` text CHARACTER SET utf8 DEFAULT NULL,
+   `settings` text CHARACTER SET utf8 DEFAULT NULL,
+   PRIMARY KEY(`file_id`),
+   FOREIGN KEY(`file_id`) REFERENCES messages(`file_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('name',               'string', 'Analog Mission Name'),
@@ -111,7 +109,7 @@ INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `
 (1, 'admin', 'Admin', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
-(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', '0000-00-00 00:00:00');
+(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW());
 
 INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES
 (1, 1);
@@ -125,12 +123,12 @@ INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `
 
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
-(2, 'Admin-Flight Director', NULL, '2021-08-03 23:14:48', '0000-00-00 00:00:00'),
-(3, 'Admin-Blueberry', NULL, '2021-08-03 23:14:59', '0000-00-00 00:00:00'),
-(4, 'Flight Director-Blueberry', NULL, '2021-08-03 23:14:59', '0000-00-00 00:00:00'),
-(5, 'Admin-Tangerine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
-(6, 'Flight Director-Tangerine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00'),
-(7, 'Blueberry-Tangerine', NULL, '2021-08-03 23:15:07', '0000-00-00 00:00:00');
+(2, 'Admin-Flight Director', NULL, '2021-08-03 23:14:48', NOW()),
+(3, 'Admin-Blueberry', NULL, '2021-08-03 23:14:59', NOW()),
+(4, 'Flight Director-Blueberry', NULL, '2021-08-03 23:14:59', NOW()),
+(5, 'Admin-Tangerine', NULL, '2021-08-03 23:15:07', NOW()),
+(6, 'Flight Director-Tangerine', NULL, '2021-08-03 23:15:07', NOW()),
+(7, 'Blueberry-Tangerine', NULL, '2021-08-03 23:15:07', NOW());
 
 
 INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES

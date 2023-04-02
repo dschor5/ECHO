@@ -103,9 +103,10 @@ class Message
         // If the message contains an attachment, load teh corresponding fields. 
         if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT)
         {
+            Logger::warning('File: '.$this->data['file_id']);
             $this->file = new FileUpload(
                 array_intersect_key($this->data, 
-                    array_flip(array('message_id', 'server_name', 'original_name', 'mime_type')))
+                    array_flip(array('file_id', 'server_name', 'original_name', 'mime_type')))
             );
         }
     }
@@ -298,6 +299,7 @@ class Message
         {
             if($this->file->exists())
             {
+                $msgData['file_id'] = $this->file->file_id;
                 $msgData['filename'] = $this->file->original_name;
                 $msgData['filesize'] = $this->file->getSize();
                 $msgData['type'] = $this->file->getTemplateType();

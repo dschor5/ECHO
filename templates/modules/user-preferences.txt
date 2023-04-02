@@ -1,0 +1,57 @@
+<div id="content">
+    <div id="heading">
+        User Profile & Preferences
+    </div>
+    
+    <form id="form-contents" method="POST">
+        
+        <div class="subheading">User Profile</div>
+        <div class="form-row">
+            <label for="name">Alias</label> 
+            <div class="form-field">
+                <input type="text" placeholder="Alias" name="alias" id="alias" value="%alias%" required>
+            </div>
+            <div class="form-help">
+                Name displayed on application. 
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="date-start">User Avatar</label>
+            <div 
+            <img src="%http%%site_url%/avatar/%avatar-filename%"/>
+            <div class="form-help">
+                When the crew will enter/leave the habitat.<br>
+                Dates should be formatted as YYYY-MM-DD.
+            </div>
+        </div>
+
+        <div class="form-divider"></div>
+        <div class="subheading">User Preferences</div>
+
+   
+
+        <div class="form-divider"></div>
+
+        <div class="form-row dialog-resp-placeholder">
+            <div class="dialog-response"></div>
+            <div class="dialog-success">Settings saved!</div>
+        </div>
+        
+        <div class="form-row">
+            <button onclick="saveConfig('mission')" type="button">Save Mission Configuration</button>
+        </div>
+
+    </form>
+</div>
+
+ <div id="dialog-avatar" title="Upload Avatar" class="dialog-body" style="display: none;">
+   <form method="POST">
+      <div class="dialog-response"></div>
+      <input type="file" id="new-avatar-file" name="new-avatar-file"/>
+      <p>Filetypes allowed: %allowed_file_types%.</p>
+      <p>Max file size: %max_upload_size%</p>
+
+   </form>
+   <div id="progress-file"><div class="progress-label-file"></div></div>
+</div>

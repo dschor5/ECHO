@@ -53,6 +53,7 @@ $config['modules_public'] = array(
 
 $config['modules_user'] = array_merge($config['modules_public'], array(
     'chat',
+    'preferences',
     'help'
 ));
 
@@ -92,8 +93,7 @@ require_once('database/conversationsDao.php');
 require_once('database/participantsDao.php');
 require_once('database/messagesDao.php');
 require_once('database/messageStatusDao.php');
-require_once('database/messageFileDao.php');
-require_once('database/archiveDao.php');
+require_once('database/filesDao.php');
 
 
 

@@ -38,6 +38,15 @@ class Database
     private $throwException;
 
     /**
+     * If true, log all queries. This makes the log files very large. 
+     * Recommend only using for debugging in development environments but 
+     * never enabling this for a production setting. 
+     * @access private
+     * @var bool
+     */
+    private $logQueries;
+
+    /**
      * Singleton instance of Database object.
      * @access private
      * @var Object
@@ -58,6 +67,7 @@ class Database
         $this->query_count = 0;
         $this->query_time = 0;
         $this->throwException = false;
+        $this->logQueries = false;
         
         // Establish databse connection.
         $this->db = new mysqli($hostname, $user, $pass, $dbname);
@@ -159,7 +169,7 @@ class Database
             }
         }
         // If it was not an error, track queries for debugging purposes. 
-        else
+        else if($this->logQueries)
         {
             Logger::debug('Query', array(
                 'query'  => $queryStr,

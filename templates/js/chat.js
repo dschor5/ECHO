@@ -259,13 +259,13 @@ function compileMsg(data, before){
             var contentClone = template.content.cloneNode(true);
             try {
                 contentClone.querySelectorAll(".file-location").forEach(function(element) {
-                    element.src = BASE_URL + "/file/" + data.message_id;
+                    element.src = BASE_URL + "/file/" + data.file_id;
                 });
             }
             catch(e) {
                 // Do nothing.
             }
-            contentClone.querySelector("a").href = BASE_URL + "/file/" + data.message_id;
+            contentClone.querySelector("a").href = BASE_URL + "/file/" + data.file_id;
             contentClone.querySelector(".filename").textContent = data.filename;
             contentClone.querySelector(".filesize").textContent = data.filesize;
             msgClone.querySelector(".msg-content").innerHTML = data.message;
