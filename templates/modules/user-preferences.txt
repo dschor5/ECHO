@@ -18,18 +18,16 @@
 
         <div class="form-row">
             <label for="date-start">User Avatar</label>
-            <div 
+%avatar-options%
+
             <img src="%http%%site_url%/avatar/%avatar-filename%"/>
             <div class="form-help">
-                When the crew will enter/leave the habitat.<br>
-                Dates should be formatted as YYYY-MM-DD.
+                Use either a default avatar or upload your own.
             </div>
         </div>
 
         <div class="form-divider"></div>
         <div class="subheading">User Preferences</div>
-
-   
 
         <div class="form-divider"></div>
 
@@ -39,7 +37,7 @@
         </div>
         
         <div class="form-row">
-            <button onclick="saveConfig('mission')" type="button">Save Mission Configuration</button>
+            <button onclick="saveConfig('user')" type="button">Save User Profile & Preferences</button>
         </div>
 
     </form>
@@ -51,7 +49,7 @@
       <input type="file" id="new-avatar-file" name="new-avatar-file"/>
       <p>Filetypes allowed: %allowed_file_types%.</p>
       <p>Max file size: %max_upload_size%</p>
-
+      <img src="#" id="avatar-preview">
    </form>
    <div id="progress-file"><div class="progress-label-file"></div></div>
 </div>

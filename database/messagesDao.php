@@ -119,7 +119,7 @@ class MessagesDao extends Dao
             $this->startTransaction();
             
             // Define query to find the next alternate id to assign to the new message
-            $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM messages '. 
+            $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0), @file_uuid := UUID() FROM messages '. 
                 'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '. 
                 'AND from_crew='.(($user->is_crew)?'1':'0');
             $this->database->query($idQueryStr);
@@ -214,7 +214,7 @@ class MessagesDao extends Dao
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.file_id, '.
                         'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -273,7 +273,7 @@ class MessagesDao extends Dao
         $qToDate   = 'ADDTIME(CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME), "0.5")';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.file_id, '.
                         'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -338,7 +338,7 @@ class MessagesDao extends Dao
         $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.file_id, '.
                         'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -404,12 +404,28 @@ class MessagesDao extends Dao
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
+        // TODO: When adding avatars, then the query will become something like this:
+        // $queryStr = 'SELECT messages.*, '. 
+        //                 'users.username, users.alias, users.file_id, '.
+        //                 'files_attach.original_name as attach_original_name, 
+        //                 'files_attach.mime_type as attach_mime_type, BIN_TO_UUID(files_attach.uuid) as attach_uuid '.
+        //                 'BIN_TO_UUID(files_avatar.uuid) as avatar_uuid '.
+        //             'FROM messages '.
+        //             'JOIN users ON users.user_id=messages.user_id '.
+        //             'LEFT JOIN files as attachment ON messages.file_id=files.file_id '.
+        //             'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+        //                 'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
+        //                 'AND messages.message_id < '.$qlastMsgId.' '.
+        //             'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+        //             'LIMIT 0, '.$numMsgs;
+
+
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.file_id, '.
                         'files.original_name, files.server_name, files.mime_type, BIN_TO_UUID(files.uuid) '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN files ON messages.file_id=files.file_id '.
+                    'LEFT JOIN files as attachment ON messages.file_id=files.file_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
                         'AND messages.message_id < '.$qlastMsgId.' '.

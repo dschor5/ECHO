@@ -1,0 +1,7 @@
+            <div class="avatar-option">
+                <input type="radio" id="avatar-%default-or-user%" name="avatar">
+                <label for="avatar-%default-or-user%">
+                    <img src="%http%%site_url%/%avatar-filename%" alt="%avatar-alt-name">
+                </label>
+            </div>
+            

@@ -51,6 +51,8 @@ class User
         {
             $this->data['conversations'] = array();
         }
+
+        $this->data['preferences'] = json_decode($this->data['preferences']);
     }
 
     /**
@@ -64,6 +66,7 @@ class User
     {
         $result = null;
 
+        // Check the properties of the User object.
         if(array_key_exists($name, $this->data)) 
         {
             // If the field starts with 'is_', then treat it as a bool
@@ -78,12 +81,32 @@ class User
                 $result = $this->data[$name];
             }
         }
+        // Check the preferences saved in a JSON array. 
+        else if($this->data['preferences'] != null && array_key_exists($name, $this->data['preferences']))
+        {
+            $result = $this->data['preferences'][$name];
+        }
         else
         {
             Logger::warning('User __get("'.$name.'")', $this->data);
         }
 
         return $result;
+    }
+
+    private function getDefaultAvatar() : string 
+    {
+        return 'default-avatar-'.($this->is_crew ? 'hab' : 'mcc').'.jpg';
+    }
+
+    public function getAvatar($forceDefault=false) : string 
+    {
+        $avatar = $this->getDefaultAvatar();
+        if(isset($this->data['preferences']['avatar']))
+        {
+            $avatar = $this->data['preferences']['avatar'];
+        }
+        return $avatar;
     }
 
     /**

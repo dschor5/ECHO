@@ -40,11 +40,20 @@ class PreferencesModule extends DefaultModule
 
       return Main::loadTemplate('user-preferences.txt', array(
          '/%alias%/'           => $this->user->alias,
-         '/%avatar-filename%/' => $this->user->avatar,
+         '/%avatar-options%/'  => $this->getAvatarOptions(),
       ));
    }
 
+   private function getAvatarOptions() 
+   {
+      $avatarOptions = Main::loadTemplate('user-preferences-avatar.txt', array(
+         '/%default-or-user%/' => 'default',
+         '/%avatar-filename%/' => ,
+         '/%avatar-alt-name%/' => 'Default Avatar',
+      ));
 
+      
+   }
 }
 
 ?>

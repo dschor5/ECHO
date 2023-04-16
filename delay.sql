@@ -69,7 +69,7 @@ CREATE TABLE `files` (
    `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
    `original_name` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
    `uuid` binary(16) NOT NULL,
-   `mime_type` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+   `mime_type` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
    `timestamp` datetime NOT NULL,
    `notes` text CHARACTER SET utf8 DEFAULT NULL,
    `settings` text CHARACTER SET utf8 DEFAULT NULL,
