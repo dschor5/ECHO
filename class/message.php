@@ -27,6 +27,7 @@
  * Additional Fields:
  * - users.username             (string)    Username for message author
  * - users.alias                (string)    Alias for message author
+ * - users.file_id              (int)       File id for avatar (if any)
  * - msg_files.original_name    (string)    Original filename for attachment (if any)
  * - msg_files.server_name      (string)    Server filename for attachment (if any)
  * - msg_files.mime_type        (string)    Mime type for attachment (if any)

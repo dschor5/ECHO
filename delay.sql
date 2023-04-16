@@ -9,7 +9,7 @@ CREATE TABLE `users` (
   `last_login` datetime DEFAULT NULL,
   `is_password_reset` tinyint(1) NOT NULL DEFAULT '1',
   `preferences` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `file_id` int(10) UNSIGNED NULL DEFAULT NULL,
+  `file_id` binary(16) NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -34,7 +34,7 @@ CREATE TABLE `messages` (
   `message_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Author',
   `conversation_id` int(10) UNSIGNED NOT NULL ,
-  `file_id` int(10) UNSIGNED NULL DEFAULT NULL,
+  `file_id` binary(16) NULL DEFAULT NULL,
   `text` text CHARACTER SET utf8 DEFAULT NULL,
   `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
   `sent_time` datetime NOT NULL,
@@ -43,7 +43,6 @@ CREATE TABLE `messages` (
   `recv_time_hab` datetime NOT NULL,
   `recv_time_mcc` datetime NOT NULL,
   PRIMARY KEY(`message_id`, `user_id`, `conversation_id`),
-  UNIQUE KEY(`file_id`),
   FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -64,17 +63,17 @@ CREATE TABLE `mission_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `files` (
-   `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+   `file_id` binary(16) NOT NULL,
    `association` enum('avatar','archive','message') COLLATE utf8_unicode_ci NOT NULL,
    `server_name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
    `original_name` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-   `uuid` binary(16) NOT NULL,
    `mime_type` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
    `timestamp` datetime NOT NULL,
    `notes` text CHARACTER SET utf8 DEFAULT NULL,
-   `settings` text CHARACTER SET utf8 DEFAULT NULL,
+   `settings` text CHARACTER SET utf8 DEFAULT NULL,...........
    PRIMARY KEY(`file_id`),
    FOREIGN KEY(`file_id`) REFERENCES messages(`file_id`) ON DELETE CASCADE
+   FOREIGN KEY(`file_id`) REFERENCES users(`file_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
