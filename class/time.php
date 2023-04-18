@@ -31,6 +31,13 @@ class DelayTime
      * @var string
      */
     const DATE_FORMAT_FILE = 'Y-m-d\TH-i-s';
+    
+    /**
+     * Regex to validate a date string in "YYYY-MM-DD HH:MM:SS" format.
+     * @access public
+     * @var string 
+     */
+    const DATE_FORMAT_REGEX   = '/^[\d]{4}-[\d]{2}-[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}$/';
 
     /**
      * Epoch Mission Elapsed Time (MET) calculated since the start of the 

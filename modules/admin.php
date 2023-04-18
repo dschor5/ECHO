@@ -2,6 +2,9 @@
 
 class AdminModule extends DefaultModule
 {
+    /**
+     * Options for the login timeout. 
+     */
     const TIMEOUT_OPS_SEC = array(
             '20' => '20 sec',
           '1800' => '30 min', 
@@ -11,6 +14,13 @@ class AdminModule extends DefaultModule
         '172800' => '2880 min (48 hr)', 
         '604800' => '10080 min (7 days)'
     );
+
+    /**
+     *  Regex to validate a floating point number.
+     */
+    const FLOAT_FORMAT_REGEX  = '/^[\d]*[\.]?[\d]+$/';
+
+    
 
     public function __construct(&$user)
     {
@@ -259,7 +269,15 @@ class AdminModule extends DefaultModule
         ));
     }
 
-    private function makeSelectOption(string $value, string $label, bool $selected)
+    /**
+     * Construct options for dropdown menu. 
+     *
+     * @param string $value Value if selected
+     * @param string $label Label for option
+     * @param boolean $selected True if selected
+     * @return string HTML for select option
+     */
+    private function makeSelectOption(string $value, string $label, bool $selected) : string 
     {
         return '<option value="'.$value.'" '.($selected ? 'selected="selected"' : '').'>'.$label.'</option>'.PHP_EOL;
     }    
@@ -268,6 +286,12 @@ class AdminModule extends DefaultModule
     /* Delay Settings      */
     /***********************/    
 
+    /**
+     * Returns true if the given equation defining the delay is valid. 
+     *
+     * @param string $eq Equation to validate
+     * @return boolean True if valid
+     */
     private function isValidDelayEquationOfTime(string $eq)
     {
         $eq = preg_replace('/\s+/', '', $eq);
@@ -280,13 +304,20 @@ class AdminModule extends DefaultModule
         return preg_match($regexp, $eq);
     }
 
+
+
+    /**
+     * Save delay_type and delay_time to the databse. 
+     *
+     * @return array JSON response. 
+     */
     protected function saveDelaySettings(): array
     {
         $mission = MissionConfig::getInstance();
 
-        $FLOAT_FMT  = '/^[\d]*[\.]?[\d]+$/';
-        $DATE_FMT   = '/^[\d]{4}-[\d]{2}-[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}$/';
+        
 
+        // Default response
         $response = array(
             'success' => false, 
             'error'   => array()
@@ -294,17 +325,24 @@ class AdminModule extends DefaultModule
 
         $data = array();
 
+        // Manual delay
         if(isset($_POST['delay_type']) && $_POST['delay_type'] == Delay::MANUAL)
         {
+            // Set delay type
             $data['delay_type'] = Delay::MANUAL;
+
+            // Extract value selected by the user
             $temp = $_POST['delay_manual'] ?? '';
             $temp = trim($temp);
-            if(!preg_match($FLOAT_FMT, $temp))
+
+            // User input must be a number. 
+            if(!preg_match(AdminModule::FLOAT_FORMAT_REGEX, $temp))
             {
                 $response['error'][] = 'Invalid "Manual Delay" entered. Only numbers allowed.';
             }
             else
             {
+                // 
                 $currTimeObj = new DelayTime();
                 $currTime = $currTimeObj->getTimestamp();
 
@@ -349,7 +387,7 @@ class AdminModule extends DefaultModule
                 
                 for($i = 0; $i < count($_POST['delay_time']); $i++)
                 {
-                    if(!preg_match($DATE_FMT, $delayConfig[$i]['ts']))
+                    if(!preg_match(DelayTime::DATE_FORMAT_REGEX, $delayConfig[$i]['ts']))
                     {
                         $response['error'][] = 'Invalid piece-wise date/time entry in row '.($i+1).'.';
                     }

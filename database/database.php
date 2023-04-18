@@ -75,7 +75,7 @@ class Database
      * Returns singleton instance of Database object. 
      * 
      * @global $database 
-     * @return MissionConfig object
+     * @return Database
      */
     public static function getInstance()
     {

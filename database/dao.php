@@ -122,7 +122,7 @@ abstract class Dao
      *                      Default to null which means use database default.
      * @param int $limit_count Select number of rows to return. 
      *                      Default to null which means use database default.
-     * @return array Associative array of database rows returned.                       
+     * @return mysqli_result|bool Associative array of database rows returned.                       
      */
     public function select($what = '*', $where = '*', $sort = '', $order = 'ASC', 
         $limit_start = null, $limit_count = null)

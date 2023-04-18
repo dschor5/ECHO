@@ -411,13 +411,31 @@ abstract class DefaultModule implements Module
     }
 
      /**
-     * Send retry settings from the server. 
+     * Send retry settings from the server. Minimum is 1sec. 
      *
-     * @param int $retry Num sec before retrying to re-establish a lost connection
+     * @param float $retry Num sec before retrying to re-establish a lost connection
      */
-    protected function sendEventStreamRetry(int $retry)
+    protected function sendEventStreamRetry(float $retry)
     {
-        echo 'retry: '.(intval($retry) * 1000).PHP_EOL.PHP_EOL;
+        // Force minimum num secs for retry
+        if($retry < 1)
+        {
+            $retry = 1;
+        }
+
+        // Convert to milliseconds and rount to an integer.
+        $retry = ceil($retry * 1000);
+        echo 'retry: '.$retry.PHP_EOL.PHP_EOL;
+    }
+
+    /**
+     * Seed last event id for EventSource stream. 
+     *
+     * @param integer $id 
+     */
+    protected function setLastEventId(int $id)
+    {
+        echo 'id: '.(intval($id)).PHP_EOL.PHP_EOL;
     }
 }
 

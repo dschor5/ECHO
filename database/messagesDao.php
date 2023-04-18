@@ -18,7 +18,7 @@ class MessagesDao extends Dao
     /**
      * Returns singleton instance of this object. 
      * 
-     * @return Delay object
+     * @return MessagesDao
      */
     public static function getInstance()
     {
@@ -171,7 +171,7 @@ class MessagesDao extends Dao
             // If the message was not created retract the database query.
             $id = false;
             $this->endTransaction(false);
-            Logger::warning('messagesDao::sendMessage failed.', $e->getMessage());
+            Logger::warning('messagesDao::sendMessage failed.', [$e->getMessage()]);
         }
         $this->database->queryExceptionEnabled(false);
 
@@ -214,6 +214,50 @@ class MessagesDao extends Dao
         }
     }   
 
+    public function getLastMessageId(array $convoIds, int $userId, bool $isCrew, string $toDate) : int
+    {
+        // Build query
+        $qConvoIds = implode(',',$convoIds);
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+
+        $queryStr = 'SELECT messages.*, '. 
+                        'users.username, users.alias, '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                    'FROM messages '.
+                    'JOIN users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                        'AND msg_status.user_id='.$qUserId.' '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
+                    'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+                    'LIMIT 1, 1';
+
+        $this->startTransaction();
+
+        $messageId = -1;
+
+        // Get all messages
+        if(($result = $this->database->query($queryStr)) !== false && $result->num_rows == 1)
+        {
+            if($result->num_rows == 1)
+            {
+                $rowData = $result->fetch_assoc();
+                $messageId = $rowData['message_id'];
+
+                // Update message read status
+                $messageStatusDao = MessageStatusDao::getInstance();
+                $messageStatusDao->drop('user_id='.$qUserId.' AND message_id='.$messageId);
+            }
+        }
+
+        $this->endTransaction();
+
+        return $messageId;
+    }
+
     /**
      * Get messages lost when a stream is disconnected.
      *
@@ -235,7 +279,7 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qLastId  = intval($lastId);
-        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+        $qToDate   = 'ADDTIME(CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME), "0.5")';
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, '.
@@ -312,7 +356,7 @@ class MessagesDao extends Dao
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
-                        'AND (messages.'.$qRefTime.' < '.$qToDate.') '.
+                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
         
@@ -411,7 +455,7 @@ class MessagesDao extends Dao
         catch (Exception $e) 
         {
             $this->endTransaction(false);
-            Logger::warning('messagesDao::getOldMessages failed.', $e);
+            Logger::warning('messagesDao::getOldMessages failed.', [$e->getMessage()]);
         }
         $this->database->queryExceptionEnabled(false);
 
@@ -426,7 +470,7 @@ class MessagesDao extends Dao
      * @param integer $userId
      * @param boolean $isCrew
      * @param string $toDate
-     * @return void
+     * @return array
      */
     public function getMsgNotifications(int $conversationId, int $userId, bool $isCrew, string $toDate)
     {
