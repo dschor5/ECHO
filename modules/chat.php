@@ -618,7 +618,7 @@ class ChatModule extends DefaultModule
             // Send events with updates. 
             $this->sendDelayEvents($forceIfNoChange);
             $this->sendNewMsgEvents();
-            $this->sendNewThreads();
+            $this->sendNewConversations();
             $this->sendNotificationEvents();
 
             // Flush output to the user. 
@@ -656,9 +656,8 @@ class ChatModule extends DefaultModule
                     $roomSelected,
                 );
 
-
                 $mission = MissionConfig::getInstance();
-                if($roomSelected && $mission->feat_convo_threads)
+                if($mission->feat_convo_threads)
                 {
                     foreach($convo->thread_ids as $threadId)
                     {
@@ -671,10 +670,11 @@ class ChatModule extends DefaultModule
                     }
                 }
             }
+            
         }
     }
 
-    private function sendRoom(int $convoId, string $name, bool $current, bool $selected)
+    private function sendRoom(int $convoId, string $name, bool $current=false, bool $selected=false)
     {
         $this->sendEventStream(
             'room', 
@@ -687,24 +687,27 @@ class ChatModule extends DefaultModule
         );
     }
 
-    private function sendThread(int $convoId, int $threadId, string $name, bool $selected)
+    private function sendThread(int $convoId, int $threadId, string $name, bool $selected=false)
     {
-        $this->sendEventStream(
-            'thread', 
-            array(
-                'convo_id'    => $convoId,
-                'thread_id'   => $threadId,
-                'thread_name' => htmlspecialchars($name),
-                'thread_selected' => $selected,
-            )
-        );
+        if($convoId == $this->currConversation->conversation_id || $convoId == $this->currConversation->parent_conversation_id)
+        {
+            $this->sendEventStream(
+                'thread', 
+                array(
+                    'convo_id'    => $convoId,
+                    'thread_id'   => $threadId,
+                    'thread_name' => htmlspecialchars($name),
+                    'thread_selected' => $selected,
+                )
+            );
+        }
     }
 
     /**
      * Sends event stream message 'delay' anytime the current 
      * communicaiton delay changes. 
      */
-    private function sendNewThreads()
+    private function sendNewConversations()
     {
         $mission = MissionConfig::getInstance();
 
@@ -715,7 +718,7 @@ class ChatModule extends DefaultModule
 
             // Gets new threads. The query excludes all known conversation ids
             // to only get the new threads.
-            $newConvos = $conversationsDao->getNewThreads(
+            $newConvos = $conversationsDao->getNewConversations(
                 array_keys($this->conversations), $this->user->user_id);
 
             // For each new thread
@@ -723,20 +726,16 @@ class ChatModule extends DefaultModule
             {
                 // Update our cached knowledge base
                 $this->conversations[$convoId] = $convo;
-                $this->conversations[$convo->parent_conversation_id]->addThreadId($convoId);
-                
-                // If it does not have a parent, then send it even if it does not belong to 
-                // the active conversation. 
-                if($convo->parent_conversation_id != null)
+
+                if($convo->parent_conversation_id == null)
                 {
-                    $this->sendEventStream(
-                        'thread', 
-                        array(
-                            'convo_id'    => $convo->parent_conversation_id,
-                            'thread_id'   => $convo->conversation_id,
-                            'thread_name' => htmlspecialchars($convo->name),
-                        )
-                    );
+                    $this->sendRoom($convo->conversation_id, $convo->getName($this->user->user_id));
+                }
+                // If it does not have a parent, then send it even if it does not belong to the active convo.
+                else
+                {
+                    $this->conversations[$convo->parent_conversation_id]->addThreadId($convoId);
+                    $this->sendThread($convo->parent_conversation_id, $convo->conversation_id, htmlspecialchars($convo->name));
                 }
             }
         }
@@ -914,7 +913,7 @@ class ChatModule extends DefaultModule
                 {
                     $conversationsDao = ConversationsDao::getInstance();
                     $this->conversations = $conversationsDao->getConversations($this->user->user_id);
-                    $this->sendRoomMenus();
+                    $this->sendNewConversations();
                 }
 
                 // If no threads AND message received in a thread (would only happen if disabling threads during a mission)

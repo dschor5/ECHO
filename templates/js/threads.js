@@ -66,10 +66,10 @@ function addThreadToMenu(conversation_id, thread_id, thread_name, thread_selecte
             linkTag.setAttribute('class', 'thread-selected');
         }
         var span1 = document.createElement('span');
-        span1.setAttribute('id', 'thread-name-' + thread_id);
-        span1.innerHTML = '&bull; ' + thread_name;
+        span1.setAttribute('id', 'room-name-' + thread_id);
+        span1.innerHTML = '&bull; ' + thread_name + '&nbsp;';
         var span2 = document.createElement('span');
-        span2.setAttribute('id', 'thread-id-' + thread_id);
+        span2.setAttribute('id', 'room-new-' + thread_id);
         linkTag.appendChild(span1);
         linkTag.appendChild(span2);
         $(linkTag).insertBefore('#new-thread');

@@ -180,28 +180,31 @@ class ConversationsDao extends Dao
     }    
 
     /**
-     * Get all new threads for a given conversation.
+     * Get all new conversations and threads for a given conversation.
      *
      * @param array $convoIds Conversation ids to exclude in search
      * @param integer $userId Current user id
      * @return array of Conversation objects
      */
-    public function getNewThreads(array $convoIds, int $userId) : array
+    public function getNewConversations(array $convoIds, int $userId) : array
     {
         $qConvoIds = implode(',',$convoIds);
-        $qUserId   = '\''.$this->database->prepareStatement($userId).'\'';
+
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
 
         $queryStr = 'SELECT conversations.*, '.
             'GROUP_CONCAT( participants.user_id) AS participants_id, '.
             'GROUP_CONCAT( users.username) AS participants_username, '.
             'GROUP_CONCAT( users.alias) AS participants_alias, '.
             'GROUP_CONCAT( users.is_crew) AS participants_is_crew, '.
-                'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
+            'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
             'FROM conversations '.
             'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
             'JOIN users ON users.user_id=participants.user_id '.
             'WHERE conversations.conversation_id NOT IN ('.$qConvoIds.') '. 
-                'AND users.user_id='.$qUserId.' '.
+                'AND conversations.conversation_id IN ( '.
+                    'SELECT participants.conversation_id FROM participants '.
+                    'WHERE participants.user_id='.$qUserId.' ) '.
             'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
         
         $conversations = array();
@@ -213,8 +216,8 @@ class ConversationsDao extends Dao
                 // Retreieve results from query
                 while(($conversationData=$result->fetch_assoc()) != null)
                 {
-                    $currConversation = new Conversation($conversationData);
-                    $conversations[$conversationData['conversation_id']] = $currConversation;
+                    $conversations[$conversationData['conversation_id']] = 
+                        new Conversation($conversationData);
                 }
 
                 foreach($conversations as $convoId => $convo)

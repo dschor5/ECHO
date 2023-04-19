@@ -138,11 +138,11 @@ function handleEventSourceNewRoom(event) {
         
         var span = document.createElement('span');
         span.setAttribute('id', 'room-name-' + data.convo_id);
-        span.innerHTML = data.convo_name;
+        span.innerHTML = data.convo_name + '&nbsp;';
         divRoomLink.appendChild(span);
 
         span = document.createElement('span');
-        span.setAttribute('id', 'room-new' + data.convo_id);
+        span.setAttribute('id', 'room-new-' + data.convo_id);
         divRoomLink.appendChild(span);
 
         divRoomName.appendChild(divRoomLink);
@@ -246,6 +246,8 @@ function newMessageNotification(name, important=false, thisRoom=true, ack=false)
 
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
+    console.log($('#feat-unread-msg-counts-enabled').length > 0);
+    console.log($('#room-new-' + data.conversation_id).length > 0);
     if($('#feat-unread-msg-counts-enabled').length && $('#room-new-' + data.conversation_id).length) {
         $('#room-new-' + data.conversation_id).html( '(' + data.num_messages + 
             ((data.num_important > 0) ? '<span class="room-important">&#8252;</span>':'') + ')');
