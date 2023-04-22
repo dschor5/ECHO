@@ -281,6 +281,7 @@ class Message
             'sent_time'        => DelayTime::convertTsForJs($this->sent_time),
             'recv_time_mcc'    => DelayTime::convertTsForJs($this->recv_time_mcc),
             'recv_time_hab'    => DelayTime::convertTsForJs($this->recv_time_hab),
+            'recv_time_local'  => DelayTime::convertTsForJs($userPerspective->is_crew ? $this->recv_time_hab : $this->recv_time_mcc),
             'recv_time'        => DelayTime::convertTsForJs($this->getReceivedTime($remoteDest)),
             'delivered_status' => $this->getMsgStatus($remoteDest),
             'remoteDest'       => $remoteDest,

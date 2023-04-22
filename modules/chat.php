@@ -258,12 +258,9 @@ class ChatModule extends DefaultModule
         // If the oldest message time was provided, use that to refine hte 
         // search and load older messages. 
         // Limit load to 10 messages at a time. 
-        if(isset($_POST['last_recv_time']) && 
-          ($ts = strtotime($_POST['last_recv_time'])) !== false) 
+        if(isset($_POST['last_recv_time']) && preg_match(DelayTime::DATE_FORMAT_MS_REGEX, $_POST['last_recv_time']))
         {
-            $dt = new DateTime('now', new DateTimeZone('UTC'));
-            $dt->setTimestamp($ts);
-            $msgsRecvBefore = $dt->format('Y-m-d H:i:s');
+            $msgsRecvBefore = str_replace('T', ' ', substr($_POST['last_recv_time'], 0, -1));
             $msgId   = PHP_INT_MAX;
             $numMsgs = 10;
         }
@@ -453,9 +450,6 @@ class ChatModule extends DefaultModule
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => $msgText,
                 'type'            => $fileType,
-                'sent_time'       => $currTime->getTime(),
-                'recv_time_hab'   => $currTime->getTime(!$this->user->is_crew),
-                'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
             );
             
             // Create entry for the msg_files table. 
@@ -511,7 +505,6 @@ class ChatModule extends DefaultModule
     protected function textMessage() : array
     {
         $messagesDao = MessagesDao::getInstance();
-        $currTime = new DelayTime();
 
         // Get message type and body.
         $msgText = $_POST['msgBody'] ?? '';
@@ -533,11 +526,8 @@ class ChatModule extends DefaultModule
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => $msgText,
                 'type'            => $msgImportant,
-                'sent_time'       => $currTime->getTime(),
-                'recv_time_hab'   => $currTime->getTime(!$this->user->is_crew),
-                'recv_time_mcc'   => $currTime->getTime($this->user->is_crew),
             );
-            
+
             // Send message.
             if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
             {
@@ -783,11 +773,7 @@ class ChatModule extends DefaultModule
     {
         $messagesDao = MessagesDao::getInstance();
         $mission = MissionConfig::getInstance();
-        
-        // Current time to query for messages
-        $time = new DelayTime();
-        $timeStr = $time->getTime();
-        
+              
         // Conversation to query for messages
         $convoIds = array();
         $convoIds[] = $this->currConversation->conversation_id;
@@ -802,7 +788,7 @@ class ChatModule extends DefaultModule
         {
             $offset = 0;
             $messages = $messagesDao->getMissedMessages(
-                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+                $convoIds, $this->user->user_id, $this->user->is_crew, $lastId, $offset);
 
             while(count($messages) > 0)
             {
@@ -821,17 +807,17 @@ class ChatModule extends DefaultModule
                 // Any more messages?
                 $offset += count($messages);
                 $messages = $messagesDao->getMissedMessages(
-                    $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr, $lastId, $offset);
+                    $convoIds, $this->user->user_id, $this->user->is_crew, $lastId, $offset);
             }
         }
         else
         {
             // Get last event id from current time to seed value on client side.
             $messageId = $messagesDao->getLastMessageId(
-                $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr);
+                $convoIds, $this->user->user_id, $this->user->is_crew);
     
             // Seed last-event id by sending an empty message that is just the event id.
-            $this->setLastEventId($messageId);
+            //$this->setLastEventId($messageId);
         }
         
     }
@@ -843,8 +829,6 @@ class ChatModule extends DefaultModule
     private function sendNewMsgEvents()
     {
         // Get new messages
-        $time = new DelayTime();
-        $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
         $mission = MissionConfig::getInstance();
         $convoIds = array();
@@ -854,7 +838,7 @@ class ChatModule extends DefaultModule
             $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
         }
         $messages = $messagesDao->getNewMessages(
-            $convoIds, $this->user->user_id, $this->user->is_crew, $timeStr);
+            $convoIds, $this->user->user_id, $this->user->is_crew);
 
         // Iterate through the new messages and send a unique event 
         // for each one where the msg data is JSON encoded. 
@@ -879,11 +863,9 @@ class ChatModule extends DefaultModule
         static $prevNotifications = array();
 
         // Poll database for new messages for each conversation. 
-        $time = new DelayTime();
-        $timeStr = $time->getTime();
         $messagesDao = MessagesDao::getInstance();
         $currNotifications = $messagesDao->getMsgNotifications(
-            $this->currConversation->conversation_id, $this->user->user_id, $this->user->is_crew, $timeStr);
+            $this->currConversation->conversation_id, $this->user->user_id, $this->user->is_crew);
 
         if(count($currNotifications) > 0)
         {
@@ -1042,7 +1024,6 @@ class ChatModule extends DefaultModule
         return Main::loadTemplate('chat.txt', 
             array('/%username%/'           => htmlspecialchars($this->user->username),
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
-                  '/%chat_rooms%/'         => '',//$this->getConversationList(),
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
                   '/%max_upload_size%/'    => ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
@@ -1050,70 +1031,6 @@ class ChatModule extends DefaultModule
                                               array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),
                   '/%features_enabled%/'  => $featuresEnabled
                 ));
-    }
-
-    /**
-     * Compile conversation list for left navigation on chat window. 
-     *
-     * @return string Navigation display. 
-     */
-    private function getConversationList(): string 
-    {
-        $content = '';
-
-        // Iterate through each conversation. 
-        foreach($this->conversations as $convo)
-        {
-            if($convo->parent_conversation_id == null)
-            {
-                // Add flag if this is the current conversation room.
-                $roomSelected = '';
-                if($this->currConversation->conversation_id == $convo->conversation_id)
-                {
-                    $roomSelected = 'room-selected';
-                }
-
-                // If threads are enabled, then only add the list for the 
-                // current parent conversation.
-                $listThreads = '';
-                $mission = MissionConfig::getInstance();
-                if($mission->feat_convo_threads && 
-                  ($this->currConversation->parent_conversation_id == $convo->conversation_id ||
-                   $this->currConversation->conversation_id == $convo->conversation_id))
-                {
-                    // Add threads.
-                    $threads = '';
-                    foreach($convo->thread_ids as $threadId)
-                    {
-                        $threads .= Main::loadTemplate('chat-room-thread-link.txt', array(
-                            '/%thread_id%/'       => $threadId,
-                            '/%thread_name%/'     => htmlspecialchars($this->conversations[$threadId]->name),
-                            '/%thread_selected%/' => ($this->currConversation->conversation_id == $threadId) ? 'class="thread-selected"' : '',
-                        ));
-                    }
-
-                    // Link for new threads always visible for admins, but others depend on a configuration flag.
-                    $newThreadLink = ($this->user->is_admin || $mission->feat_convo_threads_all) ?
-                        Main::loadTemplate('chat-room-new-thread.txt') : '';
-
-                    $listThreads = Main::loadTemplate('chat-room-thread.txt', array(
-                        '/%convo-id%/'    => $convo->conversation_id,
-                        '/%thread-rooms%/'=> $threads,
-                        '/%new-thread%/'  => $newThreadLink,
-                    ));
-                }
-
-                // Apply the template
-                $content .= Main::loadTemplate('chat-rooms.txt', array(
-                    '/%room_id%/'   => $convo->conversation_id,
-                    '/%room_name%/' => htmlspecialchars($convo->getName($this->user->user_id)),
-                    '/%selected%/'  => $roomSelected,
-                    '/%threads%/'   => $listThreads,
-                ));
-            }
-        }
-
-        return $content;
     }
 }
 

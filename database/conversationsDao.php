@@ -150,7 +150,9 @@ class ConversationsDao extends Dao
             'name'                   => $threadName,
             'parent_conversation_id' => $convo->conversation_id,
             'date_created'           => $currTime->getTime(),
+            'last_message'           => $currTime->getTime(),
         );
+
         $convoId = $this->insert($convoFields);
 
         if($convoId === false)
@@ -236,6 +238,17 @@ class ConversationsDao extends Dao
 
         return $conversations;
     }    
+
+    public function convoUpdated(int $convoId)
+    {
+        $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+
+        $queryStr = 'UPDATE conversations SET '. 
+            'last_message=UTC_TIMESTAMP(3) '. 
+            'WHERE conversation_id='.$qConvoId;
+                
+        return ($this->database->query($queryStr) !== false);
+    }
 }
 
 ?>

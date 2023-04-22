@@ -287,6 +287,32 @@ class UsersDao extends Dao
 
         return $result;
     }
+
+    public function updateLoginInfo(string $sessionId, int $userId) : bool
+    {
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qSessionId = '\''.$this->database->prepareStatement($sessionId).'\'';
+
+        $queryStr = 'UPDATE users SET '. 
+            'session_id='.$qSessionId.', '. 
+            'last_login=UTC_TIMESTAMP(3) '. 
+            'WHERE user_id='.$qUserId;
+                
+        return ($this->database->query($queryStr) !== false);
+    }
+
+    public function resetPassword(string $newPassword, bool $forceReset, int $userId) : bool
+    {
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qPassword = '\''.$this->database->prepareStatement($newPassword).'\'';
+
+        $queryStr = 'UPDATE users SET '. 
+            'password='.$qPassword.', '. 
+            'is_password_reset='.($forceReset ? '1' : '0'). 
+            'WHERE user_id='.$qUserId;
+                
+        return ($this->database->query($queryStr) !== false);
+    }    
 }
 
 ?>

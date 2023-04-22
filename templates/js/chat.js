@@ -78,13 +78,21 @@ function handleAjaxNewMessage(resp) {
 
 var evtSourceTimeout = setTimeout(handleEventSourceError, 15000);
 let serverConnection = {active: true, errorId: undefined};
-const evtSource = new EventSource(BASE_URL + '/chatstream', { withCredentials: true });
-evtSource.addEventListener("msg", handleEventSourceNewMessage);
-evtSource.addEventListener("notification", handleEventSourceNotification);
-evtSource.addEventListener("delay", handleEventSourceDelay);
-evtSource.addEventListener("thread", handleEventSourceNewThread);
-evtSource.addEventListener("room", handleEventSourceNewRoom);
-evtSource.addEventListener('error', handleEventSourceError);
+$(document).ready(function(){
+    // Load previous messages first
+    loadPrevMsgs();
+
+    // Then start listening for events with new messages. 
+    // This prevents cases where we are receiving/parsing messages from AJAX and EventSource at the same time.
+    const evtSource = new EventSource(BASE_URL + '/chatstream', { withCredentials: true });
+    evtSource.addEventListener("msg", handleEventSourceNewMessage);
+    evtSource.addEventListener("notification", handleEventSourceNotification);
+    evtSource.addEventListener("delay", handleEventSourceDelay);
+    evtSource.addEventListener("thread", handleEventSourceNewThread);
+    evtSource.addEventListener("room", handleEventSourceNewRoom);
+    evtSource.addEventListener('error', handleEventSourceError);
+});
+
 
 /**
  * Display error if the EventSource connection is lost.
@@ -246,8 +254,6 @@ function newMessageNotification(name, important=false, thisRoom=true, ack=false)
 
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
-    console.log($('#feat-unread-msg-counts-enabled').length > 0);
-    console.log($('#room-new-' + data.conversation_id).length > 0);
     if($('#feat-unread-msg-counts-enabled').length && $('#room-new-' + data.conversation_id).length) {
         $('#room-new-' + data.conversation_id).html( '(' + data.num_messages + 
             ((data.num_important > 0) ? '<span class="room-important">&#8252;</span>':'') + ')');
@@ -335,6 +341,7 @@ function compileMsg(data, before){
 
         msgTime = msgClone.querySelector("time");
         msgTime.setAttribute('status', data.delivered_status);
+        msgTime.setAttribute('recv-local',   data.recv_time_local);
         msgTime.setAttribute('recv',   data.recv_time);
         msgTime.setAttribute('sent',   data.sent_time);
         msgTime.setAttribute('msg-id', data.message_id);
@@ -744,7 +751,7 @@ $(document).ready(function() {
     }, {passive: true});
 });
 
-$(document).ready(loadPrevMsgs);
+
 
 /**
  * Load previous messages in this conversation. 
@@ -766,7 +773,7 @@ function loadPrevMsgs() {
 
     var recvTime = (new Date()).toISOString();
     if(child != null) {
-        recvTime = child.querySelector('time').getAttribute('recv');
+        recvTime = child.querySelector('time').getAttribute('recv-local');
     }
 
     if(hasMoreMessages) {
