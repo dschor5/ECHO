@@ -442,7 +442,7 @@ class MessagesDao extends Dao
                         'AND messages.message_id < '.$qlastMsgId.' '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
                     'LIMIT 0, '.$numMsgs;
-        Logger::info($queryStr);
+
         $messages = array();
 
         $this->database->queryExceptionEnabled(true);
@@ -474,16 +474,6 @@ class MessagesDao extends Dao
                     'AND msg_status.message_id <= '.$maxMsgId;
 
                 $this->database->query($delStr);
-                
-                //$messageIds = '('.implode(', ', array_keys($messages)).')';
-                //$messageStatusDao = MessageStatusDao::getInstance();
-                //if(($result = $this->database->query($delStr)) !== false)
-                //{
-                    //Logger::info('Deleted '.($result->num_rows).' rows.');
-                //}
-
-                //$messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
-                
             }
             $this->endTransaction();
 
