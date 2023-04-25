@@ -223,7 +223,7 @@ abstract class DefaultModule implements Module
         }
 
         // Only allow requests from this server. 
-        header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
+        //header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 
         // AJAX requests:
         if(isset($_GET['ajax']))
@@ -252,7 +252,7 @@ abstract class DefaultModule implements Module
             if(array_key_exists($subaction, $this->subStreamRequests))
             {
                 header('Content-Type: text/event-stream');
-                // Note that this funciton oes not return unless it encounters
+                // Note that this funciton does not return unless it encounters
                 // an error, therefore, unlike AJAX and HTML requests, the 
                 // function will echo data directly.
                 $this->compileStream();
@@ -425,8 +425,6 @@ abstract class DefaultModule implements Module
 
         // Convert to milliseconds and rount to an integer.
         $retry = ceil($retry * 1000);
-
-        echo 'data: '.$retry.PHP_EOL;
         echo 'retry: '.$retry.PHP_EOL.PHP_EOL;
     }
 
@@ -437,7 +435,9 @@ abstract class DefaultModule implements Module
      */
     protected function setLastEventId(int $id)
     {
-        echo 'id: '.(intval($id)).PHP_EOL.PHP_EOL;
+        echo 'event: '.json_encode(array('seed-id'=>intval($id))).PHP_EOL;
+        echo 'id: '.(intval($id)).PHP_EOL;
+        echo 'data: N/A'.PHP_EOL.PHP_EOL;
     }
 }
 

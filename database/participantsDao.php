@@ -61,9 +61,9 @@ class ParticipantsDao extends Dao
             $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
 
             $queryStr = 'SELECT participants.user_id, users.is_crew '.
-                        'FROM participants '.
-                        'JOIN users ON users.user_id=participants.user_id '. 
-                        'WHERE participants.conversation_id='.$qConvoId;
+                        'FROM participants, users '.
+                        'WHERE users.user_id=participants.user_id '. 
+                            'AND participants.conversation_id='.$qConvoId;
             
             self::$cache[$convoId] = array();
 

@@ -80,6 +80,16 @@ function confirmAction(subaction, id, username) {
             $('.modal-confirm-body').text("Are you sure you want to delete '" + username + "'?");
             $('#confirm-btn').text('Delete User');
         }
+        else if(subaction == 'activateuser') {
+            $('#dialog-confirm').dialog({title: 'Activate User'});
+            $('.modal-confirm-body').text("Are you sure you want to activate '" + username + "'?");
+            $('#confirm-btn').text('Activate User');
+        }
+        else if(subaction == 'deactivateuser') {
+            $('#dialog-confirm').dialog({title: 'Deactivate User'});
+            $('.modal-confirm-body').text("Are you sure you want to deactivate '" + username + "'?");
+            $('#confirm-btn').text('Deactivate User');
+        }
         else {
             $('#dialog-confirm').dialog({title: 'Reset User Password'});
             $('.modal-confirm-body').text("Are you sure you want to reset the password for '" + username + "'?");
@@ -94,7 +104,7 @@ function confirmAction(subaction, id, username) {
  * Ajax request to delete or reset a user account.
  * On success, reload page. 
  */
-function deleteOrResetUser() {
+function setUserFlag() {
     $.ajax({
         url: BASE_URL + '/ajax',
         type: 'POST',
@@ -123,6 +133,8 @@ function closeModal() {
  * Build JQuery dialogs for editing and deleting/resetting users accounts.
  */
 $(document).ready(function() {
+
+    $(document).tooltip();
 
     // Dialog to edit user accounts.
     $('#dialog-edit-user').dialog({
@@ -163,7 +175,7 @@ $(document).ready(function() {
             {
                 text: 'OK',
                 id: 'confirm-btn',
-                click: deleteOrResetUser
+                click: setUserFlag
             }
         ],
         modal: true,

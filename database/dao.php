@@ -213,14 +213,7 @@ abstract class Dao
         foreach($variables as $key => $variable)
         {
             $keys[] = '`'.$key.'`';
-            if ($value === null)
-            {
-                $values[] = 'NULL';
-            }
-            else
-            {
-                $values[] = $variable;
-            }
+            $values[] = $variable;
         }
 
         // Finish building the query and then execute it.
@@ -318,9 +311,14 @@ abstract class Dao
         $tmp = array();
         foreach ($fields as $key=>$value)
         {
-            $tmp[]= ($value === null)?
-                "`$key`=null":
-                "`$key`='".$this->database->prepareStatement($value)."'";
+            if($value === null)
+            {
+                $tmp[] = '`'.$key.'`=null';
+            }
+            else
+            {
+                $tmp[] = '`'.$key.'`="'.$this->database->prepareStatement($value).'"';
+            }
         }
 
         $query .= join(', ',$tmp);

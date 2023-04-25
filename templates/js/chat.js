@@ -1,3 +1,9 @@
+var debugTime = (new Date()).toISOString();
+var debugCount = 0;
+$(document).ready(function(){
+    $('#new-msg-text').val(debugTime + " - " + debugCount);
+});
+
 /**
  * Send AJAX text/important message to the server. 
  * 
@@ -34,6 +40,8 @@ function sendTextMessage(msgImportant) {
         success: function(resp) {
             if(resp.success) {
                 $('#new-msg-text').val("");
+                debugCount = debugCount + 1;
+                $('#new-msg-text').val(debugTime + " - " + debugCount);
             }
             else {
                 showError('Failed to send message (1).');
@@ -78,12 +86,21 @@ function handleAjaxNewMessage(resp) {
 
 var evtSourceTimeout = setTimeout(handleEventSourceError, 15000);
 let serverConnection = {active: true, errorId: undefined};
-const evtSource = new EventSource(BASE_URL + '/chatstream', { withCredentials: true });
-evtSource.addEventListener("msg", handleEventSourceNewMessage);
-evtSource.addEventListener("notification", handleEventSourceNotification);
-evtSource.addEventListener("delay", handleEventSourceDelay);
-evtSource.addEventListener("thread", handleEventSourceThread);
-evtSource.addEventListener('error', handleEventSourceError);
+$(document).ready(function(){
+    // Load previous messages first
+    loadPrevMsgs();
+
+    // Then start listening for events with new messages. 
+    // This prevents cases where we are receiving/parsing messages from AJAX and EventSource at the same time.
+    const evtSource = new EventSource(BASE_URL + '/chatstream', { withCredentials: true });
+    evtSource.addEventListener("msg", handleEventSourceNewMessage);
+    evtSource.addEventListener("notification", handleEventSourceNotification);
+    evtSource.addEventListener("delay", handleEventSourceDelay);
+    evtSource.addEventListener("thread", handleEventSourceNewThread);
+    evtSource.addEventListener("room", handleEventSourceNewRoom);
+    evtSource.addEventListener('error', handleEventSourceError);
+});
+
 
 /**
  * Display error if the EventSource connection is lost.
@@ -97,12 +114,70 @@ function handleEventSourceError(event) {
     }
 }
 
+function handleEventSourceAnnouncement(event) {
+    const data = JSON.parse(event.data);
+    
+}
+
+function handleEventSourceNewRoom(event) {
+    const data = JSON.parse(event.data);
+    if($('#room-' + data.convo_id).length == 0) {
+        var divRoom = document.createElement('div');
+        divRoom.setAttribute('id', 'room-' + data.convo_id);
+        
+        var divRoomName = document.createElement('div');
+        divRoomName.classList.add('room');
+
+        var threadsDiv = null;
+
+        if(data.convo_current) {
+            divRoomName.classList.add('room-selected');
+
+            if($('#feat-convo-threads-enabled').length) {
+                threadsDiv = document.createElement('div');
+                threadsDiv.setAttribute('id', 'room-thread-' + data.convo_id);
+                threadsDiv.setAttribute('class', 'room-thread');
+
+                var newThread = document.createElement('a');
+                newThread.setAttribute('id', 'new-thread');
+                newThread.setAttribute('href', '#');
+                newThread.setAttribute('onclick', 'openThreadModal()');
+                newThread.innerText = '+ New Thread';
+
+                threadsDiv.appendChild(newThread);
+            }
+            
+        }
+        
+        var divRoomLink = document.createElement('a');
+        divRoomLink.setAttribute('href', '%http%%site_url%/chat/' + data.convo_id);
+        
+        var span = document.createElement('span');
+        span.setAttribute('id', 'room-name-' + data.convo_id);
+        span.innerHTML = data.convo_name + '&nbsp;';
+        divRoomLink.appendChild(span);
+
+        span = document.createElement('span');
+        span.setAttribute('id', 'room-new-' + data.convo_id);
+        divRoomLink.appendChild(span);
+
+        divRoomName.appendChild(divRoomLink);
+        divRoom.appendChild(divRoomName);
+
+        if(threadsDiv != null) {
+            divRoom.appendChild(threadsDiv);
+        }
+
+        document.getElementById('rooms').appendChild(divRoom);
+    }
+}
+
 // Wrapper so that the function can be grouped with other thread functions
 // and only included if threads are enabled. 
-function handleEventSourceThread(event) {
+function handleEventSourceNewThread(event) {
     try {
         const data = JSON.parse(event.data);
-        addThreadToMenu(data.convo_id, data.thread_id, data.thread_name);
+        addThreadToMenu(data.convo_id, data.thread_id, data.thread_name, data.thread_selected);
     }
     catch (e) {}
 }
@@ -274,6 +349,7 @@ function compileMsg(data, before){
 
         msgTime = msgClone.querySelector("time");
         msgTime.setAttribute('status', data.delivered_status);
+        msgTime.setAttribute('recv-local',   data.recv_time_local);
         msgTime.setAttribute('recv',   data.recv_time);
         msgTime.setAttribute('sent',   data.sent_time);
         msgTime.setAttribute('msg-id', data.message_id);
@@ -683,7 +759,7 @@ $(document).ready(function() {
     }, {passive: true});
 });
 
-$(document).ready(loadPrevMsgs);
+
 
 /**
  * Load previous messages in this conversation. 
@@ -705,7 +781,7 @@ function loadPrevMsgs() {
 
     var recvTime = (new Date()).toISOString();
     if(child != null) {
-        recvTime = child.querySelector('time').getAttribute('recv');
+        recvTime = child.querySelector('time').getAttribute('recv-local');
     }
 
     if(hasMoreMessages) {

@@ -158,15 +158,13 @@ class HomeModule extends DefaultModule
                     if($this->user !== false)
                     {
                         $usersDao = UsersDao::getInstance();
-                        $newData = array(
-                            'password' => User::encryptPassword($_POST['password1']),
-                            'is_password_reset' => 0
-                        );
-                        $usersDao->update($newData, $this->user->user_id);
-
-                        // Delete the current cookie and force the user to login again.
-                        Main::deleteCookie();
-                        $response['success'] = true;
+                        $password = User::encryptPassword($_POST['password1']);
+                        
+                        if($respond['success'] = $usersDao->resetPassword($password, false, $this->user->user_id) !== false)
+                        {
+                            // Delete the current cookie and force the user to login again.
+                            Main::deleteCookie();
+                        }
                     }
                 }
             }
@@ -199,12 +197,8 @@ class HomeModule extends DefaultModule
                 // If so, crease a new session and update the database.
                 $this->user = $user;
                 $sessionId = $user->createNewSession();
-                $newData = array(
-                    'session_id' => $sessionId,
-                    'last_login' => date('Y-m-d H:i:s', time())
-                );
-        
-                if ($usersDao->update($newData, $this->user->user_id) !== false)
+   
+                if ($usersDao->updateLoginInfo($sessionId, $this->user->user_id) !== false)
                 {
                     Main::setSiteCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
                     $response['login'] = true;

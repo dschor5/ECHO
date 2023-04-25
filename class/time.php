@@ -16,14 +16,14 @@ class DelayTime
      * @access private
      * @var string
      */
-    const DATE_FORMAT = 'Y-m-d H:i:s';
+    const DATE_FORMAT = 'Y-m-d H:i:s.v';
 
     /**
      * Javascript datetime format
      * @access private
      * @var string
      */
-    const DATE_FORMAT_JS = 'Y-m-d\TH:i:s.000\Z';
+    const DATE_FORMAT_JS = 'Y-m-d\TH:i:s.v\Z';
 
     /**
      * Filename compatible datetime format
@@ -38,6 +38,7 @@ class DelayTime
      * @var string 
      */
     const DATE_FORMAT_REGEX   = '/^[\d]{4}-[\d]{2}-[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}$/';
+    const DATE_FORMAT_MS_REGEX = '/^[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}.[\d]{3}Z$/';
 
     /**
      * Epoch Mission Elapsed Time (MET) calculated since the start of the 

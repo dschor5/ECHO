@@ -93,6 +93,21 @@ class MissionConfig
     }
 
     /**
+     * Returns true if date_start < curr_time < date_end (all UTC).
+     *
+     * @return boolean
+     */
+    public function isMissionActive() : bool
+    {
+        $startDate = new DateTime($this->date_start, new DateTimeZone('UTC'));
+        $endDate = new DateTime($this->date_end, new DateTimeZone('UTC'));
+        $currTime = new DelayTime();
+
+        return ($startDate->getTimestamp() <= $currTime->getTimestamp() && 
+                $currTime->getTimestamp() <= $endDate->getTimestamp());
+    }
+
+    /**
      * Accessor for MissionConfig fields. Retuns parsed value stored
      * or null if the field is not found.
      * 

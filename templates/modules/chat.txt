@@ -4,7 +4,7 @@
                 Conversations
             </div>
             <div id="rooms">
-                %chat_rooms%
+                <!-- Rooms added here via javascript. -->  
             </div>
         </div>
         <div id="current-delay-container" class="navigation-container">

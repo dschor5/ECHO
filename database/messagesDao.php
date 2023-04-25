@@ -82,13 +82,13 @@ class MessagesDao extends Dao
             // Update id for messages from the perspective of the habitat
             $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_hab:=@id_hab+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=1 ';
-                'ORDER BY messages.sent_time ASC';
+                'ORDER BY IF(messages.from_crew, messages.recv_time_hab, messages.recv_time_mcc) ASC';
             $this->database->query($updateQueryStr);
             
             // Update id for messages from the perspective of mcc
             $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_mcc:=@id_mcc+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=0 ';
-                'ORDER BY messages.sent_time ASC';
+                'ORDER BY IF(messages.from_crew, messages.recv_time_hab, messages.recv_time_mcc) ASC';
             $this->database->query($updateQueryStr);
         }        
 
@@ -124,9 +124,24 @@ class MessagesDao extends Dao
                 'AND from_crew='.(($user->is_crew)?'1':'0');
             $this->database->query($idQueryStr);
 
+            $habDelay = 0.0;
+            $mccDelay = 0.0;
+            if($user->is_crew)
+            {
+                $mccDelay = Delay::getInstance()->getDelay();
+            }
+            else
+            {
+                $habDelay = Delay::getInstance()->getDelay();
+            }
+
             // Insert the new message into the database and automatically assign it 
             // an alternate id based on the previous query.
-            $variables = array('message_id_alt' => '@id_alt:=@id_alt+1');
+            $variables = array(
+                'message_id_alt' => '@id_alt:=@id_alt+1', 
+                'recv_time_hab' => 'ADDTIME(UTC_TIMESTAMP(3), '.$habDelay.')',
+                'recv_time_mcc' => 'ADDTIME(UTC_TIMESTAMP(3), '.$mccDelay.')',
+            );
             $id = $this->insert($msgData, $variables);
 
             // If the message was successfully added to the database, then 
@@ -155,7 +170,7 @@ class MessagesDao extends Dao
                 $messageStatusDao->insertMultiple($keys, $msgStatusData);
 
                 // Update the date the conversation was last updated.
-                $conversationsDao->update(array('last_message'=>$msgData['sent_time']), 'conversation_id='.$msgData['conversation_id']);
+                $conversationsDao->convoUpdated($msgData['conversation_id']);
                     
                 $this->endTransaction();
             }
@@ -214,16 +229,15 @@ class MessagesDao extends Dao
         }
     }   
 
-    public function getLastMessageId(array $convoIds, int $userId, bool $isCrew, string $toDate) : int
+    public function getLastMessageId(array $convoIds, int $userId, bool $isCrew) : int
     {
         // Build query
         $qConvoIds = implode(',',$convoIds);
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
-        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -231,7 +245,7 @@ class MessagesDao extends Dao
                         'AND msg_status.user_id='.$qUserId.' '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
-                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
+                        'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
                     'LIMIT 1, 1';
 
@@ -246,10 +260,6 @@ class MessagesDao extends Dao
             {
                 $rowData = $result->fetch_assoc();
                 $messageId = $rowData['message_id'];
-
-                // Update message read status
-                $messageStatusDao = MessageStatusDao::getInstance();
-                $messageStatusDao->drop('user_id='.$qUserId.' AND message_id='.$messageId);
             }
         }
 
@@ -266,12 +276,11 @@ class MessagesDao extends Dao
      *                        in the conversation and its subthreads.
      * @param integer $userId Checks msg_status for this user
      * @param boolean $isCrew Used to select receive time perspective
-     * @param string $toDate  Messages received before this date
      * @param integer $lastId ID of last message successfully sent
      * @param integer $offset Offset if trying to get lots of messages
      * @return array Array of Message objects
      */
-    public function getMissedMessages(array $convoIds, int $userId, bool $isCrew, string $toDate, int $lastId, int $offset=0) : array
+    public function getMissedMessages(array $convoIds, int $userId, bool $isCrew, int $lastId, int $offset=0) : array
     {
         // Build query
         $qConvoIds = implode(',',$convoIds);
@@ -279,10 +288,9 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qLastId  = intval($lastId);
-        $qToDate   = 'ADDTIME(CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME), "0.5")';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -291,7 +299,7 @@ class MessagesDao extends Dao
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.message_id > '.$qLastId.' '.
-                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
+                        'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
         
@@ -333,21 +341,21 @@ class MessagesDao extends Dao
      *                        in the conversation and its subthreads.
      * @param integer $userId Checks msg_status for this user
      * @param boolean $isCrew Used to select receive time perspective
-     * @param string $toDate  Messages received before this date
      * @param integer $offset Offset if trying to get lots of messages
      * @return array Array of Message objects
      */
-    public function getNewMessages(array $convoIds, int $userId, bool $isCrew, string $toDate, int $offset=0) : array
+    public function getNewMessages(array $convoIds, int $userId, bool $isCrew, int $offset=0) : array
     {
         // Build query
         $qConvoIds = implode(',',$convoIds);
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
-        $qToDate   = 'CAST(\''.$this->database->prepareStatement($toDate).'\' AS DATETIME)';
+        
+        $this->database->query('SET @ts := UTC_TIMESTAMP(3);');
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -356,7 +364,7 @@ class MessagesDao extends Dao
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
-                        'AND (messages.'.$qRefTime.' <= '.$qToDate.') '.
+                        'AND messages.'.$qRefTime.' <= @ts '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
         
@@ -380,9 +388,16 @@ class MessagesDao extends Dao
         // Update message read status 
         if(count($messages) > 0)
         {
-            $messageIds = '('.implode(', ', array_keys($messages)).')';
-            $messageStatusDao = MessageStatusDao::getInstance();
-            $messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
+            $maxMsgId = max(array_keys($messages));
+            $delStr   = 'DELETE msg_status '.
+            'FROM msg_status '.
+            'JOIN messages ON messages.message_id=msg_status.message_id '.
+            'WHERE msg_status.user_id='.$qUserId.' '.
+                'AND messages.conversation_id IN ('.$qConvoIds.') '. 
+                'AND messages.'.$qRefTime.' <= @ts '; 
+                //'AND msg_status.message_id <= '.$maxMsgId;
+
+            $this->database->query($delStr);
         }
         
         $this->endTransaction();
@@ -412,7 +427,7 @@ class MessagesDao extends Dao
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
         $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, '.
+                        'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
@@ -422,7 +437,7 @@ class MessagesDao extends Dao
                         'AND messages.message_id < '.$qlastMsgId.' '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
                     'LIMIT 0, '.$numMsgs;
-        
+
         $messages = array();
 
         $this->database->queryExceptionEnabled(true);
@@ -444,9 +459,16 @@ class MessagesDao extends Dao
             
             if(count($messages) > 0)
             {
-                $messageIds = '('.implode(', ', array_keys($messages)).')';
-                $messageStatusDao = MessageStatusDao::getInstance();
-                $messageStatusDao->drop('user_id='.$qUserId.' AND message_id IN '.$messageIds);
+                $maxMsgId = max(array_keys($messages));
+                $delStr   = 'DELETE msg_status '.
+                'FROM msg_status '.
+                'JOIN messages ON messages.message_id=msg_status.message_id '.
+                'WHERE msg_status.user_id='.$qUserId.' '.
+                    'AND messages.conversation_id IN ('.$qConvoIds.') '. 
+                    'AND messages.'.$qRefTime.' <= '.$qToDate.' ';
+                    //'AND msg_status.message_id <= '.$maxMsgId;
+
+                $this->database->query($delStr);
             }
             $this->endTransaction();
 
@@ -469,17 +491,15 @@ class MessagesDao extends Dao
      * @param integer $conversationId Conversation id to check.
      * @param integer $userId
      * @param boolean $isCrew
-     * @param string $toDate
      * @return array
      */
-    public function getMsgNotifications(int $conversationId, int $userId, bool $isCrew, string $toDate)
+    public function getMsgNotifications(int $conversationId, int $userId, bool $isCrew)
     {
         $notifications = array();
 
         $qConvoId = '\''.$this->database->prepareStatement($conversationId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
-        $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
 
         // Build query that counts new new messages and number of important messages. 
         // We leave it to the applicaiton to determine if the number changed from the
@@ -487,12 +507,11 @@ class MessagesDao extends Dao
         $queryStr = 'SELECT messages.conversation_id, '. 
                         'COUNT(*) AS num_new, '. 
                         "SUM(IF(messages.type = 'important', 1, 0)) AS num_important ".
-                    'FROM messages '.
-                    'JOIN msg_status ON messages.message_id=msg_status.message_id '. 
+                    'FROM messages, msg_status '.
                     'WHERE messages.conversation_id<>'.$qConvoId.' '. 
-                        'AND msg_status.message_id IS NOT NULL '.
+                        'AND msg_status.message_id=messages.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '. 
-                        'AND messages.'.$qRefTime.' <= '.$qToDate.' '. 
+                        'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '. 
                     'GROUP BY messages.conversation_id '.
                     'ORDER BY messages.conversation_id';
         

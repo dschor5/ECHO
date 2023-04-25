@@ -69,6 +69,11 @@ class Database
                 array('user'=>$user, 'dbname'=>$dbname, 'host'=>$hostname, 
                       'error'=>mysqli_connect_error()));
         }
+        else
+        {
+            // Set the current session to use UTC timestamps. 
+            $this->query("SET @@session.time_zone='+00:00'");
+        }
     }
 
     /**
