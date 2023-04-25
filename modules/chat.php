@@ -580,6 +580,11 @@ class ChatModule extends DefaultModule
             return;
         }
 
+        while (ob_get_level() > 0) 
+        {
+            ob_end_clean();
+        }
+        
         $this->sendRoomMenus();
 
         // Iteration counter. Used to send keep-alive messages 
@@ -614,7 +619,7 @@ class ChatModule extends DefaultModule
             // Flush output to the user. 
             while (ob_get_level() > 0) 
             {
-                ob_end_flush();
+                ob_flush();
             }
             flush();
 
@@ -802,6 +807,13 @@ class ChatModule extends DefaultModule
                         $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
                         $msgId, 
                     );
+
+                    // Flush output to the user. 
+                    while (ob_get_level() > 0) 
+                    {
+                        ob_flush();
+                    }
+                    flush();
                 }
 
                 // Any more messages?
@@ -817,7 +829,7 @@ class ChatModule extends DefaultModule
                 $convoIds, $this->user->user_id, $this->user->is_crew);
     
             // Seed last-event id by sending an empty message that is just the event id.
-            //$this->setLastEventId($messageId);
+            $this->setLastEventId($messageId);
         }
         
     }
@@ -850,6 +862,13 @@ class ChatModule extends DefaultModule
                 $msg->compileArray($this->user, $this->currConversation->participants_both_sites),
                 $msgId, 
             );
+            
+            // Flush output to the user. 
+            while (ob_get_level() > 0) 
+            {
+                ob_flush();
+            }
+            flush();
         }
     }
 

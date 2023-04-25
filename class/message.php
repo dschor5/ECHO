@@ -15,7 +15,6 @@
  *                                          - VIDEO - video recording
  *                                          - AUDIO - audio recording
  *                                          - FILE - any other file attachment
- * - sent_time                  (datetime)  UTC timestamp when the message was sent
  * - from_crew                  (bool)      Boolean to indicate the message was sent from the crew (HAB)
  * - message_id_alt             (int)       Alternate message id (HAB-# or MCC-#) that is
  *                                          unique to each conversation/thread. 
@@ -25,8 +24,10 @@
  * - recv_time_mcc              (datetime)  UTC timestamp when the message is visible by MCC
  * 
  * Additional Fields:
+ * - sent_time                  (datetime)  if(from_crew) ? recv_time_hab : recv_time_mcc
  * - users.username             (string)    Username for message author
  * - users.alias                (string)    Alias for message author
+ * - users.is_active            (bool)      Is sender an active user
  * - msg_files.original_name    (string)    Original filename for attachment (if any)
  * - msg_files.server_name      (string)    Server filename for attachment (if any)
  * - msg_files.mime_type        (string)    Mime type for attachment (if any)
@@ -108,6 +109,9 @@ class Message
                     array_flip(array('message_id', 'server_name', 'original_name', 'mime_type')))
             );
         }
+
+        // Dynamically extract the time the message was sent.
+        $this->data['sent_time'] = ($this->data['from_crew'] == 0) ? $this->data['recv_time_mcc'] : $this->data['recv_time_hab'];
     }
 
     /**
@@ -262,6 +266,16 @@ class Message
     }
 
     /**
+     * Get alias to display with messages that shows whether the user is inactive.
+     *
+     * @return void
+     */
+    public function getAliasWithStatus()
+    {
+        return htmlspecialchars($this->alias).($this->is_active ? '' : '&nbsp;<i>[inactive]</i>');
+    }
+
+    /**
      * Return associative array with message contents to display on the chat applicaiton.
      *
      * @param User $userPerspective Format message data from perspective of logged in user.
@@ -275,7 +289,7 @@ class Message
             'message_id_alt'   => $this->formatAltMessageId(),
             'user_id'          => $this->user_id,
             'from_crew'        => $this->from_crew,
-            'author'           => htmlspecialchars($this->alias),
+            'author'           => $this->getAliasWithStatus(),
             'message'          => $this->compileMsgText(),
             'type'             => self::TEXT,
             'sent_time'        => DelayTime::convertTsForJs($this->sent_time),

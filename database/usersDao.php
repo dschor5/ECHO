@@ -203,7 +203,7 @@ class UsersDao extends Dao
             }
             $keys = array('conversation_id', 'user_id');
             $participantsDao->insertMultiple($keys, $newParticipants);
-
+            
             // Create new private conversations with the new user. 
             foreach($users as $otherUserId=>$user)
             {
@@ -214,7 +214,11 @@ class UsersDao extends Dao
                         'name' => $user->alias.'-'.$users[$newUserId]->alias,
                         'parent_conversation_id' => null,
                     );
-                    $newConvoId = $conversationsDao->insert($newConvoData);
+                    $newConvoVars = array(
+                        'date_created' => 'UTC_TIMESTAMP(3)',
+                        'last_message' => 'UTC_TIMESTAMP(3)',
+                    );
+                    $newConvoId = $conversationsDao->insert($newConvoData, $newConvoVars);
 
                     // Add list of participants for the new private conversation.
                     $newParticipants = array(
@@ -237,7 +241,7 @@ class UsersDao extends Dao
         catch(Exception $e)
         {
             $this->endTransaction(false);
-            Logger::warning('usersDao::createNewUser', $e);
+            Logger::warning('usersDao::createNewUser', array($e));
             $newUserId = -1;
         }
 
@@ -312,7 +316,19 @@ class UsersDao extends Dao
             'WHERE user_id='.$qUserId;
                 
         return ($this->database->query($queryStr) !== false);
-    }    
+    }
+
+    public function setActiveFlag(int $userId, bool $active) : bool 
+    {
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qActive = $active ? '1' : '0';
+
+        $queryStr = 'UPDATE users SET '. 
+            'is_active='.$qActive.' '. 
+            'WHERE user_id='.$qUserId;
+                
+        return ($this->database->query($queryStr) !== false);
+    }
 }
 
 ?>

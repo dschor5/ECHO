@@ -24,7 +24,9 @@
             </div>
             <div class="form-help">
                 When the crew will enter/leave the habitat.<br>
-                Dates should be formatted as YYYY-MM-DD.
+                During the mission, no users can be deleted. They can only be deactivated.<br>
+                Dates should be formatted as YYYY-MM-DD.<br>
+                Dates entered in the timezone of the habitat.
             </div>
         </div>
 

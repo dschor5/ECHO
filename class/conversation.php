@@ -17,6 +17,7 @@
  * - participants_username   (string)   CSV of participant usernames for this convo
  * - participants_alias      (string)   CSV of participant aliases for this convo
  * - participants_is_crew    (bool)     CSV of participants is_crew field for this convo
+ * - participants_is_active  (bool)     CSV of participants is_active field for this convo
  * - num_participants        (int)      Number of participants in this convo
  * - participants_both_sites (bool)     True if convo has users in both MCC and HAB
  * - thread_ids              (array)    Ids of child conversations

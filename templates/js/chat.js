@@ -1,3 +1,9 @@
+var debugTime = (new Date()).toISOString();
+var debugCount = 0;
+$(document).ready(function(){
+    $('#new-msg-text').val(debugTime + " - " + debugCount);
+});
+
 /**
  * Send AJAX text/important message to the server. 
  * 
@@ -34,6 +40,8 @@ function sendTextMessage(msgImportant) {
         success: function(resp) {
             if(resp.success) {
                 $('#new-msg-text').val("");
+                debugCount = debugCount + 1;
+                $('#new-msg-text').val(debugTime + " - " + debugCount);
             }
             else {
                 showError('Failed to send message (1).');

@@ -8,6 +8,7 @@ CREATE TABLE `users` (
   `is_crew` tinyint(1) NOT NULL,
   `last_login` datetime DEFAULT NULL,
   `is_password_reset` tinyint(1) NOT NULL DEFAULT '1',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `preferences` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -35,7 +36,6 @@ CREATE TABLE `messages` (
   `conversation_id` int(10) UNSIGNED NOT NULL ,
   `text` text CHARACTER SET utf8 DEFAULT NULL,
   `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
-  `sent_time` datetime NOT NULL,
   `from_crew` tinyint(1) NOT NULL,
   `message_id_alt` int(10) UNSIGNED DEFAULT NULL,
   `recv_time_hab` datetime NOT NULL,

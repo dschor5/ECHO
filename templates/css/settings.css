@@ -270,3 +270,14 @@ input:checked + .slider:before {
     padding-top: 10px;
 }
 
+.button-green .ui-icon {
+    background-image: url("%http%%site_url%/templates/media/ui-icons_4eb305_256x240.png");
+}
+
+.button-red .ui-icon {
+    background-image: url("%http%%site_url%/templates/media/ui-icons_cd0a0a_256x240.png");
+}
+
+.button-black .ui-icon {
+    background-image: url("%http%%site_url%/templates/media/ui-icons_222222_256x240.png");
+}
