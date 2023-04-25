@@ -194,7 +194,7 @@ class Message
      * @param string $tz Timezone to use when displaying the send/recv time. 
      * @return string HTML representation of the message of false on error.
      */
-    public function archiveMessage(ZipArchive &$zip, string $folder, array &$participants, string $tz) 
+    public function archiveMessage(ConversationArchiveMaker &$zip, string $folder, array &$participants, string $tz) 
     {
         // Compile message text
         $msg = $this->compileMsgText();

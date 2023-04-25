@@ -182,7 +182,7 @@ class Conversation
      * @param bool $isCrew If true, order messages based on the HAB received time.
      * @return bool Success
      **/
-    public function archiveConvo(ZipArchive &$zip, string $tz, bool $sepThreads, string $parentName, bool $isCrew) : bool
+    public function archiveConvo(ConversationArchiveMaker &$zip, string $tz, bool $sepThreads, string $parentName, bool $isCrew) : bool
     {
         global $config;
         $success = true;

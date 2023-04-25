@@ -25,7 +25,7 @@
  * 
  * @link https://github.com/dschor5/ECHO
  */
- class MissionArchive extends ServerFile
+class MissionArchive extends ServerFile
 {
     /**
      * Constant definition of valid archive types.
@@ -33,9 +33,9 @@
      * @var array
      */
     const ARCHIVE_TYPES = array(
-        'application/sql' => array('ext' => 'sql', 'desc' => 'SQL Backup (sql)'),
-        'application/zip' => array('ext' => 'zip', 'desc' => 'Conversation Backup (zip)'),
-        'application/txt' => array('ext' => 'txt', 'desc' => 'System Log Backup (txt)'),
+        'application/sql' => array('ext' => 'sql', 'desc' => 'SQL'),
+        'application/zip' => array('ext' => 'zip', 'desc' => 'ZIP'),
+        'application/txt' => array('ext' => 'txt', 'desc' => 'TXT'),
     );
 
     /**
@@ -48,6 +48,29 @@
     {
         global $config;
         parent::__construct($data, $config['logs_dir']);
+    }
+
+    /**
+     * Accessor for MissionArchive fields. Returns value stored in the field $name 
+     * or null if the field does not exist. 
+     * 
+     * @param string $name Name of field being requested. 
+     * @return mixed Value contained by the field requested. 
+     */
+    public function __get($name)
+    {
+        $result = null;
+
+        if(array_key_exists($name, $this->data)) 
+        {
+            $result = $this->data[$name];
+        }
+        else
+        {
+            Logger::warning('MissionArchive __get("'.$name.'")', $this->data);
+        }
+
+        return $result;
     }
 
     /**

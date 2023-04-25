@@ -1,1 +1,1 @@
-<a href="%http%%site_url%/%path%">%text%</a>
+<a href="%http%%site_url%/%path%" title="%alt%" class="%class%"><span class="ui-icon ui-icon-%icon%"></span>%text%</a>
