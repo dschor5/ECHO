@@ -5,7 +5,7 @@
     <div id="navigation">
         <button type="button" class="top-button" onclick="getUser(0)">New User</button>
     </div>
-    %content%
+    %list-users%
 </div>
 
 <div id="dialog-edit-user" title="Edit User" class="dialog-body">

@@ -68,7 +68,7 @@ class User
         {
             // If the field starts with 'is_', then treat it as a bool
             // where 1=TRUE and 0=FALSE. 
-            $pos = strpos($this->data[$name], 'is_');
+            $pos = strpos($name, 'is_');
             if($pos !== false && $pos == 0)
             {
                 $result = ($this->data[$name] == 1);

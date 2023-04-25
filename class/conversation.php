@@ -17,6 +17,7 @@
  * - participants_username   (string)   CSV of participant usernames for this convo
  * - participants_alias      (string)   CSV of participant aliases for this convo
  * - participants_is_crew    (bool)     CSV of participants is_crew field for this convo
+ * - participants_is_active  (bool)     CSV of participants is_active field for this convo
  * - num_participants        (int)      Number of participants in this convo
  * - participants_both_sites (bool)     True if convo has users in both MCC and HAB
  * - thread_ids              (array)    Ids of child conversations
@@ -93,6 +94,31 @@ class Conversation
         }
 
         return $result;
+    }
+
+    /**
+     * Get current conversation name. 
+     *
+     * @param integer $userId In private convos (1-on-1), excludes current user in name.
+     * @return string Conversation name
+     */
+    public function getName(int $userId) : string
+    {
+        // Valid for Mission Chat only.
+        $name = $this->name;
+
+        // Overwritten otherwise for all other conversations.
+        if($this->conversation_id != 1)
+        {
+            // Get the list of participants for each conversation to 
+            // figure out what name to give this chat. 
+            $participants = $this->getParticipants($userId);
+
+            $userInfo = array_pop($participants);
+            $name = 'Private: '.(strlen($userInfo['alias']) != 0) ? $userInfo['alias'] : $userInfo['username'];
+        }
+
+        return $name;
     }
 
     /**

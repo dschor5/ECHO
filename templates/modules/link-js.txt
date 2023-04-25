@@ -1,1 +1,1 @@
-<a onclick="%onclick%" href="javascript:void(0);">%text%</a>
+<a onclick="%onclick%" href="javascript:void(0);" title="%alt%" class="%class%"><span class="ui-icon ui-icon-%icon%"></span>%text%</a>

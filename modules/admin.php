@@ -27,21 +27,23 @@ class AdminModule extends DefaultModule
         parent::__construct($user);
         $this->subJsonRequests = array(
             // Mission Settings
-            'save_mission' => 'saveMissionSettings', 
+            'save_mission'   => 'saveMissionSettings', 
             // Delay Settings
-            'save_delay'   => 'saveDelaySettings', 
+            'save_delay'     => 'saveDelaySettings', 
             // User Settings
-            'getuser'      => 'getUser', 
-            'edituser'     => 'editUser',
-            'deleteuser'   => 'deleteUser', 
-            'resetuser'    => 'resetUserPassword', 
+            'getuser'        => 'getUser', 
+            'edituser'       => 'editUser',
+            'deleteuser'     => 'deleteUser', 
+            'resetuser'      => 'resetUserPassword', 
+            'activateuser'   => 'activateUser',
+            'deactivateuser' => 'deactivateUser',
             // Data Management
-            'clear'        => 'clearMissionData',
-            'resetlog'     => 'resetSystemLog', 
-            'backupsql'    => 'backupSqlDatabase', 
-            'backupconvo'  => 'backupConversations',
-            'backuplog'    => 'backupSystemLog',
-            'deletearchive'=> 'deleteArchive',   
+            'clear'          => 'clearMissionData',
+            'resetlog'       => 'resetSystemLog', 
+            'backupsql'      => 'backupSqlDatabase', 
+            'backupconvo'    => 'backupConversations',
+            'backuplog'      => 'backupSystemLog',
+            'deletearchive'  => 'deleteArchive',   
         );
 
         $this->subHtmlRequests = array(
@@ -525,11 +527,9 @@ class AdminModule extends DefaultModule
         if($user_id > 0 && $user_id != $this->user->user_id)
         {
             global $admin;
-            $fields = array();
-            $fields['password'] = User::encryptPassword($admin['default_password']);
-            $fields['is_password_reset'] = 1;
+            $defaultPassword = User::encryptPassword($admin['default_password']);
 
-            if($usersDao->update($fields, $user_id) !== true)
+            if($usersDao->resetPassword($defaultPassword, true, $user_id) !== true)
             {
                 $response['error'] = 'Failed to reset user password (user_id='.$user_id.').';
             } 
@@ -544,6 +544,40 @@ class AdminModule extends DefaultModule
         }
 
         return $response; 
+    }
+
+    protected function activateUser(bool $active=true)
+    {
+        $usersDao = UsersDao::getInstance();
+        $missionCfg = MissionConfig::getInstance();
+
+        $response = array('success'=>false, 'error'=>'');
+
+        $userId = (isset($_POST['user_id']) && $_POST['user_id'] != null) ? intval($_POST['user_id']) : 0;
+
+        if($userId > 0 && $userId != $this->user->user_id)
+        {
+            // Delete associated images. 
+            if($usersDao->setActiveFlag($userId, $active) !== true)
+            {
+                $response['error'] = 'Failed to modify user account. (user_id='.$userId.')';
+            }
+            else
+            {
+                Logger::info('Set user_id='.$userId.' to '.($active ? 'active' : 'inactive').'.');
+            }
+        }
+        else
+        {
+            $response['error'] = 'Cannot activate/deactivate yourself.';
+        }
+
+        return $response;
+    }
+
+    protected function deactivateUser() 
+    {
+        return $this->activateUser(false);
     }
 
     protected function deleteUser()
@@ -613,10 +647,10 @@ class AdminModule extends DefaultModule
         else
         {
             $fields = array(
-                'username' => $username, 
-                'alias'    => $alias,
-                'is_crew'  => $isCrew,
-                'is_admin' => $isAdmin
+                'username'  => $username, 
+                'alias'     => $alias,
+                'is_crew'   => $isCrew,
+                'is_admin'  => $isAdmin,
             );
             if($userId == 0)
             {
@@ -624,6 +658,7 @@ class AdminModule extends DefaultModule
                 $fields['user_id'] = null;
                 $fields['password'] = User::encryptPassword($admin['default_password']);
                 $fields['is_password_reset'] = 1;
+                $fields['is_active'] = 1;
                 
                 if(($userId = $usersDao->createNewUser($fields)) > 0)
                 {
@@ -639,7 +674,7 @@ class AdminModule extends DefaultModule
             }
             else
             {
-                if($usersDao->update($fields, 'user_id='.$userId) === true)
+                if($usersDao->update($fields, $userId) === true)
                 {
                     $response = array('success'=>true, 'error'=>'');
                     Logger::info('Updated user_id='.$userId, $fields);
@@ -690,47 +725,85 @@ class AdminModule extends DefaultModule
         
         $headers = array(
             'id' => 'ID',
-            'username' => 'Username',
-            'alias'    => 'Alias',
+            'username' => 'Username (alias)',
             'is_crew'  => 'Role',
             'is_admin' => 'Admin',
+            'is_active' => 'Active',
+            'last_login' => 'Last Login',
             'tools'    => 'Actions'
         );
         
-        $list = new ListGenerator($headers);
+        $list  = new ListGenerator($headers);
 
         foreach($users as $id => $user)
         {
+            $altUser = htmlspecialchars('"'.$user->username.'"');
+
             $tools = array();
             $tools[] = Main::loadTemplate('link-js.txt', array(
-                '/%onclick%/'=>'getUser('.$id.')', 
-                '/%text%/'=>'Edit'
+                '/%onclick%/' => 'getUser('.$id.')', 
+                '/%text%/'    => '',
+                '/%alt%/'     => 'Edit User '.$altUser,
+                '/%icon%/'    => 'wrench',
+                '/%class%/'   => 'button-black'
             ));
 
             if($this->user->user_id != $id)
             {
+                if(!$mission->isMissionActive())
+                {
+                    $tools[] = Main::loadTemplate('link-js.txt', array(
+                        '/%onclick%/' => 'confirmAction(\'deleteuser\', '.$id.', \''.$user->username.'\')', 
+                        '/%text%/'    => '',
+                        '/%alt%/'     => 'Delete User '.$altUser,
+                        '/%icon%/'    => 'close',
+                        '/%class%/'   => 'button-red'
+                    ));
+                }
+                
+                if($user->is_active)
+                {
+                    $tools[] = Main::loadTemplate('link-js.txt', array(
+                        '/%onclick%/' => 'confirmAction(\'deactivateuser\', '.$id.', \''.$user->username.'\')', 
+                        '/%text%/'    => '',
+                        '/%alt%/'     => 'De-activate User '.$altUser,
+                        '/%icon%/'    => 'power',
+                        '/%class%/'   => 'button-red'
+                    ));
+                }
+                else 
+                {
+                    $tools[] = Main::loadTemplate('link-js.txt', array(
+                        '/%onclick%/' => 'confirmAction(\'activateuser\', '.$id.', \''.$user->username.'\')', 
+                        '/%text%/'    => '',
+                        '/%alt%/'     => 'Activate User '.$altUser,
+                        '/%icon%/'    => 'power',
+                        '/%class%/'   => 'button-green'
+                        
+                    ));
+                }
                 $tools[] = Main::loadTemplate('link-js.txt', array(
-                    '/%onclick%/'=>'confirmAction(\'deleteuser\', '.$id.', \''.$user->username.'\')', 
-                    '/%text%/'=>'Delete'
-                ));
-                $tools[] = Main::loadTemplate('link-js.txt', array(
-                    '/%onclick%/'=>'confirmAction(\'resetuser\', '.$id.', \''.$user->username.'\')', 
-                    '/%text%/'=>'Reset Password'
+                    '/%onclick%/' => 'confirmAction(\'resetuser\', '.$id.', \''.$user->username.'\')', 
+                    '/%text%/'    => '',
+                    '/%alt%/'     => 'Reset Password for User '.$altUser,
+                    '/%icon%/'    => 'seek-first',
+                    '/%class%/'   => 'button-red'
                 ));
             }
 
             $list->addRow(array(
                 'id' => $id,
-                'username' => htmlspecialchars($user->username),
-                'alias' => htmlspecialchars($user->alias),
-                'is_crew' => $user->is_crew ? $mission->hab_user_role : $mission->mcc_user_role,
+                'username' => htmlspecialchars($user->username).' ('.htmlspecialchars($user->alias).')',
+                'is_crew' => $user->is_crew ? 'HAB' : 'MCC',
                 'is_admin' => $user->is_admin ? 'Yes' : 'No',
-                'tools' => join(', ', $tools),
+                'is_active' => $user->is_active ? 'Yes' : 'No',
+                'last_login' => $user->last_login,
+                'tools' => join('&nbsp;&nbsp;', $tools),
             ));
         }
 
         return Main::loadTemplate('admin-users.txt', array(
-            '/%content%/'=>$list->build(),
+            '/%list-users%/'=>$list->build(),
             '/%role_mcc%/'=>htmlspecialchars($mission->mcc_user_role),
             '/%role_hab%/'=>htmlspecialchars($mission->hab_user_role),
         ));
