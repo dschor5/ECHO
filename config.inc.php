@@ -84,6 +84,7 @@ require_once('class/conversation.php');
 require_once('class/attachment.php');
 require_once('class/archive.php');
 require_once('class/parsedown.php');
+require_once('class/archiveMaker.php');
 
 // Include database objects
 require_once('database/missionDao.php');

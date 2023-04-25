@@ -6,7 +6,9 @@ function saveArchive(downloadType) {
             action: 'admin',
             subaction: downloadType,
             timezone: $('#archive-tz option:selected').val(),
-            perspective: $('#archive-perspective option:selected').val()
+            perspective: $('#archive-perspective option:selected').val(),
+            scope: $('#archive-scope option:selected').val(),
+            notes: $('#archive-notes').val(),
         },
         dataType: 'json',
         success: function(data) {

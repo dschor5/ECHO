@@ -17,6 +17,11 @@
                     <option value="hab">Habitat Perspective</option>
                     <option value="mcc">Mission Control Perspective</option>
                 </select>
+                <select name="archive-scope" id="archive-scope">
+                    <option value="convo-public">Mission Chat Only</option>
+                    <option value="convo-all">Mission Chat and Private Conversations</option>
+                </select>
+                <input type="text" placeholder="Insert archive notes..." name="archive-notes" id="archive-notes" value="" required>
 
                 <button type="button" class="form-button" onclick="saveArchive('backupconvo')">Create Archive</button>
                 <!--<div id="archive_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating archive...</div>-->

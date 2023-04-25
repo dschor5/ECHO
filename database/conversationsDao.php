@@ -81,16 +81,24 @@ class ConversationsDao extends Dao
      * @param int $userId (optional)
      * @return array Converation objects.
      */
-    public function getConversations($userId = null)
+    public function getConversations($userId = null, bool $includePrivate = true)
     {
-        $qWhere = '';
+        $qWhere = array();
         if($userId != null)
         {
             $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
-            $qWhere  = 'WHERE conversations.conversation_id IN ( '.
+            $qWhere[]  = 'conversations.conversation_id IN ( '.
                             'SELECT participants.conversation_id FROM participants '.
                             'WHERE participants.user_id='.$qUserId.' ) ';
         }
+
+        if(!$includePrivate)
+        {
+            $convos = $this->getGlobalConvos();
+            $qWhere[] = 'conversations.conversation_id IN ('.join(', ', $convos).') ';
+        }
+
+        $qWhere = (count($qWhere) > 0) ? 'WHERE '.join(' AND ', $qWhere) : '';
 
         $queryStr = 'SELECT conversations.*, '.
                     'GROUP_CONCAT( participants.user_id) AS participants_id, '.

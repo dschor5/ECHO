@@ -825,8 +825,9 @@ class AdminModule extends DefaultModule
         
         $headersZip = array(
             'id' => 'ID',
-            'type' => 'Archive Type',
-            'timestamp' => 'Date Created (MCC Timezone)',
+            'type' => 'Type',
+            'note' => 'Notes',
+            'timestamp' => 'Date Created (UTC)',
             'tools' => 'Actions'
         );
         
@@ -840,18 +841,26 @@ class AdminModule extends DefaultModule
             $tools = array();
             $tools[] = Main::loadTemplate('link-url.txt', array(
                 '/%path%/'=>'archive/'.$archive->archive_id, 
-                '/%text%/'=>'Download'
+                '/%text%/'    => '',
+                '/%alt%/'     => 'Download archive '.$id,
+                '/%icon%/'    => 'arrowthickstop-1-s',
+                '/%class%/'   => 'button-green'
             ));
+
             $tools[] = Main::loadTemplate('link-js.txt', array(
-                '/%onclick%/'=>'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getType().' created on '.$archive->getTimestamp().'\')', 
-                '/%text%/'=>'Delete'
+                '/%onclick%/' => 'confirmAction(\'deletearchive\', '.$id.', \''.$archive->getType().' created on '.$archive->getTimestamp().'\')', 
+                '/%text%/'    => '',
+                '/%alt%/'     => 'Delete archive '.$id,
+                '/%icon%/'    => 'close',
+                '/%class%/'   => 'button-red'
             ));
 
             $list->addRow(array(
                 'id' => $id,
                 'type' => $archive->getType(),
+                'note' => $archive->notes,
                 'timestamp' => $archive->getTimestamp(),
-                'tools' => join(', ', $tools),
+                'tools' => join('&nbsp;&nbsp;', $tools),
             ));
         }
 
@@ -862,6 +871,7 @@ class AdminModule extends DefaultModule
         return Main::loadTemplate('admin-data.txt', array(
             '/%archive_tz%/'=>$archiveTzOptions,
             '/%archives%/' => $list->build(),
+            '/%archive-name%/' => $mission->name,
             '/%log-num%/' => $logNum,
             '/%log-entries%/' => $logEntries,
         ));
@@ -1032,9 +1042,6 @@ class AdminModule extends DefaultModule
 
     protected function backupConversations() : array
     {
-        global $config;
-        global $server;
-
         $response = array(
             'success' => true, 
             'time'    => 0, 
@@ -1043,6 +1050,16 @@ class AdminModule extends DefaultModule
 
         $tzSelected = $_POST['timezone'] ?? '';
         $isCrew = !(isset($_POST['perspective']) && $_POST['perspective'] == 'mcc');
+        $includePrivate = (isset($_POST['scope']) && $_POST['scope'] == 'convo-all');
+        
+        $archiveName = $_POST['name'] ?? '';
+        $missionCfg = MissionConfig::getInstance();
+        $notes = 'Mission: '.$missionCfg->name.'<br/>'. 
+                 'Archive Perspective: '.($isCrew ? 'HAB' : 'MCC'). '<br/>'. 
+                 'Archive Timezone: '.$tzSelected. '<br/>'. 
+                 'Include: '.($includePrivate ? 'Private & Public' : 'Public Only').'<br/>'. 
+                 'Other: '.$archiveName;
+        
         $timezones = DateTimeZone::listIdentifiers();
         if(!in_array($tzSelected, $timezones))
         {
@@ -1051,76 +1068,58 @@ class AdminModule extends DefaultModule
         }
         else
         {
-            $currTime = new DelayTime();
-            $archiveData = array();
-            $archiveData['archive_id'] = 0;
-            $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-            $archiveData['notes'] = ''; // Placeholder to save options used for creating archive (if any).
-            $archiveData['mime_type'] = 'application/zip';
-            $archiveData['timestamp'] = $currTime->getTime();
-            $archiveData['content_tz'] = $tzSelected;
-
-            Logger::info('admin::backupConversations started for "'.$archiveData['server_name'].'"');
+            Logger::info('admin::backupConversations started');
             $startTime = microtime(true);
 
-            $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
-
             $conversationsDao = ConversationsDao::getInstance();
-            $conversations = $conversationsDao->getConversations();
-            
-            $zip = new ZipArchive();
-            if(!$zip->open($zipFilepath, ZipArchive::CREATE)) 
+            $conversations = $conversationsDao->getConversations(null, $includePrivate);
+
+            $mission = MissionConfig::getInstance();
+            $sepThreads = $mission->feat_convo_threads;
+
+            $zipMaker = new ConversationArchiveMaker($notes, $tzSelected);
+
+            foreach($conversations as $convoId => $convo)
             {
-                Logger::warning('admin::backupConversations failed to create "'. $archiveData['server_name'].'"');
-            }      
-            else
+                $parentName = ($convo->parent_conversation_id != null) ? 
+                    $conversations[$convo->parent_conversation_id]->name : '';
+                if(!$sepThreads && $convo->parent_conversation_id != null)
+                {
+                    continue;
+                }
+
+                if(!$convo->archiveConvo($zipMaker, $tzSelected, $sepThreads, $parentName, $isCrew))
+                {
+                    Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
+                    $response['success'] = false;
+                    break;
+                }
+            }
+            $archiveData = $zipMaker->close();
+            $response['time'] = microtime(true) - $startTime;
+
+            if($response['success'] === true)
             {
-                $mission = MissionConfig::getInstance();
-                $sepThreads = $mission->feat_convo_threads;
+                $archiveDao = ArchiveDao::getInstance();
+                $result = $archiveDao->insertMultiple(array_keys($archiveData[0]), $archiveData);
 
-                foreach($conversations as $convoId => $convo)
+                if($result === false)
                 {
-                    $parentName = ($convo->parent_conversation_id != null) ? 
-                        $conversations[$convo->parent_conversation_id]->name : '';
-                    if(!$sepThreads && $convo->parent_conversation_id != null)
-                    {
-                        continue;
-                    }
-
-                    if(!$convo->archiveConvo($zip, $tzSelected, $sepThreads, $parentName, $isCrew))
-                    {
-                        Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
-                        $response['success'] = false;
-                        break;
-                    }
-                }
-                $zip->close();
-                $response['time'] = microtime(true) - $startTime;
-
-                if($response['success'] === true)
-                {
-                    $archiveDao = ArchiveDao::getInstance();
-                    $result = $archiveDao->insert($archiveData);
-
-                    if($result === false)
-                    {
-                        unlink($zipFilepath);
-                        Logger::warning('conversation::saveArchive failed to add archive to database.');
-                        $response['success'] = false;
-                        $response['error'] = 'Failed to create archive. See system log for details.';
-                    }
-                }
-                else
-                {
-                    unlink($zipFilepath);
+                    $zipMaker->deleteArchives();
+                    Logger::warning('conversation::saveArchive failed to add archive to database.');
                     $response['success'] = false;
                     $response['error'] = 'Failed to create archive. See system log for details.';
                 }
             }
+            else
+            {
+                $zipMaker->deleteArchives();
+                $response['success'] = false;
+                $response['error'] = 'Failed to create archive. See system log for details.';
+            }
         }
         
-        Logger::info('admin::backupConversations finished for "'. $archiveData['server_name'].
-            '" in '.$response['time'].' sec. ('.$result.')');
+        Logger::info('admin::backupConversations finished in '.$response['time'].' sec. ('.$result.')');
 
         return $response;
     }

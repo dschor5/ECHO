@@ -369,12 +369,6 @@ class ChatModule extends DefaultModule
             $fileExt   = strtolower(substr($fileName, strrpos($fileName, '.') + 1));
             if(finfo_open(FILEINFO_MIME_TYPE) !== false)
             {
-                try {
-                    Logger::info('user= '.$this->user->username.'  '.
-                                'finfo_open(FILEINFO_MIME_TYPE) = '.(finfo_open(FILEINFO_MIME_TYPE) !== false). 
-                                '  $_FILES[data][tmp_name] = '.$_FILES['data']['tmp_name'], $_FILES);
-                }
-                catch(Exception $e) {}
                 $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
             }
             else

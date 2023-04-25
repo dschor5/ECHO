@@ -22,6 +22,7 @@
         </div>
 
         <div class="form-row">
+
             <div class="delay_manual">
                 <label for="delay_manual">Delay in Seconds</label>
                 <div class="form-field">
@@ -31,6 +32,7 @@
                     Constant used for the mission. Can be changed in real-time by an administrator. Though, messages in-transit will not be updated to use the new delay.
                 </div>
             </div>
+
             <div class="delay_timed">
                 <label for="delay_auto_config">Piecewise Delay Definition in Seconds</label>
                 <div class="form-field" id="delay-config-opts">
@@ -44,6 +46,7 @@
                     %delay_auto_tmp%
                 </template>
             </div>
+            
             <div class="delay_mars">
                 <label for="delay_mars">Delay in Seconds</label>
                 <div class="form-field">
