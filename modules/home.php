@@ -155,12 +155,12 @@ class HomeModule extends DefaultModule
                 else
                 {
                     // Update user password. 
-                    if($this->user !== false)
+                    if($this->user !== false && $this->user != null)
                     {
                         $usersDao = UsersDao::getInstance();
                         $password = User::encryptPassword($_POST['password1']);
-                        
-                        if($respond['success'] = $usersDao->resetPassword($password, false, $this->user->user_id) !== false)
+
+                        if(($response['success'] = $usersDao->resetPassword($password, false, $this->user->user_id)) !== false)
                         {
                             // Delete the current cookie and force the user to login again.
                             Main::deleteCookie();
