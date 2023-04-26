@@ -352,6 +352,25 @@
     background-color: var(--background-light);
 }
 
+.CodeMirror {
+	position: absolute;
+    width: calc(100% - 150px);
+    top: 10px;
+    left: 10px;
+    height: 64px;
+    min-height: 64px;
+    resize: none;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 0px;
+    border: 0px;
+    background-color: var(--background-light);
+}
+
+.CodeMirror-scroll {
+    min-height: 64px;
+}
+
 #send-btn {
     position: absolute;
     font-size: 16px;

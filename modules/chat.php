@@ -1006,7 +1006,7 @@ class ChatModule extends DefaultModule
         $mission = MissionConfig::getInstance();
 
         // Add templates for this module. 
-        $this->addTemplates('chat.css', 'chat.js', 'media.js', 'time.js');
+        $this->addTemplates('simplemde.min.css', 'simplemde.min.js', 'chat.css', 'chat.js', 'media.js', 'time.js');
 
         // Only add theads if enabled. 
         if($mission->feat_convo_threads)

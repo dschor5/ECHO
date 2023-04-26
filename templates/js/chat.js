@@ -1,7 +1,27 @@
-var debugTime = (new Date()).toISOString();
-var debugCount = 0;
+/**
+ * Initialize markdown editor.
+ */
+var simplemde = null;
+var simplemdeOps = { 
+    autoDownloadFontAwesome: false,
+    element: $("#new-msg-text")[0], 
+    promptURLs: false,
+    forceSync: true, 
+    toolbar: false, 
+    status: false,
+    shortcuts: {
+        "cleanBlock": null,
+        "toggleCodeBlock": null, // unbind Ctrl-Alt-C
+        "drawImage": null,
+        "toggleSideBySide": null,
+        "toggleFullScreen": null
+        }
+    };
 $(document).ready(function(){
-    $('#new-msg-text').val(debugTime + " - " + debugCount);
+    if($('#feat-markdown-support-enabled').length)
+    {
+        simplemde = new SimpleMDE(simplemdeOps);
+    }
 });
 
 /**
@@ -40,8 +60,10 @@ function sendTextMessage(msgImportant) {
         success: function(resp) {
             if(resp.success) {
                 $('#new-msg-text').val("");
-                debugCount = debugCount + 1;
-                $('#new-msg-text').val(debugTime + " - " + debugCount);
+                if($('#feat-markdown-support-enabled').length)
+                {
+                    simplemde.value("");
+                }
             }
             else {
                 showError('Failed to send message (1).');
