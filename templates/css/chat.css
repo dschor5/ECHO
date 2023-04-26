@@ -364,6 +364,11 @@
     padding: 5px;
     margin: 0px;
     border: 0px;
+    background-color: var(--background-light);
+}
+
+.CodeMirror-scroll {
+    min-height: 64px;
 }
 
 #send-btn {
