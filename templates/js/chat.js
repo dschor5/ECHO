@@ -4,6 +4,25 @@ $(document).ready(function(){
     $('#new-msg-text').val(debugTime + " - " + debugCount);
 });
 
+var simplemde = null;
+$(document).ready(function(){
+    simplemde = new SimpleMDE({ 
+        autoDownloadFontAwesome: false,
+        element: $("#new-msg-text")[0], 
+        promptURLs: false,
+        forceSync: true, 
+        toolbar: false, 
+        status: false,
+        shortcuts: {
+            "cleanBlock": null,
+            "toggleCodeBlock": null, // unbind Ctrl-Alt-C
+            "drawImage": null,
+            "toggleSideBySide": null,
+            "toggleFullScreen": null
+        }
+    });
+});
+
 /**
  * Send AJAX text/important message to the server. 
  * 
