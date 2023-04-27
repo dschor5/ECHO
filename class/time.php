@@ -38,6 +38,12 @@ class DelayTime
      * @var string 
      */
     const DATE_FORMAT_REGEX   = '/^[\d]{4}-[\d]{2}-[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}$/';
+
+    /**
+     * Regex to validate a date string in "YYYY-MM-DD HH:MM:SS.ZZZ" format.
+     * @access public
+     * @var string 
+     */
     const DATE_FORMAT_MS_REGEX = '/^[\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}.[\d]{3}Z$/';
 
     /**
@@ -143,7 +149,8 @@ class DelayTime
      * @param string $format Fomrat for string output. Defaults to DATE_FORMAT.
      * @return string Timestamp in new timezone and format.
      */
-    public static function convertTimestampTimezone(string $timestamp, string $fromTz, string $toTz, string $format=DelayTime::DATE_FORMAT) : string
+    public static function convertTimestampTimezone(string $timestamp, 
+        string $fromTz, string $toTz, string $format=DelayTime::DATE_FORMAT) : string
     {
         $ts = new DateTime($timestamp, new DateTimeZone($fromTz));
         $ts->setTimezone(new DateTimeZone($toTz));

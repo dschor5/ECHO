@@ -64,6 +64,7 @@ function sendTextMessage(msgImportant) {
                 {
                     simplemde.value("");
                 }
+                compileMsg(resp, false);
             }
             else {
                 showError('Failed to send message (1).');
@@ -739,6 +740,7 @@ function uploadMedia(mediaType) {
                 closeModal();
                 console.info("Sent message_id=" + resp.message_id);
                 $(captionBox).val("");
+                compileMsg(resp, false);
             }
             else {
                 $('.dialog-response').text(resp.error);

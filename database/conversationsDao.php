@@ -46,13 +46,16 @@ class ConversationsDao extends Dao
 
     /**
      * Used when creating a new user to grant them access to all the global conversations. 
+     * By default, only the Mission Chat (conversation_id=1) and all its threads
+     * (parent_conversation_id=1) are the only global/public conversations. 
      * 
-     * @return List of all global conversations. 
+     * @return array of all global conversations ids. No objects returned.
      **/
-    public function getGlobalConvos()
+    public function getGlobalConvos() : array 
     {
         $convos = array();
-        if(($result = $this->select('conversation_id, parent_conversation_id', 'conversation_id=\'1\' OR parent_conversation_id=\'1\'')) !== false)
+        if(($result = $this->select('conversation_id, parent_conversation_id', 
+            'conversation_id=\'1\' OR parent_conversation_id=\'1\'')) !== false)
         {
             if($result->num_rows > 0)
             {
@@ -79,11 +82,14 @@ class ConversationsDao extends Dao
      *   avoid having to perfom separate queries. 
      *
      * @param int $userId (optional)
+     * @param bool $includePrivate (optional) include private convos by default.
      * @return array Converation objects.
      */
     public function getConversations($userId = null, bool $includePrivate = true)
     {
         $qWhere = array();
+
+        // Additional clause if userId is provided.
         if($userId != null)
         {
             $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
@@ -92,12 +98,14 @@ class ConversationsDao extends Dao
                             'WHERE participants.user_id='.$qUserId.' ) ';
         }
 
+        // Additional clause if private conversations are to be included.
         if(!$includePrivate)
         {
             $convos = $this->getGlobalConvos();
             $qWhere[] = 'conversations.conversation_id IN ('.join(', ', $convos).') ';
         }
 
+        // Combine all WHERE clauses together. 
         $qWhere = (count($qWhere) > 0) ? 'WHERE '.join(' AND ', $qWhere) : '';
 
         $queryStr = 'SELECT conversations.*, '.
@@ -118,12 +126,14 @@ class ConversationsDao extends Dao
         {
             if($result->num_rows > 0)
             {
+                // Get all conversations returned by the query.
                 while(($conversationData=$result->fetch_assoc()) != null)
                 {
                     $currConversation = new Conversation($conversationData);
                     $conversations[$conversationData['conversation_id']] = $currConversation;
                 }
 
+                // Iterate through all the objects and create links for any conversation threads.
                 foreach($conversations as $convoId => $convo)
                 {
                     if($convo->parent_conversation_id != null)
@@ -141,17 +151,22 @@ class ConversationsDao extends Dao
 
     /**
      * Create a new thread for the given conversation.
+     * This is a two step operation:
+     * - Add the new conversation
+     * - Add all the participants to the new conversation. 
+     *   Note that this could have been avoided as this info is 
+     *   essentially duplicated from the parent. However, that 
+     *   added to the complexity of the implementation. 
      * 
      * Assumes that the calling function already checked that the 
      * thread name was valid and unique.
      *
      * @param Conversation $convo parent conversation.
+     * @param string $threadName 
      * @return int|false Conversation id or false on error. 
      */
     public function newThread(Conversation &$convo, string $threadName)
     {
-        $this->startTransaction();
-
         // Create new conversation
         $currTime = new DelayTime();
         $convoFields = array(
@@ -160,6 +175,8 @@ class ConversationsDao extends Dao
             'date_created'           => $currTime->getTime(),
             'last_message'           => $currTime->getTime(),
         );
+
+        $this->startTransaction();
 
         $convoId = $this->insert($convoFields);
 
@@ -230,6 +247,7 @@ class ConversationsDao extends Dao
                         new Conversation($conversationData);
                 }
 
+                // Link all the threads for each conversation
                 foreach($conversations as $convoId => $convo)
                 {
                     if($convo->parent_conversation_id != null)
@@ -247,7 +265,13 @@ class ConversationsDao extends Dao
         return $conversations;
     }    
 
-    public function convoUpdated(int $convoId)
+    /**
+     * Change the date when the conversation was last updated. 
+     *
+     * @param integer $convoId
+     * @return bool
+     */
+    public function convoUpdated(int $convoId) : bool 
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
 

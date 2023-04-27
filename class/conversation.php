@@ -175,14 +175,15 @@ class Conversation
     /**
      * Archive a conversation and add it to the zip archive.
      *
-     * @param ZipArchive $zip Zip file to add conversation files to. 
+     * @param ConversationArchiveMaker $zip Zip file to add conversation files to. 
      * @param string $tz Convert all timestamps to this timezone.
      * @param bool $sepThreads If true, then save all threads to individual files. 
      * @param string $parentName Name of parent conversation (in case of a thread)
      * @param bool $isCrew If true, order messages based on the HAB received time.
      * @return bool Success
      **/
-    public function archiveConvo(ConversationArchiveMaker &$zip, string $tz, bool $sepThreads, string $parentName, bool $isCrew) : bool
+    public function archiveConvo(ConversationArchiveMaker &$zip, string $tz, 
+        bool $sepThreads, string $parentName, bool $isCrew) : bool
     {
         global $config;
         $success = true;

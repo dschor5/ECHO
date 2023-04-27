@@ -62,7 +62,7 @@
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get(string $name)
+    public function __get(string $name) : mixed
     {
         $result = null;
 
@@ -166,7 +166,6 @@
     public function getServerPath() : string
     {
         global $server;
-        global $config;
         return $server['host_address'].$this->folder.'/'.$this->data['server_name']; 
     }
 
