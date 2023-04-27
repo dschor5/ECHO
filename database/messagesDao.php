@@ -229,6 +229,14 @@ class MessagesDao extends Dao
         }
     }   
 
+    /**
+     * Get the last message id within a specific conversation. 
+     *
+     * @param array $convoIds
+     * @param integer $userId
+     * @param boolean $isCrew
+     * @return integer
+     */
     public function getLastMessageId(array $convoIds, int $userId, bool $isCrew) : int
     {
         // Build query
@@ -236,14 +244,14 @@ class MessagesDao extends Dao
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
 
-        $queryStr = 'SELECT messages.*, '. 
-                        'users.username, users.alias, users.is_active, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+        $queryStr = 'SELECT messages.message_id '. 
+                        // 'users.username, users.alias, users.is_active, '.
+                        // 'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
                     'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
-                        'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    // 'JOIN users ON users.user_id=messages.user_id '.
+                    // 'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                    //     'AND msg_status.user_id='.$qUserId.' '.
+                    // 'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
@@ -334,6 +342,39 @@ class MessagesDao extends Dao
     }
 
     /**
+     * Get a specific message. 
+     *
+     * @param int $messageId Message to retrieve
+     * @return array Message object
+     */
+    public function getLastMessage(int $messageId) 
+    {
+        // Build query
+        $qMessageId  = '\''.$this->database->prepareStatement($messageId).'\'';
+        
+        $queryStr = 'SELECT messages.*, '. 
+                        'users.username, users.alias, users.is_active, '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                    'FROM messages '.
+                    'JOIN users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'WHERE messages.message_id='.$qMessageId;
+                    
+        $message = false;
+        
+        // Get all messages
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0) 
+            {
+                $message = new Message($result->fetch_assoc());
+            }
+        }
+        
+        return $message;
+    }
+
+    /**
      * Get new messages.
      *
      * @param array $convoIds Conversation ids to include in the query. 
@@ -404,6 +445,8 @@ class MessagesDao extends Dao
         
         return $messages;
     }
+
+    
 
     /**
      * Get old messages in a conversation. 

@@ -19,36 +19,72 @@ class Logger
 {
     /**
      * Level Threshold: ERROR - Applicaiton cannot recover.
+     * @access private
+     * @var int
      */
     const ERROR     = 0;
+
+    /**
+     * Level Threshold Name: ERROR - Applicaiton cannot recover.
+     * @access private
+     * @var string
+     */
     const ERROR_STR = 'ERROR';
 
     /**
      * Level Threshold: WARNING - Applicaiton can continue.
+     * @access private
+     * @var int
      */
     const WARNING     = 1;
+
+    /**
+     * Level Threshold Name: WARNING - Applicaiton can continue
+     * @access private
+     * @var string
+     */
     const WARNING_STR = 'WARNING';
 
     /**
      * Level Threshold: INFO - Applicaiton can continue.
+     * @access private
+     * @var int
      */
     const INFO     = 2;
+
+    /**
+     * Level Threshold Name: INFO - Applicaiton can continue
+     * @access private
+     * @var string
+     */
     const INFO_STR = 'INFO';
 
     /**
      * Level Threshold: DEBUG - Informaiton for developer only.
+     * @access private
+     * @var int
      */
     const DEBUG     = 3;
+
+    /**
+     * Level Threshold Name: INFO - Information for developers only.
+     * @access private
+     * @var string
+     */
     const DEBUG_STR = 'DEBUG';
 
     /**
      * Constant date format used for logging errors.
+     * @access private
+     * @var string 
      */
-    const DATE_FORMAT = 'Y-m-d H:i:s';
+    const DATE_FORMAT = 'Y-m-d\TH:i:s';
 
     /**
      * Destination for error log as defined in 
      * https://www.php.net/manual/en/function.error-log.php.
+     * @access private
+     * @var int 
      */
     const ERROR_LOG_DEST = 3;
 
@@ -187,11 +223,11 @@ class Logger
         {
             if(strlen(trim($line)) > 0)
             {
-                [$logDate, $logTime, $logType, $logText] = explode(" ", $line, 4);
+                [$logDate, $logType, $logText] = explode(" ", $line, 3);
                 $logType = substr($logType, 1, -1);
 
                 $output .= Main::loadTemplate('admin-data-log.txt', array(
-                    '/%log-time%/' => $logDate.' '.$logTime, 
+                    '/%log-time%/' => $logDate, 
                     '/%log-type%/' => strtolower($logType), 
                     '/%LOG-TYPE%/' => strtoupper($logType), 
                     '/%log-text%/' => $logText

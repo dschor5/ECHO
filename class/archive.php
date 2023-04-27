@@ -30,12 +30,12 @@ class MissionArchive extends ServerFile
     /**
      * Constant definition of valid archive types.
      * @access private
-     * @var array
+     * @var array of strings
      */
     const ARCHIVE_TYPES = array(
-        'application/sql' => array('ext' => 'sql', 'desc' => 'SQL'),
-        'application/zip' => array('ext' => 'zip', 'desc' => 'ZIP'),
-        'application/txt' => array('ext' => 'txt', 'desc' => 'TXT'),
+        'application/sql' => array('ext' => 'sql', 'desc' => 'Mysql Backup (SQL)'),
+        'application/zip' => array('ext' => 'zip', 'desc' => 'Conversation Backup (ZIP)'),
+        'application/txt' => array('ext' => 'txt', 'desc' => 'Log Backup (TXT)'),
     );
 
     /**
@@ -57,7 +57,7 @@ class MissionArchive extends ServerFile
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get($name)
+    public function __get($name) : mixed
     {
         $result = null;
 
@@ -90,20 +90,27 @@ class MissionArchive extends ServerFile
      *
      * @return string 
      */
-    public function getType() : string
+    public function getType(bool $short=true) : string
     {
-        $type = '';
+        $archiveType = '';
 
         if(array_key_exists($this->mime_type, MissionArchive::ARCHIVE_TYPES))
         {
-            $type = MissionArchive::ARCHIVE_TYPES[$this->mime_type]['desc'];
+            if($short)
+            {
+                $archiveType = strtoupper(MissionArchive::ARCHIVE_TYPES[$this->mime_type]['ext']);
+            }
+            else
+            {
+                $archiveType = strtoupper(MissionArchive::ARCHIVE_TYPES[$this->mime_type]['desc']);
+            }
         }
         else 
         {
             Logger::warning('MissionArchive::getType() invalid mime_type='.$this->mime_type);
 	    }
 
-        return $type;
+        return $archiveType;
     }
 
     /**

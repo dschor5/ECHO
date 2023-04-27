@@ -462,6 +462,14 @@ class ChatModule extends DefaultModule
                     'success' => true, 
                     'message_id' => $messageId,
                 );
+
+                // Get the last message and return it in the ajax call.
+                if(($lastMessage = $messagesDao->getLastMessage($messageId))!== false)
+                {
+                    $result = array_merge($result, 
+                        $lastMessage->compileArray($this->user, 
+                        $this->currConversation->participants_both_sites));
+                }
             }
             else
             {
@@ -529,13 +537,20 @@ class ChatModule extends DefaultModule
                     'success' => true, 
                     'message_id' => $messageId,
                 );
+
+                // Get the last message and return it in the ajax call.
+                if(($lastMessage = $messagesDao->getLastMessage($messageId))!== false)
+                {
+                    $result = array_merge($result, 
+                        $lastMessage->compileArray($this->user, 
+                        $this->currConversation->participants_both_sites));
+                }
             }
             else
             {
                 $result['error'] = 'Database error.';
                 Logger::error('Failed to send message', $msgData);
             }
-
         }
         
         return $result;

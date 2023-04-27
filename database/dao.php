@@ -111,7 +111,7 @@ abstract class Dao
      * Select / query this database table. 
      * 
      * @param string $what Fields to select from this table. Default to '*' for all. 
-     * @param string $where Where clause to select rows from the table. 
+     * @param string|int $where Where clause to select rows from the table. 
      *                      If an int is provided, then treat it as the unique id
      *                      to drop. Otherwise, assume it is the WHERE clause.
      *                      Default to '*' which would select all rows.
@@ -124,8 +124,8 @@ abstract class Dao
      *                      Default to null which means use database default.
      * @return mysqli_result|bool Associative array of database rows returned.                       
      */
-    public function select($what = '*', $where = '*', $sort = '', $order = 'ASC', 
-        $limit_start = null, $limit_count = null)
+    public function select(string $what = '*', mixed $where = '*', mixed $sort = '', 
+        string $order = 'ASC', ?int $limit_start = null, ?int $limit_count = null) : mixed
     {
         // Form query string for this table. 
         $query = "select $what from `{$this->name}`";
@@ -142,6 +142,7 @@ abstract class Dao
             $query .= " where " . $where;
         }
 
+        // Add multiple sort conditions in the order provided.
         if (is_array($sort))
         {
             if (count($sort) > 0)
@@ -149,6 +150,7 @@ abstract class Dao
                 $query .= ' order by ';
             }
 
+            // Add each sort condition in order. 
             for ($i=0;$i<count($sort);$i++)
             {
                 $query .= '`'.$sort[$i].'` ';
@@ -160,23 +162,20 @@ abstract class Dao
             }
 
         } 
+        // Add a single sort condition. 
         elseif ($sort != '')
         {
             $query .= " order by `{$sort}` $order";
         }
 
+        // Add limit conditions. 
         if ($limit_start >= 0 && $limit_count > 0)
         {
             $query .= " LIMIT $limit_start,$limit_count";
         }
 
-        //add the allmighty semicolon to the end
-        $query .= ';';
-
-        //run it!
-        
-        
-        return $this->database->query($query);
+        // Run the query
+        return $this->database->query($query.';');
     }
 
     /**
@@ -188,7 +187,7 @@ abstract class Dao
      *              or MySQL variables.
      * @return int|false ID of row inserted or false on error
      */
-    public function insert(array $fields, array $variables=array())
+    public function insert(array $fields, array $variables=array()) : mixed
     {
         // Build query string
         $query = "insert into `{$this->name}` (";
@@ -236,7 +235,7 @@ abstract class Dao
      *              and values to be sanitized.
      * @return int|false Number of rows inserted or false on errors.
      */
-    public function insertMultiple(array $colNames, array $rowEntries)
+    public function insertMultiple(array $colNames, array $rowEntries) : mixed
     {
         $valuesStr = array();
         
@@ -255,10 +254,11 @@ abstract class Dao
         $keysStr = join(',', $keys);
 
         // Iterate through each row and make sure they all 
-        // contain the same fields in teh same order. 
+        // contain the same fields in the same order. 
         // If not, return false and log an error.
         foreach($rowEntries as $row)
         {
+            // Iterate through each column in that row. 
             $values = array();
             foreach($colNames as $col)
             {
@@ -282,9 +282,11 @@ abstract class Dao
             $valuesStr[] = '('.join(',', $values).')';
         }
 
+        // Create query. 
         $query = 'INSERT INTO `'.$this->name.'` '.
                     '('.$keysStr.') VALUES '.join(',', $valuesStr).';';
 
+        // Run query
         if ($this->database->query($query, false))
         {
             return $this->database->getNumRowsAffected();
@@ -296,13 +298,13 @@ abstract class Dao
      * Update specific fields in the database.
      *
      * @param array $fields Associative array of fields to update in the database. 
-     * @param string $where Clause used to select which rows to update in the table.
+     * @param string|int $where Clause used to select which rows to update in the table.
      *                      If an int is provided, then treat it as the unique id
      *                      to drop. Otherwise, assume it is the WHERE clause.
      *                      Default to '*' which would select all rows.
      * @return mysqli_result|bool Result from query or bool if not keeping results.
      */
-    public function update(array $fields, string $where = '*')
+    public function update(array $fields, mixed $where = '*') : mixed
     {
         // Build update query 
         $query = "update `{$this->name}` set ";

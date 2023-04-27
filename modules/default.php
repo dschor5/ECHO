@@ -435,7 +435,7 @@ abstract class DefaultModule implements Module
      */
     protected function setLastEventId(int $id)
     {
-        echo 'event: '.json_encode(array('seed-id'=>intval($id))).PHP_EOL;
+        echo 'event: seed-id'.PHP_EOL;
         echo 'id: '.(intval($id)).PHP_EOL;
         echo 'data: N/A'.PHP_EOL.PHP_EOL;
     }

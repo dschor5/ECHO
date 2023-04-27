@@ -41,42 +41,55 @@ class Message
 {
     /**
      * Constant message type: TEXT
+     * @access public
+     * @var string
      */
     const TEXT = 'text';
 
     /**
      * Constant message type: IMPORTANT
+     * @access public
+     * @var string
      */
     const IMPORTANT = 'important';
 
     /**
      * Constant message type: FILE
+     * @access public
+     * @var string
      */
     const FILE = 'file';
 
     /**
      * Constant message type: AUDIO
+     * @access public
+     * @var string
      */
     const AUDIO = 'audio';
 
     /**
      * Constant message type: VIDEO
+     * @access public
+     * @var string
      */
     const VIDEO = 'video';
 
     /**
      * Constant message status delivered. 
+     * @access private
+     * @var string
      */
     const MSG_STATUS_DELIVERED = 'Delivered';
 
     /**
      * Constant message status on-transit. 
+     * @access private
+     * @var string
      */
     const MSG_STATUS_TRANSIT = 'Transit';
 
     /**
      * Data from 'messages' database table. 
-     * 
      * @access private
      * @var array
      */
@@ -84,7 +97,6 @@ class Message
 
     /**
      * Attachment associated with this message.
-     * 
      * @access private
      * @var FileUpload|null
      */
@@ -121,7 +133,7 @@ class Message
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get($name)
+    public function __get($name) : mixed
     {
         $result = null;
 
@@ -188,25 +200,29 @@ class Message
      * Archive the message by (i) returning a string representation of the content
      * and (ii) adding any attachments to the zip file. 
      *
-     * @param ZipArchive $zip Zip file to which attachments are added
+     * @param ConversationArchiveMaker $zip Zip file to which attachments are added
      * @param string $folder Folder within the zip file to add attachments
      * @param array $participants List of participants to get usename for message author
      * @param string $tz Timezone to use when displaying the send/recv time. 
      * @return string HTML representation of the message of false on error.
      */
-    public function archiveMessage(ConversationArchiveMaker &$zip, string $folder, array &$participants, string $tz) 
+    public function archiveMessage(ConversationArchiveMaker &$zip, 
+        string $folder, array &$participants, string $tz) 
     {
         // Compile message text
         $msg = $this->compileMsgText();
 
-        // If the message had an attachment, then copy the file to the correct
-        // folder in the zip archive.
+        // If the message had an attachment, then copy the file to the correct folder in the archive.
         if($this->type != self::TEXT && $this->type != self::IMPORTANT && $this->file != null && $this->file->exists())
         {
-            $msg = $this->file->original_name.' ('.$this->file->getSize().')';
-
             $filepath = $this->file->getServerPath();
+
+            // Add the message id (unique) to the file name in case an attachment 
+            // was sent more than once in the same conversation with the same name.
             $filename = $folder.'/'.sprintf('%05d', $this->message_id).'-'.$this->file->original_name;
+
+            // Text to add to the message. 
+            $msg = $filename.' ('.$this->file->getSize().')';
 
             if(!$zip->addFile($filepath, $filename))
             {
@@ -244,6 +260,9 @@ class Message
     {
         $missionConfig = MissionConfig::getInstance();
         $result = htmlspecialchars($this->text);
+
+        // If markdown is enabled, then parse that and convert that to HTML 
+        // before returning the text.
         if($missionConfig->feat_markdown_support)
         {
             $parsedown = new Parsedown();
@@ -268,9 +287,9 @@ class Message
     /**
      * Get alias to display with messages that shows whether the user is inactive.
      *
-     * @return void
+     * @return string
      */
-    public function getAliasWithStatus()
+    public function getAliasWithStatus() : string 
     {
         return htmlspecialchars($this->alias).($this->is_active ? '' : '&nbsp;<i>[inactive]</i>');
     }

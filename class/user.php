@@ -29,6 +29,11 @@ class User
      */
     private $data;
 
+    /**
+     * Session id for current logged in user.
+     * @access private
+     * @var string
+     */
     private $session_id;
 
     /**
@@ -60,7 +65,7 @@ class User
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get($name)
+    public function __get($name) : mixed
     {
         $result = null;
 
