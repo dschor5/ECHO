@@ -133,7 +133,7 @@ class Message
      * @param string $name Name of field being requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get($name) : mixed
+    public function __get($name)
     {
         $result = null;
 

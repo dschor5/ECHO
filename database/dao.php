@@ -124,8 +124,8 @@ abstract class Dao
      *                      Default to null which means use database default.
      * @return mysqli_result|bool Associative array of database rows returned.                       
      */
-    public function select(string $what = '*', mixed $where = '*', mixed $sort = '', 
-        string $order = 'ASC', ?int $limit_start = null, ?int $limit_count = null) : mixed
+    public function select(string $what = '*', $where = '*', $sort = '', 
+        string $order = 'ASC', ?int $limit_start = null, ?int $limit_count = null) 
     {
         // Form query string for this table. 
         $query = "select $what from `{$this->name}`";
@@ -187,7 +187,7 @@ abstract class Dao
      *              or MySQL variables.
      * @return int|false ID of row inserted or false on error
      */
-    public function insert(array $fields, array $variables=array()) : mixed
+    public function insert(array $fields, array $variables=array()) 
     {
         // Build query string
         $query = "insert into `{$this->name}` (";
@@ -235,7 +235,7 @@ abstract class Dao
      *              and values to be sanitized.
      * @return int|false Number of rows inserted or false on errors.
      */
-    public function insertMultiple(array $colNames, array $rowEntries) : mixed
+    public function insertMultiple(array $colNames, array $rowEntries) 
     {
         $valuesStr = array();
         
@@ -286,7 +286,7 @@ abstract class Dao
         $query = 'INSERT INTO `'.$this->name.'` '.
                     '('.$keysStr.') VALUES '.join(',', $valuesStr).';';
 
-        // Run query
+        
         if ($this->database->query($query, false))
         {
             return $this->database->getNumRowsAffected();
@@ -298,13 +298,13 @@ abstract class Dao
      * Update specific fields in the database.
      *
      * @param array $fields Associative array of fields to update in the database. 
-     * @param string|int $where Clause used to select which rows to update in the table.
+     * @param string $where Clause used to select which rows to update in the table.
      *                      If an int is provided, then treat it as the unique id
      *                      to drop. Otherwise, assume it is the WHERE clause.
      *                      Default to '*' which would select all rows.
      * @return mysqli_result|bool Result from query or bool if not keeping results.
      */
-    public function update(array $fields, mixed $where = '*') : mixed
+    public function update(array $fields, string $where = '*')
     {
         // Build update query 
         $query = "update `{$this->name}` set ";
