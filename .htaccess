@@ -9,6 +9,10 @@ RewriteRule ^uploads /index.php?action=error&page=%{REQUEST_URI}
 RewriteRule ^uploads/(.*) /index.php?action=error&p=$1&page=%{REQUEST_URI}
 
 RewriteRule ^favicon.ico templates/media/favicon.ico
+RewriteRule ^apple-touch-icon.png templates/media/apple-touch-icon.png 
+RewriteRule ^apple-touch-icon-precomposed.png templates/media/apple-touch-icon.png 
+RewriteRule ^wp-login.php index.php?action=home [QSA]
+
 RewriteRule ^login index.php?action=home&subaction=checkLogin [QSA]
 RewriteRule ^ajax/(.*)/(.*) index.php?ajax=true&action=$1&subaction=$2 [QSA]
 RewriteRule ^ajax/(.*) index.php?ajax=true&action=$1 [QSA]

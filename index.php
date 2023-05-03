@@ -207,17 +207,33 @@ class Main
         );*/
     }
 
+    /**
+     * Delete a cookie. Clear data and set it to expire.
+     *
+     * @return void
+     */
     public static function deleteCookie()
     {
         global $config;
         setcookie($config['cookie_name'], '', -1, '/');
     }
 
-    public static function getCookieValue(string $key) 
+    /**
+     * Accessor for cookie contents. 
+     *
+     * @param string $key
+     * @return string|null
+     */
+    public static function getCookieValue(string $key)  
     {
         return self::$cookie[$key] ?? null;
     }
 
+    /**
+     * Read the site cookie and save content into a static variable. 
+     *
+     * @return void
+     */
     private function readCookie()
     {
         global $config;
@@ -229,18 +245,30 @@ class Main
         }
     }
 
-    public static function loadTemplate($template, $replace=null, $dir='modules/')
+    /**
+     * Load a template file and replace content before returning it to 
+     * display/send to the user. 
+     *
+     * @param string $template Template to load
+     * @param array $replace Associative array with keywords to replace. 
+     * @param string $dir Directory where the template is stored
+     * @return string Tenmplate contents with parameters replaced
+     */
+    public static function loadTemplate(string $template, array $replace=null, string $dir='modules/') : string 
     {
         global $config;
         global $server;
 
+        // Load the file
         $template = file_get_contents($config['templates_dir'].'/'.$dir.$template);
 
+        // Local keywords to replace
         if($replace != null)
         {
             $template = preg_replace(array_keys($replace), array_values($replace), $template);
         }
 
+        // Global replace keywords
         $replace = array(
             '/%http%/'             => $server['http'],
             '/%site_url%/'         => $server['site_url'],
