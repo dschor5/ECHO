@@ -157,6 +157,24 @@ class User
 
         return $valid;
     }
+
+    /**
+     * Get string representation of last login in the MCC timezone.
+     * If the user never logged in, the string will be blank.
+     *
+     * @return string
+     */
+    public function getLastLogin() : string 
+    {
+        $lastLogin = '';
+        if($this->last_login != null)
+        {
+            $mission = MissionConfig::getInstance();
+            $lastLogin = DelayTime::convertTimestampTimezone(
+                $this->last_login, 'UTC', $mission->mcc_timezone);
+        }
+        return $lastLogin;
+    }
 }
 
 ?>

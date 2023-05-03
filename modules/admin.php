@@ -797,8 +797,7 @@ class AdminModule extends DefaultModule
                 'is_crew' => $user->is_crew ? 'HAB' : 'MCC',
                 'is_admin' => $user->is_admin ? 'Yes' : 'No',
                 'is_active' => $user->is_active ? 'Yes' : 'No',
-                'last_login' => DelayTime::convertTimestampTimezone(
-                    $user->last_login, 'UTC', $mission->mcc_timezone),
+                'last_login' => $user->getLastLogin(),
                 'tools' => join('&nbsp;&nbsp;', $tools),
             ));
         }
