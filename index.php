@@ -224,7 +224,7 @@ class Main
      * @param string $key
      * @return string|null
      */
-    public static function getCookieValue(string $key) : string 
+    public static function getCookieValue(string $key)  
     {
         return self::$cookie[$key] ?? null;
     }
