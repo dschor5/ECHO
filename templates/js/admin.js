@@ -62,6 +62,8 @@ $(document).ready(function() {
             fromDate.datepicker('option', 'maxDate', getDate(this));
         });
     }
+
+    threadSuboptions();
 });
 
 function getDate(element) {

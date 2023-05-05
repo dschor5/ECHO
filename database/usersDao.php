@@ -315,8 +315,6 @@ class UsersDao extends Dao
             'is_password_reset='.($forceReset ? '1' : '0').' '.
             'WHERE user_id='.$qUserId;
 
-        Logger::info($queryStr);
-
         return ($this->database->query($queryStr) !== false);
     }
 
