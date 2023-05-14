@@ -270,6 +270,10 @@ class Message
             $parsedown->setBreaksEnabled(true);
             $result = $parsedown->text(htmlspecialchars(str_replace('\\', '\\\\', $this->text)));
         }
+        else
+        {
+            $result = preg_replace('/[\r\n|\n|\r]/','<br>',$result);
+        }
         
         return $result;
     }
