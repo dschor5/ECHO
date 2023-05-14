@@ -66,24 +66,31 @@ class Delay
     /**
      * Constant speed of light in km/s to calculate distance from delay. 
      * Source: https://en.wikipedia.org/wiki/Speed_of_light
-     * @access private
+     * @access public
      * @var double
      */
     const SPEED_OF_LIGHT_KM_P_SEC = 299792.458;
 
     /**
      * Constant number of seconds per minute.
-     * @access private
+     * @access public
      * @var int
      */
     const SEC_PER_MIN = 60;
 
     /**
      * Constant number of seconds per hour. 
-     * @access private
+     * @access public
      * @var int
      */
     const SEC_PER_HOUR = 3600;
+
+    /** 
+     * Constant number of seconds per day. 
+     * @access public
+     * @var int
+     */
+    const SEC_PER_DAY = Delay::SEC_PER_HOUR * 24;
 
     /**
      * Delay cache timeout in seconds. 

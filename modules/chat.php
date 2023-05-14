@@ -440,7 +440,7 @@ class ChatModule extends DefaultModule
             $currTime = new DelayTime();
             $msgData = array(
                 'user_id'         => $this->user->user_id,
-                'from_crew'       => $this->user->is_crew,
+                'from_crew'       => ($this->user->is_crew) ? '1' : '0',
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => $msgText,
                 'type'            => $fileType,
@@ -524,7 +524,7 @@ class ChatModule extends DefaultModule
             // Fields to enter into the database.
             $msgData = array(
                 'user_id'         => $this->user->user_id,
-                'from_crew'       => $this->user->is_crew,
+                'from_crew'       => ($this->user->is_crew) ? '1' : '0',
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => $msgText,
                 'type'            => $msgImportant,
