@@ -135,12 +135,18 @@ class MessagesDao extends Dao
                 $habDelay = Delay::getInstance()->getDelay();
             }
 
+            $mccDelayDays = floor($mccDelay / Delay::SEC_PER_DAY);
+            $mccDelay = date('H:i:s.v', $mccDelay);
+            
+            $habDelayDays = floor($habDelay / Delay::SEC_PER_DAY);
+            $habDelay = date('H:i:s.v', $habDelay);
+
             // Insert the new message into the database and automatically assign it 
             // an alternate id based on the previous query.
             $variables = array(
                 'message_id_alt' => '@id_alt:=@id_alt+1', 
-                'recv_time_hab' => 'ADDTIME(UTC_TIMESTAMP(3), '.$habDelay.')',
-                'recv_time_mcc' => 'ADDTIME(UTC_TIMESTAMP(3), '.$mccDelay.')',
+                'recv_time_hab' => 'ADDTIME(ADDDATE(UTC_TIMESTAMP(3), '.$habDelayDays.'), \''.$habDelay.'\')',
+                'recv_time_mcc' => 'ADDTIME(ADDDATE(UTC_TIMESTAMP(3), '.$mccDelayDays.'), \''.$mccDelay.'\')',
             );
             $id = $this->insert($msgData, $variables);
 
