@@ -189,6 +189,16 @@
         </div>
 
         <div class="form-row">
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_out_of_seq" id="feat_out_of_seq" %feat_out_of_seq_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Out-of-Seq Indicators</div>
+            </div>
+             <div class="form-help">
+                <br/>Visualization showing messages crossed path in transit.
+            </div>
+        </div>
+
+        <div class="form-row">
             <label for="hab_name">Message Formatting</label>
             <div class="form-field">
                 <label class="switch"><input type="checkbox" name="feat_markdown_support" id="feat_markdown_support" %feat_markdown_support_checked%><span class="slider"></span></label> 

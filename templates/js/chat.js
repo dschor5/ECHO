@@ -419,26 +419,28 @@ function updateOutOfSeqWarning() {
     var currId = 0;
     var index;
 
-    for(index = 1; index < matches.length; index++) {
+    if($('#feat-out-of-seq-enabled').length) {
+         for(index = 1; index < matches.length; index++) {
 
-        currId = matches[index].getAttribute('msg-id');
-        currSentTime = (new Date(matches[index].getAttribute("sent"))).getTime();
-        
-        prevIndex = index - 1;
-        while(prevIndex >= 0) {
-            prevId = matches[prevIndex].getAttribute('msg-id');
-            prevSentTime = (new Date(matches[prevIndex].getAttribute("sent"))).getTime();
-            prevRecvTime = (new Date(matches[prevIndex].getAttribute("recv"))).getTime();
+            currId = matches[index].getAttribute('msg-id');
+            currSentTime = (new Date(matches[index].getAttribute("sent"))).getTime();
             
-            if(prevSentTime > currSentTime) {
-                document.querySelector('#msg-out-seq-id-' + prevId).style.display = 'inline';
-                document.querySelector('#msg-out-seq-id-' + currId).style.display = 'inline';
-            }
-            else if(prevRecvTime < currSentTime) {
-                break;
-            }
+            prevIndex = index - 1;
+            while(prevIndex >= 0) {
+                prevId = matches[prevIndex].getAttribute('msg-id');
+                prevSentTime = (new Date(matches[prevIndex].getAttribute("sent"))).getTime();
+                prevRecvTime = (new Date(matches[prevIndex].getAttribute("recv"))).getTime();
+                
+                if(prevSentTime > currSentTime) {
+                    document.querySelector('#msg-out-seq-id-' + prevId).style.display = 'inline';
+                    document.querySelector('#msg-out-seq-id-' + currId).style.display = 'inline';
+                }
+                else if(prevRecvTime < currSentTime) {
+                    break;
+                }
 
-            prevIndex--;
+                prevIndex--;
+            }
         }
     }
 }

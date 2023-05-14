@@ -1040,6 +1040,7 @@ class ChatModule extends DefaultModule
             (($mission->feat_progress_bar)        ? Main::loadTemplate('chat-feat-progress-bar.txt')        : '').
             (($mission->feat_markdown_support)    ? Main::loadTemplate('chat-feat-markdown-support.txt')    : '').
             (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
+            (($mission->feat_out_of_seq)          ? Main::loadTemplate('chat-feat-out-of-seq.txt')          : '').
             (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '');
 
         // Determine who can add new threads if the feature is enabled.
