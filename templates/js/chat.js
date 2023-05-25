@@ -65,6 +65,7 @@ function sendTextMessage(msgImportant) {
                     simplemde.value("");
                 }
                 compileMsg(resp, false);
+                scrollToBottom();
             }
             else {
                 showError('Failed to send message (1).');

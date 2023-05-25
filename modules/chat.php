@@ -1038,10 +1038,13 @@ class ChatModule extends DefaultModule
             (($mission->feat_convo_list_order)    ? Main::loadTemplate('chat-feat-convo-list-order.txt')    : '').
             (($mission->feat_est_delivery_status) ? Main::loadTemplate('chat-feat-est-delivery-status.txt') : '').
             (($mission->feat_progress_bar)        ? Main::loadTemplate('chat-feat-progress-bar.txt')        : '').
-            (($mission->feat_markdown_support)    ? Main::loadTemplate('chat-feat-markdown-support.txt')    : '').
             (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
             (($mission->feat_out_of_seq)          ? Main::loadTemplate('chat-feat-out-of-seq.txt')          : '').
-            (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '');
+            (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '').
+            // Note: only enable browser-side support if not on mobile devices as that was reported 
+            //       to cause issues on some touch interfaces.
+            (($mission->feat_markdown_support && !Main::detectMobile())    
+                                                  ? Main::loadTemplate('chat-feat-markdown-support.txt')    : '');
 
         // Determine who can add new threads if the feature is enabled.
         if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
