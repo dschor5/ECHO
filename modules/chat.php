@@ -346,6 +346,16 @@ class ChatModule extends DefaultModule
         // Get the file type. 
         $fileType  = trim($_POST['type'] ?? Message::FILE);
 
+        // Start building the response. 
+        $result = array('success' => false);
+
+        // Trap in case the upload failed due to file sizes
+        if($_FILES['data']['tmp_name'] == '')
+        {
+            $result['error'] = 'Failed to upload file. Check the file size.';
+            return $result;
+        }
+
         // The VIDEO and AUDIO types are fixed for Google Chrome. 
         // Future versions of ECHO can expand this to work with more browsers. 
         if($fileType == Message::VIDEO)
@@ -395,9 +405,6 @@ class ChatModule extends DefaultModule
         $serverName = ServerFile::generateFilename($config['uploads_dir']);
         $fullPath = $server['host_address'].$config['uploads_dir'].'/'.$serverName;
         
-        // Start building the response. 
-        $result = array('success' => false);
-
         // Validate upload type. 
         if(!in_array(strtolower($fileType), array(Message::FILE, Message::VIDEO, Message::AUDIO)))
         {
@@ -1059,6 +1066,7 @@ class ChatModule extends DefaultModule
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
                   '/%hab_day_name%/'       => $mission->hab_day_name,
                   '/%max_upload_size%/'    => ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()),
+                  '/%max_upload_size_bytes%/' => ServerFile::getMaxUploadSize(),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                   '/%download-link%/'      => Main::loadTemplate('download-link.txt', 
                                               array('/%link%/' => '#', '/%filename%/' => '', '/%filesize%/' => '')),
