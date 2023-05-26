@@ -129,7 +129,7 @@ class ConversationArchiveMaker
       $newData = array(
          'archive_id'  => 0,
          'server_name' => ServerFile::generateFilename($config['logs_dir']),
-         'notes'       => $this->dataNotes.' (part '.(count($this->archiveData)+1).')',
+         'notes'       => $this->dataNotes.' (part '.(count($this->archiveData)+1).')<br/>',
          'mime_type'   => 'application/zip',
          'timestamp'   => $this->dataCurrTime,
          'content_tz'  => $this->dataTzSelected,
@@ -252,6 +252,14 @@ class ConversationArchiveMaker
    public function close() : array
    {
       end($this->archiveZips)->close();
+
+      // Add file size and MD5 for every archive created.
+      for($i = 0; $i < count($this->archiveData); $i++)
+      {
+         $this->archiveData[$i]['notes'] .= 'Size: '.ServerFile::getHumanReadableSize(filesize($this->archivePaths[$i])).'<br/>'. 
+                                  'MD5: '.md5_file($this->archivePaths[$i]);
+      }
+
       return $this->archiveData;
    }
 

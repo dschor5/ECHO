@@ -930,7 +930,7 @@ class AdminModule extends DefaultModule
         $archiveData = array();
         $archiveData['archive_id'] = 0;
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-        $archiveData['notes'] = ''; // Not used for SQL archives.
+        $archiveData['notes'] = ''; 
         $archiveData['mime_type'] = 'application/sql';
         $archiveData['timestamp'] = $currTime->getTime();
         $archiveData['content_tz'] = 'UTC';
@@ -949,6 +949,13 @@ class AdminModule extends DefaultModule
 
         if($worked == 0)
         {
+            // Add file notes including size and MD5
+            $missionCfg = MissionConfig::getInstance();
+            $archiveData['notes'] = 'Mission: '.$missionCfg->name.'<br/>'. 
+                                    'Archive Timezone: UTC<br/>'. 
+                                    'Size: '.ServerFile::getHumanReadableSize(filesize($filePath)).'<br/>'. 
+                                    'MD5: '.md5_file($filePath);
+
             $archiveDao = ArchiveDao::getInstance();
             $result = $archiveDao->insert($archiveData);
             
@@ -1008,7 +1015,7 @@ class AdminModule extends DefaultModule
         $archiveData = array();
         $archiveData['archive_id'] = 0;
         $archiveData['server_name'] = ServerFile::generateFilename($config['logs_dir']);
-        $archiveData['notes'] = ''; // Not used for SQL archives.
+        $archiveData['notes'] = '';
         $archiveData['mime_type'] = 'application/txt';
         $archiveData['timestamp'] = $currTime->getTime();
         $archiveData['content_tz'] = 'UTC';
@@ -1020,6 +1027,13 @@ class AdminModule extends DefaultModule
 
         if(copy($fromPath, $toPath))
         {
+            // Add file notes including size and MD5
+            $missionCfg = MissionConfig::getInstance();
+            $archiveData['notes'] = 'Mission: '.$missionCfg->name.'<br/>'. 
+                                    'Archive Timezone: UTC<br/>'. 
+                                    'Size: '.ServerFile::getHumanReadableSize(filesize($toPath)).'<br/>'.
+                                    'MD5: '.md5_file($toPath);
+
             $archiveDao = ArchiveDao::getInstance();
             $result = $archiveDao->insert($archiveData);
             
