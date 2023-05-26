@@ -89,6 +89,7 @@ class AdminModule extends DefaultModule
             'hab_planet'    => array('name'=>'Analog Habitat Planet',     'format'=>$STR_FMT),
             'hab_user_role' => array('name'=>'Analog Habitat User Role',  'format'=>$STR_FMT),
             'hab_timezone'  => array('name'=>'Analog Habitat Timezone',   'format'=>$STR_FMT),
+            'hab_day_name'  => array('name'=>'Analog Habitat Day Name',   'format'=>$STR_FMT),
             'login_timeout' => array('name'=>'Config Timeout',            'format'=>$STR_FMT),
         );
 
@@ -257,6 +258,7 @@ class AdminModule extends DefaultModule
             '/%hab_planet%/'      => $mission->hab_planet,
             '/%hab_user_role%/'   => $mission->hab_user_role,
             '/%hab_timezone%/'    => $habTimezoneOptions,
+            '/%hab_day_name%/'    => $mission->hab_day_name,
             '/%timeout-options%/' => $timeoutOptions,
             '/%feat_audio_notification_checked%/'  => $mission->feat_audio_notification  == '1' ? 'checked' : '',
             '/%feat_badge_notification_checked%/'  => $mission->feat_badge_notification  == '1' ? 'checked' : '',
