@@ -1057,6 +1057,7 @@ class ChatModule extends DefaultModule
             array('/%username%/'           => htmlspecialchars($this->user->username),
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
+                  '/%hab_day_name%/'       => $mission->hab_day_name,
                   '/%max_upload_size%/'    => ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),
                   '/%download-link%/'      => Main::loadTemplate('download-link.txt', 

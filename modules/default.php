@@ -301,7 +301,8 @@ abstract class DefaultModule implements Module
                 '/%delay_time%/'       => $commDelay->getDelayStr(),
                 '/%mission_name%/'     => htmlspecialchars($mission->name),
                 '/%year%/'             => date('Y'),
-                '/%epoch%/'            => DelayTime::getStartTimeUTC(),
+                '/%mission-start%/'    => DelayTime::getStartTimeUTC(),
+                '/%mission-end%/'      => DelayTime::getEndTimeUTC(),
                 '/%time_sec_per_day%/' => 24*60*60, // TODO
                 '/%time_day%/'         => htmlspecialchars($mission->hab_day_name),
                 '/%hab_time_format%/'  => 'true', // TODO
