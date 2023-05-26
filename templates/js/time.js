@@ -10,33 +10,54 @@ $(document).ready(function() {
 
 /**
  * Update time diaplay. 
- * 
- * Uses flag to 
  */
 function updateTime() {
 
     // Update 
-    var dt = new Date();
-    var mccDate = formatTime(null, true);
-    $('#time-mcc-value').text(mccDate);   
+    var currTime = new Date();
+    var startTime = MISSION_START.getTime();
+    var endTime = MISSION_END.getTime();
+    var mccTime = formatTime(null, true);
+    $('#time-mcc-value').text(mccTime);   
 
     // Flag to select HAB format ()
-    if(HAB_FORMAT) {
-        dt = new Date();
-        var habMet = 0;
-        var habDate = "";
+    if(HAB_FORMAT && currTime < endTime) {
+        
+        // Before the start of the mission
+        if(currTime < startTime)
+        {
+            var habMet = (startTime - currTime) / 1000; // sec
+            var day = Math.floor(habMet / SEC_PER_DAY);
+            var hrs = Math.floor((habMet - day * SEC_PER_DAY) / 3600);
+            var min = Math.floor((habMet - day * SEC_PER_DAY - hrs * 3600) / 60);
+            var sec = Math.floor(habMet - day * SEC_PER_DAY - hrs * 3600 - min * 60);
 
-        habMet = (dt.getTime() - EPOCH_UTC.getTime()) / 1000; // seconds
-        var day = Math.floor(habMet / SEC_PER_DAY);
-        var hrs = Math.floor((habMet - day * SEC_PER_DAY) / 3600);
-        var min = Math.floor((habMet - day * SEC_PER_DAY - hrs * 3600) / 60);
-        var sec = Math.floor(habMet - day * SEC_PER_DAY - hrs * 3600 - min * 60);
+            habDate = 'T-';
+            if(day < -1)
+            {
+                habDate += Math.abs(day) + 'd ';
+            } 
+            habDate += (Math.abs(hrs)).toString().padStart(2, "0") + ":" + 
+                min.toString().padStart(2, "0") + ":" +
+                sec.toString().padStart(2, "0");
+        }
+        // During the mission
+        else
+        {
+            var habMet = (currTime - startTime) / 1000; // sec
 
-        habDate = TIME_DAY + "-" + day + " " + 
-                    hrs.toString().padStart(2, "0") + ":" + 
-                    min.toString().padStart(2, "0") + ":" +
-                    sec.toString().padStart(2, "0");
+            var day = Math.floor(habMet / SEC_PER_DAY);
+            var hrs = Math.floor((habMet - day * SEC_PER_DAY) / 3600);
+            var min = Math.floor((habMet - day * SEC_PER_DAY - hrs * 3600) / 60);
+            var sec = Math.floor(habMet - day * SEC_PER_DAY - hrs * 3600 - min * 60);
+
+            habDate = TIME_DAY + "-" + (day + 1) + " " + 
+                        hrs.toString().padStart(2, "0") + ":" + 
+                        min.toString().padStart(2, "0") + ":" +
+                        sec.toString().padStart(2, "0");
+        }
     }
+    // After the mission. 
     else {
         habDate = formatTime(null, false);  
     }
