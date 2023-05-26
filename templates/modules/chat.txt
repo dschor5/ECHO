@@ -104,7 +104,7 @@
     
     <div id="dialog-video" title="Record Video Message" class="dialog-body" style="display: none;">
         <form method="POST">
-            <p>Record and preview your message before sending.</p>
+            <p>Record and preview your message before sending. Note: 10 sec ~= 2.5 MB.</p>
             <div class="dialog-response"></div>
             <div class="media" style="margin-right: 2px;">Webcam <br> 
                 <video id="rec-video-player" src="" playsinline autoplay muted></video>
@@ -116,13 +116,15 @@
                 <p>Optional caption or notes to accompany the video message:</p>
                 <textarea id="video-caption" name="video-caption" placeholder="Enter caption or notes"></textarea>
             </div>
+            <input type="hidden" name="MAX_FILE_SIZE" class="MAX_FILE_SIZE" value="%max_upload_size_bytes%" />
+            <input type="hidden" name="MAX_FILE_SIZE_HUMAN" class="MAX_FILE_SIZE_HUMAN" value="%max_upload_size%" />
         </form>
         <div id="progress-video"><div class="progress-label-video"></div></div>
     </div>
 
     <div id="dialog-audio" title="Record Audio Message" class="dialog-body" style="display: none;">
         <form method="POST">
-            <p>Record and preview your message before sending.</p>
+            <p>Record and preview your message before sending. Note: 10 sec ~= 0.1 MB.</p>
             <div class="dialog-response"></div>
             <audio id="rec-audio-player" src="" playsinline autoplay muted></audio>
             <audio id="play-audio-player" src="" playsinline autoplay controls></audio>
@@ -130,6 +132,8 @@
                 <p>Optional caption or notes to accompany the audio message:</p>
                 <textarea id="audio-caption" name="audio-caption" placeholder="Enter caption or notes"></textarea>
             </div>
+            <input type="hidden" name="MAX_FILE_SIZE" class="MAX_FILE_SIZE" value="%max_upload_size_bytes%" />
+            <input type="hidden" name="MAX_FILE_SIZE_HUMAN" class="MAX_FILE_SIZE_HUMAN" value="%max_upload_size%" />
         </form>
         <div id="progress-audio"><div class="progress-label-audio"></div></div>
     </div>
@@ -144,6 +148,8 @@
                 <p>Optional caption or notes to accompany the file:</p>
                 <textarea id="file-caption" name="file-caption" placeholder="Enter caption or notes"></textarea>
             </div>
+            <input type="hidden" name="MAX_FILE_SIZE" class="MAX_FILE_SIZE" value="%max_upload_size_bytes%" />
+            <input type="hidden" name="MAX_FILE_SIZE_HUMAN" class="MAX_FILE_SIZE_HUMAN" value="%max_upload_size%" />
         </form>
         <div id="progress-file"><div class="progress-label-file"></div></div>
     </div>

@@ -21,7 +21,7 @@
 
 // Instance of MediaRecorder object.
 // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder
-let mediaRecorder;
+var mediaRecorder;
 
 // Blobs of memory containing the audio/video capture. 
 let recordedBlobs;
@@ -46,6 +46,9 @@ let playMediaPlayer;
 
 // URL created for the audio/video recording
 let mediaUrl;
+
+// Calc size of current recording
+var recSize;
 
 
 /**
@@ -202,6 +205,7 @@ function startRecording(mediaType) {
     }
 
     // Save blobs into an array. 
+    recSize = 0;
     mediaRecorder.ondataavailable = handleDataAvailable;
 
     // Start recording. 
@@ -258,6 +262,7 @@ async function stopRecording(mediaType) {
  */
 function handleDataAvailable(event) {
     if(event.data && event.data.size > 0) {
+        recSize += event.data.size;
         recordedBlobs.push(event.data);
     }
 }

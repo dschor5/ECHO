@@ -344,7 +344,7 @@ function compileMsg(data, before){
             msgClone.querySelector('.msg').classList.add('response');
         }
 
-        // Message content. Eiter text or a template for the img/audio/video/file. 
+        // Message content. Either text or a template for the img/audio/video/file. 
         if(data.type === 'text' || data.type === 'important') {
             msgClone.querySelector(".msg-content").innerHTML = data.message;
             if(data.type === 'important' && $('#feat-important-msgs-enabled').length) {
@@ -691,7 +691,9 @@ function uploadMedia(mediaType) {
 
     var captionBox = '#' + mediaType + '-caption';
     formData.append("caption", $(captionBox).val().trim());
-    
+
+    var fileSize = 0;
+
     // For video messages create a new blob to transfer the data.
     if(mediaType === 'video' || mediaType === 'audio') {
         if(recordedBlobs === undefined) {
@@ -701,9 +703,10 @@ function uploadMedia(mediaType) {
         const blobMimeType = (mediaType == 'video') ? 
             'video/webm; codecs="vp8, opus"' : 'audio/ogg; codecs=opus';
 
-        const blob = new Blob(recordedBlobs, {type: blobMimeType});
+        const file = new Blob(recordedBlobs, {type: blobMimeType});
         formData.append("type", mediaType);
-        formData.append("data", blob, "recording");
+        formData.append("data", file, "recording");
+        fileSize = file.size;
     }
     // Files can be transferred with the nominal fields. 
     else {
@@ -715,6 +718,15 @@ function uploadMedia(mediaType) {
         formData.append("fname", file.name);
         formData.append("fsize", file.size);
         formData.append("data", file, file.name);
+        fileSize = file.size;
+    }
+
+    // Catch invalid file sizes before failing the upload.
+    if(fileSize > $('.MAX_FILE_SIZE').val())
+    {
+        $('.dialog-response').text('Invalid file size (0 < size < ' + $('.MAX_FILE_SIZE_HUMAN').val() + ')');
+        $('.dialog-response').show('highlight');
+        return;
     }
 
     progressBar = $('#progress-' + mediaType)

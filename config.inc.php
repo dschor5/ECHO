@@ -42,6 +42,9 @@ $config['uploads_allowed'] = array(
     'application/x-7z-compressed' => '7z',
     'video/mp4' => 'mp4',
     'audio/mp4' => 'mp4',
+    'image/heic' => 'heic',
+    'image/heif' => 'heif',
+    'video/quicktime' => 'mov',
 );
 
 // this is the array of modules that are allowed to run

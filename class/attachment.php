@@ -47,8 +47,23 @@
      */
     public function getTemplateType() : string
     {
+        // After adding HEIC files, we also need to exclude them 
+        // from being displayed like regular images. 
+        $validImgMime = array(
+            'image/bmp',
+            'image/gif',
+            'image/jpg',
+            'image/jpeg',
+            'image/png',
+            'image/tiff'
+        );
+
         $fileType = explode('/', $this->mime_type, 2)[0];
-        if(!in_array($fileType, array('image', 'audio', 'video')))
+        if($fileType == 'image' && !in_array($this->mime_type, $validImgMime))
+        {
+            $fileType = 'file';
+        }
+        else if(!in_array($fileType, array('image', 'audio', 'video')))
         {
             $fileType = 'file';
         }
