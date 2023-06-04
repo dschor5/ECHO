@@ -254,7 +254,6 @@ class MessagesDao extends Dao
                     'FROM messages '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
-                        'AND message_id_alt is not null '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
                     'LIMIT 1, 1';
 
@@ -309,7 +308,6 @@ class MessagesDao extends Dao
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.message_id > '.$qLastId.' '.
                         'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
-                        'AND message_id_alt is not null '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
         
@@ -360,8 +358,7 @@ class MessagesDao extends Dao
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'WHERE messages.message_id='.$qMessageId.' '. 
-                        'AND message_id_alt is not null ';
+                    'WHERE messages.message_id='.$qMessageId;
                     
         $message = false;
         
@@ -409,7 +406,6 @@ class MessagesDao extends Dao
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
                         'AND messages.'.$qRefTime.' <= @ts '.
-                        'AND message_id_alt is not null '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$qOffset.', 25';
         
@@ -482,7 +478,6 @@ class MessagesDao extends Dao
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
                         'AND messages.message_id < '.$qlastMsgId.' '.
-                        'AND message_id_alt is not null '.
                     'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
                     'LIMIT 0, '.$numMsgs;
 
@@ -560,7 +555,6 @@ class MessagesDao extends Dao
                         'AND msg_status.message_id=messages.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '. 
                         'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '. 
-                        'AND message_id_alt is not null '.
                     'GROUP BY messages.conversation_id '.
                     'ORDER BY messages.conversation_id';
         
@@ -627,7 +621,6 @@ class MessagesDao extends Dao
                     'FROM messages '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
-                        'AND message_id_alt is not null '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$offset.', '.$numMsgs;
         
