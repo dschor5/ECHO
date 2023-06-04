@@ -463,7 +463,7 @@ class ChatModule extends DefaultModule
 
             // Execute both database queries. 
             $messagesDao = MessagesDao::getInstance();
-            if(($messageId = $messagesDao->sendMessage($this->user, $msgData, $fileData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user->is_crew, $msgData, $fileData)) !== false)
             {
                 $result = array(
                     'success' => true, 
@@ -538,7 +538,7 @@ class ChatModule extends DefaultModule
             );
 
             // Send message.
-            if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user->is_crew, $msgData)) !== false)
             {
                 $result = array(
                     'success' => true, 
@@ -615,6 +615,8 @@ class ChatModule extends DefaultModule
         $lastEventId = $headers['Last-Event-Id'] ?? -1;
         $this->sendMissedMessages(intval($lastEventId));
         
+        $schedMessagesDao = SchedMessagesDao::getInstance();
+
         // Infinite loop processing data. 
         while(true)
         {
@@ -624,6 +626,7 @@ class ChatModule extends DefaultModule
             {
                 $iter = 1;
                 $forceIfNoChange = true;    
+                $schedMessagesDao->sendScheduledMessages();
             }
 
             // Send events with updates. 

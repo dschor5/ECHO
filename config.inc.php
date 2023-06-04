@@ -88,6 +88,7 @@ require_once('class/attachment.php');
 require_once('class/archive.php');
 require_once('class/parsedown.php');
 require_once('class/archiveMaker.php');
+require_once('class/schedMessage.php');
 
 // Include database objects
 require_once('database/missionDao.php');
@@ -98,6 +99,7 @@ require_once('database/messagesDao.php');
 require_once('database/messageStatusDao.php');
 require_once('database/messageFileDao.php');
 require_once('database/archiveDao.php');
+require_once('database/schedMessagesDao.php');
 
 
 

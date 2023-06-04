@@ -55,7 +55,7 @@ class DebugModule extends DefaultModule
                 'recv_time_mcc' => $currTime->getTime($otherUser->is_crew),
             );
 
-            if(($messageId = $messagesDao->sendMessage($this->user, $msgData)) !== false)
+            if(($messageId = $messagesDao->sendMessage($this->user->is_crew, $msgData)) !== false)
             {
                 echo 'New auto-generated message ID='.$messageId.'<br/>';
             }
