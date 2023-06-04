@@ -45,6 +45,8 @@ $config['uploads_allowed'] = array(
     'image/heic' => 'heic',
     'image/heif' => 'heif',
     'video/quicktime' => 'mov',
+    'video/x-msvideo' => 'avi',
+    'text/plain' => 'txt',
 );
 
 // this is the array of modules that are allowed to run
