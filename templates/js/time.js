@@ -33,7 +33,7 @@ function updateTime() {
             var sec = Math.floor(habMet - day * SEC_PER_DAY - hrs * 3600 - min * 60);
 
             habDate = 'T-';
-            if(day < -1)
+            if(day > 0)
             {
                 habDate += Math.abs(day) + 'd ';
             } 
