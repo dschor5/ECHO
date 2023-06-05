@@ -740,7 +740,7 @@ function uploadMedia(mediaType) {
         cache: false,
         contentType: false,
         processData: false,
-        timeout: 60000,
+        timeout: 1800000, // 30min
         xhr: function () {
             var myXhr = $.ajaxSettings.xhr();
             $(captionBox).attr('disabled', true);
@@ -764,8 +764,10 @@ function uploadMedia(mediaType) {
             }
             $(captionBox).attr('disabled', false);
         },
-        error: function(xhr, ajaxOptions, thrownError) {
-            $('.dialog-response').text(resp.error);
+        error: function(jqXHR, textStatus, errorThrown) {
+            var errorMsg = 'status=' + ((textStatus == null) ? 'null' : textStatus) + ', ' + 
+                           'exception=' + ((errorThrown == null) ? 'null' : errorThrown);
+            $('.dialog-response').text('Error uploading file (' + errorMsg + ')');
             $('.dialog-response').show('highlight');
             $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
             $(captionBox).attr('disabled', false);
