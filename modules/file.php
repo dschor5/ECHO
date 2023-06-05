@@ -141,6 +141,10 @@ class FileModule implements Module
             exit();
         }
 
+        // Cache control for files
+        $missionCfg = MissionConfig::getInstance();
+        header("Cache-Control: max-age=".$missionCfg->login_timeout);
+
         // Else send the proper HTTP headers.
         switch($extension)
         {
