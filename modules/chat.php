@@ -615,8 +615,6 @@ class ChatModule extends DefaultModule
         $lastEventId = $headers['Last-Event-Id'] ?? -1;
         $this->sendMissedMessages(intval($lastEventId));
         
-        $schedMessagesDao = SchedMessagesDao::getInstance();
-
         // Infinite loop processing data. 
         while(true)
         {
@@ -626,7 +624,6 @@ class ChatModule extends DefaultModule
             {
                 $iter = 1;
                 $forceIfNoChange = true;    
-                $schedMessagesDao->sendScheduledMessages();
             }
 
             // Send events with updates. 
