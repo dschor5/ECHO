@@ -8,3 +8,5 @@ uploads/*
 update.php
 phpinfo.php
 logs/*
+cron_stderr.txt
+cron_stdout.txt
