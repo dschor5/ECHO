@@ -15,7 +15,7 @@ CREATE TABLE `users` (
 
 CREATE TABLE `conversations` (
   `conversation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
   `parent_conversation_id` int(11) UNSIGNED NULL DEFAULT NULL,
   `date_created` datetime NOT NULL DEFAULT NOW(),
   `last_message` datetime NOT NULL DEFAULT NOW(),
