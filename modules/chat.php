@@ -345,6 +345,9 @@ class ChatModule extends DefaultModule
 
         // Get the file type. 
         $fileType  = trim($_POST['type'] ?? Message::FILE);
+        $fileExt1 = '';
+        $fileExt2 = '';
+        $fileNameParts = 1;
 
         // Start building the response. 
         $result = array('success' => false);
@@ -360,14 +363,18 @@ class ChatModule extends DefaultModule
         // Future versions of ECHO can expand this to work with more browsers. 
         if($fileType == Message::VIDEO)
         {
-            $fileExt  = 'mkv';
+            $fileExt1  = 'mkv';
+            $fileExt2  = '';
+            $fileNameParts = 2;
             $fileMime = 'video/webm';
             $dt = new DateTime('NOW');
             $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
         }
         elseif($fileType == Message::AUDIO)
         {
-            $fileExt  = 'mkv';
+            $fileExt1  = 'mkv';
+            $fileExt2  = '';
+            $fileNameParts = 2;
             $fileMime = 'audio/webm';
             $dt = new DateTime('NOW');
             $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
