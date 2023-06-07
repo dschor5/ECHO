@@ -375,8 +375,26 @@ class ChatModule extends DefaultModule
         else // Catch-all for regular attachments
         {
             $fileType = Message::FILE;
-            $fileName  = trim($_FILES['data']['name'] ?? '');
-            $fileExt   = strtolower(substr($fileName, strrpos($fileName, '.') + 1));
+            $fileName = trim($_FILES['data']['name'] ?? '');
+
+            $fileNameParts = explode('.', $fileName, 3);
+            $numFileNameParts = count($fileNameParts);
+            if($numFileNameParts == 1)
+            {
+                $fileExt1 = $fileNameParts[0];
+                $fileExt2 = '';
+            }
+            else if($numFileNameParts == 2)
+            {
+                $fileExt1 = $fileNameParts[1];
+                $fileExt2 = $fileNameParts[0];
+            }
+            else
+            {
+                $fileExt1 = $fileNameParts[2];
+                $fileExt2 = $fileNameParts[1];
+            }
+
             if(finfo_open(FILEINFO_MIME_TYPE) !== false)
             {
                 $fileMime  = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['data']['tmp_name']);
@@ -416,19 +434,20 @@ class ChatModule extends DefaultModule
             $result['error'] = 'Invalid filename (3 < length =< 240).';
         }
         // Validate file type. 
-        else if(!isset($config['uploads_allowed'][$fileMime]))
+        else if($numFileNameParts == 3 && $fileExt2 != '7z' && !isset($config['uploads_allowed'][$fileMime]))
         {
-            $result['error'] = 'Invalid file type uploaded. (MimeType)';
+            $result['error'] = 'Invalid file type uploaded. (MimeType='.$fileMime.')';
         }
         // Validate extension
-        else if(!in_array($fileExt, $config['uploads_allowed']))
+        else if(($numFileNameParts == 2 && !in_array($fileExt1, array_merge($config['uploads_allowed'], $config['uploads_allowed_partial']))) ||
+                ($numFileNameParts == 3 && !in_array($fileExt2, array_merge($config['uploads_allowed'], $config['uploads_allowed_partial']))))
         {
-            $result['error'] = 'Invalid file type uploaded. (Extension)';
+            $result['error'] = 'Invalid file type uploaded. (Extension='.$fileName.')';
         }
         // Validate filesize. 
         else if($fileSize <= 0 || $fileSize > ServerFile::getMaxUploadSize())
         {
-            $result['error'] = 'Invalid file size (0 < size < '.ServerFile::getMaxUploadSize().')';
+            $result['error'] = 'Invalid file size (0 < size < '.ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()).')';
         }
         // Move the file to the uploads directory. 
         else if(!move_uploaded_file($_FILES['data']['tmp_name'], $fullPath))
