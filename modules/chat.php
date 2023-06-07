@@ -384,7 +384,7 @@ class ChatModule extends DefaultModule
             $fileType = Message::FILE;
             $fileName = trim($_FILES['data']['name'] ?? '');
 
-            $fileNameParts = explode('.', $fileName, 3);
+            $fileNameParts = explode('.', strtolower($fileName), 3);
             $numFileNameParts = count($fileNameParts);
             if($numFileNameParts == 1)
             {
