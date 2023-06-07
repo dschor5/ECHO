@@ -449,7 +449,7 @@ class ChatModule extends DefaultModule
         else if(($numFileNameParts == 2 && !in_array($fileExt1, array_merge($config['uploads_allowed'], $config['uploads_allowed_partial']))) ||
                 ($numFileNameParts == 3 && !in_array($fileExt2, array_merge($config['uploads_allowed'], $config['uploads_allowed_partial']))))
         {
-            $result['error'] = 'Invalid file type uploaded. (Extension='.$fileName.')';
+            $result['error'] = 'Invalid file type uploaded. (Extension='.$fileName.' - '.$fileExt1.' - '.$numFileNameParts.')';
         }
         // Validate filesize. 
         else if($fileSize <= 0 || $fileSize > ServerFile::getMaxUploadSize())
