@@ -394,7 +394,7 @@ class ChatModule extends DefaultModule
             else if($numFileNameParts == 2)
             {
                 $fileExt1 = $fileNameParts[1];
-                $fileExt2 = $fileNameParts[0];
+                $fileExt2 = '';
             }
             else
             {
