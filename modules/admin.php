@@ -492,7 +492,7 @@ class AdminModule extends DefaultModule
                     '/%delay-time-id%/'    => 'id="delay-time-'.$id.'"',
                     '/%delay-cfg-id%/'     => 'id="delay-cfg-'.$id.'"',
                     '/%delay-date-value%/' => $dateTime[0],
-                    '/%delay-time-value%/' => $dateTime[1],
+                    '/%delay-time-value%/' => substr($dateTime[1], 0, 5),
                     '/%delay-cfg-value%/'  => $cfg['eq'],
                 ));
             }
