@@ -345,6 +345,9 @@ class ChatModule extends DefaultModule
 
         // Get the file type. 
         $fileType  = trim($_POST['type'] ?? Message::FILE);
+        $fileExt1 = '';
+        $fileExt2 = '';
+        $fileNameParts = 1;
 
         // Start building the response. 
         $result = array('success' => false);
@@ -360,14 +363,18 @@ class ChatModule extends DefaultModule
         // Future versions of ECHO can expand this to work with more browsers. 
         if($fileType == Message::VIDEO)
         {
-            $fileExt  = 'mkv';
+            $fileExt1  = 'mkv';
+            $fileExt2  = '';
+            $fileNameParts = 2;
             $fileMime = 'video/webm';
             $dt = new DateTime('NOW');
             $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
         }
         elseif($fileType == Message::AUDIO)
         {
-            $fileExt  = 'mkv';
+            $fileExt1  = 'mkv';
+            $fileExt2  = '';
+            $fileNameParts = 2;
             $fileMime = 'audio/webm';
             $dt = new DateTime('NOW');
             $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
@@ -377,7 +384,7 @@ class ChatModule extends DefaultModule
             $fileType = Message::FILE;
             $fileName = trim($_FILES['data']['name'] ?? '');
 
-            $fileNameParts = explode('.', $fileName, 3);
+            $fileNameParts = explode('.', strtolower($fileName), 3);
             $numFileNameParts = count($fileNameParts);
             if($numFileNameParts == 1)
             {
@@ -387,7 +394,7 @@ class ChatModule extends DefaultModule
             else if($numFileNameParts == 2)
             {
                 $fileExt1 = $fileNameParts[1];
-                $fileExt2 = $fileNameParts[0];
+                $fileExt2 = '';
             }
             else
             {
@@ -442,7 +449,7 @@ class ChatModule extends DefaultModule
         else if(($numFileNameParts == 2 && !in_array($fileExt1, array_merge($config['uploads_allowed'], $config['uploads_allowed_partial']))) ||
                 ($numFileNameParts == 3 && !in_array($fileExt2, array_merge($config['uploads_allowed'], $config['uploads_allowed_partial']))))
         {
-            $result['error'] = 'Invalid file type uploaded. (Extension='.$fileName.')';
+            $result['error'] = 'Invalid file type uploaded. (Extension='.$fileName.' - '.$fileExt1.' - '.$numFileNameParts.')';
         }
         // Validate filesize. 
         else if($fileSize <= 0 || $fileSize > ServerFile::getMaxUploadSize())
