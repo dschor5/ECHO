@@ -21,6 +21,7 @@ $(document).ready(function(){
     if($('#feat-markdown-support-enabled').length)
     {
         simplemde = new SimpleMDE(simplemdeOps);
+        $('.CodeMirror').keyup(detectShiftEnter);
     }
 });
 
