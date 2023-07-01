@@ -11,6 +11,7 @@ function saveArchive(downloadType) {
             notes: $('#archive-notes').val(),
         },
         dataType: 'json',
+        timeout: 1000 * 60 * 20,
         success: function(data) {
             if(data.success != true) {
                 $('div.dialog-response').text(data.error);

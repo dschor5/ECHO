@@ -29,7 +29,22 @@ class ConversationArchiveMaker
      * @access private
      * @var int
      */
-   const MAX_ARCHIVE_SIZE = 1024*1024*1024;
+   const MAX_ARCHIVE_SIZE = 1024*1024*1024; // bytes
+   
+   /**
+     * Max execution time for script. Will overwrite PHP.ini settings.
+     * @access private
+     * @var int
+     */
+   const MAX_EXECUTION_TIME = 1200; // sec
+
+   /**
+    * Maximum number of files per archive. 
+    * PHP documentation recommends keeping this below 1000. 
+    * @access private 
+    * @var int
+    */
+   const MAX_FILES_PER_ARCHIVE = 500; 
 
    /**
     * Track success from creating a conversation archive.
@@ -47,11 +62,11 @@ class ConversationArchiveMaker
    private $archiveData;
 
    /**
-    * Array of ZipArchive objects. 
+    * Curr ZipArchive object. 
     * @access private
-    * @var array of ZipArchives
+    * @var ZipArchive
     */
-   private $archiveZips;
+   private $currZip;
 
     /**
      * Array of paths to each archive created.
@@ -66,6 +81,13 @@ class ConversationArchiveMaker
      * @var array of ints
      */
    private $archiveSizes;
+
+    /**
+     * Array of number of files added to teh archive.
+     * @access private
+     * @var array of ints
+     */
+   private $archiveNumFiles;
 
    /**
     * Metadata to add to each archive created in the database.
@@ -101,15 +123,24 @@ class ConversationArchiveMaker
       $this->success = true;
 
       // Arrays to track all the archives created. 
-      $this->archiveData  = array();
-      $this->archiveZips  = array();
-      $this->archivePaths = array();
-      $this->archiveSizes = array();
+      $this->archiveData     = array();
+      $this->archivePaths    = array();
+      $this->archiveSizes    = array();
+      $this->archiveNumFiles = array();
+
+      // Initialize current zip file.
+      $this->currZip = null;
 
       // Default values for all archives created
       $this->dataNotes      = $notes;
       $this->dataTzSelected = $tzSelected;
       $this->dataCurrTime   = (new DelayTime())->getTime();
+
+      // Increase max execution time. 
+      if(ini_set('max_execution_time', ConversationArchiveMaker::MAX_EXECUTION_TIME) === false)
+      {
+         Logger::warning('ConversationArchiveMaker::__construct - Could not change max_execution_time.');
+      }
 
       // Start a new archive. 
       $this->newArchive();
@@ -138,20 +169,30 @@ class ConversationArchiveMaker
       // File path for new file
       $zipFilepath = $server['host_address'].$config['logs_dir'].'/'.$newData['server_name'];
 
-      // Create a new file. 
-      $newZip = new ZipArchive();
-
-      // Open the new file. 
-      if($newZip->open($zipFilepath, ZipArchive::CREATE)) 
+      if($this->currZip == null)
       {
-         $this->archiveData[]  = $newData;
-         $this->archiveZips[]  = $newZip;
-         $this->archivePaths[] = $zipFilepath;
-         $this->archiveSizes[] = 0;
+         // Create a new file. 
+         $this->currZip = new ZipArchive();
+
+         // Open the new file. 
+         if($this->currZip->open($zipFilepath, ZipArchive::CREATE)) 
+         {
+            $this->archiveData[]  = $newData;
+            $this->archivePaths[] = $zipFilepath;
+            $this->archiveSizes[] = 0;
+            $this->archiveNumFiles[] = 0;
+         }
+         else
+         {
+            Logger::warning('ConversationArchiveMaker::newArchive - Failed to create "'.$newData['server_name'].'"');
+            $this->currZip = null;
+            $this->success = false;
+         }      
       }
       else
       {
-         Logger::warning('archiveMaker::newArchive failed to create "'.$newData['server_name'].'"');
+         Logger::warning('ConversationArchiveMaker::newArchive - Improper initialization.');
+         $this->currZip = null;
          $this->success = false;
       }      
 
@@ -168,9 +209,30 @@ class ConversationArchiveMaker
     */
    private function checkZipSize(int $newFile) : void
    {
-      if(end($this->archiveSizes) + $newFile >= ConversationArchiveMaker::MAX_ARCHIVE_SIZE)
+      if(end($this->archiveSizes) + $newFile >= ConversationArchiveMaker::MAX_ARCHIVE_SIZE ||
+         end($this->archiveNumFiles) >= ConversationArchiveMaker::MAX_FILES_PER_ARCHIVE)
       {
-         end($this->archiveZips)->close();
+         if($this->currZip != null)
+         {
+            // PHP documentation says ZipArchive will not close properly if it has 0 files. 
+            if($this->currZip->count() > 0)
+            {
+               if(!$this->currZip->close())
+               {
+                  Logger::error('ConversationArchiveMaker::checkZipSize - Reported "'.$this->currZip->getStatusString().'"');
+               }
+            }
+            else
+            {
+               Logger::warning('ConversationArchiveMaker::checkZipSize - Cannot close file with 0 files.');
+            }
+
+            $this->currZip = null;
+         }
+         else
+         {
+            Logger::error('ConversationArchiveMaker::checkZipSize - Called on null archive.');
+         }
          $this->newArchive();
       }
    }
@@ -183,16 +245,22 @@ class ConversationArchiveMaker
     */
    public function addEmptyDir(string $folder) : bool
    {
+      $success = false;
+
       // Assumed size for adding a new directory to the zip file.
-      $extraSize = 4; 
+      $extraSize = 16; 
 
       // Check if it needs to start a new archive. 
       $this->checkZipSize($extraSize);
       
       // Call funuction on ZipArchive. 
-      if(($success = end($this->archiveZips)->addEmptyDir($folder)) == true)
+      if($this->currZip != null && ($success = $this->currZip->addEmptyDir($folder)) === true)
       {
          $this->archiveSizes[count($this->archiveSizes)-1] += $extraSize;
+      }
+      else
+      {
+         Logger::error('ConversationArchiveMaker::addEmptyDir - Reported "'.$this->currZip->getStatusString().'"');
       }
 
       return $success;
@@ -206,16 +274,22 @@ class ConversationArchiveMaker
     */
    public function addFromString(string $filename, string $text) : bool 
    {
+      $success = false;
+
       // Size of new text added + assumed overhead. 
-      $extraSize = strlen($text) + 32; 
+      $extraSize = strlen($text) + 256; 
 
       // Check if it needs to start a new archive.
       $this->checkZipSize($extraSize);
 
-      // Call function on ZipArchive.
-      if(($success = end($this->archiveZips)->addFromString($filename, $text)) == true)
+      if($this->currZip != null && ($success = $this->currZip->addFromString($filename, $text)) === true)
       { 
          $this->archiveSizes[count($this->archiveSizes)-1] += $extraSize;
+         $this->archiveNumFiles[count($this->archiveSizes)-1]++;
+      }
+      else
+      {
+         Logger::error('ConversationArchiveMaker::addFromString - Reported "'.$this->currZip->getStatusString().'"');
       }
 
       return $success;
@@ -229,6 +303,8 @@ class ConversationArchiveMaker
     */
    public function addFile(string $filepath, string $zippath) : bool 
    {
+      $success = false;
+
       // Size of new text added + assumed overhead. 
       $extraSize = filesize($filepath); 
 
@@ -236,9 +312,14 @@ class ConversationArchiveMaker
       $this->checkZipSize($extraSize);
 
       // Call function on ZipArchive.
-      if(file_exists($filepath) && ($success = end($this->archiveZips)->addFile($filepath, $zippath)) == true)
+      if($this->currZip != null && file_exists($filepath) && ($success = $this->currZip->addFile($filepath, $zippath)) === true)
       {
          $this->archiveSizes[count($this->archiveSizes)-1] += $extraSize;
+         $this->archiveNumFiles[count($this->archiveSizes)-1]++;
+      }
+      else
+      {
+         Logger::error('ConversationArchiveMaker::addFile - Reported "'.$this->currZip->getStatusString().'"');
       }
 
       return $success;
@@ -251,7 +332,26 @@ class ConversationArchiveMaker
     */
    public function close() : array
    {
-      end($this->archiveZips)->close();
+      if($this->currZip != null)
+      {
+         if($this->currZip->count() > 0)
+         {
+            if(!$this->currZip->close())
+            {
+               Logger::error('ConversationArchiveMaker::close - Reported "'.$this->currZip->getStatusString().'"');
+            }
+         }
+         else
+         {
+            Logger::warning('ConversationArchiveMaker::close - Cannot call on empty zip.');
+         }
+         
+         $this->currZip = null;
+      }
+      else
+      {
+         Logger::error('ConversationArchiveMaker::close - Called on null archive.');
+      }
 
       // Add file size and MD5 for every archive created.
       for($i = 0; $i < count($this->archiveData); $i++)
