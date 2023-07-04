@@ -1,4 +1,14 @@
+var archiveProgressTimeout = null;
+
 function saveArchive(downloadType) {
+
+    $('#progress-archive').progressbar('widget').show('highlight', 0);
+    $('#dialog-progrss').dialog('open');
+    if(archiveProgressTimeout != null) {
+        clearTimeout(archiveProgressTimeout);
+    }
+    archiveProgressTimeout = setTimeout(checkArchiveProgress, 2000);
+
     $.ajax({
         url: BASE_URL + "/ajax",
         type: 'POST',
@@ -12,16 +22,50 @@ function saveArchive(downloadType) {
         },
         dataType: 'json',
         timeout: 1000 * 60 * 20,
+        error: function(data) {
+            $('#progress-archive').progressbar('widget').show('highlight', 0);
+            $('#dialog-progrss').dialog('close');
+            $('div.dialog-response').text('Error creating archive. See log for details.');
+            $('div.dialog-response').show();
+            clearTimeout(archiveProgressTimeout);
+        },
         success: function(data) {
             if(data.success != true) {
                 $('div.dialog-response').text(data.error);
                 $('div.dialog-response').show();
+                $('#progress-archive').progressbar('widget').show('highlight', 0);
+                $('#dialog-progrss').dialog('close');
             }
             else {
                 location.href = BASE_URL + '/admin/data';
             }
         }
     });    
+}
+
+function checkArchiveProgress() {
+
+    $.ajax({
+        url: BASE_URL + "/ajax",
+        type: 'POST',
+        data: {
+            action: 'admin',
+            subaction: 'backupstatus',
+        },
+        dataType: 'json',
+        timeout: 1000,
+        error: function(data) {
+            // Do nothing
+        },
+        success: function(data) {
+            if(data.success != true) {
+                var percent = parseFloat(data.currCount) / data.totalCount * 100;
+                $('#progress-archive').progressbar('value', percent);
+            }
+        }
+    });
+
+    archiveProgressTimeout = setTimeout(checkArchiveProgress, 2000);
 }
 
 function clearData() {
@@ -95,5 +139,21 @@ $(document).ready(function() {
         modal: true,
     });
 
-});
+    $('#dialog-progress').dialog({
+        autoOpen: false,
+        draggable: false,
+        resizable: false,
+        closeOnEscape: false,
+        height: 200,
+        width: 400,
+        position: { my: "center center", at: "center center-25%", of: window },
+        buttons: [
+            {
+                text: 'OK',
+                id: 'confirm-btn',
+            }
+        ],
+        modal: true,
+    });
 
+});

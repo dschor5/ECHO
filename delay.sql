@@ -65,7 +65,7 @@ CREATE TABLE `msg_files` (
 CREATE TABLE `mission_config` (
   `name` varchar(32) COLLATE utf8_unicode_ci NOT NULL UNIQUE,
   `value` text CHARACTER SET utf8 NOT NULL,
-  `type` enum('string','int','float','bool', 'datetime') COLLATE utf8_unicode_ci NOT NULL,
+  `type` enum('string','int','float','bool', 'json') COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY(`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -93,7 +93,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('hab_timezone',       'string', 'America/Chicago'),
 ('hab_day_name',       'string', 'Mission Day'),
 ('delay_type',         'string', 'manual'),
-('delay_config',       'string', '[{"ts":"2021-01-01 00:00:00","eq":0}]'),
+('delay_config',       'json', '[{"ts":"2021-01-01 00:00:00","eq":0}]'),
 ('login_timeout',      'int',    '3600'),
 ('feat_audio_notification',  'bool', '1'),
 ('feat_badge_notification',  'bool', '1'),

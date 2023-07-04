@@ -647,6 +647,31 @@ class MessagesDao extends Dao
         return $messages;
     }
 
+    /**
+     * Count all messages containing a file attachment in the given conversations.
+     *
+     * @param array $convo_ids
+     * @return integer
+     */
+    public function countMessagesInConvo(array $convo_ids) : int 
+    {
+        $queryStr = 'SELECT count(*) as num_files FROM `msg_files` '. 
+                    'JOIN messages ON messages.message_id=msg_files.message_id '. 
+                    'WHERE messages.conversation_id IN ('.join(',', $convo_ids).');';
+
+        $numMsgs = 0;
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            if($result->num_rows > 0)
+            {
+                $numMsgs = $result->fetch_assoc()['num_files'];
+            }
+        }
+
+        return $numMsgs;
+    }
+
 }
 
 ?>

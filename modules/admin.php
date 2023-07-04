@@ -43,7 +43,8 @@ class AdminModule extends DefaultModule
             'backupsql'      => 'backupSqlDatabase', 
             'backupconvo'    => 'backupConversations',
             'backuplog'      => 'backupSystemLog',
-            'deletearchive'  => 'deleteArchive',   
+            'deletearchive'  => 'deleteArchive',  
+            'backupstatus'   => 'backupConversationStatus', 
         );
 
         $this->subHtmlRequests = array(
@@ -358,7 +359,7 @@ class AdminModule extends DefaultModule
                 if($startTime < $currTime && $currTime <= $endTime)
                 {
                     $delayConfig = array_merge(
-                        json_decode($mission->delay_config, true), 
+                        $mission->delay_config, 
                         array(array('ts'=>$currTimeObj->getTime(), 'eq'=>floatval($temp)))
                     );
                 }
@@ -478,7 +479,7 @@ class AdminModule extends DefaultModule
         else
         {
             $delayManual  = 0;
-            $delayOptions = json_decode($mission->delay_config, true);
+            $delayOptions = $mission->delay_config;
             $delayAuto    = '';
             foreach($delayOptions as $id => $cfg)
             {
@@ -1058,6 +1059,26 @@ class AdminModule extends DefaultModule
         return $response;
     }
 
+    /**
+     * Return the current conversation download status. 
+     * Useful for large backups that take minutes to completed.
+     *
+     * @return array
+     */
+    protected function backupConversationStatus() : array
+    {
+        $ret = array('success' => false);
+        
+        $missionCfg = MissionConfig::getInstance();
+        if(isset($missionCfg->download_status))
+        {
+            $ret = $missionCfg->download_status;
+            $ret['success'] = true;
+        }
+
+        return $ret;
+    }
+
     protected function backupConversations() : array
     {
         $response = array(
@@ -1086,17 +1107,26 @@ class AdminModule extends DefaultModule
         }
         else
         {
+            if(isset($missionCfg->download_status))
+            {
+                Logger::warning('admin::backupConversations Incomplete archive.', $missionCfg->download_status);
+                unset($missionCfg->download_status);
+            }
+
             Logger::info('admin::backupConversations started');
             $startTime = microtime(true);
 
             $conversationsDao = ConversationsDao::getInstance();
             $conversations = $conversationsDao->getConversations(null, $includePrivate);
 
-            $mission = MissionConfig::getInstance();
-            $sepThreads = $mission->feat_convo_threads;
+            $messagesDao = MessagesDao::getInstance();
+            $numMsgs = $messagesDao->countMessagesInConvo(array_keys($conversations));
 
-            $zipMaker = new ConversationArchiveMaker($notes, $tzSelected);
-
+            $sepThreads = $missionCfg->feat_convo_threads;
+            $zipMaker = new ConversationArchiveMaker($notes, $tzSelected, $numMsgs + count($conversations));
+            
+            $missionCfg->download_status = $zipMaker->getDownloadStatus(0);
+                
             foreach($conversations as $convoId => $convo)
             {
                 $parentName = ($convo->parent_conversation_id != null) ? 
@@ -1111,6 +1141,11 @@ class AdminModule extends DefaultModule
                     Logger::warning('conversation::archiveConvo failed to save '.$convoId.'.');
                     $response['success'] = false;
                     break;
+                }
+                else
+                {
+                    // Update status
+                    $missionCfg->download_status = $zipMaker->getDownloadStatus();
                 }
             }
             $archiveData = $zipMaker->close();
@@ -1137,6 +1172,7 @@ class AdminModule extends DefaultModule
             }
         }
         
+        unset($missionCfg->download_status);
         Logger::info('admin::backupConversations finished in '.$response['time'].' sec. ('.$result.')');
 
         return $response;

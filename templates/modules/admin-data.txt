@@ -115,3 +115,8 @@
     <input type="hidden" id="confirm-archive-id" name="archive_id" value="">
     <input type="hidden" id="confirm-subaction" name="subaction" value="">    
 </div>
+
+<div id="dialog-progress" title="Creating Archive" class="dialog-body" style="display: none;">
+    <p>Generating archive. This operation may take a few minutes depending on the number of attachments/video/audio messages sent.</p>
+    <div id="progress-archive"><div class="progress-label-file"></div></div>
+</div>

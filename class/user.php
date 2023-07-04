@@ -37,6 +37,13 @@ class User
     private $session_id;
 
     /**
+     * Struct to manage user preferences
+     * @access private
+     * @var array
+     */
+    private $preferenceArray;
+
+    /**
      * User constructor. 
      * 
      * Appends object data with the field conversations (array) containing
@@ -48,6 +55,7 @@ class User
     {
         $this->data = $data;
 
+        // Explode list of conversations the user belongs to. 
         if(isset($data['conversations']))
         {
             $this->data['conversations'] = explode(',', $this->data['conversations']);
@@ -55,6 +63,16 @@ class User
         else
         {
             $this->data['conversations'] = array();
+        }
+
+        // Parse user preferences
+        if(isset($data['preferences']))
+        {
+            $this->preferenceArray = json_decode($this->data['preferences']);
+        }
+        else
+        {
+            $this->preferenceArray = array();
         }
     }
 
@@ -174,6 +192,51 @@ class User
                 $this->last_login, 'UTC', $mission->mcc_timezone);
         }
         return $lastLogin;
+    }
+
+    /**
+     * Read the value of a user preference. 
+     *
+     * @param string $name
+     * @return mixed Return null if $name not found. 
+     */
+    public function readUserPreference(string $name)
+    {
+        $ret = null;
+
+        if(isset($this->preferenceArray[$name]))
+        {
+            $ret = $this->preferenceArray[$name];
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Update hte value of a user preference.
+     *
+     * @param string $name
+     * @param string $value
+     * @param boolean $updateNow - If false, value is not updated in DB. A subsequent call is needed. 
+     */
+    public function updateUserPreference(string $name, string $value, bool $updateNow=true) 
+    {
+        $this->preferenceArray[$name] = $value;
+        if($updateNow)
+        {
+            $this->saveUserPreference();
+        }
+    }
+
+    /**
+     * Save user preferences to DB. 
+     *
+     * @return void
+     */
+    public function saveUserPreference()
+    {
+        $userDao = UsersDao::getInstance();
+        $userDao->update(array('preference' => json_encode($this->preferenceArray)), $this->user_id);
     }
 }
 

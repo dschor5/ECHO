@@ -8,7 +8,8 @@
  * Implementation Notes:
  * - There are four concurrent arrays for archiveData, archiveZips, 
  *   archivePaths, archiveSizes. On initialization they are all empty. 
- *   Each time one archive is full (uncompressed data exceeds MAX_ARCHIVE_SIZE)
+ *   Each time one archive is full (uncompressed data exceeds MAX_ARCHIVE_SIZE
+ *   or the number of files in a single zip exceeds MAX_FILES_PER_ARCHIVE)
  *   then a new entry into the four arrays is created. 
  * - The last entry into the arrays is the current archive being modified. 
  * - Since the ZipArchive class does not allow you to see the compressed size
@@ -17,7 +18,17 @@
  * - The default settings in Apache/PHP defines the upper limit to use for 
  *   MAX_ARCHIVE_SIZE as 1.5G. For better performance it is better to keep 
  *   this at a lower value. The default for ECHO is 1G. 
+ * - The default settings in PHP allows for at most 1000 files to be 
+ *   tracked at a time. Since the ZipArchive keeps all the files opened 
+ *   until it finishes compressing and closing the archive, then 
+ *   the upper limit for MAX_FILES_PER_ARCHIVE is 1000. However, for better 
+ *   performance it is better to keep this at a default of 500 files. 
  * - Only added wrappers for the ZipArchive functions needed. 
+ * - Depending on the number of files to add, the zip creation can take 
+ *   minutes to complete. Thus, the constructor requires that you know apriori
+ *   how many files you will need to add (total for all archives). Then, internally
+ *   it tracks the status that can be used to send progress indicators 
+ *   to the user. 
  * 
  * @link https://github.com/dschor5/ECHO
  */
@@ -29,7 +40,7 @@ class ConversationArchiveMaker
      * @access private
      * @var int
      */
-   const MAX_ARCHIVE_SIZE = 1024*1024*1024; // bytes
+   const MAX_ARCHIVE_SIZE = 1024*1024*1024; // bytes = 1GB
    
    /**
      * Max execution time for script. Will overwrite PHP.ini settings.
@@ -112,12 +123,21 @@ class ConversationArchiveMaker
    private $dataCurrTime;
 
    /**
+    * Track progress while creating the archive.
+    * @access private
+    * @var array
+    */
+   private $status;
+
+   /**
     * ConversationArchiveMaker constructor. 
     *
     * @param string $notes Notes to add to each database entry.
     * @param string $tzSelected Timezone selected for the archive. 
+    * @param int $totalMsg Total number of files that need to be processed. 
+    *    Count +1 for each file/video/audio attachment +1 for each HTML conversation.
     */
-   public function __construct(string $notes, string $tzSelected)
+   public function __construct(string $notes, string $tzSelected, int $totalMsgs)
    {
       // Flag to record success from the full operation. 
       $this->success = true;
@@ -144,6 +164,13 @@ class ConversationArchiveMaker
 
       // Start a new archive. 
       $this->newArchive();
+
+      // Set array to store information on current archive
+      $this->status = array(
+         'currCount'  => 0,
+         'totalCount' => $totalMsgs, 
+         'date'       => (new DelayTime())->getTime()
+      );
    }
 
    /**
@@ -286,6 +313,7 @@ class ConversationArchiveMaker
       { 
          $this->archiveSizes[count($this->archiveSizes)-1] += $extraSize;
          $this->archiveNumFiles[count($this->archiveSizes)-1]++;
+         $this->status['currCount']++;
       }
       else
       {
@@ -316,6 +344,7 @@ class ConversationArchiveMaker
       {
          $this->archiveSizes[count($this->archiveSizes)-1] += $extraSize;
          $this->archiveNumFiles[count($this->archiveSizes)-1]++;
+         $this->status['currCount']++;
       }
       else
       {
@@ -386,6 +415,16 @@ class ConversationArchiveMaker
                array($file));
          }
       }
+   }
+
+   /**
+    * Get the status of the current archive creation.
+    *
+    * @return array
+    */
+   public function getDownloadStatus() : array 
+   {
+      return $this->status;
    }
 }
 

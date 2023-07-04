@@ -48,11 +48,49 @@ class MissionConfig
      */
     private $data;
 
+
+   /**
+    * Required config mnemonics that cannot be deleted
+    * @access private
+    * @var array
+    */
+    private $req;
+
     /**
      * Private constructor. Loads mission config from database.
      */
     private function __construct()
     {
+        // List of mnemonics that cannot be deleted
+        $this->req = array(
+            'name',                     
+            'date_start',               
+            'date_end',                 
+            'mcc_name',                 
+            'mcc_planet',               
+            'mcc_user_role',            
+            'mcc_timezone',             
+            'hab_name',                 
+            'hab_planet',               
+            'hab_user_role',            
+            'hab_timezone',             
+            'hab_day_name',             
+            'delay_type',               
+            'delay_config',             
+            'login_timeout',            
+            'feat_audio_notification',  
+            'feat_badge_notification',  
+            'feat_unread_msg_counts',   
+            'feat_convo_list_order',    
+            'feat_est_delivery_status', 
+            'feat_progress_bar',        
+            'feat_markdown_support',    
+            'feat_important_msgs',      
+            'feat_convo_threads',       
+            'feat_convo_threads_all',   
+            'debug',            
+        );
+
         // Force new query.
         $this->lastQueryTime = time() - 2 * self::QUERY_TIMEOUT;
 
@@ -119,7 +157,7 @@ class MissionConfig
      * @throws Exception if an invalid field is requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get(string $name)
+    public function __get(string $name) : mixed
     {
         $result = null;
 
@@ -140,6 +178,9 @@ class MissionConfig
                 case 'bool':
                     $result = boolval($this->data[$name]['value']); 
                     break;
+                case 'json':
+                    $result = json_decode($this->data[$name]['value'], true);
+                    break;
                 default:
                     $result = strval($this->data[$name]['value']);
             }
@@ -151,6 +192,99 @@ class MissionConfig
         }
 
         return $result;
+    }
+
+    /**
+     * Returns true if a parameter is set as a mission property. 
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function __iseet(string $name) : bool
+    {
+        $this->refreshData();
+        return array_key_exists($name, $this->data);
+    }
+
+    /**
+     * Set a mission property. 
+     * If setting an existing property, then check the type provided and 
+     * make sure it is compatible with what was already stored in the DB. 
+     * If setting a new variable, then extract the type from the $value passed.
+     *
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    public function __set(string $name, mixed $value) : void 
+    {
+        $validTypes = array(
+            'boolean' => 'bool',
+            'integer' => 'int',
+            'double'  => 'float',
+            'string'  => 'string',
+            'array'   => 'json'
+        );
+
+        // Get the type of hte input
+        $typeOrig = gettype($value);
+        $typeData = 'string';
+
+        // If it is an array, then encode hte value. 
+        if($typeOrig == 'array')
+        {
+            $value = json_encode($value);
+        }
+
+        // Get the actual data type that matches the DB enum.
+        if(in_array($typeOrig, $validTypes))
+        {
+            $typeData = $validTypes[$typeOrig];
+        }
+
+        $missionDao = MissionDao::getInstance();
+
+        // Update existing variable
+        if(array_key_exists($name, $this->data))
+        {   
+            if($typeData == $this->data[$name]['type'])
+            {
+                $missionDao->updateMissionConfig(array($name => $value));
+            }
+            else
+            {
+                Logger::warning('MissionConfig::__set - Update received invalid type for "'.$name.'"');
+            }
+        }
+        // Insert new variable
+        else
+        {
+            $missionDao->insert(array(
+                'name'  => $name,
+                'type'  => $typeData,
+                'value' => $value
+            ));
+        }
+    }
+
+    /**
+     * Remove a property set in the database. 
+     *
+     * @param string $name
+     * @return void
+     */
+    public function __unset(string $name) : void 
+    {
+        if(!in_array($name, $this->req, true))
+        {
+            unset($this->data[$name]);
+            $missionDao = MissionDao::getInstance();
+            $missionDao->drop('name="'.$name.'"');
+        }
+        else
+        {
+            Logger::error('MissionConfig::__unset - Tried to deleted "'.$name.'"');
+        }
     }
 }
 
