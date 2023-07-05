@@ -2,12 +2,13 @@ var archiveProgressTimeout = null;
 
 function saveArchive(downloadType) {
 
+    
     $('#progress-archive').progressbar('widget').show('highlight', 0);
-    $('#dialog-progrss').dialog('open');
+    $('#dialog-progress').dialog('open');
     if(archiveProgressTimeout != null) {
         clearTimeout(archiveProgressTimeout);
     }
-    archiveProgressTimeout = setTimeout(checkArchiveProgress, 2000);
+    archiveProgressTimeout = setTimeout(checkArchiveProgress, 1000);
 
     $.ajax({
         url: BASE_URL + "/ajax",
@@ -24,7 +25,7 @@ function saveArchive(downloadType) {
         timeout: 1000 * 60 * 20,
         error: function(data) {
             $('#progress-archive').progressbar('widget').show('highlight', 0);
-            $('#dialog-progrss').dialog('close');
+            $('#dialog-progress').dialog('close');
             $('div.dialog-response').text('Error creating archive. See log for details.');
             $('div.dialog-response').show();
             clearTimeout(archiveProgressTimeout);
@@ -34,7 +35,8 @@ function saveArchive(downloadType) {
                 $('div.dialog-response').text(data.error);
                 $('div.dialog-response').show();
                 $('#progress-archive').progressbar('widget').show('highlight', 0);
-                $('#dialog-progrss').dialog('close');
+                $('#dialog-progress').dialog('close');
+                clearTimeout(archiveProgressTimeout);
             }
             else {
                 location.href = BASE_URL + '/admin/data';
@@ -44,7 +46,6 @@ function saveArchive(downloadType) {
 }
 
 function checkArchiveProgress() {
-
     $.ajax({
         url: BASE_URL + "/ajax",
         type: 'POST',
@@ -53,19 +54,19 @@ function checkArchiveProgress() {
             subaction: 'backupstatus',
         },
         dataType: 'json',
-        timeout: 1000,
+        timeout: 800,
         error: function(data) {
             // Do nothing
         },
         success: function(data) {
-            if(data.success != true) {
+            if(data.success == true) {
                 var percent = parseFloat(data.currCount) / data.totalCount * 100;
                 $('#progress-archive').progressbar('value', percent);
             }
         }
     });
 
-    archiveProgressTimeout = setTimeout(checkArchiveProgress, 2000);
+    archiveProgressTimeout = setTimeout(checkArchiveProgress, 1000);
 }
 
 function clearData() {
@@ -144,16 +145,14 @@ $(document).ready(function() {
         draggable: false,
         resizable: false,
         closeOnEscape: false,
-        height: 200,
+        height: 300,
         width: 400,
         position: { my: "center center", at: "center center-25%", of: window },
-        buttons: [
-            {
-                text: 'OK',
-                id: 'confirm-btn',
-            }
-        ],
         modal: true,
+        open: function(event, ui) {
+            $(".ui-dialog-titlebar-close").hide();
+        }
     });
+    $('#progress-archive').progressbar({value: false});
 
 });

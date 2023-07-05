@@ -118,5 +118,6 @@
 
 <div id="dialog-progress" title="Creating Archive" class="dialog-body" style="display: none;">
     <p>Generating archive. This operation may take a few minutes depending on the number of attachments/video/audio messages sent.</p>
+    <p><b>NOTE:</b> The archive generation will continue in the background if you leave this page.</p>
     <div id="progress-archive"><div class="progress-label-file"></div></div>
 </div>

@@ -188,7 +188,11 @@ class MissionConfig
         else
         {
             Logger::error('Invalid field "'.$name.'" requested from MissionConfig');
-            throw new Exception();
+
+            if(in_array($name, $this->req, true))
+            {
+                throw new Exception();
+            }
         }
 
         return $result;
@@ -200,10 +204,10 @@ class MissionConfig
      * @param string $name
      * @return boolean
      */
-    public function __iseet(string $name) : bool
+    public function __isset(string $name) : bool
     {
         $this->refreshData();
-        return array_key_exists($name, $this->data);
+        return (array_key_exists($name, $this->data));
     }
 
     /**
@@ -237,7 +241,7 @@ class MissionConfig
         }
 
         // Get the actual data type that matches the DB enum.
-        if(in_array($typeOrig, $validTypes))
+        if(isset($validTypes[$typeOrig]))
         {
             $typeData = $validTypes[$typeOrig];
         }
@@ -249,16 +253,18 @@ class MissionConfig
         {   
             if($typeData == $this->data[$name]['type'])
             {
+                $this->data[$name]['value'] = $value;
                 $missionDao->updateMissionConfig(array($name => $value));
             }
             else
             {
-                Logger::warning('MissionConfig::__set - Update received invalid type for "'.$name.'"');
+                Logger::warning('MissionConfig::__set - Update received invalid type for "'.$name.'"'.'   '.$this->data[$name]['type'].' == '.$typeData);
             }
         }
         // Insert new variable
         else
         {
+            $this->data[$name] = array('type' => $typeData, 'value' => $value);
             $missionDao->insert(array(
                 'name'  => $name,
                 'type'  => $typeData,
@@ -277,9 +283,12 @@ class MissionConfig
     {
         if(!in_array($name, $this->req, true))
         {
-            unset($this->data[$name]);
-            $missionDao = MissionDao::getInstance();
-            $missionDao->drop('name="'.$name.'"');
+            if(isset($this->data[$name]))
+            {
+                unset($this->data[$name]);
+                $missionDao = MissionDao::getInstance();
+                $missionDao->drop('name="'.$name.'"');
+            }
         }
         else
         {

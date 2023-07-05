@@ -1068,7 +1068,6 @@ class AdminModule extends DefaultModule
     protected function backupConversationStatus() : array
     {
         $ret = array('success' => false);
-        
         $missionCfg = MissionConfig::getInstance();
         if(isset($missionCfg->download_status))
         {
@@ -1125,8 +1124,11 @@ class AdminModule extends DefaultModule
             $sepThreads = $missionCfg->feat_convo_threads;
             $zipMaker = new ConversationArchiveMaker($notes, $tzSelected, $numMsgs + count($conversations));
             
-            $missionCfg->download_status = $zipMaker->getDownloadStatus(0);
-                
+            Logger::info('BEFORE '.(isset($missionCfg->download_status) ? 'true' : 'false'));
+            $missionCfg->download_status = $zipMaker->getDownloadStatus();
+            Logger::info('AFTER '.json_encode($missionCfg->download_status));
+            
+
             foreach($conversations as $convoId => $convo)
             {
                 $parentName = ($convo->parent_conversation_id != null) ? 
