@@ -157,7 +157,7 @@ class MissionConfig
      * @throws Exception if an invalid field is requested. 
      * @return mixed Value contained by the field requested. 
      */
-    public function __get(string $name) : mixed
+    public function __get(string $name) 
     {
         $result = null;
 
