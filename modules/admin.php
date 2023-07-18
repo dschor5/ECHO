@@ -817,7 +817,6 @@ class AdminModule extends DefaultModule
 
     protected function editDataManagement() : string 
     {
-        
         $this->addTemplates('settings.css', 'data-management.js');
         $mission = MissionConfig::getInstance();
 
@@ -874,11 +873,11 @@ class AdminModule extends DefaultModule
         $logEntries = Logger::tailLog($logNum);
 
         return Main::loadTemplate('admin-data.txt', array(
-            '/%archive_tz%/'=>$archiveTzOptions,
             '/%archives%/' => $list->build(),
             '/%archive-name%/' => $mission->name,
             '/%log-num%/' => $logNum,
             '/%log-entries%/' => $logEntries,
+            '/%archive_tz%/'=>$archiveTzOptions,
         ));
     }
 
@@ -1067,12 +1066,16 @@ class AdminModule extends DefaultModule
      */
     protected function backupConversationStatus() : array
     {
-        $ret = array('success' => false);
+        $ret = array('success' => true);
         $missionCfg = MissionConfig::getInstance();
         if(isset($missionCfg->download_status))
         {
-            $ret = $missionCfg->download_status;
-            $ret['success'] = true;
+            $ret = array_merge($ret, $missionCfg->download_status);
+            $ret['inprogress'] = true;
+        }
+        else
+        {
+            $ret['inprogress'] = false;
         }
 
         return $ret;
@@ -1080,18 +1083,37 @@ class AdminModule extends DefaultModule
 
     protected function backupConversations() : array
     {
+        $missionCfg = MissionConfig::getInstance();
+
         $response = array(
             'success' => true, 
             'time'    => 0, 
             'error'   => '', 
         );
 
+        if(isset($missionCfg->download_status))
+        {
+            $backupTime = strtotime($missionCfg->download_status['date']);
+            $currTime  = strtotime((new DelayTime())->getTime());
+            $differenceInSeconds = $currTime - $backupTime;
+            if($differenceInSeconds > ConversationArchiveMaker::MAX_EXECUTION_TIME)
+            {
+                Logger::warning('admin::backupConversations Incomplete archive.', $missionCfg->download_status);
+                unset($missionCfg->download_status);
+            }
+            else
+            {
+                $response['success'] = false;
+                $response['error'] = 'Generating archive. Only one archive can be created at a time.';
+                return $response;
+            }
+        }
+
         $tzSelected = $_POST['timezone'] ?? '';
         $isCrew = !(isset($_POST['perspective']) && $_POST['perspective'] == 'mcc');
         $includePrivate = (isset($_POST['scope']) && $_POST['scope'] == 'convo-all');
         
         $archiveName = $_POST['name'] ?? '';
-        $missionCfg = MissionConfig::getInstance();
         $notes = 'Mission: '.$missionCfg->name.'<br/>'. 
                  'Archive Perspective: '.($isCrew ? 'HAB' : 'MCC'). '<br/>'. 
                  'Archive Timezone: '.$tzSelected. '<br/>'. 
@@ -1106,11 +1128,7 @@ class AdminModule extends DefaultModule
         }
         else
         {
-            if(isset($missionCfg->download_status))
-            {
-                Logger::warning('admin::backupConversations Incomplete archive.', $missionCfg->download_status);
-                unset($missionCfg->download_status);
-            }
+
 
             Logger::info('admin::backupConversations started');
             $startTime = microtime(true);
@@ -1124,10 +1142,7 @@ class AdminModule extends DefaultModule
             $sepThreads = $missionCfg->feat_convo_threads;
             $zipMaker = new ConversationArchiveMaker($notes, $tzSelected, $numMsgs + count($conversations));
             
-            Logger::info('BEFORE '.(isset($missionCfg->download_status) ? 'true' : 'false'));
             $missionCfg->download_status = $zipMaker->getDownloadStatus();
-            Logger::info('AFTER '.json_encode($missionCfg->download_status));
-            
 
             foreach($conversations as $convoId => $convo)
             {

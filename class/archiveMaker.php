@@ -44,7 +44,7 @@ class ConversationArchiveMaker
    
    /**
      * Max execution time for script. Will overwrite PHP.ini settings.
-     * @access private
+     * @access public
      * @var int
      */
    const MAX_EXECUTION_TIME = 1200; // sec

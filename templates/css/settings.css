@@ -281,3 +281,14 @@ input:checked + .slider:before {
 .button-black .ui-icon {
     background-image: url("%http%%site_url%/templates/media/ui-icons_222222_256x240.png");
 }
+
+.ui-progressbar {
+    position: relative;
+}
+.progress-label-file {
+    position: absolute;
+    left: 30%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}

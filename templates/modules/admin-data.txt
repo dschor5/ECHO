@@ -9,7 +9,6 @@
         <div class="form-row">
             <label for="name">Conversations</label>
             <div class="form-field">
-
                 <select name="archive-tz" id="archive-tz">
                     %archive_tz%
                 </select>
@@ -23,8 +22,13 @@
                 </select>
                 <input type="text" placeholder="Insert archive notes..." name="archive-notes" id="archive-notes" value="" required>
 
-                <button type="button" class="form-button" onclick="saveArchive('backupconvo')">Create Archive</button>
-                <!--<div id="archive_loading"><img src="%http%%site_url%/%templates_dir%/images/loader.gif" width="20" height="20"> Creating archive...</div>-->
+                <div id="progress-archive-wrapper" style="display: none;">
+                    <div id="progress-archive" style="border: 1px solid black;"><div class="progress-label-file"></div></div>
+                </div>
+
+                <div id="archive-response" class="dialog-response"></div>
+
+                <button id="create-archive-btn" type="button" class="form-button" onclick="saveArchive('backupconvo')" disabled>Create Archive</button>
                 <div id="archive_download"></div>
             </div>
             <div class="form-help">
@@ -114,10 +118,4 @@
     <div class="modal-confirm-body"><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span></div>
     <input type="hidden" id="confirm-archive-id" name="archive_id" value="">
     <input type="hidden" id="confirm-subaction" name="subaction" value="">    
-</div>
-
-<div id="dialog-progress" title="Creating Archive" class="dialog-body" style="display: none;">
-    <p>Generating archive. This operation may take a few minutes depending on the number of attachments/video/audio messages sent.</p>
-    <p><b>NOTE:</b> The archive generation will continue in the background if you leave this page.</p>
-    <div id="progress-archive"><div class="progress-label-file"></div></div>
 </div>
