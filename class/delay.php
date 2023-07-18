@@ -280,7 +280,7 @@ class Delay
     {
         // Get the current mission configuration and parse the delay field. 
         $mission = MissionConfig::getInstance();
-        $config = json_decode($mission->delay_config, true);
+        $config = $mission->delay_config;
 
         // Add dummy delay configs before/after mission to make it easier to traverse the array.
         array_unshift($config, array('ts'=>'2000-00-00 00:00:00', 'eq'=>'0'));

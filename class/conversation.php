@@ -188,14 +188,14 @@ class Conversation
         global $config;
         $success = true;
         $messagesDao = MessagesDao::getInstance();
-        $missionConfig = MissionConfig::getInstance();
+        $missionCfg = MissionConfig::getInstance();
         
         // Include list of participants and their role in the archive.
         $convoStr = '';
         $convoParticipants = $this->getParticipants();
         $participantsStr = '';
-        $mccStr = $missionConfig->mcc_planet;
-        $habStr = $missionConfig->hab_planet;
+        $mccStr = $missionCfg->mcc_planet;
+        $habStr = $missionCfg->hab_planet;
         foreach($convoParticipants as $participant)
         {
             $participantsStr .= Main::loadTemplate('admin-data-save-user.txt', 
@@ -261,6 +261,10 @@ class Conversation
                 }
             }
             $offset += $numMsgs;
+
+            // Update status
+            $missionCfg->download_status = $zip->getDownloadStatus();
+
             $messages = $messagesDao->getMessagesForConvo($ids, $isCrew, $offset, $numMsgs);
         }
 
@@ -298,7 +302,7 @@ class Conversation
             $fileName = $folderName.'.html';
             $success = $zip->addFromString($fileName, $convoStr);
         }
-
+        
         return $success;
     }
     
