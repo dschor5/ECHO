@@ -272,7 +272,7 @@ class Message
         }
         else
         {
-            $result = preg_replace('/[\r\n|\n|\r]/','<br>',$result);
+            $result = preg_replace('/(\r\n)|(\n)|(\r)/','<br>',$result);
         }
         
         return $result;
