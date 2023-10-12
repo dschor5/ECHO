@@ -220,7 +220,7 @@ class MissionConfig
      * @param mixed $value
      * @return void
      */
-    public function __set(string $name, mixed $value) : void 
+    public function __set(string $name, $value) : void 
     {
         $validTypes = array(
             'boolean' => 'bool',
