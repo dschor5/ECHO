@@ -90,9 +90,10 @@ class UsersDao extends Dao
      * Get User by its username field.
      *
      * @param string $username
+     * @param string $session_id
      * @return User|null
      */
-    public function getByUsername(string $username)
+    public function getByUsername(string $username, string $session_id=null)
     {
         $user = null;
 
@@ -115,6 +116,13 @@ class UsersDao extends Dao
                             'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
                             'WHERE participants.user_id=users.user_id) AS conversations '. 
                         'FROM users WHERE users.username='.$qUsername;
+            
+            // If provided, the session id must also match for the query to succeed. 
+            if($session_id != null)
+            {
+                $qSessionId = '\''.$this->database->prepareStatement($session_id).'\'';
+                $queryStr .= ' AND users.session_id='.$qSessionId;
+            }
 
             if (($result = $this->database->query($queryStr)) !== false)
             {

@@ -129,12 +129,6 @@ class Main
             $moduleName = $_GET['action'];
         }
         
-        // Add heartbeat to all modules if user not logged in. 
-        if($this->user != null)
-        {
-            $defaults[] = 'heartbeat.js';
-        }
-
         // Load module
         require_once($config['modules_dir'].'/'.$moduleName.'.php');
         $moduleClassName = $moduleName.'Module';
@@ -159,9 +153,9 @@ class Main
             $sessionId = trim(self::$cookie['sessionId']);
 
             $usersDao = UsersDao::getInstance();
-            $this->user = $usersDao->getByUsername($username);
+            $this->user = $usersDao->getByUsername($username, $sessionId);
 
-            if($this->user != null && $this->user->isValidSession($sessionId))
+            if($this->user != null)
             {
                 $subaction = $_GET['subaction'] ?? '';
                 if($subaction != 'stream')
@@ -169,6 +163,12 @@ class Main
                     $this->setSiteCookie(array('sessionId'=>$sessionId, 'username'=>$username));
                 }
             }
+            else
+            {
+                $this->user = null;
+                $this->deleteCookie();
+            }
+
         }
     }
 

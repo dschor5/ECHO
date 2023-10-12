@@ -159,24 +159,6 @@ class User
     }
 
     /**
-     * Returns true if the given session id matches the one in the 
-     * database for this user. 
-     * 
-     * @param string $cmpKey Session ID to validate.
-     * @return bool Returns true if it is a valid session ID.
-     */
-    public function isValidSession(string $cmpKey) : bool
-    {
-        $valid=false;
-        if ($cmpKey == $this->session_id)
-        {
-            $valid=true;
-        }
-
-        return $valid;
-    }
-
-    /**
      * Get string representation of last login in the MCC timezone.
      * If the user never logged in, the string will be blank.
      *

@@ -63,6 +63,10 @@ class HomeModule extends DefaultModule
                 header('Location: '.$server['http'].$server['site_url'].'/chat');
             }
         }
+        else if($this->user != null)
+        {
+            header('Location: '.$server['http'].$server['site_url'].'/chat');
+        }
 
         return $this->showHomepage();
     }
@@ -102,8 +106,27 @@ class HomeModule extends DefaultModule
      */
     protected function showHomepage() : string
     {
-        $this->addTemplates('login.js', 'login.css');
-        return Main::loadTemplate('home.txt', array());
+        global $server;
+        $content = '';
+
+        if($this->user != null)
+        {
+            if($this->user->is_password_reset)
+            {
+                $content = $this->showResetPage();
+            }
+            else
+            {
+                header('Location: '.$server['http'].$server['site_url'].'/chat');
+            }
+        }
+        else
+        {
+            $this->addTemplates('login.js', 'login.css');
+            $content = Main::loadTemplate('home.txt', array());
+        }
+        
+        return $content;
     }
 
     /**
@@ -197,6 +220,8 @@ class HomeModule extends DefaultModule
                 // If so, crease a new session and update the database.
                 $this->user = $user;
                 $sessionId = $user->createNewSession();
+
+                Logger::info('User '.$user->username.' logged in from '.$_SERVER['REMOTE_ADDR'].'.');
    
                 if ($usersDao->updateLoginInfo($sessionId, $this->user->user_id) !== false)
                 {
