@@ -10,9 +10,18 @@ var simplemdeOps = {
     toolbar: false, 
     status: false,
     shortcuts: {
-        "cleanBlock": null,
         "toggleCodeBlock": null, // unbind Ctrl-Alt-C
+        "toggleBold": null, // disabled per request
+        "cleanBlock": null,
+        "toggleHeadingSmaller": null, // disabled per request
+        "toggleLink": null, // disabled per request
+        "toggleItalic": null, // disabled per request
+        "toggleUnorderedList": null, // disabled per request
+        "togglePreview": null, // disabled per request
+        "toggleCodeBlock": null, // disabled per request
         "drawImage": null,
+        "toggleOrderedList": null, // disabled per request
+        "toggleHeadingBigger": null, // disabled per request
         "toggleSideBySide": null,
         "toggleFullScreen": null
         }
@@ -21,7 +30,7 @@ $(document).ready(function(){
     if($('#feat-markdown-support-enabled').length)
     {
         simplemde = new SimpleMDE(simplemdeOps);
-        $('.CodeMirror').keyup(detectShiftEnter);
+        //$('.CodeMirror').keyup(detectShiftEnter); // disabled per request
     }
 });
 
@@ -93,8 +102,8 @@ function scrollToBottom() {
  */
 function detectShiftEnter(event) {
     if(event.keyCode == 13 && event.shiftKey && !event.repeat) {
-        event.preventDefault();
-        sendTextMessage();
+        //event.preventDefault(); // disabled per request
+        //sendTextMessage(); // disabled per request
     }
 }
 

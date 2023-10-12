@@ -98,7 +98,8 @@
         <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')" title="Record and send video messages">&#128249;</button>
         <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')" title="Record and send audio messages">&#127908;</button>
         <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()" title="Send attachments">&#128206;</button>
-        <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage(0)" title="Send message (SHIFT+ENTER)">SEND</button>
+        <!-- Disabled per request <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage(0)" title="Send message (SHIFT+ENTER)">SEND</button> --> 
+        <button type="button" class="new-msg-btn" id="send-btn" onclick="sendTextMessage(0)" title="Send message">SEND</button>
         <button type="button" class="new-msg-btn" id="important-btn" onclick="sendTextMessage(1)"  title="Send high priority messages">&#8252;</button>
     </div>
     
