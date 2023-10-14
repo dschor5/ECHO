@@ -121,8 +121,8 @@ class UsersDao extends Dao
             if($session_id != null)
             {
                 $qSessionId = '\''.$this->database->prepareStatement($session_id).'\'';
-                $queryStr .= ' AND users.session_id='.$qSessionId;
-            }
+                $queryStr .= ' AND users.session_id='.$qSessionId.' AND users.is_active=1 ';
+            }   
 
             if (($result = $this->database->query($queryStr)) !== false)
             {

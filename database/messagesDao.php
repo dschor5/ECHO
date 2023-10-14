@@ -351,7 +351,7 @@ class MessagesDao extends Dao
      * Get a specific message. 
      *
      * @param int $messageId Message to retrieve
-     * @return array Message object
+     * @return Message object
      */
     public function getLastMessage(int $messageId) 
     {
