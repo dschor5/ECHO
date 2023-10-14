@@ -320,7 +320,8 @@ class UsersDao extends Dao
 
         $queryStr = 'UPDATE users SET '. 
             'password='.$qPassword.', '. 
-            'is_password_reset='.($forceReset ? '1' : '0').' '.
+            'is_password_reset='.($forceReset ? '1' : '0').', '.
+            'last_login=NULL '.
             'WHERE user_id='.$qUserId;
 
         return ($this->database->query($queryStr) !== false);
