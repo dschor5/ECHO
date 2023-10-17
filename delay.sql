@@ -55,9 +55,9 @@ CREATE TABLE `msg_status` (
 
 CREATE TABLE `msg_files` (
   `message_id` int(10) UNSIGNED NOT NULL,
-  `server_name` text CHARACTER SET utf8 DEFAULT NOT NULL,
-  `original_name` text CHARACTER SET utf8 DEFAULT NOT NULL,
-  `mime_type` text CHARACTER SET utf8 DEFAULT NOT NULL,
+  `server_name` text CHARACTER SET utf8 NOT NULL,
+  `original_name` text CHARACTER SET utf8 NOT NULL,
+  `mime_type` text CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY(`message_id`),
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -71,9 +71,9 @@ CREATE TABLE `mission_config` (
 
 CREATE TABLE `mission_archives` (
   `archive_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `server_name` text CHARACTER SET utf8 DEFAULT NOT NULL,
-  `notes` text CHARACTER SET utf8 DEFAULT NOT NULL,
-  `mime_type` text CHARACTER SET utf8 DEFAULT NOT NULL,
+  `server_name` text CHARACTER SET utf8 NOT NULL,
+  `notes` text CHARACTER SET utf8 NOT NULL,
+  `mime_type` text CHARACTER SET utf8 NOT NULL,
   `timestamp` datetime NOT NULL,
   `content_tz` varchar(64) COLLATE utf8_unicode_ci NOT NULL, 
   PRIMARY KEY(`archive_id`)
