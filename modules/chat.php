@@ -368,7 +368,7 @@ class ChatModule extends DefaultModule
             $fileNameParts = 2;
             $fileMime = 'video/webm';
             $dt = new DateTime('NOW');
-            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt1;
         }
         elseif($fileType == Message::AUDIO)
         {
@@ -377,7 +377,7 @@ class ChatModule extends DefaultModule
             $fileNameParts = 2;
             $fileMime = 'audio/webm';
             $dt = new DateTime('NOW');
-            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt1;
         }
         else // Catch-all for regular attachments
         {
@@ -682,7 +682,7 @@ class ChatModule extends DefaultModule
         // Initialize conversations menu
         foreach($this->conversations as $convoId => $convo)
         {
-            if($convo->parent_conversation_id == null)
+            if($convo->parent_conversation_id == null && $convo->countActiveParticipants() > 1)
             {
                 $roomSelected = $this->currConversation->conversation_id == $convoId;
                 

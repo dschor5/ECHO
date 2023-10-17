@@ -153,6 +153,7 @@ class Conversation
         $alias = explode(',', $this->participants_alias);
         $usernames = explode(',', $this->participants_username);
         $isCrew = explode(',', $this->participants_is_crew);
+        $isActive = explode(',', $this->participants_is_active);
 
         // Iterate through each entry. 
         for($i = 0; $i < count($ids); $i++)
@@ -162,14 +163,35 @@ class Conversation
             {
                 // Assign the value depending on whether there is an alias. 
                 $participants[intval($ids[$i])] = 
-                    array('username' => $usernames[$i],
-                          'alias'    => $alias[$i],
-                          'is_crew'  => $isCrew[$i]
+                    array('username'  => $usernames[$i],
+                          'alias'     => $alias[$i],
+                          'is_crew'   => $isCrew[$i],
+                          'is_active' => $isActive[$i]
                     );
             }
         }
 
         return $participants;
+    }
+
+    /**
+     * Count active participants in this conversation.
+     *
+     * @return integer
+     */
+    public function countActiveParticipants() : int
+    {
+        $count = 0;
+        $participants = $this->getParticipants();
+        foreach($participants as $participant)
+        {
+            if($participant['is_active'] == 1)
+            {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**

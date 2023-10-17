@@ -1,1 +1,1 @@
-Download <a href="%link%"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>
+Download <a href="%link%" target="_blank"><span class="filename">%filename%</span> (<span class="filesize">%filesize%</span>)</a>

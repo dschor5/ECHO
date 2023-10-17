@@ -121,8 +121,8 @@ class UsersDao extends Dao
             if($session_id != null)
             {
                 $qSessionId = '\''.$this->database->prepareStatement($session_id).'\'';
-                $queryStr .= ' AND users.session_id='.$qSessionId;
-            }
+                $queryStr .= ' AND users.session_id='.$qSessionId.' AND users.is_active=1 ';
+            }   
 
             if (($result = $this->database->query($queryStr)) !== false)
             {
@@ -320,7 +320,8 @@ class UsersDao extends Dao
 
         $queryStr = 'UPDATE users SET '. 
             'password='.$qPassword.', '. 
-            'is_password_reset='.($forceReset ? '1' : '0').' '.
+            'is_password_reset='.($forceReset ? '1' : '0').', '.
+            'last_login=NULL '.
             'WHERE user_id='.$qUserId;
 
         return ($this->database->query($queryStr) !== false);
