@@ -105,6 +105,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('feat_important_msgs',      'bool', '1'),
 ('feat_convo_threads',       'bool', '1'), 
 ('feat_convo_threads_all',   'bool', '1'),
+('feat_out_of_seq',          'bool', '1'),
 ('debug',                    'bool', '0');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
