@@ -29,9 +29,9 @@ The video can be accompanied by an optional text message/caption.
 
 Based on the default settings, every 10 sec of video recording require approximately 2.5 MB. 
 
-```note
-Google Chrome requires permission to use the microphone. If you are having problems, use the top right menu on the browser to access the Settings. Then click on the "Privacy and Security" menu, followed by "Site Settings", and then "Camera or Microphone". It is recommended that you add an exception for ECHO to allow use of the microphone without changing your default settings for other websites.
-```
+> [!IMPORTANT]
+> Google Chrome requires permission to use the microphone. If you are having problems, use the top right menu on the browser to access the Settings. Then click on the "Privacy and Security" menu, followed by "Site Settings", and then "Camera or Microphone". It is recommended that you add an exception for ECHO to allow use of the microphone without changing your default settings for other websites.
+
 
 ## File attachments 
 To send a file attachment, click on the paperclip. A window will appear allowing you to send one file at a time accompanied by an optional text message/caption.
