@@ -14,3 +14,5 @@ Finally, since ECHO is designed as a research tool, it includes functionality to
 The application was developed for Dario Schor's PhD research at the University of North Dakota (UND) and used in over ten analog missions in the Integrated Lunar/Martian Analog Habitat (ILMAH). 
 
 User's Manual in development. 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11362589.svg)](https://doi.org/10.5281/zenodo.11362589)
