@@ -36,6 +36,6 @@ Based on the default settings, every 10 sec of video recording require approxima
 ## File attachments 
 To send a file attachment, click on the paperclip. A window will appear allowing you to send one file at a time accompanied by an optional text message/caption.
 
-The list of allowed file types is defined in `config.inc.php'. 
+The list of allowed file types is defined in `config.inc.php`. 
 
 source: `{{ page.path }}`
