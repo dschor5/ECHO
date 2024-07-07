@@ -136,10 +136,10 @@ class MessagesDao extends Dao
             }
 
             $mccDelayDays = floor($mccDelay / Delay::SEC_PER_DAY);
-            $mccDelay = date('H:i:s.v', $mccDelay);
+            $mccDelay = date('H:i:s', floor($mccDelay)).sprintf('.%03d', $mccDelay - floor($mccDelay));
             
             $habDelayDays = floor($habDelay / Delay::SEC_PER_DAY);
-            $habDelay = date('H:i:s.v', $habDelay);
+            $habDelay = date('H:i:s', floor($habDelay)).sprintf('.%03d', $habDelay - floor($habDelay));
 
             // Insert the new message into the database and automatically assign it 
             // an alternate id based on the previous query.

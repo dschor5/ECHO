@@ -53,6 +53,12 @@ function sendTextMessage(msgImportant) {
         return;
     }
 
+    // If text field is disabled, then return because it is actively 
+    // processing an AJAX command.
+    if($('#new-msg-text').attr('disabled')) {
+        return;
+    }
+
     // Disable text field while processing AJAX command.
     $('#new-msg-text').attr('disabled', true);
 
