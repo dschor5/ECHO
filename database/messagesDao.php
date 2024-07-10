@@ -118,6 +118,24 @@ class MessagesDao extends Dao
         {
             $this->startTransaction();
             
+            $recvSource = $user->is_crew ? 'recv_time_hab' : 'recv_time_mcc';
+
+            // Check if the message exists (has the same sender and content within the last 10 sec)
+            $queryStr = 'SELECT message_id FROM messages '.
+                        'WHERE user_id='.$user->user_id.' '.
+                        'AND conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '.
+                        'AND text="'.$this->database->prepareStatement($msgData['text']).'" '.
+                        'AND type="'.$this->database->prepareStatement($msgData['type']).'" '.
+                        'AND '.$recvSource.' > DATE_SUB(UTC_TIMESTAMP(3), INTERVAL 3 SECOND) '.
+                        'ORDER BY message_id DESC LIMIT 1';
+            if(($result = $this->database->query($queryStr)) !== false && $result->num_rows > 0)
+            {
+                $duplicate_id = $result->fetch_assoc()['message_id'];
+                Logger::info('Duplicate message to message_id = '.$duplicate_id);
+                $this->endTransaction();
+                return $duplicate_id;
+            }
+
             // Define query to find the next alternate id to assign to the new message
             $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM messages '. 
                 'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '. 
