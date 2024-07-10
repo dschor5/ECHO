@@ -73,6 +73,7 @@ $config['uploads_allowed'] = array(
     'image/heif' => 'heif',
     'video/quicktime' => 'mov',
     'video/x-msvideo' => 'avi',
+    'image/avif' => 'avif',
     'text/plain' => 'txt',
 );
 
