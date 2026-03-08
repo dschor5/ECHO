@@ -93,7 +93,7 @@ class UsersDao extends Dao
      * @param string $session_id
      * @return User|null
      */
-    public function getByUsername(string $username, string $session_id=null)
+    public function getByUsername(string $username, ?string $session_id=null)
     {
         $user = null;
 

@@ -93,7 +93,7 @@ class Logger
      * @access private
      * @var int
      */
-    private static $levelThreshold = Logger::INFO;
+    private static $levelThreshold = Logger::DEBUG;
     
     /**
      * Private constructor to prevent instantiating the class. 
