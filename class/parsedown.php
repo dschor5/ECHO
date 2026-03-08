@@ -317,7 +317,7 @@ class Parsedown
     #
     # Code
 
-    protected function blockCode($Line, $Block = null)
+    protected function blockCode($Line, ?array $Block = null)
     {
         if (isset($Block) and ! isset($Block['type']) and ! isset($Block['interrupted']))
         {
@@ -712,7 +712,7 @@ class Parsedown
     #
     # Setext
 
-    protected function blockSetextHeader($Line, array $Block = null)
+    protected function blockSetextHeader($Line, ?array $Block = null)
     {
         if ( ! isset($Block) or isset($Block['type']) or isset($Block['interrupted']))
         {
@@ -850,7 +850,7 @@ class Parsedown
     #
     # Table
 
-    protected function blockTable($Line, array $Block = null)
+    protected function blockTable($Line, ?array $Block = null)
     {
         if ( ! isset($Block) or isset($Block['type']) or isset($Block['interrupted']))
         {
