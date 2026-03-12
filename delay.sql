@@ -21,6 +21,14 @@ CREATE TABLE `conversations` (
   `date_created` datetime NOT NULL DEFAULT NOW(),
   `last_message` datetime NOT NULL DEFAULT NOW(),
   PRIMARY KEY (`conversation_id`)
+    INDEX idx_parent_conversation (`parent_conversation_id`),
+
+  -- Foreign key to enforce parent thread integrity
+  CONSTRAINT fk_parent_conversation
+    FOREIGN KEY (`parent_conversation_id`)
+    REFERENCES conversations(`conversation_id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `participants` (
