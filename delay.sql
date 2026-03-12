@@ -10,7 +10,7 @@ CREATE TABLE `users` (
   `is_password_reset` tinyint(1) NOT NULL DEFAULT '1',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `preferences` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-  PRIMARY KEY (`user_id`)
+  PRIMARY KEY (`user_id`),
   UNIQUE KEY idx_users_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -20,8 +20,8 @@ CREATE TABLE `conversations` (
   `parent_conversation_id` int(11) UNSIGNED NULL DEFAULT NULL,
   `date_created` datetime NOT NULL DEFAULT NOW(),
   `last_message` datetime NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (`conversation_id`)
-    INDEX idx_parent_conversation (`parent_conversation_id`),
+  PRIMARY KEY (`conversation_id`),
+  INDEX idx_parent_conversation (`parent_conversation_id`),
 
   -- Foreign key to enforce parent thread integrity
   CONSTRAINT fk_parent_conversation
@@ -127,7 +127,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('debug',                    'bool', '0');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
-(1, 'admin', 'Admin', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
+(1, 'admin', 'Admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', NULL, 1, 0, '2021-07-23 14:52:17', 0, '');
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
 (1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW());
