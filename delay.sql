@@ -43,8 +43,8 @@ CREATE TABLE `messages` (
   `recv_time_mcc` datetime NOT NULL,
 
   PRIMARY KEY (`message_id`),
-  KEY (`user_id`),
-  KEY (`conversation_id`),
+  KEY idx_messages_user (user_id, message_id),
+  KEY idx_messages_conversation_message (conversation_id, message_id),
 
   FOREIGN KEY (`conversation_id`) REFERENCES conversations(`conversation_id`) 
     ON DELETE CASCADE ON UPDATE CASCADE,
