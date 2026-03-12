@@ -481,6 +481,7 @@ class ChatModule extends DefaultModule
             
             // Create entry for the msg_files table. 
             $fileData = array(
+                'file_id'       => 0,
                 'message_id'    => 0,
                 'server_name'   => $serverName,
                 'original_name' => $fileName,

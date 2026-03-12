@@ -1,26 +1,35 @@
 CREATE TABLE `users` (
   `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `username` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
-  `alias` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `session_id` varchar(60) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `username` varchar(60) NOT NULL,
+  `alias` varchar(60) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `session_id` varchar(60) DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL,
   `is_crew` tinyint(1) NOT NULL,
   `last_login` datetime DEFAULT NULL,
   `is_password_reset` tinyint(1) NOT NULL DEFAULT '1',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `preferences` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `preferences` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY idx_users_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `conversations` (
   `conversation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(130) NOT NULL,
   `parent_conversation_id` int(11) UNSIGNED NULL DEFAULT NULL,
   `date_created` datetime NOT NULL DEFAULT NOW(),
   `last_message` datetime NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (`conversation_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY (`conversation_id`),
+  INDEX idx_parent_conversation (`parent_conversation_id`),
+
+  -- Foreign key to enforce parent thread integrity
+  CONSTRAINT fk_parent_conversation
+    FOREIGN KEY (`parent_conversation_id`)
+    REFERENCES conversations(`conversation_id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `participants` (
   `conversation_id` int(10) UNSIGNED NOT NULL ,
@@ -28,62 +37,65 @@ CREATE TABLE `participants` (
   PRIMARY KEY (`conversation_id`, `user_id`),
   FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE  
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `messages` (
   `message_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Author',
   `conversation_id` int(10) UNSIGNED NOT NULL,
-  `text` text CHARACTER SET utf8 DEFAULT NULL,
-  `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
+  `text` text DEFAULT NULL,
+  `type` enum('text','important','video','audio','file') NOT NULL,
   `from_crew` tinyint(1) NOT NULL,
   `message_id_alt` int(10) UNSIGNED DEFAULT NULL,
   `recv_time_hab` datetime NOT NULL,
   `recv_time_mcc` datetime NOT NULL,
 
   PRIMARY KEY (`message_id`),
-  KEY (`user_id`),
-  KEY (`conversation_id`),
+  KEY idx_messages_user (user_id, message_id),
+  KEY idx_messages_conversation_message (conversation_id, message_id),
 
   FOREIGN KEY (`conversation_id`) REFERENCES conversations(`conversation_id`) 
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (`user_id`) REFERENCES users(`user_id`) 
     ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `msg_status` (
   `message_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Recipient',
   PRIMARY KEY(`message_id`, `user_id`),
+  INDEX idx_msg_status_user (`user_id`),
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `msg_files` (
+  `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,  
   `message_id` int(10) UNSIGNED NOT NULL,
-  `server_name` text CHARACTER SET utf8 NOT NULL,
-  `original_name` text CHARACTER SET utf8 NOT NULL,
-  `mime_type` text CHARACTER SET utf8 NOT NULL,
-  PRIMARY KEY(`message_id`),
+  `server_name` text NOT NULL,
+  `original_name` text NOT NULL,
+  `mime_type` text NOT NULL,
+  PRIMARY KEY(`file_id`),
+  INDEX idx_msg_files_message (`message_id`),
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `mission_config` (
-  `name` varchar(32) COLLATE utf8_unicode_ci NOT NULL UNIQUE,
-  `value` text CHARACTER SET utf8 NOT NULL,
-  `type` enum('string','int','float','bool', 'json') COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(32) NOT NULL UNIQUE,
+  `value` text NOT NULL,
+  `type` enum('string','int','float','bool', 'json') NOT NULL,
   PRIMARY KEY(`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `mission_archives` (
   `archive_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `server_name` text CHARACTER SET utf8 NOT NULL,
-  `notes` text CHARACTER SET utf8 NOT NULL,
-  `mime_type` text CHARACTER SET utf8 NOT NULL,
+  `server_name` text NOT NULL,
+  `notes` text NOT NULL,
+  `mime_type` text NOT NULL,
   `timestamp` datetime NOT NULL,
-  `content_tz` varchar(64) COLLATE utf8_unicode_ci NOT NULL, 
+  `content_tz` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL, 
   PRIMARY KEY(`archive_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('name',               'string', 'Analog Mission Name'),
@@ -115,7 +127,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('debug',                    'bool', '0');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
-(1, 'admin', 'Admin', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 1, 0, '2021-07-23 14:52:17', 1, '');
+(1, 'admin', 'Admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', NULL, 1, 0, '2021-07-23 14:52:17', 0, '');
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
 (1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW());
