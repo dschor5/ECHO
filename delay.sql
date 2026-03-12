@@ -18,8 +18,9 @@ CREATE TABLE `conversations` (
   `conversation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(130) NOT NULL,
   `parent_conversation_id` int(11) UNSIGNED NULL DEFAULT NULL,
-  `date_created` datetime NOT NULL DEFAULT NOW(),
-  `last_message` datetime NOT NULL DEFAULT NOW(),
+  `date_created` datetime NOT NULL DEFAULT UTC_TIMESTAMP(3),
+  `last_message_mcc` datetime NOT NULL DEFAULT UTC_TIMESTAMP(3),
+  `last_message_hab` datetime NOT NULL DEFAULT UTC_TIMESTAMP(3),
   PRIMARY KEY (`conversation_id`),
   INDEX idx_parent_conversation (`parent_conversation_id`),
 
@@ -130,7 +131,7 @@ INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `
 (1, 'admin', 'Admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', NULL, 1, 0, '2021-07-23 14:52:17', 0, '');
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
-(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW());
+(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW(), NOW());
 
 INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES
 (1, 1);
@@ -144,12 +145,12 @@ INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `
 
 
 INSERT INTO `conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message`) VALUES
-(2, 'Admin-Flight Director', NULL, '2021-08-03 23:14:48', NOW()),
-(3, 'Admin-Blueberry', NULL, '2021-08-03 23:14:59', NOW()),
-(4, 'Flight Director-Blueberry', NULL, '2021-08-03 23:14:59', NOW()),
-(5, 'Admin-Tangerine', NULL, '2021-08-03 23:15:07', NOW()),
-(6, 'Flight Director-Tangerine', NULL, '2021-08-03 23:15:07', NOW()),
-(7, 'Blueberry-Tangerine', NULL, '2021-08-03 23:15:07', NOW());
+(2, 'Admin-Flight Director', NULL, '2021-08-03 23:14:48', NOW(), NOW()),
+(3, 'Admin-Blueberry', NULL, '2021-08-03 23:14:59', NOW(), NOW()),
+(4, 'Flight Director-Blueberry', NULL, '2021-08-03 23:14:59', NOW(), NOW()),
+(5, 'Admin-Tangerine', NULL, '2021-08-03 23:15:07', NOW(), NOW()),
+(6, 'Flight Director-Tangerine', NULL, '2021-08-03 23:15:07', NOW(), NOW()),
+(7, 'Blueberry-Tangerine', NULL, '2021-08-03 23:15:07', NOW(), NOW());
 
 
 INSERT INTO `participants` (`conversation_id`, `user_id`) VALUES

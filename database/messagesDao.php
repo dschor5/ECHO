@@ -624,7 +624,7 @@ class MessagesDao extends Dao
         $this->database->query('DELETE FROM conversations WHERE parent_conversation_id IS NOT NULL');
 
         // Update date for date created and last message.
-        $this->database->query('UPDATE conversations SET date_created=NOW(), last_message=NOW()');
+        $this->database->query('UPDATE conversations SET date_created=UTC_TIMESTAMP(3), last_message=UTC_TIMESTAMP(3)');
        
         $this->endTransaction();
     }
