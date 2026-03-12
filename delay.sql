@@ -56,6 +56,7 @@ CREATE TABLE `msg_status` (
   `message_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Recipient',
   PRIMARY KEY(`message_id`, `user_id`),
+  INDEX idx_msg_status_user (`user_id`),
   FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
