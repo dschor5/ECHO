@@ -20,13 +20,19 @@ function updateTime() {
     var mccTime = formatTime(null, true);
     $('#time-mcc-value').text(mccTime);   
 
+    var dst_adjust = 0;
+    if(MISSION_START.getTimezoneOffset() !== currTime.getTimezoneOffset()) {
+        dst_adjust = 
+            (MISSION_START.getTimezoneOffset() - currTime.getTimezoneOffset()) * 60000; // in msec
+    }
+
     // Flag to select HAB format ()
     if(HAB_FORMAT && currTime < endTime) {
         
         // Before the start of the mission
         if(currTime < startTime)
         {
-            var habMet = (startTime - currTime) / 1000; // sec
+            var habMet = (startTime - currTime - dst_adjust) / 1000; // sec
             var day = Math.floor(habMet / SEC_PER_DAY);
             var hrs = Math.floor((habMet - day * SEC_PER_DAY) / 3600);
             var min = Math.floor((habMet - day * SEC_PER_DAY - hrs * 3600) / 60);
@@ -44,8 +50,7 @@ function updateTime() {
         // During the mission
         else
         {
-            var habMet = (currTime - startTime) / 1000; // sec
-
+            var habMet = (currTime - startTime + dst_adjust) / 1000; // sec
             var day = Math.floor(habMet / SEC_PER_DAY);
             var hrs = Math.floor((habMet - day * SEC_PER_DAY) / 3600);
             var min = Math.floor((habMet - day * SEC_PER_DAY - hrs * 3600) / 60);
