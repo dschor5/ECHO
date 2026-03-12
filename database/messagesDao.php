@@ -180,7 +180,8 @@ class MessagesDao extends Dao
                 if(count($fileData) > 0)
                 {
                     $fileData['message_id'] = '@msg_id';
-                    $msgFileDao->insert($fileData);
+                    unset($fileData['message_id']);
+                    $msgFileDao->insert($fileData, array('message_id'=>'@msg_id'));
                 }
 
                 // Create message status entries for the new entry.
