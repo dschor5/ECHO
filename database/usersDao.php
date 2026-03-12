@@ -209,8 +209,7 @@ class UsersDao extends Dao
                 );
                 $messagesDao->newUserAccessToPrevMessages($convoId, $newUserId);
             }
-            $keys = array('conversation_id', 'user_id');
-            $participantsDao->insertMultiple($keys, $newParticipants);
+            $participantsDao->insertMultiple($newParticipants);
             
             // Create new private conversations with the new user. 
             foreach($users as $otherUserId=>$user)
@@ -239,8 +238,7 @@ class UsersDao extends Dao
                             'user_id' => $otherUserId,
                         ),
                     );
-                    $keys = array('conversation_id', 'user_id');
-                    $participantsDao->insertMultiple($keys, $newParticipants);
+                    $participantsDao->insertMultiple($newParticipants);
                 }
             }
             $this->endTransaction(true);

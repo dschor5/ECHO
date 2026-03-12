@@ -315,7 +315,7 @@ class ChatModule extends DefaultModule
      * Response for asynchronous javascript POST request 
      * to upload a file (sent as a new message).
      * 
-     * The funciton validates the upload (type, name, size) before
+     * The function validates the upload (type, name, size) before
      * moving it to the uploads directory and entering the information 
      * into the database. 
      * 
@@ -324,7 +324,7 @@ class ChatModule extends DefaultModule
      *   an error message, then leave the polling function get the 
      *   message to display on the screen. Unfortunately, that led to 
      *   race conditions depending on the polling & database insertion. 
-     *   So on some occations, the message was not displayed to the user. 
+     *   So on some occasions, the message was not displayed to the user. 
      *   The problem was resolved by returning the status along with 
      *   the new message. 
      * - All messages get an MCC and HAB timestamp regardless of where
@@ -523,7 +523,7 @@ class ChatModule extends DefaultModule
      *   an error message, then leave the polling function get the 
      *   message to display on the screen. Unfortunately, that led to 
      *   race conditions depending on the polling & database insertion. 
-     *   So on some occations, the message was not displayed to the user. 
+     *   So on some occasions, the message was not displayed to the user. 
      *   The problem was resolved by returning the status along with 
      *   the new message. 
      * - All messages get an MCC and HAB timestamp regardless of where
@@ -597,11 +597,11 @@ class ChatModule extends DefaultModule
      * - delay        - Updates current communication delay and distance between HAB and MCC. 
      * - msg          - New message received. Multiple instances of this messages can be sent
      *                  per second and each contains a unique id to ensure the client knows 
-     *                  there is no duplicate informaiton. 
+     *                  there is no duplicate information. 
      * - notification - Notifies the client that the current user received messages in 
      *                  another conversation. 
      * - keep-alive   - Empty message sent if no activity was recorded for more than X sec
-     *                  to ensure the conneciton is kept alive. 
+     *                  to ensure the connection is kept alive. 
      * 
      * Implementation Notes:
      * - To avoid interfering with the on page load request for messages, 
@@ -742,7 +742,7 @@ class ChatModule extends DefaultModule
 
     /**
      * Sends event stream message 'delay' anytime the current 
-     * communicaiton delay changes. 
+     * communication delay changes. 
      */
     private function sendNewConversations()
     {
