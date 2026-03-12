@@ -111,6 +111,7 @@ class MessagesDao extends Dao
         $msgFileDao = MessageFileDao::getInstance();
 
         $id = null;
+        $ret = true;
 
         // Query exceptions are used to avoid too many levels of nested if-statements.
         $this->database->queryExceptionEnabled(true);
@@ -173,29 +174,32 @@ class MessagesDao extends Dao
             // the newly created message id.
             if ($id !== false)
             {
+                $this->database->query('SET @msg_id = LAST_INSERT_ID();');
+
                 // Add file attachments if any.
                 if(count($fileData) > 0)
                 {
-                    $fileData['message_id'] = $id;
+                    $fileData['message_id'] = '@msg_id';
                     $msgFileDao->insert($fileData);
                 }
 
                 // Create message status entries for the new entry.
                 $participants = $participantsDao->getParticipantIds($msgData['conversation_id']);
                 $msgStatusData = array();
+                $msgStatusVariables = array();
                 foreach($participants as $userId => $isCrew)
                 {
                     $msgStatusData[] = array(
-                        'message_id' => $id,
                         'user_id' => $userId
                     );
                 }
-                $keys = array('message_id', 'user_id');
-                $messageStatusDao->insertMultiple($keys, $msgStatusData);
+                $msgStatusVariables = array(
+                    'message_id' => '@msg_id'
+                );
+                $ret = $messageStatusDao->insertMultiple($msgStatusData, $msgStatusVariables);
 
                 // Update the date the conversation was last updated.
                 $conversationsDao->convoUpdated($msgData['conversation_id']);
-                    
                 $this->endTransaction();
             }
             else
@@ -247,8 +251,7 @@ class MessagesDao extends Dao
                         'user_id' => $userId,
                     );
                 }
-                $keys = array('message_id', 'user_id');
-                $msgStatusDao->insertMultiple($keys, $msgStatus);
+                $msgStatusDao->insertMultiple($msgStatus);
             }
         }
     }   

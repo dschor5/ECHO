@@ -33,16 +33,22 @@ CREATE TABLE `participants` (
 CREATE TABLE `messages` (
   `message_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Author',
-  `conversation_id` int(10) UNSIGNED NOT NULL ,
+  `conversation_id` int(10) UNSIGNED NOT NULL,
   `text` text CHARACTER SET utf8 DEFAULT NULL,
   `type` enum('text','important','video','audio','file') COLLATE utf8_unicode_ci NOT NULL,
   `from_crew` tinyint(1) NOT NULL,
   `message_id_alt` int(10) UNSIGNED DEFAULT NULL,
   `recv_time_hab` datetime NOT NULL,
   `recv_time_mcc` datetime NOT NULL,
-  PRIMARY KEY(`message_id`, `user_id`, `conversation_id`),
-  FOREIGN KEY(`conversation_id`) REFERENCES conversations(`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+
+  PRIMARY KEY (`message_id`),
+  KEY (`user_id`),
+  KEY (`conversation_id`),
+
+  FOREIGN KEY (`conversation_id`) REFERENCES conversations(`conversation_id`) 
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES users(`user_id`) 
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `msg_status` (

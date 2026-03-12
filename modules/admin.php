@@ -1171,7 +1171,7 @@ class AdminModule extends DefaultModule
             if($response['success'] === true)
             {
                 $archiveDao = ArchiveDao::getInstance();
-                $result = $archiveDao->insertMultiple(array_keys($archiveData[0]), $archiveData);
+                $result = $archiveDao->insertMultiple($archiveData);
 
                 if($result === false)
                 {

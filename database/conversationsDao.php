@@ -199,8 +199,7 @@ class ConversationsDao extends Dao
                 'user_id' => $userId,
             );
         }
-        $keys = array('conversation_id', 'user_id');
-        $participantsDao->insertMultiple($keys, $participantsFields);
+        $participantsDao->insertMultiple($participantsFields);
 
         $this->endTransaction();
 
