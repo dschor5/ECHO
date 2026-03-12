@@ -2,7 +2,7 @@ CREATE TABLE `users` (
   `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` varchar(60) NOT NULL,
   `alias` varchar(60) NOT NULL,
-  `password` varchar(80) NOT NULL,
+  `password` varchar(255) NOT NULL,
   `session_id` varchar(60) DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL,
   `is_crew` tinyint(1) NOT NULL,
