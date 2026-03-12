@@ -5,6 +5,7 @@
  * Encapsulates 'msg_files' row from database.
  * 
  * Table Structure: msg_files
+ * - file_id            (int)       Unique file attachment id. (not used) 
  * - message_id         (int)       Message id containing this attachment
  * - server_name        (string)    Name of file on the server
  * - original_name      (string)    Original filename

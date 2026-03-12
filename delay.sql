@@ -62,11 +62,13 @@ CREATE TABLE `msg_status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `msg_files` (
+  `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,  
   `message_id` int(10) UNSIGNED NOT NULL,
   `server_name` text NOT NULL,
   `original_name` text NOT NULL,
   `mime_type` text NOT NULL,
-  PRIMARY KEY(`message_id`),
+  PRIMARY KEY(`file_id`),
+  INDEX idx_msg_files_message (`message_id`),
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
