@@ -4,7 +4,7 @@ author: Dario Schor
 email: schor@ieee.org
 lang: en
 
-remote_theme: rundocs/jekyll-rtd-theme
+remote_theme: rundocs/jekyll-theme-rtd
 
 markdown: kramdown
 
@@ -22,4 +22,3 @@ plugins:
 exclude:
   - Gemfile
   - Gemfile.lock
-  - node_modules
