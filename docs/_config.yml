@@ -4,7 +4,7 @@ author: Dario Schor
 email: schor@ieee.org
 lang: en
 
-remote_theme: rundocs/jekyll-theme-rtd
+remote_theme: pages-themes/leap-day@v0.2.0
 
 markdown: kramdown
 
