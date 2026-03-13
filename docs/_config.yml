@@ -5,18 +5,7 @@ email: schor@ieee.org
 lang: en
 
 remote_theme: pages-themes/leap-day@v0.2.0
-
-markdown: kramdown
-
-kramdown:
-  input: GFM
-  math_engine: mathjax
-  syntax_highlighter: rouge
-
 plugins:
-  - jemoji
-  - jekyll-avatar
-  - jekyll-mentions
   - jekyll-remote-theme
 
 exclude:
