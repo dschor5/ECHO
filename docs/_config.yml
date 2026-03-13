@@ -3,6 +3,7 @@ lang:        en
 description: Communication tool for human space analog missions
 author:      Dario Schor
 email:       schor@ieee.org
+theme:       jekyll-theme-minimal
 
 toc:
   enabled: true
