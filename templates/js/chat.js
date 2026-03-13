@@ -87,6 +87,7 @@ function sendTextMessage(msgImportant) {
         },
     });
     $('#new-msg-text').attr('disabled', false);
+    
 }
 
 /**

@@ -111,6 +111,7 @@ class MessagesDao extends Dao
         $msgFileDao = MessageFileDao::getInstance();
 
         $id = null;
+        $ret = true;
 
         // Query exceptions are used to avoid too many levels of nested if-statements.
         $this->database->queryExceptionEnabled(true);
@@ -118,6 +119,24 @@ class MessagesDao extends Dao
         {
             $this->startTransaction();
             
+            $recvSource = $user->is_crew ? 'recv_time_hab' : 'recv_time_mcc';
+
+            // Check if the message exists (has the same sender and content within the last 10 sec)
+            $queryStr = 'SELECT message_id FROM messages '.
+                        'WHERE user_id='.$user->user_id.' '.
+                        'AND conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '.
+                        'AND text="'.$this->database->prepareStatement($msgData['text']).'" '.
+                        'AND type="'.$this->database->prepareStatement($msgData['type']).'" '.
+                        'AND '.$recvSource.' > DATE_SUB(UTC_TIMESTAMP(3), INTERVAL 3 SECOND) '.
+                        'ORDER BY message_id DESC LIMIT 1';
+            if(($result = $this->database->query($queryStr)) !== false && $result->num_rows > 0)
+            {
+                $duplicate_id = $result->fetch_assoc()['message_id'];
+                Logger::info('Duplicate message to message_id = '.$duplicate_id);
+                $this->endTransaction();
+                return $duplicate_id;
+            }
+
             // Define query to find the next alternate id to assign to the new message
             $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM messages '. 
                 'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '. 
@@ -136,10 +155,10 @@ class MessagesDao extends Dao
             }
 
             $mccDelayDays = floor($mccDelay / Delay::SEC_PER_DAY);
-            $mccDelay = date('H:i:s.v', $mccDelay);
+            $mccDelay = date('H:i:s', floor($mccDelay)).sprintf('.%03d', $mccDelay - floor($mccDelay));
             
             $habDelayDays = floor($habDelay / Delay::SEC_PER_DAY);
-            $habDelay = date('H:i:s.v', $habDelay);
+            $habDelay = date('H:i:s', floor($habDelay)).sprintf('.%03d', $habDelay - floor($habDelay));
 
             // Insert the new message into the database and automatically assign it 
             // an alternate id based on the previous query.
@@ -155,29 +174,33 @@ class MessagesDao extends Dao
             // the newly created message id.
             if ($id !== false)
             {
+                $this->database->query('SET @msg_id = LAST_INSERT_ID();');
+
                 // Add file attachments if any.
                 if(count($fileData) > 0)
                 {
-                    $fileData['message_id'] = $id;
-                    $msgFileDao->insert($fileData);
+                    $fileData['message_id'] = '@msg_id';
+                    unset($fileData['message_id']);
+                    $msgFileDao->insert($fileData, array('message_id'=>'@msg_id'));
                 }
 
                 // Create message status entries for the new entry.
                 $participants = $participantsDao->getParticipantIds($msgData['conversation_id']);
                 $msgStatusData = array();
+                $msgStatusVariables = array();
                 foreach($participants as $userId => $isCrew)
                 {
                     $msgStatusData[] = array(
-                        'message_id' => $id,
                         'user_id' => $userId
                     );
                 }
-                $keys = array('message_id', 'user_id');
-                $messageStatusDao->insertMultiple($keys, $msgStatusData);
+                $msgStatusVariables = array(
+                    'message_id' => '@msg_id'
+                );
+                $ret = $messageStatusDao->insertMultiple($msgStatusData, $msgStatusVariables);
 
                 // Update the date the conversation was last updated.
                 $conversationsDao->convoUpdated($msgData['conversation_id']);
-                    
                 $this->endTransaction();
             }
             else
@@ -229,8 +252,7 @@ class MessagesDao extends Dao
                         'user_id' => $userId,
                     );
                 }
-                $keys = array('message_id', 'user_id');
-                $msgStatusDao->insertMultiple($keys, $msgStatus);
+                $msgStatusDao->insertMultiple($msgStatus);
             }
         }
     }   

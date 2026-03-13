@@ -9,7 +9,7 @@ header('Access-Control-Allow-Origin: '.$server['http'].$server['site_url']);
 function echoErrorHandler($errno, $errstr, $errfile, $errline)
 {    
     global $server;
-    Logger::error('Main::compile()', 
+    Logger::error('Main::compile(2)', 
         array('errno'=>$errno, 'errstr'=>$errstr, 'errfile'=>$errfile, 'errline'=>$errline));
     header('Location: '.$server['http'].$server['site_url'].'/error');
 }
@@ -36,8 +36,9 @@ try
 }
 catch (Exception $e) 
 {
-    Logger::error("Main::compile()", array($e));
-    header('Location: '.$server['http'].$server['site_url'].'/error');
+    var_dump($e);
+    Logger::error("Main::compile(1)", array($e));
+    //header('Location: '.$server['http'].$server['site_url'].'/error');
 }
 
 /**
@@ -254,7 +255,7 @@ class Main
      * @param string $dir Directory where the template is stored
      * @return string Tenmplate contents with parameters replaced
      */
-    public static function loadTemplate(string $template, array $replace=null, string $dir='modules/') : string 
+    public static function loadTemplate(string $template, ?array $replace=null, ?string $dir='modules/') : string 
     {
         global $config;
         global $server;
