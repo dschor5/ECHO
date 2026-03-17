@@ -174,7 +174,8 @@ class ConversationsDao extends Dao
             'name'                   => $threadName,
             'parent_conversation_id' => $convo->conversation_id,
             'date_created'           => $currTime->getTime(),
-            'last_message'           => $currTime->getTime(),
+            'last_message_mcc'       => $currTime->getTime(),
+            'last_message_hab'       => $currTime->getTime(),
         );
 
         $this->startTransaction();
@@ -276,9 +277,16 @@ class ConversationsDao extends Dao
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
 
-        $queryStr = 'UPDATE conversations SET '. 
-            'last_message=UTC_TIMESTAMP(3) '. 
-            'WHERE conversation_id='.$qConvoId;
+        $queryStr = 'UPDATE conversations c
+            LEFT JOIN (
+                SELECT conversation_id, MAX(recv_time_mcc) AS last_mcc, MAX(recv_time_hab) AS last_hab
+                FROM messages
+                GROUP BY conversation_id
+            ) m ON c.conversation_id = m.conversation_id
+            SET 
+                c.last_message_mcc = m.last_mcc,
+                c.last_message_hab = m.last_hab
+            WHERE c.conversation_id = '.$qConvoId;
                 
         return ($this->database->query($queryStr) !== false);
     }

@@ -223,7 +223,8 @@ class UsersDao extends Dao
                     );
                     $newConvoVars = array(
                         'date_created' => 'UTC_TIMESTAMP(3)',
-                        'last_message' => 'UTC_TIMESTAMP(3)',
+                        'last_message_mcc' => 'UTC_TIMESTAMP(3)',
+                        'last_message_hab' => 'UTC_TIMESTAMP(3)',
                     );
                     $newConvoId = $conversationsDao->insert($newConvoData, $newConvoVars);
 
