@@ -78,6 +78,8 @@ class ChatModule extends DefaultModule
             'newThread' => 'createNewThread'
         );
         $this->subHtmlRequests = array(
+            'showSave' => 'showSavedMessages',
+            'showChat' => 'showChat',
             'default' => 'showChat'
         );
         $this->subStreamRequests = array(
@@ -1086,8 +1088,14 @@ class ChatModule extends DefaultModule
             $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
         }   
 
+        $template = 'chat.txt';
+        if($mission->feat_saved_messages && $subaction == 'saved')
+        {
+            $template = 'chat-read-only.txt';
+        }
+
         // Load template. 
-        return Main::loadTemplate('chat.txt', 
+        return Main::loadTemplate($template, 
             array('/%username%/'           => htmlspecialchars($this->user->username),
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%convo_id%/'           => $this->currConversation->conversation_id,

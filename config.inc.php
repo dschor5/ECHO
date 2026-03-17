@@ -135,6 +135,7 @@ require_once('database/messagesDao.php');
 require_once('database/messageStatusDao.php');
 require_once('database/messageFileDao.php');
 require_once('database/archiveDao.php');
+require_once('database/messagesSavedDao.php');
 
 
 

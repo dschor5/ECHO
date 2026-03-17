@@ -70,6 +70,15 @@ CREATE TABLE `msg_status` (
   FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `msg_saved` (
+  `message_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY(`message_id`, `user_id`),
+  INDEX idx_msg_status_user (`user_id`),
+  FOREIGN KEY(`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY(`message_id`) REFERENCES messages(`message_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `msg_files` (
   `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,  
   `message_id` int(10) UNSIGNED NOT NULL,
@@ -125,6 +134,7 @@ INSERT INTO `mission_config` (`name`, `type`, `value`) VALUES
 ('feat_convo_threads',       'bool', '1'), 
 ('feat_convo_threads_all',   'bool', '1'),
 ('feat_out_of_seq',          'bool', '1'),
+('feat_saved_messages',      'bool', '1'),
 ('debug',                    'bool', '0');
 
 INSERT INTO `users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
