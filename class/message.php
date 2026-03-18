@@ -31,6 +31,7 @@
  * - msg_files.original_name    (string)    Original filename for attachment (if any)
  * - msg_files.server_name      (string)    Server filename for attachment (if any)
  * - msg_files.mime_type        (string)    Mime type for attachment (if any)
+ * - is_saved                   (bool)      If pinned by current user.
  * 
  * Implementation Notes:
  * - Each message is assigned a type from: TEXT, IMPORTANT, FILE, AUDIO, or VIDEO. 
@@ -323,6 +324,7 @@ class Message
             'delivered_status' => $this->getMsgStatus($remoteDest),
             'remoteDest'       => $remoteDest,
             'send_notification'=> ($userPerspective->user_id != $this->user_id) ? true : false,
+            'is_saved'         => $this->is_saved
         );
             
         // Flag as important

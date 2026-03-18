@@ -75,7 +75,8 @@ class ChatModule extends DefaultModule
             'send'      => 'textMessage', 
             'upload'    => 'uploadFile',
             'prevMsgs'  => 'getPrevMessages',
-            'newThread' => 'createNewThread'
+            'newThread' => 'createNewThread',
+            'toggleSave' => 'toggleSaveMessage',
         );
         $this->subHtmlRequests = array(
             'showSave' => 'showSavedMessages',
@@ -159,6 +160,33 @@ class ChatModule extends DefaultModule
         else
         {
             $response['error'] = 'User cannot access conversation_id='.$this->currConversation->conversation_id;
+        }
+
+        return $response;
+    }
+
+    /**
+     * Toggle saved message
+     */
+    protected function toggleSaveMessage() : array
+    {
+        $messagesSavedDao = MessagesSavedDao::getInstance();
+
+        $messageId = intval($_POST['message_id'] ?? -1);
+        $response = array(
+            'success' => false,
+            'message_id' => $messageId,
+            'is_saved' => false,
+        );
+
+        if($messageId > 0)
+        {
+            $response['is_saved'] = $messagesSavedDao->toggleSaveMessage($this->user->user_id, $messageId);
+            $response['success'] = true;
+        }
+        else
+        {
+            $response['error'] = 'Invalid message id.';
         }
 
         return $response;
@@ -500,7 +528,7 @@ class ChatModule extends DefaultModule
                 );
 
                 // Get the last message and return it in the ajax call.
-                if(($lastMessage = $messagesDao->getLastMessage($messageId))!== false)
+                if(($lastMessage = $messagesDao->getLastMessage($messageId, $this->user->user_id))!== false)
                 {
                     $result = array_merge($result, 
                         $lastMessage->compileArray($this->user, 
@@ -575,7 +603,7 @@ class ChatModule extends DefaultModule
                 );
 
                 // Get the last message and return it in the ajax call.
-                if(($lastMessage = $messagesDao->getLastMessage($messageId))!== false)
+                if(($lastMessage = $messagesDao->getLastMessage($messageId, $this->user->user_id))!== false)
                 {
                     $result = array_merge($result, 
                         $lastMessage->compileArray($this->user, 
@@ -1065,6 +1093,14 @@ class ChatModule extends DefaultModule
             $this->addTemplates('threads.js');
         }
 
+        // Only add if saved messages is enabled.
+        if($mission->feat_saved_messages)
+        {
+            $this->addTemplates('saved-messages.js');
+        }
+
+        $readOnly = ($mission->feat_saved_messages && $subaction == 'saved') ? true : false;
+        
         // Add flags & templates for all features enabled. 
         // The flags can be used by javascripts to enable/disable features.
         $featuresEnabled = ''.
@@ -1077,19 +1113,23 @@ class ChatModule extends DefaultModule
             (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
             (($mission->feat_out_of_seq)          ? Main::loadTemplate('chat-feat-out-of-seq.txt')          : '').
             (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '').
+            (($mission->feat_saved_messages)      ? Main::loadTemplate('chat-feat-saved-messages.txt')      : '').
             // Note: only enable browser-side support if not on mobile devices as that was reported 
             //       to cause issues on some touch interfaces.
             (($mission->feat_markdown_support && !Main::detectMobile())    
                                                   ? Main::loadTemplate('chat-feat-markdown-support.txt')    : '');
 
         // Determine who can add new threads if the feature is enabled.
-        if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
+        if(!$readOnly)
         {
-            $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
+            if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
+            {
+                $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
+            }
         }   
 
         $template = 'chat.txt';
-        if($mission->feat_saved_messages && $subaction == 'saved')
+        if($readOnly)
         {
             $template = 'chat-read-only.txt';
         }

@@ -174,15 +174,19 @@ function handleEventSourceNewRoom(event) {
                 threadsDiv.setAttribute('id', 'room-thread-' + data.convo_id);
                 threadsDiv.setAttribute('class', 'room-thread');
 
-                var newThread = document.createElement('a');
-                newThread.setAttribute('id', 'new-thread');
-                newThread.setAttribute('href', '#');
-                newThread.setAttribute('onclick', 'openThreadModal()');
-                newThread.innerText = '+ New Thread';
-
-                threadsDiv.appendChild(newThread);
+                if($('#feat-convo-threads-all-enabled').length) {
+                    var newThread = document.createElement('a');
+                    newThread.setAttribute('id', 'new-thread');
+                    newThread.setAttribute('href', '#');
+                    newThread.setAttribute('onclick', 'openThreadModal()');
+                    newThread.innerText = '+ New Thread';
+                    threadsDiv.appendChild(newThread);
+                }
             }
             
+            if(threadsDiv.hasChildNodes()) {
+                threadsDiv.setAttribute('style', 'display:block;');
+            }
         }
         
         var divRoomLink = document.createElement('a');
@@ -344,6 +348,24 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg").setAttribute('id', 'msg-id-' + data.message_id);
         msgClone.querySelector(".msg-from").innerHTML = data.author;
         msgClone.querySelector(".msg-id").textContent = "(" + data.message_id_alt + ")";
+
+        if ($('#feat-saved-messages-enabled').length) {
+            var msgSaved = msgClone.querySelector(".msg-saved");
+            
+            if (msgSaved) {
+                msgSaved.setAttribute('id', 'msg-saved-' + data.message_id);
+                
+                // Set the star icon based on the boolean from our SQL query
+                // 1 (true) = Filled Star, 0 (false) = Empty Star
+                console.log("Message ID " + data.message_id + " is_saved: " + data.is_saved);
+                msgSaved.innerHTML = data.is_saved == 0 ? '&#9734;' : '&#9733;';
+                
+                // Ensure it's visible (in case CSS hides it by default)
+                msgSaved.style.display = 'inline-block'; 
+                
+                msgSaved.setAttribute('onclick', 'toggleSaved(' + data.message_id + ')');
+            }
+        }
 
         // Add appropriate avatar. Only added for non-logged in user. 
         if(data.source != 'usr') {
