@@ -37,7 +37,7 @@ try
 catch (Exception $e) 
 {
     var_dump($e);
-    Logger::error("Main::compile(1)", array($e));
+    Logger::error("Main::compile(1)".$e, array($e));
     //header('Location: '.$server['http'].$server['site_url'].'/error');
 }
 

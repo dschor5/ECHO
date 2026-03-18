@@ -5,9 +5,9 @@
  * Encapsulates 'mission_config' row from database.
  * 
  * Table Structure: 'mission_config'
- * - name   (string)    Configuration field name
- * - value  (string)    Value for configuration field saved as a string.
- * - type   (string)    Variable type for parsing/interpreting config field.
+ * - name          (string)    Configuration field name
+ * - config_value  (string)    Value for configuration field saved as a string.
+ * - config_type   (string)    Variable type for parsing/interpreting config field.
  * 
  * Implementation Notes:
  * - Singleton implementation. 
@@ -88,6 +88,7 @@ class MissionConfig
             'feat_important_msgs',      
             'feat_convo_threads',       
             'feat_convo_threads_all',   
+            'feat_saved_messages',
             'debug',            
         );
 
@@ -167,22 +168,22 @@ class MissionConfig
         // If the key exists, use the type to parse the value. 
         if(array_key_exists($name, $this->data))
         {
-            switch($this->data[$name]['type'])
+            switch($this->data[$name]['config_type'])
             {
                 case 'int': 
-                    $result = intval($this->data[$name]['value']); 
+                    $result = intval($this->data[$name]['config_value']); 
                     break;
                 case 'float':
-                    $result = floatval($this->data[$name]['value']); 
+                    $result = floatval($this->data[$name]['config_value']); 
                     break;
                 case 'bool':
-                    $result = boolval($this->data[$name]['value']); 
+                    $result = boolval($this->data[$name]['config_value']); 
                     break;
                 case 'json':
-                    $result = json_decode($this->data[$name]['value'], true);
+                    $result = json_decode($this->data[$name]['config_value'], true);
                     break;
                 default:
-                    $result = strval($this->data[$name]['value']);
+                    $result = strval($this->data[$name]['config_value']);
             }
         }
         else
@@ -251,24 +252,24 @@ class MissionConfig
         // Update existing variable
         if(array_key_exists($name, $this->data))
         {   
-            if($typeData == $this->data[$name]['type'])
+            if($typeData == $this->data[$name]['config_type'])
             {
-                $this->data[$name]['value'] = $value;
+                $this->data[$name]['config_value'] = $value;
                 $missionDao->updateMissionConfig(array($name => $value));
             }
             else
             {
-                Logger::warning('MissionConfig::__set - Update received invalid type for "'.$name.'"'.'   '.$this->data[$name]['type'].' == '.$typeData);
+                Logger::warning('MissionConfig::__set - Update received invalid type for "'.$name.'"'.'   '.$this->data[$name]['config_type'].' == '.$typeData);
             }
         }
         // Insert new variable
         else
         {
-            $this->data[$name] = array('type' => $typeData, 'value' => $value);
+            $this->data[$name] = array('config_type' => $typeData, 'config_value' => $value);
             $missionDao->insert(array(
                 'name'  => $name,
-                'type'  => $typeData,
-                'value' => $value
+                'config_type'  => $typeData,
+                'config_value' => $value
             ));
         }
     }

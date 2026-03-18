@@ -52,8 +52,8 @@ class MissionDao extends Dao
                 while(($data = $result->fetch_assoc()) != null)
                 {
                     $missionData[$data['name']] = array(
-                            'type'  => $data['type'],
-                            'value' => $data['value']
+                            'config_type'  => $data['config_type'],
+                            'config_value' => $data['config_value']
                         );
                 }
             }

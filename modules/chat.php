@@ -591,7 +591,7 @@ class ChatModule extends DefaultModule
                 'from_crew'       => ($this->user->is_crew) ? '1' : '0',
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => $msgText,
-                'type'            => $msgImportant,
+                'message_type'    => $msgImportant,
             );
 
             // Send message.

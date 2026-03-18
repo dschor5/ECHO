@@ -126,7 +126,7 @@ class MessagesDao extends Dao
                         'WHERE user_id='.$user->user_id.' '.
                         'AND conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '.
                         'AND text="'.$this->database->prepareStatement($msgData['text']).'" '.
-                        'AND type="'.$this->database->prepareStatement($msgData['type']).'" '.
+                        'AND message_type="'.$this->database->prepareStatement($msgData['message_type']).'" '.
                         'AND '.$recvSource.' > DATE_SUB(UTC_TIMESTAMP(3), INTERVAL 3 SECOND) '.
                         'ORDER BY message_id DESC LIMIT 1';
             if(($result = $this->database->query($queryStr)) !== false && $result->num_rows > 0)
@@ -591,7 +591,7 @@ class MessagesDao extends Dao
         // last time the query was ran or not. 
         $queryStr = 'SELECT messages.conversation_id, '. 
                         'COUNT(*) AS num_new, '. 
-                        "SUM(IF(messages.type = 'important', 1, 0)) AS num_important ".
+                        "SUM(IF(messages.message_type = 'important', 1, 0)) AS num_important ".
                     'FROM messages, msg_status '.
                     'WHERE messages.conversation_id<>'.$qConvoId.' '. 
                         'AND msg_status.message_id=messages.message_id '.

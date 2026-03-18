@@ -255,7 +255,7 @@ function handleEventSourceNewMessage(event) {
 
     if(data.send_notification == true)
     {
-        newMessageNotification(data.author, data.type == 'important');
+        newMessageNotification(data.author, data.message_type == 'important');
     }
 }
 
@@ -379,7 +379,7 @@ function compileMsg(data, before){
         }
 
         // Message content. Either text or a template for the img/audio/video/file. 
-        if(data.type === 'text' || data.type === 'important') {
+        if(data.message_type === 'text' || data.message_type === 'important') {
             msgClone.querySelector(".msg-content").innerHTML = data.message;
             if(data.type === 'important' && $('#feat-important-msgs-enabled').length) {
                 msgClone.querySelector(".msg").classList.add("msg-important");
@@ -388,7 +388,7 @@ function compileMsg(data, before){
         }
         else {
             // Copy appropriate video, audio, image, or file template. 
-            template = document.querySelector('#msg-' + data.type);
+            template = document.querySelector('#msg-' + data.message_type);
             var contentClone = template.content.cloneNode(true);
             try {
                 contentClone.querySelectorAll(".file-location").forEach(function(element) {

@@ -49,7 +49,7 @@ class DebugModule extends DefaultModule
                 'from_crew' => $otherUser->is_crew,
                 'conversation_id' => $conversationId,
                 'text' => 'Auto generated debug message #'.$i,
-                'type' => Message::TEXT,
+                'message_type' => Message::TEXT,
                 'sent_time' => $currTime->getTime(),
                 'recv_time_hab' => $currTime->getTime(!$otherUser->is_crew),
                 'recv_time_mcc' => $currTime->getTime($otherUser->is_crew),
