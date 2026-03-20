@@ -70,9 +70,11 @@ class MissionDao extends Dao
      **/
     public function updateMissionConfig(array $data) : bool
     {
+        $tblMissionConfig = $this->tableName('mission_config');
+
         // Use case statements to update multiple fields in the table
         // in a single query. 
-        $queryStr = 'UPDATE mission_config SET config_value = ( CASE ';
+        $queryStr = 'UPDATE `'.$tblMissionConfig.'` SET config_value = ( CASE ';
         $qIn = array();
         foreach($data as $name => $value) 
         {

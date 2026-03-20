@@ -13,6 +13,18 @@ $config['uploads_dir'] = 'uploads';
 $config['logs_dir'] = 'logs';
 $config['log_file'] = 'analog.log';
 $config['delay_mars_file'] = 'mars_distance_echo.txt';
+// Base table names used by ECHO (without prefix)
+$config['table_list'] = array(
+    'users',
+    'conversations',
+    'participants',
+    'messages',
+    'msg_status',
+    'msg_saved',
+    'msg_files',
+    'mission_config',
+    'mission_archives',
+);
 
 // Extension => Mime Type
 $config['uploads_allowed'] = array(

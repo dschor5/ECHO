@@ -48,11 +48,13 @@ class ArchiveDao extends Dao
     {
         $qArchiveId = '\''.$this->database->prepareStatement($archiveId).'\'';
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $tblMissionArchives = $this->tableName('mission_archives');
+        $tblUsers = $this->tableName('users');
         
         // Get files with the matching archive_id and ensure the user is
         // an admin that can read the archive.
         $queryStr = 'SELECT mission_archives.* '. 
-                    'FROM `mission_archives`, `users` '. 
+                    'FROM `'.$tblMissionArchives.'` mission_archives, `'.$tblUsers.'` users '. 
                     'WHERE mission_archives.archive_id='.$qArchiveId.' AND '. 
                     'users.user_id='.$qUserId.' AND users.is_admin=1';
 

@@ -39,7 +39,10 @@ $database = array(
    'db_host' => '127.0.0.1',
    'db_user' => 'username',
    'db_pass' => 'password',
-   'db_name' => 'delay'
+   'db_name' => 'delay',
+   // Optional table prefix for multi-instance installs (e.g., 'echo_a_')
+   // Leave blank for default single-instance tables.
+   'table_prefix' => ''
 );
 
 // Other administrative settings. 
@@ -49,4 +52,3 @@ $admin = array(
    'default_password' => 'password',
 );
 ?>
-

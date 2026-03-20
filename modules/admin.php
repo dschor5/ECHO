@@ -939,12 +939,34 @@ class AdminModule extends DefaultModule
 
         $filePath    = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
+        $prefix = $database['table_prefix'] ?? '';
+        $tables = $config['table_list'] ?? array();
+        if(count($tables) === 0)
+        {
+            $tables = array(
+                'users',
+                'conversations',
+                'participants',
+                'messages',
+                'msg_status',
+                'msg_saved',
+                'msg_files',
+                'mission_config',
+                'mission_archives',
+            );
+        }
+        $tables = array_map(function($name) use ($prefix) {
+            return $prefix.$name;
+        }, $tables);
+        $tablesArg = implode(' ', array_map('escapeshellarg', $tables));
+
         $command = 'mysqldump --no-tablespaces'. 
-                            ' --host=\''.$database['db_host'].'\''.
-                            ' --user=\''.$database['db_user'].'\''.
-                            ' --password=\''.$database['db_pass'].'\''.
-                            ' \''.$database['db_name'].'\''.
-                            ' > '.$filePath;
+                            ' --host='.escapeshellarg($database['db_host']).
+                            ' --user='.escapeshellarg($database['db_user']).
+                            ' --password='.escapeshellarg($database['db_pass']).
+                            ' '.escapeshellarg($database['db_name']).
+                            ' --tables '.$tablesArg.
+                            ' > '.escapeshellarg($filePath);
         $startTime = microtime(true);
         exec($command, $output, $worked);
         $response['time'] = microtime(true) - $startTime;

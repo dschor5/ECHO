@@ -49,6 +49,7 @@ class MessagesDao extends Dao
 
         $conversationsDao = ConversationsDao::getInstance();
         $conversations = $conversationsDao->getConversations();
+        $tblMessages = $this->tableName('messages');
 
         foreach($conversations as $convoId => $convo) 
         {
@@ -80,13 +81,13 @@ class MessagesDao extends Dao
             $this->database->query($idQueryStr);
             
             // Update id for messages from the perspective of the habitat
-            $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_hab:=@id_hab+1 '. 
+            $updateQueryStr = 'UPDATE `'.$tblMessages.'` messages SET messages.message_id_alt=@id_hab:=@id_hab+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=1 ';
                 'ORDER BY IF(messages.from_crew, messages.recv_time_hab, messages.recv_time_mcc) ASC';
             $this->database->query($updateQueryStr);
             
             // Update id for messages from the perspective of mcc
-            $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_mcc:=@id_mcc+1 '. 
+            $updateQueryStr = 'UPDATE `'.$tblMessages.'` messages SET messages.message_id_alt=@id_mcc:=@id_mcc+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=0 ';
                 'ORDER BY IF(messages.from_crew, messages.recv_time_hab, messages.recv_time_mcc) ASC';
             $this->database->query($updateQueryStr);
@@ -109,6 +110,7 @@ class MessagesDao extends Dao
         $conversationsDao = ConversationsDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
+        $tblMessages = $this->tableName('messages');
 
         $id = null;
         $ret = true;
@@ -122,7 +124,7 @@ class MessagesDao extends Dao
             $recvSource = $user->is_crew ? 'recv_time_hab' : 'recv_time_mcc';
 
             // Check if the message exists (has the same sender and content within the last 10 sec)
-            $queryStr = 'SELECT message_id FROM messages '.
+            $queryStr = 'SELECT message_id FROM `'.$tblMessages.'` '.
                         'WHERE user_id='.$user->user_id.' '.
                         'AND conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '.
                         'AND text="'.$this->database->prepareStatement($msgData['text']).'" '.
@@ -138,7 +140,7 @@ class MessagesDao extends Dao
             }
 
             // Define query to find the next alternate id to assign to the new message
-            $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM messages '. 
+            $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM `'.$tblMessages.'` '. 
                 'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '. 
                 'AND from_crew='.(($user->is_crew)?'1':'0');
             $this->database->query($idQueryStr);
@@ -271,11 +273,12 @@ class MessagesDao extends Dao
         $qConvoIds = implode(',',$convoIds);
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
 
         $queryStr = 'SELECT messages.message_id '. 
                         // 'users.username, users.alias, users.is_active, '.
                         // 'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
-                    'FROM messages '.
+                    'FROM `'.$tblMessages.'` messages '.
                     // 'JOIN users ON users.user_id=messages.user_id '.
                     // 'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
                     //     'AND msg_status.user_id='.$qUserId.' '.
@@ -324,17 +327,22 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qLastId  = intval($lastId);
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgStatus = $this->tableName('msg_status');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgStatus.'` msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.message_id > '.$qLastId.' '.
@@ -384,15 +392,19 @@ class MessagesDao extends Dao
         // Build query
         $qMessageId  = '\''.$this->database->prepareStatement($messageId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
         
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.message_id='.$qMessageId;
                     
@@ -428,6 +440,11 @@ class MessagesDao extends Dao
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgStatus = $this->tableName('msg_status');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
         
         $this->database->query('SET @ts := UTC_TIMESTAMP(3);');
 
@@ -435,12 +452,12 @@ class MessagesDao extends Dao
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgStatus.'` msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
                         'AND msg_saved.user_id='.$qUserId.' '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
@@ -470,8 +487,8 @@ class MessagesDao extends Dao
         {
             $maxMsgId = max(array_keys($messages));
             $delStr   = 'DELETE msg_status '.
-            'FROM msg_status '.
-            'JOIN messages ON messages.message_id=msg_status.message_id '.
+            'FROM `'.$tblMsgStatus.'` msg_status '.
+            'JOIN `'.$tblMessages.'` messages ON messages.message_id=msg_status.message_id '.
             'WHERE msg_status.user_id='.$qUserId.' '.
                 'AND messages.conversation_id IN ('.$qConvoIds.') '. 
                 'AND messages.'.$qRefTime.' <= @ts '; 
@@ -507,15 +524,20 @@ class MessagesDao extends Dao
         $qlastMsgId  = '\''.$this->database->prepareStatement($lastMsgId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
+        $tblMsgStatus = $this->tableName('msg_status');
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved ' . 
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id ' .
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id ' . 
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id ' .
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id ' . 
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
@@ -546,8 +568,8 @@ class MessagesDao extends Dao
             {
                 $maxMsgId = max(array_keys($messages));
                 $delStr   = 'DELETE msg_status '.
-                'FROM msg_status '.
-                'JOIN messages ON messages.message_id=msg_status.message_id '.
+                'FROM `'.$tblMsgStatus.'` msg_status '.
+                'JOIN `'.$tblMessages.'` messages ON messages.message_id=msg_status.message_id '.
                 'WHERE msg_status.user_id='.$qUserId.' '.
                     'AND messages.conversation_id IN ('.$qConvoIds.') '. 
                     'AND messages.'.$qRefTime.' <= '.$qToDate.' ';
@@ -585,6 +607,8 @@ class MessagesDao extends Dao
         $qConvoId = '\''.$this->database->prepareStatement($conversationId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblMsgStatus = $this->tableName('msg_status');
 
         // Build query that counts new new messages and number of important messages. 
         // We leave it to the applicaiton to determine if the number changed from the
@@ -592,7 +616,7 @@ class MessagesDao extends Dao
         $queryStr = 'SELECT messages.conversation_id, '. 
                         'COUNT(*) AS num_new, '. 
                         "SUM(IF(messages.message_type = 'important', 1, 0)) AS num_important ".
-                    'FROM messages, msg_status '.
+                    'FROM `'.$tblMessages.'` messages, `'.$tblMsgStatus.'` msg_status '.
                     'WHERE messages.conversation_id<>'.$qConvoId.' '. 
                         'AND msg_status.message_id=messages.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '. 
@@ -625,20 +649,22 @@ class MessagesDao extends Dao
     public function clearMessagesAndThreads()
     {
         $conversationsDao = ConversationsDao::getInstance();
+        $tblMessages = $this->tableName('messages');
+        $tblConversations = $this->tableName('conversations');
 
         $this->startTransaction();
 
         // Delete all messags
-        $this->database->query('DELETE FROM messages');
+        $this->database->query('DELETE FROM `'.$tblMessages.'`');
 
         // Reset message counter
-        $this->database->query('ALTER TABLE messages AUTO_INCREMENT = 1');
+        $this->database->query('ALTER TABLE `'.$tblMessages.'` AUTO_INCREMENT = 1');
 
         // Delete all threads
-        $this->database->query('DELETE FROM conversations WHERE parent_conversation_id IS NOT NULL');
+        $this->database->query('DELETE FROM `'.$tblConversations.'` WHERE parent_conversation_id IS NOT NULL');
 
         // Update date for date created and last message.
-        $this->database->query('UPDATE conversations SET date_created=UTC_TIMESTAMP(3), last_message=UTC_TIMESTAMP(3)');
+        $this->database->query('UPDATE `'.$tblConversations.'` SET date_created=UTC_TIMESTAMP(3), last_message=UTC_TIMESTAMP(3)');
        
         $this->endTransaction();
     }
@@ -656,14 +682,17 @@ class MessagesDao extends Dao
     {
         $qConvoIds = implode(',',$convoIds);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
         
         // Build query
         $queryStr = 'SELECT messages.*, '. 
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '. 
+                    'FROM `'.$tblMessages.'` messages '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '. 
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
@@ -694,8 +723,10 @@ class MessagesDao extends Dao
      */
     public function countMessagesInConvo(array $convo_ids) : int 
     {
-        $queryStr = 'SELECT count(*) as num_files FROM `msg_files` '. 
-                    'JOIN messages ON messages.message_id=msg_files.message_id '. 
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMessages = $this->tableName('messages');
+        $queryStr = 'SELECT count(*) as num_files FROM `'.$tblMsgFiles.'` msg_files '. 
+                    'JOIN `'.$tblMessages.'` messages ON messages.message_id=msg_files.message_id '. 
                     'WHERE messages.conversation_id IN ('.join(',', $convo_ids).');';
 
         $numMsgs = 0;

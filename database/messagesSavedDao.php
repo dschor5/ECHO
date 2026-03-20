@@ -51,14 +51,15 @@ class MessagesSavedDao extends Dao
 
         $qMsgId = '\''.$this->database->prepareStatement($messageId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $tblMsgSaved = $this->tableName('msg_saved');
 
-        $deleteQuery = 'DELETE FROM msg_saved '. 
+        $deleteQuery = 'DELETE FROM `'.$tblMsgSaved.'` '. 
                            'WHERE user_id='.$qUserId.' '. 
                            'AND message_id='.$qMsgId;
         $this->database->query($deleteQuery);
         if($this->database->getNumRowsAffected() == 0) 
         {
-            $insertQuery = 'INSERT INTO msg_saved (user_id, message_id) '. 
+            $insertQuery = 'INSERT INTO `'.$tblMsgSaved.'` (user_id, message_id) '. 
                            'VALUES ('.$qUserId.', '.$qMsgId.')';
             $this->database->query($insertQuery);
             $ret = true;
