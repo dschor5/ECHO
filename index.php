@@ -176,9 +176,6 @@ class Main
             $action = '';
         }
         
-        
-        Logger::error('Main::compile(0)', array('action'=>$action, 'validModules'=>$validModules));
-
         if(!empty($action) && in_array($action, $validModules))
         {
             $moduleName = $action;
