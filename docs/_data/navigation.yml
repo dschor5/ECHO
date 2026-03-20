@@ -1,0 +1,29 @@
+- id: home
+  title: Home
+  url: /
+- id: installation
+  title: Installation
+  url: /installation/
+  children:
+    - title: Installation
+      url: /installation/installation/
+- id: usage
+  title: Usage
+  url: /manual/
+  children:
+    - title: Overview
+      url: /manual/overview/
+    - title: Messaging Interface
+      url: /manual/messaging-interface/
+    - title: Sending Messages
+      url: /manual/sending/
+    - title: User Interface
+      url: /manual/gui/
+    - title: Mission Settings
+      url: /administration/admin-mission/
+    - title: Account Management
+      url: /administration/admin-users/
+    - title: Communication Delay Settings
+      url: /administration/admin-delay/
+    - title: Data Management
+      url: /administration/admin-data/

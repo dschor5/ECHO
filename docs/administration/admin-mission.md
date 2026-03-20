@@ -1,5 +1,8 @@
 ---
+layout: default
 title: Mission Settings
+section: usage
+permalink: /administration/admin-mission/
 ---
 
 # Mission Settings

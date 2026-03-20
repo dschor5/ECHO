@@ -1,5 +1,8 @@
 ---
+layout: default
 title: Communication Delay Settings
+section: usage
+permalink: /administration/admin-delay/
 ---
 
 # Communication Delay Settings

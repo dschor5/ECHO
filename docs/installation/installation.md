@@ -1,8 +1,11 @@
 ---
-sort: 1
+layout: default
+title: Installation
+section: installation
+permalink: /installation/installation/
 ---
 
-## Installation
+# Installation
 
 1. Confirm that your server has the following prerequisites installed:
    - Apache 2.4 or higher with mod\_rewrite enabled.
@@ -17,4 +20,3 @@ sort: 1
 5. Modify the `.htaccess` file with the proper `RewriteBase` in accordance with the comments in the file.
 6. Navigate to your server's URL to see the **ECHO** home page / login screen.
 7. Click login and use the username `admin` and password `secret`. You will immediately be asked to change the password.
-

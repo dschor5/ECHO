@@ -1,5 +1,8 @@
 ---
+layout: default
 title: Overview
+section: usage
+permalink: /manual/overview/
 ---
 
 # Overview

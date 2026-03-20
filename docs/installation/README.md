@@ -1,9 +1,12 @@
 ---
-sort: 1
+layout: default
+title: Installation
+section: installation
+permalink: /installation/
 ---
 
 # Installation
 
 This section includes the installation guides for ECHO.
 
-- [Installation instructions](installation/installation.md)
+- [Installation instructions]({{ '/installation/installation/' | relative_url }})

@@ -1,5 +1,8 @@
 ---
-sort: 2
+layout: default
+title: Sending Messages
+section: usage
+permalink: /manual/sending/
 ---
 
 # Sending Messages

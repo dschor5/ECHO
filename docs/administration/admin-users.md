@@ -1,5 +1,8 @@
 ---
+layout: default
 title: Account Management
+section: usage
+permalink: /administration/admin-users/
 ---
 
 # Account Management

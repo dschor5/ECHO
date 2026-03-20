@@ -1,5 +1,8 @@
 ---
+layout: default
 title: Installation
+section: usage
+permalink: /manual/installation/
 ---
 
 # Installation

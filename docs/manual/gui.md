@@ -1,5 +1,8 @@
 ---
-sort: 1
+layout: default
+title: User Interface
+section: usage
+permalink: /manual/gui/
 ---
 
 # User Interface

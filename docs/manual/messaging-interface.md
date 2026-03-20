@@ -1,5 +1,8 @@
 ---
+layout: default
 title: Messaging Interface
+section: usage
+permalink: /manual/messaging-interface/
 ---
 
 # Messaging Interface

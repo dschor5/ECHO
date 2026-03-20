@@ -1,5 +1,8 @@
 ---
+layout: default
 title: Data Management
+section: usage
+permalink: /administration/admin-data/
 ---
 
 # Data Management
