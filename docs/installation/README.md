@@ -4,4 +4,6 @@ sort: 1
 
 # Installation
 
-{% include list.liquid all=true %}
+This section includes the installation guides for ECHO.
+
+- [Installation instructions](installation/installation.md)

@@ -4,4 +4,7 @@ sort: 1
 
 # User Manual
 
-{% include list.liquid all=true %}
+This section includes the user manual pages for ECHO.
+
+- [GUI guide](manual/gui.md)
+- [Sending messages](manual/sending.md)
