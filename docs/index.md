@@ -1,15 +1,18 @@
 ---
 layout: default
-title: ECHO
+title: User Manual
 ---
 
-# ECHO Documentation
+# ECHO User Manual
 
-Welcome to the ECHO docs site. Please use the menu to access installation instructions, the user manual, and other resources.
+Welcome to the ECHO user manual. Start with the overview and follow the sections below as needed.
 
-This site is configured for GitHub Pages:
+## Manual Sections
 
-- `url`: https://USERNAME.github.io
-- `baseurl`: /ECHO
-
-Replace `USERNAME` with your GitHub username or organization.
+- [Overview](manual/overview.md)
+- [Installation](manual/installation.md)
+- [Messaging Interface](manual/messaging-interface.md)
+- [Mission Settings](manual/admin-mission.md)
+- [Account Management](manual/admin-users.md)
+- [Communication Delay Settings](manual/admin-delay.md)
+- [Data Management](manual/admin-data.md)
