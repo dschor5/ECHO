@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Sending Messages
-section: usage
+section: users
 permalink: /manual/sending/
 ---
 

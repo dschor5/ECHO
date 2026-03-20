@@ -1,14 +1,14 @@
 - id: home
   title: Home
   url: /
+- id: about
+  title: About ECHO
+  url: /about/
 - id: installation
   title: Installation
   url: /installation/
-  children:
-    - title: Installation
-      url: /installation/installation/
-- id: usage
-  title: Usage
+- id: users
+  title: ECHO Users
   url: /manual/
   children:
     - title: Overview
@@ -19,6 +19,10 @@
       url: /manual/sending/
     - title: User Interface
       url: /manual/gui/
+- id: administrators
+  title: ECHO Administrators
+  url: /administration/
+  children:
     - title: Mission Settings
       url: /administration/admin-mission/
     - title: Account Management

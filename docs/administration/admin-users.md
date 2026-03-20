@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Account Management
-section: usage
+section: administrators
 permalink: /administration/admin-users/
 ---
 

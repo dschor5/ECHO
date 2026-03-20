@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Data Management
-section: usage
+section: administrators
 permalink: /administration/admin-data/
 ---
 

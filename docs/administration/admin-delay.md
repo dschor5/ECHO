@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Communication Delay Settings
-section: usage
+section: administrators
 permalink: /administration/admin-delay/
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: User Interface
-section: usage
+section: users
 permalink: /manual/gui/
 ---
 

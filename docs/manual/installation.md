@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Installation
-section: usage
+section: users
 permalink: /manual/installation/
 ---
 

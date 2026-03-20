@@ -107,6 +107,13 @@ body {
   color: var(--brand-accent);
 }
 
+.content img {
+  max-width: 600px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 @media (max-width: 900px) {
   .layout {
     flex-direction: column;

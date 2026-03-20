@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Mission Settings
-section: usage
+section: administrators
 permalink: /administration/admin-mission/
 ---
 

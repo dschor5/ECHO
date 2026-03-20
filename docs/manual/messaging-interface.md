@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Messaging Interface
-section: usage
+section: users
 permalink: /manual/messaging-interface/
 ---
 

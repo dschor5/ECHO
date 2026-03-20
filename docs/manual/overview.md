@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Overview
-section: usage
+section: users
 permalink: /manual/overview/
 ---
 
