@@ -34,9 +34,9 @@ class ErrorModule extends DefaultModule
             ', GET='.json_encode($_GET).
             ', POST='.json_encode($_POST). 
             ', SERVER_REQUEST_URI='.json_encode($_SERVER['REQUEST_URI']). 
-            ', SERVER_REDIRECT_URL='.json_encode($_SERVER['REDIRECT_URL']));
+            ', SERVER_REDIRECT_URL='.json_encode($_SERVER['REDIRECT_URL'] ?? null));
         return Main::loadTemplate('error.txt');
-    }    
+    }
 }
 
 

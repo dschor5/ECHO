@@ -8,6 +8,7 @@ RewriteRule mission.inc.php error
 RewriteRule ^uploads /index.php?action=error&page=%{REQUEST_URI}
 RewriteRule ^uploads/(.*) /index.php?action=error&p=$1&page=%{REQUEST_URI}
 
+RewriteRule ^error$ index.php?action=error [L,QSA]
 RewriteRule ^favicon.ico templates/media/favicon.ico
 RewriteRule ^apple-touch-icon.png templates/media/apple-touch-icon.png 
 RewriteRule ^apple-touch-icon-precomposed.png templates/media/apple-touch-icon.png 
@@ -16,9 +17,9 @@ RewriteRule ^apple-touch-icon-120x120-precomposed.png templates/media/apple-touc
 RewriteRule ^wp-login.php index.php?action=home [QSA]
 
 RewriteRule ^login index.php?action=home&subaction=checkLogin [QSA]
-RewriteRule ^ajax/(.*)/(.*) index.php?ajax=true&action=$1&subaction=$2 [QSA]
-RewriteRule ^ajax/(.*) index.php?ajax=true&action=$1 [QSA]
-RewriteRule ^ajax index.php?ajax=true [QSA]
+RewriteRule ^ajax/(.*)/(.*) index.php?ajax=true&action=$1&subaction=$2 [QSA,L]
+RewriteRule ^ajax/(.*) index.php?ajax=true&action=$1 [QSA,L]
+RewriteRule ^ajax index.php?ajax=true [QSA,L]
 RewriteRule ^chatstream index.php?stream=true&action=chat&subaction=refresh [QSA]
 RewriteRule ^home index.php?action=home [QSA]
 RewriteRule ^logout index.php?action=home&subaction=logout [QSA]
@@ -32,10 +33,13 @@ RewriteRule ^help index.php?action=help&subaction=overview [QSA]
 RewriteRule ^(file|css|js|archive)/(.*) index.php?action=file&subaction=$1&id=$2 [QSA]
 RewriteRule ^debug/run index.php?action=debug&subaction=run [QSA]
 
-ErrorDocument 400 /index.php?action=error&page=%{REQUEST_URI}
-ErrorDocument 403 /index.php?action=error&page=%{REQUEST_URI}
-ErrorDocument 404 /index.php?action=error&page=%{REQUEST_URI}
-ErrorDocument 500 /index.php?action=error&page=%{REQUEST_URI}
+ErrorDocument 400 index.php?action=error
+ErrorDocument 403 index.php?action=error
+ErrorDocument 404 index.php?action=error
+ErrorDocument 500 index.php?action=error
 
+# Map single path segments to action so unknown routes can trigger error module.
+# Must be at the END so specific rules (ajax, chatstream, etc) match first.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^/]+)/?$ index.php?action=$1 [QSA,L]
