@@ -13,6 +13,13 @@ abstract class Dao
      * @var Database
      */
     protected $database; 
+    
+    /**
+     * Optional table prefix for multi-instance installs.
+     * @access protected
+     * @var string
+     */
+    protected $tablePrefix;
 
     /**
      * Name of table represented by this DAO.
@@ -58,8 +65,32 @@ abstract class Dao
     protected function __construct(string $name, ?string $id=null)
     {
         $this->database = Database::getInstance();
-        $this->name     = $name;
+        global $database;
+        $this->tablePrefix = isset($database['table_prefix']) ? $database['table_prefix'] : '';
+        $this->name     = $this->tablePrefix.$name;
         $this->id       = $id;
+    }
+
+    /**
+     * Return a table name with prefix (no backticks).
+     * 
+     * @param string $name Base table name
+     * @return string Prefixed table name
+     */
+    protected function tableName(string $name): string
+    {
+        return $this->tablePrefix.$name;
+    }
+
+    /**
+     * Return a table name wrapped in backticks with prefix applied.
+     * 
+     * @param string $name Base table name
+     * @return string Backticked, prefixed table name
+     */
+    protected function table(string $name): string
+    {
+        return '`'.$this->tablePrefix.$name.'`';
     }
 
     /**
