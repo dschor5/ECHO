@@ -196,6 +196,18 @@
     color: #666;
 }
 
+.error-debug {
+    margin: 20px;
+    margin-top: 30px;
+    padding: 10px;
+    border: 2px solid red;
+    background: #fff7f7;
+    color: #400;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
 .switch {
     position: relative;
     display: inline-block;

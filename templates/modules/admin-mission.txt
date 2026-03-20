@@ -252,6 +252,17 @@
         </div>        
 
         <div class="form-row">
+            <label for="hab_name">Save Messages</label>
+            <div class="form-field">
+                <label class="switch"><input type="checkbox" name="feat_saved_messages" id="feat_saved_messages" %feat_saved_messages_checked%><span class="slider"></span></label> 
+                <div class="switch-label">Save Messages</div>
+            </div>
+             <div class="form-help">
+                Allows users to save important messages for each retrieval. 
+            </div>         
+        </div>
+
+        <div class="form-row">
             <label for="hab_name">Debugging</label>
             <div class="form-field">
                 <label class="switch"><input type="checkbox" name="debug" id="debug" %debug_checked%><span class="slider"></span></label> 

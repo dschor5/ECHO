@@ -126,7 +126,7 @@ class MessagesDao extends Dao
                         'WHERE user_id='.$user->user_id.' '.
                         'AND conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '.
                         'AND text="'.$this->database->prepareStatement($msgData['text']).'" '.
-                        'AND type="'.$this->database->prepareStatement($msgData['type']).'" '.
+                        'AND message_type="'.$this->database->prepareStatement($msgData['message_type']).'" '.
                         'AND '.$recvSource.' > DATE_SUB(UTC_TIMESTAMP(3), INTERVAL 3 SECOND) '.
                         'ORDER BY message_id DESC LIMIT 1';
             if(($result = $this->database->query($queryStr)) !== false && $result->num_rows > 0)
@@ -327,12 +327,15 @@ class MessagesDao extends Dao
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                        'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.message_id > '.$qLastId.' '.
                         'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
@@ -373,19 +376,24 @@ class MessagesDao extends Dao
      * Get a specific message. 
      *
      * @param int $messageId Message to retrieve
+     * @param int $userId Checks msg_status for this user and if the message is saved for this user
      * @return Message object
      */
-    public function getLastMessage(int $messageId) 
+    public function getLastMessage(int $messageId, int $userId) : ?Message
     {
         // Build query
         $qMessageId  = '\''.$this->database->prepareStatement($messageId).'\'';
+        $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                        'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.message_id='.$qMessageId;
                     
         $message = false;
@@ -425,12 +433,15 @@ class MessagesDao extends Dao
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
                     'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                        'AND msg_saved.user_id='.$qUserId.' '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
                         'AND messages.'.$qRefTime.' <= @ts '.
@@ -499,10 +510,13 @@ class MessagesDao extends Dao
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved ' . 
                     'FROM messages '.
                     'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id ' .
+                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id ' . 
+                        'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
                         'AND messages.message_id < '.$qlastMsgId.' '.
@@ -577,7 +591,7 @@ class MessagesDao extends Dao
         // last time the query was ran or not. 
         $queryStr = 'SELECT messages.conversation_id, '. 
                         'COUNT(*) AS num_new, '. 
-                        "SUM(IF(messages.type = 'important', 1, 0)) AS num_important ".
+                        "SUM(IF(messages.message_type = 'important', 1, 0)) AS num_important ".
                     'FROM messages, msg_status '.
                     'WHERE messages.conversation_id<>'.$qConvoId.' '. 
                         'AND msg_status.message_id=messages.message_id '.
@@ -624,7 +638,7 @@ class MessagesDao extends Dao
         $this->database->query('DELETE FROM conversations WHERE parent_conversation_id IS NOT NULL');
 
         // Update date for date created and last message.
-        $this->database->query('UPDATE conversations SET date_created=NOW(), last_message=NOW()');
+        $this->database->query('UPDATE conversations SET date_created=UTC_TIMESTAMP(3), last_message=UTC_TIMESTAMP(3)');
        
         $this->endTransaction();
     }
@@ -645,9 +659,12 @@ class MessagesDao extends Dao
         
         // Build query
         $queryStr = 'SELECT messages.*, '. 
-                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
                     'FROM messages '.
                     'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '. 
+                        'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
                     'LIMIT '.$offset.', '.$numMsgs;

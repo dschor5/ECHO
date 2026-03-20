@@ -10,7 +10,8 @@
  * - parent_conversation_id  (int)      If using nested threads, this points to 
  *                                      the parent conversation
  * - date_created            (datetime) Date when the conversation was created
- * - last_message            (datetime) when the last message was sent
+ * - last_message_mcc        (datetime) when the last message was sent w/mcc timestamp
+ * - last_message_hab        (datetime) when the last message was sent w/hab timestamp
  * 
  * Additional Fields:
  * - participants_id         (string)   CSV of participant ids for this convo

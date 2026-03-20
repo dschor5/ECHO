@@ -52,8 +52,8 @@ class MissionDao extends Dao
                 while(($data = $result->fetch_assoc()) != null)
                 {
                     $missionData[$data['name']] = array(
-                            'type'  => $data['type'],
-                            'value' => $data['value']
+                            'config_type'  => $data['config_type'],
+                            'config_value' => $data['config_value']
                         );
                 }
             }
@@ -72,7 +72,7 @@ class MissionDao extends Dao
     {
         // Use case statements to update multiple fields in the table
         // in a single query. 
-        $queryStr = 'UPDATE mission_config SET value = ( CASE ';
+        $queryStr = 'UPDATE mission_config SET config_value = ( CASE ';
         $qIn = array();
         foreach($data as $name => $value) 
         {

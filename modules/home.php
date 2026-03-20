@@ -58,14 +58,17 @@ class HomeModule extends DefaultModule
             {
                 return $this->showResetPage();
             }
-            else
+            elseif($this->user != null)
             {
                 header('Location: '.$server['http'].$server['site_url'].'/chat');
+                exit();
             }
         }
-        else if($this->user != null)
+        
+        if($this->user != null && $subaction != 'checkLogin')
         {
             header('Location: '.$server['http'].$server['site_url'].'/chat');
+            exit();
         }
 
         return $this->showHomepage();
@@ -118,6 +121,7 @@ class HomeModule extends DefaultModule
             else
             {
                 header('Location: '.$server['http'].$server['site_url'].'/chat');
+                exit();
             }
         }
         else

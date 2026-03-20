@@ -6,7 +6,7 @@ ini_set('display_errors', '1');
 require_once('server.inc.php');
 
 $config = array();
-$config['echo_version'] = '4.6';
+$config['echo_version'] = '5.0RC1';
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
@@ -135,6 +135,7 @@ require_once('database/messagesDao.php');
 require_once('database/messageStatusDao.php');
 require_once('database/messageFileDao.php');
 require_once('database/archiveDao.php');
+require_once('database/messagesSavedDao.php');
 
 
 
