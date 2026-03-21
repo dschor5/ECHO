@@ -13,6 +13,13 @@ abstract class Dao
      * @var Database
      */
     protected $database; 
+    
+    /**
+     * Optional table prefix for multi-instance installs.
+     * @access protected
+     * @var string
+     */
+    protected $tablePrefix;
 
     /**
      * Name of table represented by this DAO.
@@ -58,8 +65,32 @@ abstract class Dao
     protected function __construct(string $name, ?string $id=null)
     {
         $this->database = Database::getInstance();
-        $this->name     = $name;
+        global $database;
+        $this->tablePrefix = isset($database['table_prefix']) ? $database['table_prefix'] : '';
+        $this->name     = $this->tablePrefix.$name;
         $this->id       = $id;
+    }
+
+    /**
+     * Return a table name with prefix (no backticks).
+     * 
+     * @param string $name Base table name
+     * @return string Prefixed table name
+     */
+    protected function tableName(string $name): string
+    {
+        return $this->tablePrefix.$name;
+    }
+
+    /**
+     * Return a table name wrapped in backticks with prefix applied.
+     * 
+     * @param string $name Base table name
+     * @return string Backticked, prefixed table name
+     */
+    protected function table(string $name): string
+    {
+        return '`'.$this->tablePrefix.$name.'`';
     }
 
     /**
@@ -67,7 +98,7 @@ abstract class Dao
      */
     public function startTransaction()
     {
-        $this->database->query('START TRANSACTION',0);
+        $this->database->query('START TRANSACTION');
     }
 
     /**
@@ -104,7 +135,7 @@ abstract class Dao
             $query .= " where ".$id;
         }
 
-        return $this->database->query($query, false);
+        return $this->database->query($query);
     }
 
     /**
@@ -217,7 +248,7 @@ abstract class Dao
 
         // Finish building the query and then execute it.
         $query .= join(',',$keys).') values ('.join(',',$values).');';
-        if ($this->database->query($query,0))
+        if ($this->database->query($query))
         {
             // Always get the last insert id.
             $id = $this->database->getLastInsertId();
@@ -228,66 +259,102 @@ abstract class Dao
     }
 
     /**
+     * Check that all rows of a 2D array have the same keys. 
+     *
+     * @param array $arr
+     * @return boolean
+     */
+    private function sameKeys(array $arr): bool
+    {
+        if (count($arr) === 0) {
+            return true;
+        }
+
+        $expectedKeys = array_keys(reset($arr));
+        sort($expectedKeys);
+
+        foreach ($arr as $row) {
+            $keys = array_keys($row);
+            sort($keys);
+
+            if ($keys !== $expectedKeys) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Insert multiple rows into a table in a single database transaction.
      *
-     * @param array $colNames Array of column names.
      * @param array $rowEntries 2D associative array containing rows with field names 
      *              and values to be sanitized.
+     * @param array $sharedVariables to insert
      * @return int|false Number of rows inserted or false on errors.
      */
-    public function insertMultiple(array $colNames, array $rowEntries) 
+    public function insertMultiple(array $rowEntries, array $sharedVariables=array()) 
     {
         $valuesStr = array();
         
         // There must be at least one row to enter.
         if(count($rowEntries) == 0)
         {
+            Logger::error('Dao::insertMultiple() empty.', $rowEntries);
             return 0;
         }
 
-        // Sanitize the keys for the insert operation.
-        $keys = array();
-        foreach($colNames as $col)
+        if(!$this->sameKeys($rowEntries))
         {
-            $keys[] = '`'.$col.'`';
+            Logger::error('Dao::insertMultiple() invalid columns.', $rowEntries);
+            return false;
         }
-        $keysStr = join(',', $keys);
 
-        // Iterate through each row and make sure they all 
-        // contain the same fields in the same order. 
-        // If not, return false and log an error.
+        // Build column list
+        $expectedKeys = array_keys(reset($rowEntries));
+        $keys = array();
+        foreach($expectedKeys as $key)
+        {
+            $keys[] = '`'.$key.'`';
+        }
+        foreach($sharedVariables as $key => $variable)
+        {
+            $keys[] = '`'.$key.'`';
+        }
+
+        $keysStr = join(',', $keys);
+        
+        // Iterate through each row
         foreach($rowEntries as $row)
         {
-            // Iterate through each column in that row. 
             $values = array();
-            foreach($colNames as $col)
+            foreach($expectedKeys as $key)
             {
-                if(isset($row[$col]))
+                if ($row[$key] === null)
                 {
-                    if ($row[$col] === null)
-                    {
-                        $values[] = 'NULL';
-                    }
-                    else
-                    {
-                        $values[] = '"'.$this->database->prepareStatement($row[$col]).'"';
-                    }
+                    $values[] = 'NULL';
                 }
                 else
                 {
-                    Logger::error('Dao::insertMultiple() invalid column. ', array($this->name, $row, $col));
-                    return false;
+                    $values[] = '"'.$this->database->prepareStatement($row[$key]).'"';
                 }
             }
+            
+            // Add raw SQL variables (NOT sanitized or quoted)
+            foreach($sharedVariables as $key=>$variable)
+            {
+                $values[] = $variable;
+            }
+
             $valuesStr[] = '('.join(',', $values).')';
         }
 
-        // Create query. 
+        // Create query
         $query = 'INSERT INTO `'.$this->name.'` '.
                     '('.$keysStr.') VALUES '.join(',', $valuesStr).';';
 
-        
-        if ($this->database->query($query, false))
+
+        if ($this->database->query($query))
         {
             return $this->database->getNumRowsAffected();
         } 
@@ -337,7 +404,7 @@ abstract class Dao
 
         $query.=';';
 
-        return $this->database->query($query, false);
+        return $this->database->query($query);
     }
 
     /** 

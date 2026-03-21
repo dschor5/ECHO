@@ -1,4 +1,16 @@
+var archiveProgressTimeout = null;
+var archiveInProgress = false;
+
 function saveArchive(downloadType) {
+
+    $('#archive-response').hide();
+    $('#progress-archive').progressbar('widget').show('highlight', 0);
+    
+    if(archiveProgressTimeout != null) {
+        clearTimeout(archiveProgressTimeout);
+    }
+    archiveProgressTimeout = setTimeout(checkArchiveProgress, 100);
+
     $.ajax({
         url: BASE_URL + "/ajax",
         type: 'POST',
@@ -11,10 +23,17 @@ function saveArchive(downloadType) {
             notes: $('#archive-notes').val(),
         },
         dataType: 'json',
+        timeout: 1000 * 60 * 20,
+        error: function(data) {
+            $('#archive-response').html('ERROR: Could not connect to the server.');
+            $('#archive-response').show('highlight').delay(10000).fadeOut();
+            clearTimeout(archiveProgressTimeout);
+        },
         success: function(data) {
             if(data.success != true) {
-                $('div.dialog-response').text(data.error);
-                $('div.dialog-response').show();
+                $('#archive-response').html(data.error);
+                $('#archive-response').show('highlight').delay(10000).fadeOut();
+                clearTimeout(archiveProgressTimeout);
             }
             else {
                 location.href = BASE_URL + '/admin/data';
@@ -22,6 +41,59 @@ function saveArchive(downloadType) {
         }
     });    
 }
+
+function checkArchiveProgress() {
+    $.ajax({
+        url: BASE_URL + "/ajax",
+        type: 'POST',
+        data: {
+            action: 'admin',
+            subaction: 'backupstatus',
+        },
+        dataType: 'json',
+        timeout: 1600,
+        error: function(data) {
+            $('#create-archive-btn').css('display', 'inline');
+            $('#create-archive-btn').attr('disabled', false);
+            $('#progress-archive-wrapper').css('display', 'none');
+            $('#archive-response').html('ERROR: Failed to connect to server.');
+            $('#archive-response').show('highlight').delay(10000).fadeOut();
+        },
+        success: function(data) {
+            if(data.success == true) {
+                if(data.inprogress == true) {
+                    archiveInProgress = true;
+                    var percent = parseFloat(data.currCount) / data.totalCount * 100;
+                    $('.progress-label-file').text("Creating archive...");
+                    $('#progress-archive').progressbar('value', percent);
+                    $('#create-archive-btn').css('display', 'none');
+                    $('#create-archive-btn').attr('disabled', true);
+                    $('#progress-archive-wrapper').css('display', 'inline');
+                    archiveProgressTimeout = setTimeout(checkArchiveProgress, 2000);
+                }
+                else {
+                    if(archiveInProgress == true) {
+                        $('#archive-response').html('Finished .Refresh page to update listing.');
+                        $('#archive-response').show('highlight').delay(10000).fadeOut();
+                    }
+                    archiveInProgress = false;
+                    $('#create-archive-btn').css('display', 'inline');
+                    $('#create-archive-btn').attr('disabled', false);
+                    $('#progress-archive-wrapper').css('display', 'none');
+                    archiveProgressTimeout = setTimeout(checkArchiveProgress, 10000);
+                }
+            }
+            else {
+                $('#create-archive-btn').css('display', 'inline');
+                $('#create-archive-btn').attr('disabled', false);
+                $('#progress-archive-wrapper').css('display', 'none');
+            }
+        }
+    });
+
+    
+}
+
 
 function clearData() {
     $.ajax({
@@ -94,5 +166,6 @@ $(document).ready(function() {
         modal: true,
     });
 
+    $('#progress-archive').progressbar({value: false});
+    archiveProgressTimeout = setTimeout(checkArchiveProgress, 100);
 });
-

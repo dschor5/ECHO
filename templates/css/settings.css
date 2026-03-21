@@ -196,6 +196,18 @@
     color: #666;
 }
 
+.error-debug {
+    margin: 20px;
+    margin-top: 30px;
+    padding: 10px;
+    border: 2px solid red;
+    background: #fff7f7;
+    color: #400;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
 .switch {
     position: relative;
     display: inline-block;
@@ -280,4 +292,15 @@ input:checked + .slider:before {
 
 .button-black .ui-icon {
     background-image: url("%http%%site_url%/templates/media/ui-icons_222222_256x240.png");
+}
+
+.ui-progressbar {
+    position: relative;
+}
+.progress-label-file {
+    position: absolute;
+    left: 30%;
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
 }

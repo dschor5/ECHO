@@ -392,7 +392,7 @@ abstract class DefaultModule implements Module
      * @param array|null $data  Data to send with the event. 
      * @param integer|null $id Unique id given to the event (or null if not applicable).
      */
-    protected function sendEventStream(?string $name, ?array $data = null, int $id = null)
+    protected function sendEventStream(?string $name, ?array $data = null, ?int $id = null)
     {
         // Send empty message to keep stream alive.
         if($name == null)

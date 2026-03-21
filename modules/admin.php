@@ -43,7 +43,8 @@ class AdminModule extends DefaultModule
             'backupsql'      => 'backupSqlDatabase', 
             'backupconvo'    => 'backupConversations',
             'backuplog'      => 'backupSystemLog',
-            'deletearchive'  => 'deleteArchive',   
+            'deletearchive'  => 'deleteArchive',  
+            'backupstatus'   => 'backupConversationStatus', 
         );
 
         $this->subHtmlRequests = array(
@@ -122,7 +123,8 @@ class AdminModule extends DefaultModule
             'feat_important_msgs',
             'feat_convo_threads',    
             'feat_out_of_seq',
-            'feat_convo_threads_all',    
+            'feat_convo_threads_all',
+            'feat_saved_messages',    
             'debug'        
         );
 
@@ -271,6 +273,7 @@ class AdminModule extends DefaultModule
             '/%feat_convo_threads_checked%/'       => $mission->feat_convo_threads       == '1' ? 'checked' : '',
             '/%feat_out_of_seq_checked%/'          => $mission->feat_out_of_seq          == '1' ? 'checked' : '',
             '/%feat_convo_threads_all_checked%/'   => $mission->feat_convo_threads_all   == '1' ? 'checked' : '',
+            '/%feat_saved_messages_checked%/'      => $mission->feat_saved_messages      == '1' ? 'checked' : '',
             '/%debug_checked%/'                    => $mission->debug                    == '1' ? 'checked' : '',
         ));
     }
@@ -358,7 +361,7 @@ class AdminModule extends DefaultModule
                 if($startTime < $currTime && $currTime <= $endTime)
                 {
                     $delayConfig = array_merge(
-                        json_decode($mission->delay_config, true), 
+                        $mission->delay_config, 
                         array(array('ts'=>$currTimeObj->getTime(), 'eq'=>floatval($temp)))
                     );
                 }
@@ -478,7 +481,7 @@ class AdminModule extends DefaultModule
         else
         {
             $delayManual  = 0;
-            $delayOptions = json_decode($mission->delay_config, true);
+            $delayOptions = $mission->delay_config;
             $delayAuto    = '';
             foreach($delayOptions as $id => $cfg)
             {
@@ -733,7 +736,7 @@ class AdminModule extends DefaultModule
             'is_crew'  => 'Role',
             'is_admin' => 'Admin',
             'is_active' => 'Active',
-            'last_login' => 'Last Login (MCC timezone)',
+            'last_login' => 'Last Login <br/> (MCC timezone)',
             'tools'    => 'Actions'
         );
         
@@ -797,11 +800,11 @@ class AdminModule extends DefaultModule
 
             $list->addRow(array(
                 'id' => $id,
-                'username' => htmlspecialchars($user->username).' ('.htmlspecialchars($user->alias).')',
+                'username' => htmlspecialchars($user->username).' <br/> ('.htmlspecialchars($user->alias).')',
                 'is_crew' => $user->is_crew ? 'HAB' : 'MCC',
                 'is_admin' => $user->is_admin ? 'Yes' : 'No',
                 'is_active' => $user->is_active ? 'Yes' : 'No',
-                'last_login' => $user->getLastLogin(),
+                'last_login' => substr($user->getLastLogin(), 0, 16),
                 'tools' => join('&nbsp;&nbsp;', $tools),
             ));
         }
@@ -816,7 +819,6 @@ class AdminModule extends DefaultModule
 
     protected function editDataManagement() : string 
     {
-        
         $this->addTemplates('settings.css', 'data-management.js');
         $mission = MissionConfig::getInstance();
 
@@ -873,11 +875,11 @@ class AdminModule extends DefaultModule
         $logEntries = Logger::tailLog($logNum);
 
         return Main::loadTemplate('admin-data.txt', array(
-            '/%archive_tz%/'=>$archiveTzOptions,
             '/%archives%/' => $list->build(),
             '/%archive-name%/' => $mission->name,
             '/%log-num%/' => $logNum,
             '/%log-entries%/' => $logEntries,
+            '/%archive_tz%/'=>$archiveTzOptions,
         ));
     }
 
@@ -937,12 +939,34 @@ class AdminModule extends DefaultModule
 
         $filePath    = $server['host_address'].$config['logs_dir'].'/'.$archiveData['server_name'];
 
+        $prefix = $database['table_prefix'] ?? '';
+        $tables = $config['table_list'] ?? array();
+        if(count($tables) === 0)
+        {
+            $tables = array(
+                'users',
+                'conversations',
+                'participants',
+                'messages',
+                'msg_status',
+                'msg_saved',
+                'msg_files',
+                'mission_config',
+                'mission_archives',
+            );
+        }
+        $tables = array_map(function($name) use ($prefix) {
+            return $prefix.$name;
+        }, $tables);
+        $tablesArg = implode(' ', array_map('escapeshellarg', $tables));
+
         $command = 'mysqldump --no-tablespaces'. 
-                            ' --host=\''.$database['db_host'].'\''.
-                            ' --user=\''.$database['db_user'].'\''.
-                            ' --password=\''.$database['db_pass'].'\''.
-                            ' \''.$database['db_name'].'\''.
-                            ' > '.$filePath;
+                            ' --host='.escapeshellarg($database['db_host']).
+                            ' --user='.escapeshellarg($database['db_user']).
+                            ' --password='.escapeshellarg($database['db_pass']).
+                            ' '.escapeshellarg($database['db_name']).
+                            ' --tables '.$tablesArg.
+                            ' > '.escapeshellarg($filePath);
         $startTime = microtime(true);
         exec($command, $output, $worked);
         $response['time'] = microtime(true) - $startTime;
@@ -1058,20 +1082,62 @@ class AdminModule extends DefaultModule
         return $response;
     }
 
+    /**
+     * Return the current conversation download status. 
+     * Useful for large backups that take minutes to completed.
+     *
+     * @return array
+     */
+    protected function backupConversationStatus() : array
+    {
+        $ret = array('success' => true);
+        $missionCfg = MissionConfig::getInstance();
+        if(isset($missionCfg->download_status))
+        {
+            $ret = array_merge($ret, $missionCfg->download_status);
+            $ret['inprogress'] = true;
+        }
+        else
+        {
+            $ret['inprogress'] = false;
+        }
+
+        return $ret;
+    }
+
     protected function backupConversations() : array
     {
+        $missionCfg = MissionConfig::getInstance();
+
         $response = array(
             'success' => true, 
             'time'    => 0, 
             'error'   => '', 
         );
 
+        if(isset($missionCfg->download_status))
+        {
+            $backupTime = strtotime($missionCfg->download_status['date']);
+            $currTime  = strtotime((new DelayTime())->getTime());
+            $differenceInSeconds = $currTime - $backupTime;
+            if($differenceInSeconds > ConversationArchiveMaker::MAX_EXECUTION_TIME)
+            {
+                Logger::warning('admin::backupConversations Incomplete archive.', $missionCfg->download_status);
+                unset($missionCfg->download_status);
+            }
+            else
+            {
+                $response['success'] = false;
+                $response['error'] = 'Generating archive. Only one archive can be created at a time.';
+                return $response;
+            }
+        }
+
         $tzSelected = $_POST['timezone'] ?? '';
         $isCrew = !(isset($_POST['perspective']) && $_POST['perspective'] == 'mcc');
         $includePrivate = (isset($_POST['scope']) && $_POST['scope'] == 'convo-all');
         
         $archiveName = $_POST['name'] ?? '';
-        $missionCfg = MissionConfig::getInstance();
         $notes = 'Mission: '.$missionCfg->name.'<br/>'. 
                  'Archive Perspective: '.($isCrew ? 'HAB' : 'MCC'). '<br/>'. 
                  'Archive Timezone: '.$tzSelected. '<br/>'. 
@@ -1086,16 +1152,21 @@ class AdminModule extends DefaultModule
         }
         else
         {
+
+
             Logger::info('admin::backupConversations started');
             $startTime = microtime(true);
 
             $conversationsDao = ConversationsDao::getInstance();
             $conversations = $conversationsDao->getConversations(null, $includePrivate);
 
-            $mission = MissionConfig::getInstance();
-            $sepThreads = $mission->feat_convo_threads;
+            $messagesDao = MessagesDao::getInstance();
+            $numMsgs = $messagesDao->countMessagesInConvo(array_keys($conversations));
 
-            $zipMaker = new ConversationArchiveMaker($notes, $tzSelected);
+            $sepThreads = $missionCfg->feat_convo_threads;
+            $zipMaker = new ConversationArchiveMaker($notes, $tzSelected, $numMsgs + count($conversations));
+            
+            $missionCfg->download_status = $zipMaker->getDownloadStatus();
 
             foreach($conversations as $convoId => $convo)
             {
@@ -1112,6 +1183,11 @@ class AdminModule extends DefaultModule
                     $response['success'] = false;
                     break;
                 }
+                else
+                {
+                    // Update status
+                    $missionCfg->download_status = $zipMaker->getDownloadStatus();
+                }
             }
             $archiveData = $zipMaker->close();
             $response['time'] = microtime(true) - $startTime;
@@ -1119,7 +1195,7 @@ class AdminModule extends DefaultModule
             if($response['success'] === true)
             {
                 $archiveDao = ArchiveDao::getInstance();
-                $result = $archiveDao->insertMultiple(array_keys($archiveData[0]), $archiveData);
+                $result = $archiveDao->insertMultiple($archiveData);
 
                 if($result === false)
                 {
@@ -1137,6 +1213,7 @@ class AdminModule extends DefaultModule
             }
         }
         
+        unset($missionCfg->download_status);
         Logger::info('admin::backupConversations finished in '.$response['time'].' sec. ('.$result.')');
 
         return $response;

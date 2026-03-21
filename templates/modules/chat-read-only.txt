@@ -1,0 +1,96 @@
+    <div id="navigation">
+        <div id="room-container" class="navigation-container">
+            <div class="navigation-title">
+                Conversations
+            </div>
+            <div id="rooms">
+                <!-- Rooms added here via javascript. -->  
+            </div>
+        </div>
+        <div id="current-delay-container" class="navigation-container">
+            <div class="navigation-title">
+                Mission Parameters
+            </div>
+
+            <div id="distance-label" class="sim-param-label">Distance from %away_planet%:</div>
+            <div id="distance-value" class="sim-param-value">.</div>
+
+            <div id="owlt-label" class="sim-param-label">One-way-light-time delay:</div>
+            <div id="owlt-value" class="sim-param-value">.</div>
+
+            <div id="time-mcc-label" class="sim-param-label">Earth local time:</div>
+            <div id="time-mcc-value" class="sim-param-value">.</div>
+
+            <div id="time-hab-label" class="sim-param-label">Habitat time:</div>
+            <div id="time-hab-value" class="sim-param-value">.</div>
+        </div>
+    </div>
+
+    <div id="copyright">
+        &copy; 2020-%year% ECHO v%version%
+    </div>
+
+    <div id="content" style="bottom: 0px;">
+
+        <div id="msg-error">
+            <!-- Errors reported here via javascript. -->    
+        </div>
+
+        <div id="msg-container">
+            <!-- Messages loaded here via javascript. -->
+        </div>
+
+        <template id="msg-end">
+            <p style="padding-top: 10px; text-align: center; font-style: italic;">Start of conversation. </p>
+        </template>
+
+        <template id="msg-sent-template">
+            <div class="msg">
+                <div class="msg-originator">
+                    <span class="msg-from"></span>
+                    <span class="msg-id"></span>
+                </div>
+                <div class="msg-content"></div>
+                <time></time>
+                <div class="msg-status">
+                    <div class="msg-status-info">
+                        [<span class="msg-delivery-status"></span>]
+                        <span class="msg-out-seq" title="Messages cross paths in transit"><br/><span class="ui-icon ui-icon-shuffle"></span>Out of sequence<span class="ui-icon ui-icon-shuffle"></span></span>
+                    </div>
+                    <div class="msg-progress-bar">
+                        <span class="msg-progress-bar-fill"></span>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="msg-file">
+            Attachment: <a href="%http%%site_url%/file/%message-id%?download=true"><span class="filename"></span> (<span class="filesize"></span>)</a>
+        </template>
+
+        <template id="msg-image">
+            <img class="msg-image file-location" onclick="showImage(this)"><br>
+            %download-link%
+        </template>
+
+        <template id="msg-audio">
+            <audio class="msg-audio" controls preload="metadata">
+                <source class="file-location" type="video/webm">
+                <source class="file-location" type="video/x-matroska">
+                Your browser does not support the audio format.
+            </audio><br>
+            %download-link%
+        </template>
+
+        <template id="msg-video">
+            <video class="msg-video" controls preload="metadata">
+                <source class="file-location" type="audio/webm">
+                <source class="file-location" type="audio/x-matroska">
+                Your browser does not support the video format.
+            </video><br>
+            %download-link%
+        </template>
+    </div>
+    
+    %features_enabled%
+

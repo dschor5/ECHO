@@ -10,7 +10,8 @@
  * - parent_conversation_id  (int)      If using nested threads, this points to 
  *                                      the parent conversation
  * - date_created            (datetime) Date when the conversation was created
- * - last_message            (datetime) when the last message was sent
+ * - last_message_mcc        (datetime) when the last message was sent w/mcc timestamp
+ * - last_message_hab        (datetime) when the last message was sent w/hab timestamp
  * 
  * Additional Fields:
  * - participants_id         (string)   CSV of participant ids for this convo
@@ -153,6 +154,7 @@ class Conversation
         $alias = explode(',', $this->participants_alias);
         $usernames = explode(',', $this->participants_username);
         $isCrew = explode(',', $this->participants_is_crew);
+        $isActive = explode(',', $this->participants_is_active);
 
         // Iterate through each entry. 
         for($i = 0; $i < count($ids); $i++)
@@ -162,14 +164,35 @@ class Conversation
             {
                 // Assign the value depending on whether there is an alias. 
                 $participants[intval($ids[$i])] = 
-                    array('username' => $usernames[$i],
-                          'alias'    => $alias[$i],
-                          'is_crew'  => $isCrew[$i]
+                    array('username'  => $usernames[$i],
+                          'alias'     => $alias[$i],
+                          'is_crew'   => $isCrew[$i],
+                          'is_active' => $isActive[$i]
                     );
             }
         }
 
         return $participants;
+    }
+
+    /**
+     * Count active participants in this conversation.
+     *
+     * @return integer
+     */
+    public function countActiveParticipants() : int
+    {
+        $count = 0;
+        $participants = $this->getParticipants();
+        foreach($participants as $participant)
+        {
+            if($participant['is_active'] == 1)
+            {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**
@@ -188,14 +211,14 @@ class Conversation
         global $config;
         $success = true;
         $messagesDao = MessagesDao::getInstance();
-        $missionConfig = MissionConfig::getInstance();
+        $missionCfg = MissionConfig::getInstance();
         
         // Include list of participants and their role in the archive.
         $convoStr = '';
         $convoParticipants = $this->getParticipants();
         $participantsStr = '';
-        $mccStr = $missionConfig->mcc_planet;
-        $habStr = $missionConfig->hab_planet;
+        $mccStr = $missionCfg->mcc_planet;
+        $habStr = $missionCfg->hab_planet;
         foreach($convoParticipants as $participant)
         {
             $participantsStr .= Main::loadTemplate('admin-data-save-user.txt', 
@@ -261,6 +284,10 @@ class Conversation
                 }
             }
             $offset += $numMsgs;
+
+            // Update status
+            $missionCfg->download_status = $zip->getDownloadStatus();
+
             $messages = $messagesDao->getMessagesForConvo($ids, $isCrew, $offset, $numMsgs);
         }
 
@@ -298,7 +325,7 @@ class Conversation
             $fileName = $folderName.'.html';
             $success = $zip->addFromString($fileName, $convoStr);
         }
-
+        
         return $success;
     }
     

@@ -9,7 +9,7 @@
  * - user_id                    (int)       User id who authored the message.
  * - conversation_id            (int)       Conversation where the message belongs.
  * - text                       (text)      Text stored in the message.
- * - type                       (enum)      Enumerated value indicating:
+ * - message_type               (enum)      Enumerated value indicating:
  *                                          - TEXT - plaintext message
  *                                          - IMPORTANT - plaintext message but important
  *                                          - VIDEO - video recording
@@ -31,6 +31,7 @@
  * - msg_files.original_name    (string)    Original filename for attachment (if any)
  * - msg_files.server_name      (string)    Server filename for attachment (if any)
  * - msg_files.mime_type        (string)    Mime type for attachment (if any)
+ * - is_saved                   (bool)      If pinned by current user.
  * 
  * Implementation Notes:
  * - Each message is assigned a type from: TEXT, IMPORTANT, FILE, AUDIO, or VIDEO. 
@@ -114,7 +115,8 @@ class Message
         $this->file = null;
 
         // If the message contains an attachment, load teh corresponding fields. 
-        if($this->data['type'] != self::TEXT && $this->data['type'] != self::IMPORTANT)
+        if($this->data['message_type'] != self::TEXT && 
+           $this->data['message_type'] != self::IMPORTANT)
         {
             $this->file = new FileUpload(
                 array_intersect_key($this->data, 
@@ -213,7 +215,9 @@ class Message
         $msg = $this->compileMsgText();
 
         // If the message had an attachment, then copy the file to the correct folder in the archive.
-        if($this->type != self::TEXT && $this->type != self::IMPORTANT && $this->file != null && $this->file->exists())
+        if($this->message_type != self::TEXT && 
+           $this->message_type != self::IMPORTANT && 
+           $this->file != null && $this->file->exists())
         {
             $filepath = $this->file->getServerPath();
 
@@ -233,7 +237,7 @@ class Message
 
         // Add indicator that this message was sent with high importance.
         $important = '';
-        if($this->type == self::IMPORTANT)
+        if($this->message_type == self::IMPORTANT)
         {
             $important = '<p style="color: red; font-weight: bold; font-size: 140%;">IMPORTANT:</p>';
         }
@@ -272,7 +276,7 @@ class Message
         }
         else
         {
-            $result = preg_replace('/[\r\n|\n|\r]/','<br>',$result);
+            $result = preg_replace('/(\r\n)|(\n)|(\r)/','<br>',$result);
         }
         
         return $result;
@@ -314,7 +318,7 @@ class Message
             'from_crew'        => $this->from_crew,
             'author'           => $this->getAliasWithStatus(),
             'message'          => $this->compileMsgText(),
-            'type'             => self::TEXT,
+            'message_type'     => self::TEXT,
             'sent_time'        => DelayTime::convertTsForJs($this->sent_time),
             'recv_time_mcc'    => DelayTime::convertTsForJs($this->recv_time_mcc),
             'recv_time_hab'    => DelayTime::convertTsForJs($this->recv_time_hab),
@@ -323,22 +327,25 @@ class Message
             'delivered_status' => $this->getMsgStatus($remoteDest),
             'remoteDest'       => $remoteDest,
             'send_notification'=> ($userPerspective->user_id != $this->user_id) ? true : false,
+            'is_saved'         => $this->is_saved
         );
             
         // Flag as important
-        if($this->type == self::IMPORTANT) 
+        if($this->message_type == self::IMPORTANT) 
         {
-            $msgData['type'] = self::IMPORTANT;
+            $msgData['message_type'] = self::IMPORTANT;
         }
         
         // If not null, add the details on the file attachment. 
-        if($this->type != self::TEXT && $this->type != self::IMPORTANT && $this->file != null)
+        if($this->message_type != self::TEXT && 
+           $this->message_type != self::IMPORTANT && 
+           $this->file != null)
         {
             if($this->file->exists())
             {
                 $msgData['filename'] = $this->file->original_name;
                 $msgData['filesize'] = $this->file->getSize();
-                $msgData['type'] = $this->file->getTemplateType();
+                $msgData['message_type'] = $this->file->getTemplateType();
                 $msgData['mime_type'] = $this->file->mime_type;
             }
         }

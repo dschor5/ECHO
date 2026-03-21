@@ -1,0 +1,33 @@
+- id: home
+  title: Home
+  url: /
+- id: about
+  title: About ECHO
+  url: /about/
+- id: installation
+  title: Installation
+  url: /installation/
+- id: users
+  title: ECHO Users
+  url: /manual/
+  children:
+    - title: Overview
+      url: /manual/overview/
+    - title: Messaging Interface
+      url: /manual/messaging-interface/
+    - title: Sending Messages
+      url: /manual/sending/
+    - title: User Interface
+      url: /manual/gui/
+- id: administrators
+  title: ECHO Administrators
+  url: /administration/
+  children:
+    - title: Mission Settings
+      url: /administration/admin-mission/
+    - title: Account Management
+      url: /administration/admin-users/
+    - title: Communication Delay Settings
+      url: /administration/admin-delay/
+    - title: Data Management
+      url: /administration/admin-data/

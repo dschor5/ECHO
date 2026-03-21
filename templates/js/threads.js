@@ -59,7 +59,7 @@ function createThread()
 }
 
 function addThreadToMenu(conversation_id, thread_id, thread_name, thread_selected) {
-    if($('#thread-name-' + thread_id).length == 0) {
+    if($('#room-name-' + thread_id).length == 0) {
         var linkTag = document.createElement('a');
         linkTag.setAttribute('href', BASE_URL + '/chat/' + thread_id);
         if(thread_selected) {
@@ -72,6 +72,8 @@ function addThreadToMenu(conversation_id, thread_id, thread_name, thread_selecte
         span2.setAttribute('id', 'room-new-' + thread_id);
         linkTag.appendChild(span1);
         linkTag.appendChild(span2);
-        $(linkTag).insertBefore('#new-thread');
+        if($('#new-thread').length > 0) {
+            $(linkTag).insertBefore('#new-thread');
+        }
     }
 }

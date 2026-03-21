@@ -75,9 +75,12 @@ class ChatModule extends DefaultModule
             'send'      => 'textMessage', 
             'upload'    => 'uploadFile',
             'prevMsgs'  => 'getPrevMessages',
-            'newThread' => 'createNewThread'
+            'newThread' => 'createNewThread',
+            'toggleSave' => 'toggleSaveMessage',
         );
         $this->subHtmlRequests = array(
+            'showSave' => 'showSavedMessages',
+            'showChat' => 'showChat',
             'default' => 'showChat'
         );
         $this->subStreamRequests = array(
@@ -157,6 +160,33 @@ class ChatModule extends DefaultModule
         else
         {
             $response['error'] = 'User cannot access conversation_id='.$this->currConversation->conversation_id;
+        }
+
+        return $response;
+    }
+
+    /**
+     * Toggle saved message
+     */
+    protected function toggleSaveMessage() : array
+    {
+        $messagesSavedDao = MessagesSavedDao::getInstance();
+
+        $messageId = intval($_POST['message_id'] ?? -1);
+        $response = array(
+            'success' => false,
+            'message_id' => $messageId,
+            'is_saved' => false,
+        );
+
+        if($messageId > 0)
+        {
+            $response['is_saved'] = $messagesSavedDao->toggleSaveMessage($this->user->user_id, $messageId);
+            $response['success'] = true;
+        }
+        else
+        {
+            $response['error'] = 'Invalid message id.';
         }
 
         return $response;
@@ -315,7 +345,7 @@ class ChatModule extends DefaultModule
      * Response for asynchronous javascript POST request 
      * to upload a file (sent as a new message).
      * 
-     * The funciton validates the upload (type, name, size) before
+     * The function validates the upload (type, name, size) before
      * moving it to the uploads directory and entering the information 
      * into the database. 
      * 
@@ -324,7 +354,7 @@ class ChatModule extends DefaultModule
      *   an error message, then leave the polling function get the 
      *   message to display on the screen. Unfortunately, that led to 
      *   race conditions depending on the polling & database insertion. 
-     *   So on some occations, the message was not displayed to the user. 
+     *   So on some occasions, the message was not displayed to the user. 
      *   The problem was resolved by returning the status along with 
      *   the new message. 
      * - All messages get an MCC and HAB timestamp regardless of where
@@ -365,19 +395,19 @@ class ChatModule extends DefaultModule
         {
             $fileExt1  = 'mkv';
             $fileExt2  = '';
-            $fileNameParts = 2;
+            $numFileNameParts = 2;
             $fileMime = 'video/webm';
             $dt = new DateTime('NOW');
-            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt1;
         }
         elseif($fileType == Message::AUDIO)
         {
             $fileExt1  = 'mkv';
             $fileExt2  = '';
-            $fileNameParts = 2;
+            $numFileNameParts = 2;
             $fileMime = 'audio/webm';
             $dt = new DateTime('NOW');
-            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt;
+            $fileName = $fileType.'_'.$dt->format('YmdHisv').'.'.$fileExt1;
         }
         else // Catch-all for regular attachments
         {
@@ -481,6 +511,7 @@ class ChatModule extends DefaultModule
             
             // Create entry for the msg_files table. 
             $fileData = array(
+                'file_id'       => 0,
                 'message_id'    => 0,
                 'server_name'   => $serverName,
                 'original_name' => $fileName,
@@ -497,7 +528,7 @@ class ChatModule extends DefaultModule
                 );
 
                 // Get the last message and return it in the ajax call.
-                if(($lastMessage = $messagesDao->getLastMessage($messageId))!== false)
+                if(($lastMessage = $messagesDao->getLastMessage($messageId, $this->user->user_id))!== false)
                 {
                     $result = array_merge($result, 
                         $lastMessage->compileArray($this->user, 
@@ -523,7 +554,7 @@ class ChatModule extends DefaultModule
      *   an error message, then leave the polling function get the 
      *   message to display on the screen. Unfortunately, that led to 
      *   race conditions depending on the polling & database insertion. 
-     *   So on some occations, the message was not displayed to the user. 
+     *   So on some occasions, the message was not displayed to the user. 
      *   The problem was resolved by returning the status along with 
      *   the new message. 
      * - All messages get an MCC and HAB timestamp regardless of where
@@ -560,7 +591,7 @@ class ChatModule extends DefaultModule
                 'from_crew'       => ($this->user->is_crew) ? '1' : '0',
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => $msgText,
-                'type'            => $msgImportant,
+                'message_type'    => $msgImportant,
             );
 
             // Send message.
@@ -572,7 +603,7 @@ class ChatModule extends DefaultModule
                 );
 
                 // Get the last message and return it in the ajax call.
-                if(($lastMessage = $messagesDao->getLastMessage($messageId))!== false)
+                if(($lastMessage = $messagesDao->getLastMessage($messageId, $this->user->user_id))!== false)
                 {
                     $result = array_merge($result, 
                         $lastMessage->compileArray($this->user, 
@@ -597,11 +628,11 @@ class ChatModule extends DefaultModule
      * - delay        - Updates current communication delay and distance between HAB and MCC. 
      * - msg          - New message received. Multiple instances of this messages can be sent
      *                  per second and each contains a unique id to ensure the client knows 
-     *                  there is no duplicate informaiton. 
+     *                  there is no duplicate information. 
      * - notification - Notifies the client that the current user received messages in 
      *                  another conversation. 
      * - keep-alive   - Empty message sent if no activity was recorded for more than X sec
-     *                  to ensure the conneciton is kept alive. 
+     *                  to ensure the connection is kept alive. 
      * 
      * Implementation Notes:
      * - To avoid interfering with the on page load request for messages, 
@@ -682,7 +713,7 @@ class ChatModule extends DefaultModule
         // Initialize conversations menu
         foreach($this->conversations as $convoId => $convo)
         {
-            if($convo->parent_conversation_id == null)
+            if($convo->parent_conversation_id == null && $convo->countActiveParticipants() > 1)
             {
                 $roomSelected = $this->currConversation->conversation_id == $convoId;
                 
@@ -742,7 +773,7 @@ class ChatModule extends DefaultModule
 
     /**
      * Sends event stream message 'delay' anytime the current 
-     * communicaiton delay changes. 
+     * communication delay changes. 
      */
     private function sendNewConversations()
     {
@@ -1062,6 +1093,14 @@ class ChatModule extends DefaultModule
             $this->addTemplates('threads.js');
         }
 
+        // Only add if saved messages is enabled.
+        if($mission->feat_saved_messages)
+        {
+            $this->addTemplates('saved-messages.js');
+        }
+
+        $readOnly = ($mission->feat_saved_messages && $subaction == 'saved') ? true : false;
+        
         // Add flags & templates for all features enabled. 
         // The flags can be used by javascripts to enable/disable features.
         $featuresEnabled = ''.
@@ -1074,19 +1113,29 @@ class ChatModule extends DefaultModule
             (($mission->feat_important_msgs)      ? Main::loadTemplate('chat-feat-important-msgs.txt')      : '').
             (($mission->feat_out_of_seq)          ? Main::loadTemplate('chat-feat-out-of-seq.txt')          : '').
             (($mission->feat_convo_threads)       ? Main::loadTemplate('chat-feat-convo-threads.txt')       : '').
+            (($mission->feat_saved_messages)      ? Main::loadTemplate('chat-feat-saved-messages.txt')      : '').
             // Note: only enable browser-side support if not on mobile devices as that was reported 
             //       to cause issues on some touch interfaces.
             (($mission->feat_markdown_support && !Main::detectMobile())    
                                                   ? Main::loadTemplate('chat-feat-markdown-support.txt')    : '');
 
         // Determine who can add new threads if the feature is enabled.
-        if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
+        if(!$readOnly)
         {
-            $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
+            if($mission->feat_convo_threads && ($this->user->is_admin || $mission->feat_convo_threads_all))
+            {
+                $featuresEnabled .= Main::loadTemplate('chat-feat-convo-threads-all.txt');
+            }
         }   
 
+        $template = 'chat.txt';
+        if($readOnly)
+        {
+            $template = 'chat-read-only.txt';
+        }
+
         // Load template. 
-        return Main::loadTemplate('chat.txt', 
+        return Main::loadTemplate($template, 
             array('/%username%/'           => htmlspecialchars($this->user->username),
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%convo_id%/'           => $this->currConversation->conversation_id,

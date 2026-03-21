@@ -9,10 +9,20 @@ var simplemdeOps = {
     forceSync: true, 
     toolbar: false, 
     status: false,
+    spellChecker: false,
     shortcuts: {
-        "cleanBlock": null,
         "toggleCodeBlock": null, // unbind Ctrl-Alt-C
+        "toggleBold": null, // disabled per request
+        "cleanBlock": null,
+        "toggleHeadingSmaller": null, // disabled per request
+        "toggleLink": null, // disabled per request
+        "toggleItalic": null, // disabled per request
+        "toggleUnorderedList": null, // disabled per request
+        "togglePreview": null, // disabled per request
+        "toggleCodeBlock": null, // disabled per request
         "drawImage": null,
+        "toggleOrderedList": null, // disabled per request
+        "toggleHeadingBigger": null, // disabled per request
         "toggleSideBySide": null,
         "toggleFullScreen": null
         }
@@ -21,6 +31,7 @@ $(document).ready(function(){
     if($('#feat-markdown-support-enabled').length)
     {
         simplemde = new SimpleMDE(simplemdeOps);
+        //$('.CodeMirror').keyup(detectShiftEnter); // disabled per request
     }
 });
 
@@ -76,6 +87,7 @@ function sendTextMessage(msgImportant) {
         },
     });
     $('#new-msg-text').attr('disabled', false);
+    
 }
 
 /**
@@ -92,8 +104,8 @@ function scrollToBottom() {
  */
 function detectShiftEnter(event) {
     if(event.keyCode == 13 && event.shiftKey && !event.repeat) {
-        event.preventDefault();
-        sendTextMessage();
+        //event.preventDefault(); // disabled per request
+        //sendTextMessage(); // disabled per request
     }
 }
 
@@ -162,15 +174,19 @@ function handleEventSourceNewRoom(event) {
                 threadsDiv.setAttribute('id', 'room-thread-' + data.convo_id);
                 threadsDiv.setAttribute('class', 'room-thread');
 
-                var newThread = document.createElement('a');
-                newThread.setAttribute('id', 'new-thread');
-                newThread.setAttribute('href', '#');
-                newThread.setAttribute('onclick', 'openThreadModal()');
-                newThread.innerText = '+ New Thread';
-
-                threadsDiv.appendChild(newThread);
+                if($('#feat-convo-threads-all-enabled').length) {
+                    var newThread = document.createElement('a');
+                    newThread.setAttribute('id', 'new-thread');
+                    newThread.setAttribute('href', '#');
+                    newThread.setAttribute('onclick', 'openThreadModal()');
+                    newThread.innerText = '+ New Thread';
+                    threadsDiv.appendChild(newThread);
+                }
             }
             
+            if(threadsDiv.hasChildNodes()) {
+                threadsDiv.setAttribute('style', 'display:block;');
+            }
         }
         
         var divRoomLink = document.createElement('a');
@@ -239,7 +255,7 @@ function handleEventSourceNewMessage(event) {
 
     if(data.send_notification == true)
     {
-        newMessageNotification(data.author, data.type == 'important');
+        newMessageNotification(data.author, data.message_type == 'important');
     }
 }
 
@@ -333,6 +349,24 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg-from").innerHTML = data.author;
         msgClone.querySelector(".msg-id").textContent = "(" + data.message_id_alt + ")";
 
+        if ($('#feat-saved-messages-enabled').length) {
+            var msgSaved = msgClone.querySelector(".msg-saved");
+            
+            if (msgSaved) {
+                msgSaved.setAttribute('id', 'msg-saved-' + data.message_id);
+                
+                // Set the star icon based on the boolean from our SQL query
+                // 1 (true) = Filled Star, 0 (false) = Empty Star
+                console.log("Message ID " + data.message_id + " is_saved: " + data.is_saved);
+                msgSaved.innerHTML = data.is_saved == 0 ? '&#9734;' : '&#9733;';
+                
+                // Ensure it's visible (in case CSS hides it by default)
+                msgSaved.style.display = 'inline-block'; 
+                
+                msgSaved.setAttribute('onclick', 'toggleSaved(' + data.message_id + ')');
+            }
+        }
+
         // Add appropriate avatar. Only added for non-logged in user. 
         if(data.source != 'usr') {
             var imgTag = document.createElement("img");
@@ -345,7 +379,7 @@ function compileMsg(data, before){
         }
 
         // Message content. Either text or a template for the img/audio/video/file. 
-        if(data.type === 'text' || data.type === 'important') {
+        if(data.message_type === 'text' || data.message_type === 'important') {
             msgClone.querySelector(".msg-content").innerHTML = data.message;
             if(data.type === 'important' && $('#feat-important-msgs-enabled').length) {
                 msgClone.querySelector(".msg").classList.add("msg-important");
@@ -354,7 +388,7 @@ function compileMsg(data, before){
         }
         else {
             // Copy appropriate video, audio, image, or file template. 
-            template = document.querySelector('#msg-' + data.type);
+            template = document.querySelector('#msg-' + data.message_type);
             var contentClone = template.content.cloneNode(true);
             try {
                 contentClone.querySelectorAll(".file-location").forEach(function(element) {
