@@ -64,6 +64,10 @@ try
         }
         exit;
     }
+
+    // Run initialization tasks on first application run
+    Initialization::init();
+
     $main = Main::getInstance()->compile();
 }
 catch (Exception $e) 

@@ -328,6 +328,47 @@ class Conversation
         
         return $success;
     }
+
+    /**
+     * Get the decrypted encryption key for this conversation
+     *
+     * @return string|null Raw binary encryption key or null if not set
+     */
+    public function getEncryptionKey()
+    {
+        if (empty($this->encryption_key)) {
+            return null;
+        }
+
+        try {
+            return Encryption::decryptConversationKey($this->encryption_key);
+        } catch (Exception $e) {
+            Logger::error('Failed to decrypt conversation key', [
+                'conversation_id' => $this->conversation_id,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Set a new encryption key for this conversation
+     *
+     * @param string $rawKey Raw binary encryption key
+     */
+    public function setEncryptionKey(string $rawKey)
+    {
+        $this->data['encryption_key'] = Encryption::encryptConversationKey($rawKey);
+    }
+
+    /**
+     * Generate and set a new encryption key for this conversation
+     */
+    public function generateEncryptionKey()
+    {
+        $key = Encryption::generateConversationKey();
+        $this->setEncryptionKey($key);
+    }
     
 }
 

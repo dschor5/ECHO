@@ -32,6 +32,9 @@ $server = array(
    // Site URL without http (e.g., 'echo.space', 
    // 'analog.space/echo', '127.0.0.1', or '127.0.0.1/ECHO')
    'site_url' => '127.0.0.1',
+
+   // Master key for encrypting conversation keys (CHANGE THIS IN PRODUCTION!)
+   'encryption_master_key' => 'your_secure_master_key_here_32_chars_min',
 );
 
 // MySQL database login info

@@ -45,6 +45,25 @@ class ConversationsDao extends Dao
     }
 
     /**
+     * Override insert to generate encryption key for new conversations
+     *
+     * @param array $fields
+     * @param array $variables
+     * @return int|bool
+     */
+    public function insert(array $fields, array $variables = array())
+    {
+        // Generate encryption key if not provided
+        if (!isset($fields['encryption_key'])) {
+            $conversation = new Conversation(array());
+            $conversation->generateEncryptionKey();
+            $fields['encryption_key'] = $conversation->encryption_key;
+        }
+
+        return parent::insert($fields, $variables);
+    }
+
+    /**
      * Used when creating a new user to grant them access to all the global conversations. 
      * By default, only the Mission Chat (conversation_id=1) and all its threads
      * (parent_conversation_id=1) are the only global/public conversations. 

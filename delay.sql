@@ -26,8 +26,10 @@ CREATE TABLE `__TABLE_PREFIX__conversations` (
   `date_created` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `last_message_mcc` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `last_message_hab` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `encryption_key` TEXT NULL COMMENT 'Encrypted conversation key for message/file encryption',
   PRIMARY KEY (`conversation_id`),
   INDEX idx_parent_conversation (`parent_conversation_id`),
+  INDEX idx_conversations_encryption_key (`encryption_key`(255)),
   CONSTRAINT __TABLE_PREFIX__fk_parent_conversation
     FOREIGN KEY (`parent_conversation_id`)
     REFERENCES `__TABLE_PREFIX__conversations`(`conversation_id`)
@@ -147,28 +149,14 @@ INSERT INTO `__TABLE_PREFIX__mission_config` (`name`, `config_type`, `config_val
 ('feat_convo_threads_all',   'bool', '1'),
 ('feat_out_of_seq',          'bool', '1'),
 ('feat_saved_messages',      'bool', '1'),
-('debug',                    'bool', '0');
+('debug',                    'bool', '0'),
+('initialized',              'bool', '0');
 
 INSERT INTO `__TABLE_PREFIX__users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
-(1, 'admin', 'Admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', NULL, 1, 0, '2021-07-23 14:52:17', 0, ''),
-(2, 'user1', 'Flight Director', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 0, NULL, 1, ''),
-(3, 'user2', 'Blueberry', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 1, NULL, 1, ''),
-(4, 'user3', 'Tangerine', '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b', NULL, 0, 1, NULL, 1, '');
+(1, 'admin', 'Admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', NULL, 1, 0, '2021-07-23 14:52:17', 0, '');
 
-INSERT INTO `__TABLE_PREFIX__conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message_mcc`, `last_message_hab`) VALUES
-(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW(), NOW()),
-(2, 'Admin-Flight Director', NULL, '2021-08-03 23:14:48', NOW(), NOW()),
-(3, 'Admin-Blueberry', NULL, '2021-08-03 23:14:59', NOW(), NOW()),
-(4, 'Flight Director-Blueberry', NULL, '2021-08-03 23:14:59', NOW(), NOW()),
-(5, 'Admin-Tangerine', NULL, '2021-08-03 23:15:07', NOW(), NOW()),
-(6, 'Flight Director-Tangerine', NULL, '2021-08-03 23:15:07', NOW(), NOW()),
-(7, 'Blueberry-Tangerine', NULL, '2021-08-03 23:15:07', NOW(), NOW());
+INSERT INTO `__TABLE_PREFIX__conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message_mcc`, `last_message_hab`, `encryption_key`) VALUES
+(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW(), NOW(), NULL);
 
 INSERT INTO `__TABLE_PREFIX__participants` (`conversation_id`, `user_id`) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4),
-(2, 1), (2, 2),
-(3, 1), (3, 3),
-(4, 2), (4, 3),
-(5, 1), (5, 4),
-(6, 2), (6, 4),
-(7, 3), (7, 4);
+(1, 1);

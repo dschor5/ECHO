@@ -493,6 +493,22 @@ class ChatModule extends DefaultModule
         }
         else
         {
+            // Encrypt the uploaded file
+            $encryptionKey = $this->currConversation->getEncryptionKey();
+            if ($encryptionKey !== null) {
+                $encryptedPath = $fullPath . '.enc';
+                if (Encryption::encryptFile($fullPath, $encryptedPath, $encryptionKey)) {
+                    // Replace original file with encrypted version
+                    unlink($fullPath);
+                    rename($encryptedPath, $fullPath);
+                } else {
+                    Logger::error('Failed to encrypt uploaded file', ['file' => $fullPath]);
+                    $result['error'] = 'Error encrypting file.';
+                    unlink($fullPath);
+                    return $result;
+                }
+            }
+
             // If all the previous checks passed and we successfully moved the 
             // file to the uploads directory, then the last step is to add the 
             // information to the database. 
