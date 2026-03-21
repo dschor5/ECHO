@@ -572,6 +572,7 @@ class AdminModule extends DefaultModule
             else
             {
                 Logger::info('Set user_id='.$userId.' to '.($active ? 'active' : 'inactive').'.');
+                $response['success'] = true;
             }
         }
         else
@@ -604,6 +605,7 @@ class AdminModule extends DefaultModule
             }
             else
             {
+                $response['success'] = true;
                 Logger::info('Deleted user_id='.$userId);
             }
         }
