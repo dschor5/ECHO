@@ -1,6 +1,34 @@
 var archiveProgressTimeout = null;
 var archiveInProgress = false;
 
+function showAjaxError(message) {
+    var $archive = $('#archive-response');
+    if($archive.length) {
+        $archive.html(message);
+        $archive.show('highlight').delay(10000).fadeOut();
+    }
+    else {
+        $('div.dialog-response').text(message);
+        $('div.dialog-response').show();
+    }
+}
+
+function ajaxRequest(options) {
+    var token = $('meta[name="csrf-token"]').attr('content');
+    var defaults = {
+        dataType: 'json',
+        timeout: 20000,
+        error: function(jqXHR, textStatus, errorThrown) {
+            var detail = textStatus ? (' (' + textStatus + ')') : '';
+            showAjaxError('Request failed' + detail + '.');
+        }
+    };
+    if(token) {
+        defaults.headers = {'X-CSRF-Token': token};
+    }
+    return $.ajax($.extend(true, {}, defaults, options));
+}
+
 function saveArchive(downloadType) {
 
     $('#archive-response').hide();
@@ -96,7 +124,7 @@ function checkArchiveProgress() {
 
 
 function clearData() {
-    $.ajax({
+    ajaxRequest({
         url: BASE_URL + '/ajax',
         type: 'POST',
         data: {

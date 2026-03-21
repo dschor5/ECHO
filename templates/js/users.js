@@ -2,8 +2,25 @@
  * Ajax request to get user information and populate fields. 
  * @param {number} id 
  */
+function ajaxRequest(options) {
+    var token = $('meta[name="csrf-token"]').attr('content');
+    var defaults = {
+        dataType: 'json',
+        timeout: 20000,
+        error: function(jqXHR, textStatus, errorThrown) {
+            var detail = textStatus ? (' (' + textStatus + ')') : '';
+            $('div.dialog-response').text('Request failed' + detail + '.');
+            $('div.dialog-response').show();
+        }
+    };
+    if(token) {
+        defaults.headers = {'X-CSRF-Token': token};
+    }
+    return $.ajax($.extend(true, {}, defaults, options));
+}
+
 function getUser(id) {
-    $.ajax({
+    ajaxRequest({
         url: BASE_URL + '/ajax',
         type: 'POST',
         data: {
@@ -39,7 +56,7 @@ function getUser(id) {
  * Ajax request to edit/update user profile. 
  */
 function editUser() {
-    $.ajax({
+    ajaxRequest({
         url: BASE_URL + '/ajax',
         type: 'POST',
         data: {
@@ -105,7 +122,7 @@ function confirmAction(subaction, id, username) {
  * On success, reload page. 
  */
 function setUserFlag() {
-    $.ajax({
+    ajaxRequest({
         url: BASE_URL + '/ajax',
         type: 'POST',
         data: {
@@ -114,8 +131,14 @@ function setUserFlag() {
             user_id: $('#confirm-user-id').val(),        
         },
         dataType: 'json',
-        success: function() {
-            location.href = BASE_URL + '/admin/users';
+        success: function(data) {
+            if(data.success != true) {
+                $('div.dialog-response').text(data.error || 'Request failed.');
+                $('div.dialog-response').show();
+            }
+            else {
+                location.href = BASE_URL + '/admin/users';
+            }
         }
     });
 }

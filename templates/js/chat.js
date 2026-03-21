@@ -35,6 +35,22 @@ $(document).ready(function(){
     }
 });
 
+function ajaxRequest(options) {
+    var token = $('meta[name="csrf-token"]').attr('content');
+    var defaults = {
+        dataType: 'json',
+        timeout: 20000,
+        error: function(jqXHR, textStatus, errorThrown) {
+            var detail = textStatus ? (' (' + textStatus + ')') : '';
+            showError('Request failed' + detail + '.');
+        }
+    };
+    if(token) {
+        defaults.headers = {'X-CSRF-Token': token};
+    }
+    return $.ajax($.extend(true, {}, defaults, options));
+}
+
 /**
  * Send AJAX text/important message to the server. 
  * 
@@ -57,11 +73,11 @@ function sendTextMessage(msgImportant) {
     $('#new-msg-text').attr('disabled', true);
 
     // Send AJAX request to save the message. 
-    $.ajax({
+    ajaxRequest({
         url:  BASE_URL + "/ajax",
         type: "POST",
         data: {
-            action: 'chats',
+            action: 'chat',
             subaction: 'send',
             conversation_id: $('#conversation_id').val(),
             msgBody: newMsgText,
@@ -85,8 +101,10 @@ function sendTextMessage(msgImportant) {
         error: function(xhr, ajaxOptions, thrownError) {
             showError('Failed to send message (2).');
         },
+        complete: function() {
+            $('#new-msg-text').attr('disabled', false);
+        }
     });
-    $('#new-msg-text').attr('disabled', false);
     
 }
 
@@ -766,7 +784,7 @@ function uploadMedia(mediaType) {
     progressBar = $('#progress-' + mediaType)
     $('#progress-' + mediaType).progressbar('widget').show('highlight', 0);
 
-    $.ajax({
+    ajaxRequest({
         type: "POST",
         url:  BASE_URL + '/ajax',
         async: true,
@@ -796,7 +814,6 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
             }
-            $(captionBox).attr('disabled', false);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             var errorMsg = 'status=' + ((textStatus == null) ? 'null' : textStatus) + ', ' + 
@@ -804,8 +821,10 @@ function uploadMedia(mediaType) {
             $('.dialog-response').text('Error uploading file (' + errorMsg + ')');
             $('.dialog-response').show('highlight');
             $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-            $(captionBox).attr('disabled', false);
         },
+        complete: function() {
+            $(captionBox).attr('disabled', false);
+        }
     });
 }
 
@@ -861,7 +880,7 @@ function loadPrevMsgs() {
 
     if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
-        $.ajax({
+        ajaxRequest({
             url:  BASE_URL + '/ajax',
             type: "POST",
             data: {
@@ -899,11 +918,13 @@ function loadPrevMsgs() {
                     document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
                 }
 
-                oldMsgQueryInProgress = false;               
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 showError('Failed loading previous messages.');
             },
+            complete: function() {
+                oldMsgQueryInProgress = false;
+            }
         });
     }
 }
