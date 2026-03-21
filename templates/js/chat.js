@@ -61,7 +61,7 @@ function sendTextMessage(msgImportant) {
         url:  BASE_URL + "/ajax",
         type: "POST",
         data: {
-            action: 'chat',
+            action: 'chats',
             subaction: 'send',
             conversation_id: $('#conversation_id').val(),
             msgBody: newMsgText,
@@ -916,11 +916,38 @@ function loadPrevMsgs() {
  * @param {boolean} persistent 
  */
 function showError(msg, persistent=false) {
-    
+    // Avoid duplicating the same error message on screen.
+    var existingErrors = document.querySelectorAll('#msg-error .msg-error-text');
+    for(var i = 0; i < existingErrors.length; i++) {
+        var existing = existingErrors[i];
+        if(existing.dataset.msg === msg && existing.dataset.persistent === (persistent ? '1' : '0')) {
+            var count = parseInt(existing.dataset.count || '1', 10) + 1;
+            existing.dataset.count = count;
+            existing.innerHTML = '<strong>ERROR:</strong> ' + msg + ' (x' + count + ')';
+
+            if(persistent) {
+                $(existing).stop(true, true).show();
+            }
+            else {
+                $(existing).stop(true, true).fadeIn('slow', function() {
+                    $(this).delay(5000).fadeOut('slow', function() {
+                        // Reset count after the message fades out.
+                        existing.dataset.count = '1';
+                        existing.innerHTML = '<strong>ERROR:</strong> ' + msg;
+                    });
+                });
+            }
+            return existing.id;
+        }
+    }
+
     var newErrorId = 'msg-error-' + $('.msg-error-text').length + 1;
     var newError = document.createElement('div');
     newError.setAttribute('class', 'msg-error-text');
     newError.setAttribute('id', newErrorId);
+    newError.dataset.msg = msg;
+    newError.dataset.persistent = persistent ? '1' : '0';
+    newError.dataset.count = '1';
     newError.innerHTML = '<strong>ERROR:</strong> ' + msg;
     document.getElementById('msg-error').appendChild(newError);
 
@@ -932,7 +959,11 @@ function showError(msg, persistent=false) {
     }
     else {
         $('#' + newErrorId).fadeIn('slow', function() {
-            $(this).delay(5000).fadeOut('slow');
+            $(this).delay(5000).fadeOut('slow', function() {
+                // Reset count after the message fades out.
+                newError.dataset.count = '1';
+                newError.innerHTML = '<strong>ERROR:</strong> ' + msg;
+            });
         });
     }
 
