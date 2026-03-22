@@ -22,9 +22,21 @@ permalink: /installation/
 7. Navigate to your server's URL to see the **ECHO** home page / login screen.
 8. Click login and use the username `admin` and password `secret`. You will immediately be asked to change the password.
 
+## Encryption Setup
+
+On the first request to your ECHO installation, the application automatically initializes encryption:
+
+- Unique encryption keys are generated for all conversations
+- These keys are encrypted with the master key you configured in `server.inc.php`
+- The initialization happens silently in the background
+- No admin action is required
+
+For more details about security and encryption, see the [Security documentation]({{ '/administration/security/' | relative_url }}).
+
 **server.inc.php**
 Configure the following settings in `server.inc.php`:
 - `$server` values to match your server URL and protocol (see inline comments).
+- `$server['encryption_master_key']` - **IMPORTANT**: Change this to a secure random value (32+ characters). This key encrypts all conversation encryption keys. Use a strong, random value unique to your installation.
 - `$database` values (`db_host`, `db_user`, `db_pass`, `db_name`).
 - Optional: `$database['table_prefix']` to match the prefix you used in `delay.sql`. Leave it blank if you imported default tables without a prefix.
 - `$admin['default_password']` if you want a different default password for new accounts and resets.

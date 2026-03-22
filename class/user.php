@@ -44,6 +44,28 @@ class User
     private $preferenceArray;
 
     /**
+     * Login attempts
+     * @access private
+     * @var int
+     */
+    private $failed_attempts;
+
+    /**
+     * Lockout until timestamp. 
+     * @access private
+     * @var timestamp
+     */
+    private $lockout_until;
+
+    /**
+     * Last failed attempt timestamp. 
+     * @access private 
+     * @var timestamp
+     */
+    private $last_failed_attempt;
+
+
+    /**
      * User constructor. 
      * 
      * Appends object data with the field conversations (array) containing
@@ -125,25 +147,179 @@ class User
 
     /**
      * Returns true if the given password matches the one in the database.
-     * 
-     * @param string $password Password entered by the user at login. 
+     * Supports both new Argon2id hashes and legacy SHA-256 hashes for migration.
+     *
+     * @param string $password Password entered by the user at login.
      * @return bool True if the password matches what's stored in the database.
      */
     public function isValidPassword(string $password): bool
     {
-        return (User::encryptPassword($password) == $this->password);
+        // Check if password hash is using new Argon2id format
+        if (password_get_info($this->password)['algo'] === PASSWORD_ARGON2ID) {
+            return password_verify($password, $this->password);
+        }
+
+        // Fallback to legacy SHA-256 verification for migration
+        return (hash('sha256', $password) === $this->password);
     }
 
     /**
-     * Encrypt a password.
+     * Encrypt a password using Argon2id.
      *
      * @param string $password
-     * @return string Encrypted password
+     * @return string Encrypted password hash
      */
     public static function encryptPassword(string $password) : string
     {
-        // Select the appropriate hash funciton for your application. 
-        return hash('sha256', $password);
+        // Use Argon2id for secure password hashing
+        return password_hash($password, PASSWORD_ARGON2ID, [
+            'memory_cost' => 65536,    // 64MB memory cost
+            'time_cost' => 4,          // 4 iterations
+            'threads' => 3             // 3 parallel threads
+        ]);
+    }
+
+    /**
+     * Validate password complexity requirements.
+     *
+     * @param string $password Password to validate
+     * @param string $username Username for additional checks
+     * @return array Array with 'valid' boolean and 'errors' array
+     */
+    public static function validatePasswordComplexity(string $password, string $username = '') : array
+    {
+        $errors = [];
+        $valid = true;
+
+        // Minimum length
+        if (strlen($password) < 12) {
+            $errors[] = 'Password must be at least 12 characters long';
+            $valid = false;
+        }
+
+        // Character requirements
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = 'Password must contain at least one uppercase letter';
+            $valid = false;
+        }
+
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = 'Password must contain at least one lowercase letter';
+            $valid = false;
+        }
+
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = 'Password must contain at least one number';
+            $valid = false;
+        }
+
+        if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $password)) {
+            $errors[] = 'Password must contain at least one special character';
+            $valid = false;
+        }
+
+        // Check for excessive consecutive characters
+        if (preg_match('/(.)\1{3,}/', $password)) {
+            $errors[] = 'Password cannot contain more than 3 consecutive identical characters';
+            $valid = false;
+        }
+
+        // Check for sequential characters (like 123, abc)
+        if (preg_match('/(012|123|234|345|456|567|678|789|890)/', $password) ||
+            preg_match('/(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i', $password)) {
+            $errors[] = 'Password cannot contain sequential characters';
+            $valid = false;
+        }
+
+        // Check if password contains username
+        if (!empty($username) && stripos($password, $username) !== false) {
+            $errors[] = 'Password cannot contain your username';
+            $valid = false;
+        }
+
+        // Check against common passwords (basic check)
+        $commonPasswords = ['password', '123456', 'qwerty', 'admin', 'letmein', 'welcome', 'monkey', 'dragon', 'password1'];
+        if (in_array(strtolower($password), $commonPasswords)) {
+            $errors[] = 'Password is too common, please choose a more unique password';
+            $valid = false;
+        }
+
+        return ['valid' => $valid, 'errors' => $errors];
+    }
+
+    /**
+     * Check if the account is currently locked out.
+     *
+     * @return bool True if account is locked
+     */
+    public function isAccountLocked(): bool
+    {
+        if ($this->lockout_until === null) {
+            return false;
+        }
+
+        $now = new DateTime();
+        $lockoutTime = new DateTime($this->lockout_until);
+
+        return $now < $lockoutTime;
+    }
+
+    /**
+     * Get the remaining lockout time in seconds.
+     *
+     * @return int Seconds remaining, or 0 if not locked
+     */
+    public function getLockoutRemainingSeconds(): int
+    {
+        if (!$this->isAccountLocked()) {
+            return 0;
+        }
+
+        $now = new DateTime();
+        $lockoutTime = new DateTime($this->lockout_until);
+
+        return $lockoutTime->getTimestamp() - $now->getTimestamp();
+    }
+
+    /**
+     * Record a failed login attempt and potentially lock the account.
+     *
+     * @return bool True if account should be locked
+     */
+    public function recordFailedLogin(): bool
+    {
+        $this->failed_attempts = (int)$this->failed_attempts + 1;
+        $this->last_failed_attempt = date('Y-m-d H:i:s.v');
+
+        // Lockout thresholds: 5 attempts = 5min, 10 attempts = 30min, 15+ attempts = 2hr
+        $lockoutTimes = [5 => 300, 10 => 1800, 15 => 7200]; // seconds
+
+        foreach ($lockoutTimes as $attempts => $lockoutSeconds) {
+            if ($this->failed_attempts >= $attempts) {
+                $this->lockout_until = date('Y-m-d H:i:s.v', strtotime("+{$lockoutSeconds} seconds"));
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Clear failed login attempts (on successful login).
+     */
+    public function clearFailedLoginAttempts(): void
+    {
+        $this->failed_attempts = 0;
+        $this->lockout_until = null;
+        $this->last_failed_attempt = null;
+    }
+
+    /**
+     * Manually unlock an account (admin function).
+     */
+    public function unlockAccount(): void
+    {
+        $this->clearFailedLoginAttempts();
     }
 
     /**

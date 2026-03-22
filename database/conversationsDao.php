@@ -41,7 +41,7 @@ class ConversationsDao extends Dao
      **/
     protected function __construct()
     {
-        parent::__construct('conversations');
+        parent::__construct('conversations', 'conversation_id');
     }
 
     /**

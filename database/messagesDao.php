@@ -46,6 +46,7 @@ class MessagesDao extends Dao
     private function decryptMessageData(array $messageData): array
     {
         if (empty($messageData['text'])) {
+            Logger::debug('Message text is empty, skipping decryption', ['message_id' => $messageData['message_id']]);
             return $messageData;
         }
 
@@ -60,12 +61,18 @@ class MessagesDao extends Dao
         $conversationData = $conversationResult->fetch_assoc();
         if (empty($conversationData['encryption_key'])) {
             // No encryption key - message might be unencrypted
+            Logger::warning('No encryption key for conversation during message decryption', ['conversation_id' => $messageData['conversation_id']]);
             return $messageData;
         }
 
         try {
             $conversation = new Conversation($conversationData);
             $encryptionKey = $conversation->getEncryptionKey();
+            Logger::debug('Decrypting message text', [
+                'message_id' => $messageData['message_id'],
+                'conversation_id' => $messageData['conversation_id'],
+                'encryption_key_exists' => $encryptionKey !== null
+            ]);
             if ($encryptionKey !== null) {
                 $messageData['text'] = Encryption::decryptData($messageData['text'], $encryptionKey);
             }
@@ -77,6 +84,7 @@ class MessagesDao extends Dao
             ]);
         }
 
+        Logger::debug('Message decryption complete', ['message_id' => $messageData['message_id']]);
         return $messageData;
     }
 

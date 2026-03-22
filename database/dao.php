@@ -30,10 +30,10 @@ abstract class Dao
 
     /**
      * Name of primary id for the table.
-     * @access private
+     * @access protected
      * @var string
      */
-    private $id;
+    protected $idName;
 
     /**
      * Search for any of these keyrods. 
@@ -68,7 +68,7 @@ abstract class Dao
         global $database;
         $this->tablePrefix = isset($database['table_prefix']) ? $database['table_prefix'] : '';
         $this->name     = $this->tablePrefix.$name;
-        $this->id       = $id;
+        $this->idName   = $id;
     }
 
     /**
@@ -164,7 +164,7 @@ abstract class Dao
         // Integer where clause means select by primary id. 
         if (intval($where) > 0)
         {
-            $query .= " where `{$this->id}` = '$where'";
+            $query .= " where `{$this->idName}` = '$where'";
         }
         // Otherwise, if where clause is not a wildcard, assume it is a well 
         // constructed database statement.
@@ -367,11 +367,10 @@ abstract class Dao
      * @param array $fields Associative array of fields to update in the database. 
      * @param string $where Clause used to select which rows to update in the table.
      *                      If an int is provided, then treat it as the unique id
-     *                      to drop. Otherwise, assume it is the WHERE clause.
-     *                      Default to '*' which would select all rows.
+     *                      to update. Otherwise, assume it is the WHERE clause.
      * @return mysqli_result|bool Result from query or bool if not keeping results.
      */
-    public function update(array $fields, string $where = '*')
+    public function update(array $fields, string $where)
     {
         // Build update query 
         $query = "update `{$this->name}` set ";
@@ -395,7 +394,7 @@ abstract class Dao
         // Apply where clause. 
         if (intval($where) > 0)
         {
-            $query .= " where `{$this->id}` = '$where'";
+            $query .= " where `{$this->idName}` = '$where'";
         }
         else if ($where != '*')
         {

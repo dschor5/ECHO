@@ -4,6 +4,19 @@
  * Encryption utility class for server-side encryption of messages and files.
  * Uses AES-256-GCM for authenticated encryption with per-conversation keys.
  *
+ * SCOPE:
+ * - Encrypts messages in the database
+ * - Encrypts file attachments on disk
+ * - Decrypts data when accessed by authorized users
+ * 
+ * LIMITATIONS & SECURITY NOTES:
+ * - Conversation archives (exports) contain PLAIN TEXT messages
+ *   Archives are static exports and are not encrypted
+ *   Treat archive files as sensitive documents
+ * - User passwords are NOT encrypted (use bcrypt hashing instead)
+ * - Encryption keys are stored encrypted using a master key
+ * - Only server administrators can access encrypted data
+ *
  * @link https://github.com/dschor5/ECHO
  */
 class Encryption

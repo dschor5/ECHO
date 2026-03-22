@@ -17,6 +17,7 @@ Key features:
 - **Out-of-Order Indicator**: Flags messages that arrived out of sequence.
 - **Important Messages**: Send high-priority messages with emphasis.
 - **Conversation Threads**: Group messages into threads.
+- **Encrypted Messages & Files**: Server-side AES-256-GCM encryption for all messages and attachments.
 
 ECHO also supports exporting archives for post-mission analysis.
 

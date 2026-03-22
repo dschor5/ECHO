@@ -336,12 +336,13 @@ class Conversation
      */
     public function getEncryptionKey()
     {
-        if (empty($this->encryption_key)) {
+        if (empty($this->data['encryption_key'])) {
+            Logger::error('Conversation encryption key is empty', ['conversation_id' => $this->conversation_id]);
             return null;
         }
 
         try {
-            return Encryption::decryptConversationKey($this->encryption_key);
+            return Encryption::decryptConversationKey($this->data['encryption_key']);
         } catch (Exception $e) {
             Logger::error('Failed to decrypt conversation key', [
                 'conversation_id' => $this->conversation_id,

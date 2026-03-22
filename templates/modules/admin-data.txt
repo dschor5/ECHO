@@ -35,6 +35,7 @@
                 Before generating the archive, select what timezone to use for all sent/receive messages.  <br/>
                 Then select whether to order messages by the Habitat or MCC received timestamp. <br/>
                 Finally, click the button to create a zip file containing a copy of all conversations and attachments. <br/>
+                <span style="color: #ff6600;"><strong>⚠️ IMPORTANT:</strong> Archive files contain <strong>plain text</strong> (decrypted) messages. While messages in the database are encrypted, archived conversations are stored in human-readable format. Protect archive files accordingly.</span><br/>
                 File structure:
                 <div>&nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> archive-YYYY-MM-DDTHH-MM-SS.zip</div>
                 <div>&nbsp; &nbsp; &nbsp; &nbsp; <span class="ui-icon ui-icon-folder-open"></span> CCCCC-conversation</div>

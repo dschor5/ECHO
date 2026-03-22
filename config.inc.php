@@ -125,6 +125,8 @@ require_once('modules/debug.php');
 
 // Include classes
 require_once('class/log.php');
+require_once('class/initialization.php');
+require_once('class/encryption.php');
 require_once('class/delay.php');
 require_once('class/time.php');
 require_once('class/serverFile.php');

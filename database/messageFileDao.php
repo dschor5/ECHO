@@ -34,7 +34,7 @@ class MessageFileDao extends Dao
      **/
     protected function __construct()
     {
-        parent::__construct('msg_files');
+        parent::__construct('msg_files', 'file_id');
     }
 
     /**

@@ -14,6 +14,9 @@ CREATE TABLE `__TABLE_PREFIX__users` (
   `is_password_reset` tinyint NOT NULL DEFAULT '1',
   `is_active` tinyint NOT NULL DEFAULT '1',
   `preferences` varchar(255) NOT NULL DEFAULT '',
+  `failed_attempts` int NOT NULL DEFAULT '0',
+  `lockout_until` datetime(3) DEFAULT NULL,
+  `last_failed_attempt` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY idx_users_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -116,47 +119,3 @@ CREATE TABLE `__TABLE_PREFIX__mission_archives` (
   `content_tz` varchar(64) NOT NULL, 
   PRIMARY KEY(`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- DATA INSERTS 
---
-
-INSERT INTO `__TABLE_PREFIX__mission_config` (`name`, `config_type`, `config_value`) VALUES
-('name',               'string', 'Analog Mission Name'),
-('date_start',         'string', '2021-08-10 00:00:00'),
-('date_end',           'string', '2021-11-10 00:00:00'),
-('mcc_name',           'string', 'Mission Control'),
-('mcc_planet',         'string', 'Earth'),
-('mcc_user_role',      'string', 'Mission Control'),
-('mcc_timezone',       'string', 'America/New_York'),
-('hab_name',           'string', 'Analog Habitat'),
-('hab_planet',         'string', 'Mars'),
-('hab_user_role',      'string', 'Astronaut'),
-('hab_timezone',       'string', 'America/Chicago'),
-('hab_day_name',       'string', 'Mission Day'),
-('delay_type',         'string', 'manual'),
-('delay_config',       'json',   '[{"ts":"2021-01-01 00:00:00","eq":0}]'),
-('login_timeout',      'int',    '3600'),
-('feat_audio_notification',  'bool', '1'),
-('feat_badge_notification',  'bool', '1'),
-('feat_unread_msg_counts',   'bool', '1'),
-('feat_convo_list_order',    'bool', '1'),
-('feat_est_delivery_status', 'bool', '1'),
-('feat_progress_bar',        'bool', '1'),
-('feat_markdown_support',    'bool', '1'),
-('feat_important_msgs',      'bool', '1'),
-('feat_convo_threads',       'bool', '1'), 
-('feat_convo_threads_all',   'bool', '1'),
-('feat_out_of_seq',          'bool', '1'),
-('feat_saved_messages',      'bool', '1'),
-('debug',                    'bool', '0'),
-('initialized',              'bool', '0');
-
-INSERT INTO `__TABLE_PREFIX__users` (`user_id`, `username`, `alias`, `password`, `session_id`, `is_admin`, `is_crew`, `last_login`, `is_password_reset`, `preferences`) VALUES
-(1, 'admin', 'Admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', NULL, 1, 0, '2021-07-23 14:52:17', 0, '');
-
-INSERT INTO `__TABLE_PREFIX__conversations` (`conversation_id`, `name`, `parent_conversation_id`, `date_created`, `last_message_mcc`, `last_message_hab`, `encryption_key`) VALUES
-(1, 'Mission Chat', NULL, '2021-07-23 14:57:49', NOW(), NOW(), NULL);
-
-INSERT INTO `__TABLE_PREFIX__participants` (`conversation_id`, `user_id`) VALUES
-(1, 1);

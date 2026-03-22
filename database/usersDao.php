@@ -313,19 +313,33 @@ class UsersDao extends Dao
             'session_id='.$qSessionId.', '. 
             'last_login=UTC_TIMESTAMP(3) '. 
             'WHERE user_id='.$qUserId;
-                
+
         return ($this->database->query($queryStr) !== false);
     }
 
-    public function resetPassword(string $newPassword, bool $forceReset, int $userId) : bool
+    /**
+     * Update security-related fields for a user (failed attempts, lockout, etc.)
+     *
+     * @param User $user User object with updated security fields
+     * @return bool True on success
+     */
+    public function updateSecurityInfo(User $user) : bool
     {
-        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
-        $qPassword = '\''.$this->database->prepareStatement($newPassword).'\'';
+        $qUserId = '\''.$this->database->prepareStatement($user->user_id).'\'';
+        
+        $qFailedAttempts = '\''.$this->database->prepareStatement($user->failed_attempts).'\'';
+        
+        $qLockoutUntil = $user->lockout_until ? '\''.$this->database->prepareStatement($user->lockout_until).'\'' : 'NULL';
+        
+        $qLastFailedAttempt = $user->last_failed_attempt ? '\''.$this->database->prepareStatement($user->last_failed_attempt).'\'' : 'NULL';
+        
         $tblUsers = $this->tableName('users');
 
-        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
-            'password='.$qPassword.', '. 
-            'is_password_reset='.($forceReset ? '1' : '0').', '.
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '.
+            'failed_attempts='.$qFailedAttempts.', '.
+            'lockout_until='.$qLockoutUntil.', '.
+            'last_failed_attempt='.$qLastFailedAttempt.' '.
+            'WHERE user_id='.$qUserId;
             'last_login=NULL '.
             'WHERE user_id='.$qUserId;
 
