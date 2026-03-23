@@ -476,12 +476,13 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
         // Determine where to add the message within the DOM.
-        if(before) { 
+        if(before) {
             document.querySelector('#msg-container').prepend(msgClone);
         }
         else {
             document.querySelector('#msg-container').appendChild(msgClone);
         }
+        checkAndInsertDaySeparator();
         updateOutOfSeqWarning();
     }
     else
@@ -877,6 +878,126 @@ var messageSearch = {
     hasMore: false,
     inProgress: false,
 };
+
+/**
+ * Get a Date object representing the same moment but adjusted for the user's timezone.
+ * This allows us to get the local date/time components.
+ * 
+ * @param {string|Date} timestamp ISO format timestamp string or Date object
+ * @returns {Date} A Date object adjusted by the timezone offset
+ */
+function getLocalDate(timestamp) {
+    var date = new Date(timestamp);
+    var offset = (USER_IN_MCC) ? TZ_MCC_OFFSET : TZ_HAB_OFFSET;
+    var ts = date.getTime() + offset * 1000; // offset is in seconds, convert to milliseconds
+    
+    var localDate = new Date();
+    localDate.setTime(ts);
+    return localDate;
+}
+
+/**
+ * Get the day label for a given timestamp.
+ * Returns "Mission Day #" if within mission, otherwise returns the date.
+ * Uses the user's local timezone for day calculations.
+ * 
+ * @param {string|Date} timestamp ISO format timestamp string or Date object
+ * @returns {Object} Object with properties: {dayIdentifier, dayLabel}
+ */
+function getDayLabel(timestamp) {
+    var localDate = getLocalDate(timestamp);
+    var missionStart = getLocalDate($('#mission_start').val());
+    var missionEnd = getLocalDate($('#mission_end').val());
+    var habDayName = $('#hab_day_name').val() || 'Mission Day';
+    
+    // Create day identifier (YYYY-MM-DD in local timezone)
+    var dayIdentifier = localDate.getUTCFullYear() + '-' + 
+                       String(localDate.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                       String(localDate.getUTCDate()).padStart(2, '0');
+    
+    var missionStartDayIdentifier = missionStart.getUTCFullYear() + '-' + 
+                                    String(missionStart.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                                    String(missionStart.getUTCDate()).padStart(2, '0');
+    
+    var missionEndDayIdentifier = missionEnd.getUTCFullYear() + '-' + 
+                                  String(missionEnd.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                                  String(missionEnd.getUTCDate()).padStart(2, '0');
+    
+    // Compare as date strings (YYYY-MM-DD format sorts lexicographically)
+    if(dayIdentifier >= missionStartDayIdentifier && dayIdentifier <= missionEndDayIdentifier) {
+        // Create UTC dates from identifiers for day calculation
+        var localDay = new Date(dayIdentifier + 'T00:00:00Z');
+        var missionStartDay = new Date(missionStartDayIdentifier + 'T00:00:00Z');
+        var daysDiff = Math.floor((localDay - missionStartDay) / (1000 * 60 * 60 * 24));
+        
+        return {
+            dayIdentifier: dayIdentifier,
+            dayLabel: habDayName + ' ' + (daysDiff + 1)
+        };
+    }
+    else {
+        // Format as readable date
+        var options = { year: 'numeric', month: 'short', day: 'numeric' };
+        var formattedDate = new Date(localDate.toUTCString()).toLocaleDateString('en-US', options);
+        return {
+            dayIdentifier: dayIdentifier,
+            dayLabel: formattedDate
+        };
+    }
+}
+
+/**
+ * Insert a day separator before the given message element.
+ * 
+ * @param {HTMLElement} msgElement The message element
+ * @param {string} dayLabel The label for the day
+ */
+function insertDaySeparator(msgElement, dayLabel) {
+    var separator = document.createElement('div');
+    separator.className = 'msg-day-separator';
+    
+    var separatorText = document.createElement('div');
+    separatorText.className = 'msg-day-separator-text';
+    separatorText.textContent = dayLabel;
+    
+    separator.appendChild(separatorText);
+    msgElement.parentNode.insertBefore(separator, msgElement);
+}
+
+/**
+ * Rebuild all day separators based on current message order in the DOM.
+ */
+function refreshDaySeparators() {
+    var container = document.querySelector('#msg-container');
+    if(container == null) {
+        return;
+    }
+
+    container.querySelectorAll('.msg-day-separator').forEach(function(separator) {
+        separator.remove();
+    });
+
+    var prevDayIdentifier = null;
+    container.querySelectorAll('.msg').forEach(function(msgElement) {
+        var timeElement = msgElement.querySelector('time');
+        if(timeElement == null) {
+            return;
+        }
+
+        var dayInfo = getDayLabel(timeElement.getAttribute('recv-local'));
+        if(prevDayIdentifier == null || prevDayIdentifier !== dayInfo.dayIdentifier) {
+            insertDaySeparator(msgElement, dayInfo.dayLabel);
+        }
+        prevDayIdentifier = dayInfo.dayIdentifier;
+    });
+}
+
+/**
+ * Refresh day separators after message list changes.
+ */
+function checkAndInsertDaySeparator() {
+    refreshDaySeparators();
+}
 
 function mountSearchInHeader() {
     var search = document.getElementById('msg-search');

@@ -1339,6 +1339,8 @@ class ChatModule extends DefaultModule
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
                   '/%hab_day_name%/'       => $mission->hab_day_name,
+                  '/%mission_start%/'      => DelayTime::convertTsForJs(date(DelayTime::DATE_FORMAT, DelayTime::getStartTimeUTC())),
+                  '/%mission_end%/'        => DelayTime::convertTsForJs(date(DelayTime::DATE_FORMAT, DelayTime::getEndTimeUTC())),
                   '/%max_upload_size%/'    => ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()),
                   '/%max_upload_size_bytes%/' => ServerFile::getMaxUploadSize(),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),

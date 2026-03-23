@@ -712,3 +712,29 @@
     padding-left: 10px;
 }
 
+.msg-day-separator {
+    clear: both;
+    width: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    gap: 10px;
+}
+
+.msg-day-separator::before,
+.msg-day-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #999;
+}
+
+.msg-day-separator-text {
+    color: #666;
+    font-size: 12px;
+    white-space: nowrap;
+    padding: 0 10px;
+    font-weight: bold;
+}
+
