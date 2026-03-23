@@ -108,6 +108,9 @@
     <div id="new-msg">
         <textarea id="new-msg-text" name="newmsg-text" placeholder="Enter Message" onkeyup="detectShiftEnter(event)"></textarea>
         <input type="hidden" id="conversation_id" name="conversation_id" value="%convo_id%">
+        <input type="hidden" id="mission_start" value="%mission_start%">
+        <input type="hidden" id="mission_end" value="%mission_end%">
+        <input type="hidden" id="hab_day_name" value="%hab_day_name%">
         <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')" title="Record and send video messages">&#128249;</button>
         <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')" title="Record and send audio messages">&#127908;</button>
         <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()" title="Send attachments">&#128206;</button>
