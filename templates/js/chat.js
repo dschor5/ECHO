@@ -234,6 +234,13 @@ function handleEventSourceNewRoom(event) {
         }
         sortRooms();
     }
+    else {
+        // Update existing room with new last message time
+        if($('#feat-convo-list-order-enabled').length && data.last_msg_time) {
+            $('#room-' + data.convo_id).data('last-msg-time', data.last_msg_time);
+            sortRooms();
+        }
+    }
 }
 
 // Wrapper so that the function can be grouped with other thread functions
@@ -463,12 +470,12 @@ function compileMsg(data, before){
         }
 
         if(data.search_match) {
-            var contextButton = document.createElement('button');
-            contextButton.setAttribute('type', 'button');
-            contextButton.setAttribute('class', 'msg-view-context-btn');
-            contextButton.setAttribute('onclick', 'viewMessageContext(' + data.message_id + ')');
-            contextButton.textContent = 'View context';
-            msgClone.querySelector('.msg-content').appendChild(contextButton);
+            var goToBtn = document.createElement('button');
+            goToBtn.setAttribute('type', 'button');
+            goToBtn.setAttribute('class', 'msg-view-context-btn');
+            goToBtn.setAttribute('onclick', 'goToMessage(' + data.message_id + ')');
+            goToBtn.textContent = 'Go to message';
+            msgClone.querySelector('.msg-content').appendChild(goToBtn);
         }
 
         if(messageSearch.active && messageSearch.query.length > 0) {
@@ -898,7 +905,6 @@ var hasMoreMessages = true;
 var oldestMsgRecv = null;
 var messageSearch = {
     active: false,
-    context: false,
     query: '',
     nextCursorId: Number.MAX_SAFE_INTEGER,
     hasMore: false,
@@ -1053,10 +1059,6 @@ $(document).ready(function() {
         clearMessageSearch();
     });
 
-    $('#msg-search-back').on('click', function() {
-        reloadSearchResults();
-    });
-
     $('#msg-search-more').on('click', function() {
         loadSearchMessages(false);
     });
@@ -1073,6 +1075,10 @@ $(document).ready(function() {
     // Setup an event listener to poll for older messages.
     scrollContainer.addEventListener('scroll', function(event) {
         if(messageSearch.active) {
+            // Load more search results when scrolling up
+            if(!messageSearch.inProgress && scrollContainer.scrollTop < 300) {
+                loadSearchMessages(false);
+            }
             return;
         }
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
@@ -1303,21 +1309,12 @@ function updateSearchToolbar() {
     if(!messageSearch.active) {
         $('#msg-search-status').text('');
         $('#msg-search-more').hide();
-        $('#msg-search-back').hide();
         return;
     }
 
-    if(messageSearch.context) {
-        $('#msg-search-status').text('Showing message context.');
-        $('#msg-search-back').show();
-        $('#msg-search-more').hide();
-    }
-    else {
-        $('#msg-search-back').hide();
-        $('#msg-search-more').toggle(messageSearch.hasMore);
-        if(messageSearch.query.length > 0) {
-            $('#msg-search-status').text('Search active: ' + messageSearch.query);
-        }
+    $('#msg-search-more').toggle(messageSearch.hasMore);
+    if(messageSearch.query.length > 0) {
+        $('#msg-search-status').text('Search active: ' + messageSearch.query);
     }
 }
 
@@ -1329,7 +1326,6 @@ function startMessageSearch() {
     }
 
     messageSearch.active = true;
-    messageSearch.context = false;
     messageSearch.query = query;
     messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
     messageSearch.hasMore = false;
@@ -1345,7 +1341,6 @@ function reloadSearchResults() {
     }
 
     messageSearch.active = true;
-    messageSearch.context = false;
     messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
     messageSearch.hasMore = false;
 
@@ -1355,7 +1350,6 @@ function reloadSearchResults() {
 
 function clearMessageSearch() {
     messageSearch.active = false;
-    messageSearch.context = false;
     messageSearch.query = '';
     messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
     messageSearch.hasMore = false;
@@ -1369,7 +1363,7 @@ function clearMessageSearch() {
 }
 
 function loadSearchMessages(reset) {
-    if(!messageSearch.active || messageSearch.context || messageSearch.inProgress) {
+    if(!messageSearch.active || messageSearch.inProgress) {
         return;
     }
 
@@ -1408,11 +1402,19 @@ function loadSearchMessages(reset) {
             }
 
             var i;
-            for(i = 0; i < resp.messages.length; i++) {
-                compileMsg(resp.messages[i], false);
+            if(reset) {
+                // Chronological order: oldest at top, newest at bottom
+                for(i = resp.messages.length - 1; i >= 0; i--) {
+                    compileMsg(resp.messages[i], false);
+                }
+                scrollToBottom();
+            } else {
+                // Prepend older results above existing ones
+                for(i = 0; i < resp.messages.length; i++) {
+                    compileMsg(resp.messages[i], true);
+                }
             }
 
-            messageSearch.context = false;
             messageSearch.hasMore = !!resp.has_more;
             var nextCursor = parseInt(resp.next_cursor_message_id, 10);
             if(!isNaN(nextCursor) && nextCursor > 0) {
@@ -1437,59 +1439,130 @@ function loadSearchMessages(reset) {
     });
 }
 
-function viewMessageContext(messageId) {
-    if(messageSearch.inProgress) {
+function goToMessage(messageId) {
+    if(messageSearch.inProgress || oldMsgQueryInProgress) {
         return;
     }
 
-    messageSearch.active = true;
-    messageSearch.context = true;
-    messageSearch.inProgress = true;
-    updateSearchToolbar();
-    $('#msg-search-status').text('Loading message context...');
+    // Capture the target message's recv time before clearing search results
+    var recvTimeLocal = null;
+    var msgElement = document.querySelector('#msg-id-' + messageId);
+    if(msgElement != null) {
+        var timeEl = msgElement.querySelector('time');
+        if(timeEl != null) {
+            recvTimeLocal = timeEl.getAttribute('recv-local');
+        }
+    }
 
+    // Exit search mode
+    messageSearch.active = false;
+    messageSearch.query = '';
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+    messageSearch.inProgress = false;
+    $('#msg-search-input').val('');
+    updateSearchToolbar();
+
+    clearMessageContainer();
+
+    if(recvTimeLocal == null || serverConnection.active == false) {
+        loadPrevMsgs();
+        return;
+    }
+
+    // Load the full conversation up to and including the target message's time,
+    // then load all remaining messages through the present time
+    oldMsgQueryInProgress = true;
     ajaxRequest({
         url: BASE_URL + '/ajax',
         type: 'POST',
         dataType: 'json',
         data: {
             action: 'chat',
-            subaction: 'msgContext',
+            subaction: 'prevMsgs',
             conversation_id: $('#conversation_id').val(),
-            message_id: messageId,
-            before: 8,
-            after: 8,
+            message_id: -1,
+            last_recv_time: recvTimeLocal,
         },
         success: function(resp) {
-            if(!resp.success) {
-                showError(resp.error || 'Failed to load message context.');
-                messageSearch.context = false;
-                updateSearchToolbar();
-                return;
+            if(resp.success) {
+                var i;
+                for(i = resp.messages.length - 1; i >= 0; i--) {
+                    compileMsg(resp.messages[i], true);
+                }
+                hasMoreMessages = (resp.messages.length > 0);
+                
+                // Now load messages forward from the target time through the present
+                if(resp.messages.length > 0) {
+                    loadMessagesForwardToPresent(recvTimeLocal);
+                } else {
+                    hasMoreMessages = false;
+                    scrollToBottom();
+                    var scrollContainer = document.querySelector('#content');
+                    scrollContainer.style.padding = '0px';
+                    document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
+                }
+            } else {
+                hasMoreMessages = false;
+                loadPrevMsgs();
             }
-
-            clearMessageContainer();
-
-            var i;
-            for(i = 0; i < resp.messages.length; i++) {
-                compileMsg(resp.messages[i], false);
-            }
-
-            var anchor = document.querySelector('#msg-id-' + messageId);
-            if(anchor != null) {
-                anchor.scrollIntoView({behavior: 'smooth', block: 'center'});
-            }
-
-            $('#msg-search-status').text('Context view loaded.');
-            updateSearchToolbar();
         },
         error: function() {
-            showError('Failed to load message context.');
-            messageSearch.context = false;
-            updateSearchToolbar();
+            showError('Failed to load messages.');
+            loadPrevMsgs();
         },
         complete: function() {
-            messageSearch.inProgress = false;
+            oldMsgQueryInProgress = false;
+        }
+    });
+}
+
+/**
+ * Load all messages from a given time through the present (for "Go to message" feature).
+ * This ensures the conversation is fully loaded up to now, so new SSE messages append naturally.
+ * 
+ * @param {string} fromRecvTimeLocal - The recv_time_local to load from
+ */
+function loadMessagesForwardToPresent(fromRecvTimeLocal) {
+    if(serverConnection.active == false) {
+        return;
+    }
+
+    oldMsgQueryInProgress = true;
+    ajaxRequest({
+        url: BASE_URL + '/ajax',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'chat',
+            subaction: 'prevMsgs',
+            conversation_id: $('#conversation_id').val(),
+            message_id: -1,
+            last_recv_time: new Date().toISOString(),
+        },
+        success: function(resp) {
+            if(resp.success && resp.messages.length > 0) {
+                // Append these newer messages to the bottom
+                var i;
+                for(i = resp.messages.length - 1; i >= 0; i--) {
+                    compileMsg(resp.messages[i], false);
+                }
+                scrollToBottom();
+            } else {
+                // No more messages to load
+                hasMoreMessages = false;
+                scrollToBottom();
+                var scrollContainer = document.querySelector('#content');
+                scrollContainer.style.padding = '0px';
+                document.querySelector('#msg-container').append(document.querySelector('#msg-end').content.cloneNode(true));
+            }
+        },
+        error: function() {
+            // Silently fail - at least we have the messages up to the target time
+            scrollToBottom();
+        },
+        complete: function() {
+            oldMsgQueryInProgress = false;
         }
     });
 }
