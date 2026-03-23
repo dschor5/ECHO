@@ -91,8 +91,10 @@ function sendTextMessage(msgImportant) {
                 {
                     simplemde.value("");
                 }
-                compileMsg(resp, false);
-                scrollToBottom();
+                if(!messageSearch.active) {
+                    compileMsg(resp, false);
+                    scrollToBottom();
+                }
             }
             else {
                 showError('Failed to send message (1).');
@@ -258,6 +260,15 @@ function handleEventSourceDelay(event) {
 
 function handleEventSourceNewMessage(event) {
     const data = JSON.parse(event.data);
+
+    if(messageSearch.active) {
+        if(data.send_notification == true)
+        {
+            newMessageNotification(data.author, data.message_type == 'important');
+        }
+        return;
+    }
+
     var scrollContainer = $("#content");
     var autoScroll = scrollContainer.prop("scrollHeight") - scrollContainer.prop("clientHeight") - scrollContainer.prop("scrollTop");
     
@@ -421,6 +432,23 @@ function compileMsg(data, before){
             contentClone.querySelector(".filesize").textContent = data.filesize;
             msgClone.querySelector(".msg-content").innerHTML = data.message;
             msgClone.querySelector(".msg-content").appendChild(contentClone);
+        }
+
+        if(data.search_match) {
+            var contextButton = document.createElement('button');
+            contextButton.setAttribute('type', 'button');
+            contextButton.setAttribute('class', 'msg-view-context-btn');
+            contextButton.setAttribute('onclick', 'viewMessageContext(' + data.message_id + ')');
+            contextButton.textContent = 'View context';
+            msgClone.querySelector('.msg-content').appendChild(contextButton);
+        }
+
+        if(messageSearch.active && messageSearch.query.length > 0) {
+            applySearchHighlight(msgClone.querySelector('.msg-content'), messageSearch.query);
+        }
+
+        if(data.search_anchor) {
+            msgClone.querySelector('.msg').classList.add('msg-search-anchor');
         }
 
         msgTime = msgClone.querySelector("time");
@@ -841,12 +869,65 @@ function progressHandling(event) {
 var oldMsgQueryInProgress = false;
 var hasMoreMessages = true;
 var oldestMsgRecv = null;
+var messageSearch = {
+    active: false,
+    context: false,
+    query: '',
+    nextCursorId: Number.MAX_SAFE_INTEGER,
+    hasMore: false,
+    inProgress: false,
+};
+
+function mountSearchInHeader() {
+    var search = document.getElementById('msg-search');
+    var header = document.getElementById('header');
+    if(search == null || header == null) {
+        return;
+    }
+
+    var navBox = header.querySelector('div[style*="float: right"]');
+    if(navBox == null || navBox.parentNode == null) {
+        return;
+    }
+
+    search.classList.add('msg-search-header');
+    navBox.parentNode.insertBefore(search, navBox);
+}
 
 $(document).ready(function() {
+
+    mountSearchInHeader();
+
+    $('#msg-search-btn').on('click', function() {
+        startMessageSearch();
+    });
+
+    $('#msg-search-clear').on('click', function() {
+        clearMessageSearch();
+    });
+
+    $('#msg-search-back').on('click', function() {
+        reloadSearchResults();
+    });
+
+    $('#msg-search-more').on('click', function() {
+        loadSearchMessages(false);
+    });
+
+    $('#msg-search-input').on('keyup', function(event) {
+        if(event.keyCode === 13) {
+            startMessageSearch();
+        }
+    });
+
+    updateSearchToolbar();
     
     var scrollContainer = document.querySelector('#content');
     // Setup an event listener to poll for older messages.
     scrollContainer.addEventListener('scroll', function(event) {
+        if(messageSearch.active) {
+            return;
+        }
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
             loadPrevMsgs();
         }
@@ -862,6 +943,10 @@ $(document).ready(function() {
  *  2) Loading older messages when the user scrolls up in the conversation. 
  */
 function loadPrevMsgs() {
+
+    if(messageSearch.active) {
+        return;
+    }
 
     // The 
     if(serverConnection.active == false) {
@@ -927,6 +1012,339 @@ function loadPrevMsgs() {
             }
         });
     }
+}
+
+function clearMessageContainer() {
+    $('#msg-container').empty();
+    oldestMsgRecv = null;
+    hasMoreMessages = true;
+}
+
+function parseSearchTermsClient(query) {
+    var terms = [];
+    var buffer = '';
+    var inQuote = false;
+    var i;
+
+    for(i = 0; i < query.length; i++) {
+        var ch = query.charAt(i);
+
+        if(ch === '"') {
+            inQuote = !inQuote;
+            continue;
+        }
+
+        if(!inQuote && ch === '+') {
+            var term = buffer.trim();
+            if(term.length > 0) {
+                terms.push(term);
+            }
+            buffer = '';
+            continue;
+        }
+
+        buffer += ch;
+    }
+
+    var finalTerm = buffer.trim();
+    if(finalTerm.length > 0) {
+        terms.push(finalTerm);
+    }
+
+    var dedup = [];
+    terms.forEach(function(term) {
+        if(dedup.indexOf(term) < 0) {
+            dedup.push(term);
+        }
+    });
+
+    dedup.sort(function(a, b) {
+        return b.length - a.length;
+    });
+
+    return dedup;
+}
+
+function escapeRegexLiteral(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildHighlightRegex(query) {
+    var terms = parseSearchTermsClient(query);
+    var patternParts = [];
+
+    terms.forEach(function(term) {
+        var clean = term.trim();
+        if(clean.length > 0) {
+            patternParts.push(escapeRegexLiteral(clean));
+        }
+    });
+
+    if(patternParts.length === 0) {
+        return null;
+    }
+
+    return new RegExp('(' + patternParts.join('|') + ')', 'ig');
+}
+
+function applySearchHighlight(container, query) {
+    if(!container || !query || query.length === 0) {
+        return;
+    }
+
+    var regex = buildHighlightRegex(query);
+    if(regex == null) {
+        return;
+    }
+
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+    var textNodes = [];
+    var node;
+
+    while((node = walker.nextNode())) {
+        if(!node.nodeValue || node.nodeValue.trim().length === 0) {
+            continue;
+        }
+
+        if(node.parentElement && (
+            node.parentElement.classList.contains('msg-search-hit') ||
+            node.parentElement.tagName === 'BUTTON' ||
+            node.parentElement.tagName === 'SCRIPT' ||
+            node.parentElement.tagName === 'STYLE'
+        )) {
+            continue;
+        }
+
+        textNodes.push(node);
+    }
+
+    textNodes.forEach(function(textNode) {
+        var text = textNode.nodeValue;
+        if(!regex.test(text)) {
+            regex.lastIndex = 0;
+            return;
+        }
+        regex.lastIndex = 0;
+
+        var frag = document.createDocumentFragment();
+        var lastIndex = 0;
+        var match;
+
+        while((match = regex.exec(text)) !== null) {
+            if(match.index > lastIndex) {
+                frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+            }
+
+            var mark = document.createElement('mark');
+            mark.setAttribute('class', 'msg-search-hit');
+            mark.textContent = match[0];
+            frag.appendChild(mark);
+
+            lastIndex = match.index + match[0].length;
+        }
+
+        if(lastIndex < text.length) {
+            frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+        }
+
+        textNode.parentNode.replaceChild(frag, textNode);
+        regex.lastIndex = 0;
+    });
+}
+
+function updateSearchToolbar() {
+    if(!messageSearch.active) {
+        $('#msg-search-status').text('');
+        $('#msg-search-more').hide();
+        $('#msg-search-back').hide();
+        return;
+    }
+
+    if(messageSearch.context) {
+        $('#msg-search-status').text('Showing message context.');
+        $('#msg-search-back').show();
+        $('#msg-search-more').hide();
+    }
+    else {
+        $('#msg-search-back').hide();
+        $('#msg-search-more').toggle(messageSearch.hasMore);
+        if(messageSearch.query.length > 0) {
+            $('#msg-search-status').text('Search active: ' + messageSearch.query);
+        }
+    }
+}
+
+function startMessageSearch() {
+    var query = ($('#msg-search-input').val() || '').trim();
+    if(query.length === 0) {
+        showError('Please enter a search keyword.');
+        return;
+    }
+
+    messageSearch.active = true;
+    messageSearch.context = false;
+    messageSearch.query = query;
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+
+    clearMessageContainer();
+    loadSearchMessages(true);
+}
+
+function reloadSearchResults() {
+    if(messageSearch.query.length === 0) {
+        clearMessageSearch();
+        return;
+    }
+
+    messageSearch.active = true;
+    messageSearch.context = false;
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+
+    clearMessageContainer();
+    loadSearchMessages(true);
+}
+
+function clearMessageSearch() {
+    messageSearch.active = false;
+    messageSearch.context = false;
+    messageSearch.query = '';
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+    messageSearch.inProgress = false;
+
+    $('#msg-search-input').val('');
+    updateSearchToolbar();
+
+    clearMessageContainer();
+    loadPrevMsgs();
+}
+
+function loadSearchMessages(reset) {
+    if(!messageSearch.active || messageSearch.context || messageSearch.inProgress) {
+        return;
+    }
+
+    if(!reset && !messageSearch.hasMore) {
+        return;
+    }
+
+    if(serverConnection.active == false) {
+        showError('Could not search older messages.');
+        return;
+    }
+
+    messageSearch.inProgress = true;
+    $('#msg-search-status').text('Searching...');
+
+    ajaxRequest({
+        url: BASE_URL + '/ajax',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'chat',
+            subaction: 'searchMsgs',
+            conversation_id: $('#conversation_id').val(),
+            query: messageSearch.query,
+            cursor_message_id: reset ? -1 : messageSearch.nextCursorId,
+            num_msgs: 25,
+        },
+        success: function(resp) {
+            if(!resp.success) {
+                showError(resp.error || 'Search failed.');
+                return;
+            }
+
+            if(reset) {
+                clearMessageContainer();
+            }
+
+            var i;
+            for(i = 0; i < resp.messages.length; i++) {
+                compileMsg(resp.messages[i], false);
+            }
+
+            messageSearch.context = false;
+            messageSearch.hasMore = !!resp.has_more;
+            var nextCursor = parseInt(resp.next_cursor_message_id, 10);
+            if(!isNaN(nextCursor) && nextCursor > 0) {
+                messageSearch.nextCursorId = nextCursor;
+            }
+
+            if(resp.messages.length === 0 && reset) {
+                $('#msg-search-status').text('No matching messages found.');
+            }
+            else {
+                $('#msg-search-status').text('Showing matching messages only.');
+            }
+
+            updateSearchToolbar();
+        },
+        error: function() {
+            showError('Failed to run message search.');
+        },
+        complete: function() {
+            messageSearch.inProgress = false;
+        }
+    });
+}
+
+function viewMessageContext(messageId) {
+    if(messageSearch.inProgress) {
+        return;
+    }
+
+    messageSearch.active = true;
+    messageSearch.context = true;
+    messageSearch.inProgress = true;
+    updateSearchToolbar();
+    $('#msg-search-status').text('Loading message context...');
+
+    ajaxRequest({
+        url: BASE_URL + '/ajax',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'chat',
+            subaction: 'msgContext',
+            conversation_id: $('#conversation_id').val(),
+            message_id: messageId,
+            before: 8,
+            after: 8,
+        },
+        success: function(resp) {
+            if(!resp.success) {
+                showError(resp.error || 'Failed to load message context.');
+                messageSearch.context = false;
+                updateSearchToolbar();
+                return;
+            }
+
+            clearMessageContainer();
+
+            var i;
+            for(i = 0; i < resp.messages.length; i++) {
+                compileMsg(resp.messages[i], false);
+            }
+
+            var anchor = document.querySelector('#msg-id-' + messageId);
+            if(anchor != null) {
+                anchor.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }
+
+            $('#msg-search-status').text('Context view loaded.');
+            updateSearchToolbar();
+        },
+        error: function() {
+            showError('Failed to load message context.');
+            messageSearch.context = false;
+            updateSearchToolbar();
+        },
+        complete: function() {
+            messageSearch.inProgress = false;
+        }
+    });
 }
 
 /**
