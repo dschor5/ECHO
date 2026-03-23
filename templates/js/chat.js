@@ -229,6 +229,10 @@ function handleEventSourceNewRoom(event) {
         }
 
         document.getElementById('rooms').appendChild(divRoom);
+        if(data.last_msg_time) {
+            $(divRoom).data('last-msg-time', data.last_msg_time);
+        }
+        sortRooms();
     }
 }
 
@@ -286,6 +290,11 @@ function handleEventSourceNewMessage(event) {
     {
         newMessageNotification(data.author, data.message_type == 'important');
     }
+
+    if($('#feat-convo-list-order-enabled').length) {
+        $('.room-selected').parent().data('last-msg-time', Date.now());
+        sortRooms();
+    }
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
@@ -329,6 +338,25 @@ function newMessageNotification(name, important=false, thisRoom=true, ack=false)
     }
 }
 
+/**
+ * Sort conversations in #rooms by last message time (most recent first),
+ * keeping the mission chat (conversation_id=1) pinned at the top.
+ * Thread order within each conversation is preserved since threads are
+ * children of their parent div#room-{id}.
+ */
+function sortRooms() {
+    if(!$('#feat-convo-list-order-enabled').length) return;
+    var rooms = $('#rooms > div[id^="room-"]').get();
+    rooms.sort(function(a, b) {
+        if(a.id === 'room-1' && b.id !== 'room-1') return -1;
+        if(b.id === 'room-1' && a.id !== 'room-1') return 1;
+        return (parseFloat($(b).data('last-msg-time')) || 0) - (parseFloat($(a).data('last-msg-time')) || 0);
+    });
+    $.each(rooms, function(i, el) {
+        $('#rooms').append(el);
+    });
+}
+
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
     if($('#feat-unread-msg-counts-enabled').length && $('#room-new-' + data.conversation_id).length) {
@@ -340,11 +368,11 @@ function handleEventSourceNotification(event) {
     
     if($('#feat-convo-list-order-enabled').length) {
         if($('#room-' + data.conversation_id).length) {
-            $('#room-' + data.conversation_id).insertAfter( $('.room-selected').parent() );
+            $('#room-' + data.conversation_id).data('last-msg-time', Date.now());
+        } else if($('#feat-convo-threads-enabled').length) {
+            $('#room-name-' + data.conversation_id).closest('#rooms > div').data('last-msg-time', Date.now());
         }
-        else if($('#feat-convo-threads-enabled').length) {
-            $('.room-thread').prepend($('#room-name-' + data.conversation_id).parent());
-        }
+        sortRooms();
     }
 }
 
@@ -613,9 +641,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    if($('#feat-convo-list-order-enabled').length) {
-        $('#rooms').prepend($('.room-selected').parent())
-    }
+    sortRooms();
 
     if($('#feat-important-msgs-enabled').length) {
         $('#send-btn').css('width', '73px');

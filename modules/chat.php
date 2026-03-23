@@ -916,11 +916,15 @@ class ChatModule extends DefaultModule
             {
                 $roomSelected = $this->currConversation->conversation_id == $convoId;
                 
+                $lastMsgStr = ($this->user->is_crew)
+                    ? ($convo->last_message_hab ?? $convo->date_created)
+                    : ($convo->last_message_mcc ?? $convo->date_created);
                 $this->sendRoom(
                     $convoId, 
                     $convo->getName($this->user->user_id),
                     $roomSelected || $this->currConversation->parent_conversation_id == $convoId,
                     $roomSelected,
+                    $lastMsgStr ? strtotime($lastMsgStr) : 0,
                 );
 
                 $mission = MissionConfig::getInstance();
@@ -941,15 +945,16 @@ class ChatModule extends DefaultModule
         }
     }
 
-    private function sendRoom(int $convoId, string $name, bool $current=false, bool $selected=false)
+    private function sendRoom(int $convoId, string $name, bool $current=false, bool $selected=false, int $lastMsgTime=0)
     {
         $this->sendEventStream(
             'room', 
             array(
-                'convo_id' => $convoId,
-                'convo_name' => htmlspecialchars($name),
-                'convo_current' => $current,
-                'convo_selected' => $selected
+                'convo_id'       => $convoId,
+                'convo_name'     => htmlspecialchars($name),
+                'convo_current'  => $current,
+                'convo_selected' => $selected,
+                'last_msg_time'  => $lastMsgTime
             )
         );
     }
@@ -996,7 +1001,10 @@ class ChatModule extends DefaultModule
 
                 if($convo->parent_conversation_id == null)
                 {
-                    $this->sendRoom($convo->conversation_id, $convo->getName($this->user->user_id));
+                    $lastMsgStr = ($this->user->is_crew)
+                        ? ($convo->last_message_hab ?? $convo->date_created)
+                        : ($convo->last_message_mcc ?? $convo->date_created);
+                    $this->sendRoom($convo->conversation_id, $convo->getName($this->user->user_id), false, false, $lastMsgStr ? strtotime($lastMsgStr) : 0);
                 }
                 // If it does not have a parent, then send it even if it does not belong to the active convo.
                 else
