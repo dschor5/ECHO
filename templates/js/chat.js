@@ -915,6 +915,12 @@ var messageSearch = {
     hasMore: false,
     inProgress: false,
 };
+var savedMessageFilter = {
+    active: false,
+    nextCursorId: Number.MAX_SAFE_INTEGER,
+    hasMore: false,
+    inProgress: false,
+};
 
 // State for "Go to message" anchor navigation.
 var anchorNavigation = {
@@ -1068,12 +1074,12 @@ $(document).ready(function() {
         startMessageSearch();
     });
 
-    $('#msg-search-clear').on('click', function() {
-        clearMessageSearch();
+    $('#msg-starred-btn').on('click', function() {
+        startSavedMessages();
     });
 
-    $('#msg-search-more').on('click', function() {
-        loadSearchMessages(false);
+    $('#msg-search-clear').on('click', function() {
+        clearMessageSearch();
     });
 
     $('#msg-search-input').on('keyup', function(event) {
@@ -1094,6 +1100,12 @@ $(document).ready(function() {
             }
             return;
         }
+        if(savedMessageFilter.active) {
+            if(!savedMessageFilter.inProgress && scrollContainer.scrollTop < 300) {
+                loadSavedMessages(false);
+            }
+            return;
+        }
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
             loadPrevMsgs();
         }
@@ -1110,7 +1122,7 @@ $(document).ready(function() {
  */
 function loadPrevMsgs() {
 
-    if(messageSearch.active) {
+    if(messageSearch.active || savedMessageFilter.active) {
         return;
     }
 
@@ -1352,16 +1364,39 @@ function applySearchHighlight(container, query) {
 }
 
 function updateSearchToolbar() {
-    if(!messageSearch.active) {
+    if(!messageSearch.active && !savedMessageFilter.active) {
         $('#msg-search-status').text('');
-        $('#msg-search-more').hide();
+        $('#msg-starred-btn').html('&#9733; messages');
         return;
     }
 
-    $('#msg-search-more').toggle(messageSearch.hasMore);
-    if(messageSearch.query.length > 0) {
+    if(messageSearch.active) {
+        $('#msg-starred-btn').html('&#9733; messages');
         $('#msg-search-status').text('Search active: ' + messageSearch.query);
+        return;
     }
+
+    $('#msg-starred-btn').html('&#9733; messages (on)');
+    $('#msg-search-status').text('Showing starred messages only.');
+}
+
+function resetMessageSearch(clearInput) {
+    messageSearch.active = false;
+    messageSearch.query = '';
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+    messageSearch.inProgress = false;
+
+    if(clearInput) {
+        $('#msg-search-input').val('');
+    }
+}
+
+function resetSavedMessagesFilter() {
+    savedMessageFilter.active = false;
+    savedMessageFilter.nextCursorId = Number.MAX_SAFE_INTEGER;
+    savedMessageFilter.hasMore = false;
+    savedMessageFilter.inProgress = false;
 }
 
 function startMessageSearch() {
@@ -1370,6 +1405,8 @@ function startMessageSearch() {
         showError('Please enter a search keyword.');
         return;
     }
+
+    resetSavedMessagesFilter();
 
     messageSearch.active = true;
     messageSearch.query = query;
@@ -1395,17 +1432,111 @@ function reloadSearchResults() {
 }
 
 function clearMessageSearch() {
-    messageSearch.active = false;
-    messageSearch.query = '';
-    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
-    messageSearch.hasMore = false;
-    messageSearch.inProgress = false;
-
-    $('#msg-search-input').val('');
+    resetMessageSearch(true);
+    resetSavedMessagesFilter();
     updateSearchToolbar();
 
     clearMessageContainer();
     loadPrevMsgs();
+}
+
+function startSavedMessages() {
+    if(savedMessageFilter.active) {
+        clearMessageSearch();
+        return;
+    }
+
+    resetMessageSearch(false);
+
+    savedMessageFilter.active = true;
+    savedMessageFilter.nextCursorId = Number.MAX_SAFE_INTEGER;
+    savedMessageFilter.hasMore = false;
+
+    clearMessageContainer();
+    updateSearchToolbar();
+    loadSavedMessages(true);
+}
+
+function loadSavedMessages(reset) {
+    if(!savedMessageFilter.active || savedMessageFilter.inProgress) {
+        return;
+    }
+
+    if(!reset && !savedMessageFilter.hasMore) {
+        return;
+    }
+
+    if(serverConnection.active == false) {
+        showError('Could not load starred messages.');
+        return;
+    }
+
+    savedMessageFilter.inProgress = true;
+    $('#msg-search-status').text('Loading starred messages...');
+
+    var scrollContainer = document.querySelector('#content');
+    var prevScrollHeight = scrollContainer ? scrollContainer.scrollHeight : 0;
+
+    ajaxRequest({
+        url: BASE_URL + '/ajax',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'chat',
+            subaction: 'savedMsgs',
+            conversation_id: $('#conversation_id').val(),
+            cursor_message_id: reset ? -1 : savedMessageFilter.nextCursorId,
+            num_msgs: 25,
+        },
+        success: function(resp) {
+            if(!resp.success) {
+                showError(resp.error || 'Loading starred messages failed.');
+                return;
+            }
+
+            if(reset) {
+                clearMessageContainer();
+            }
+
+            var i;
+            if(reset) {
+                for(i = resp.messages.length - 1; i >= 0; i--) {
+                    compileMsg(resp.messages[i], false);
+                }
+                scrollToBottom();
+            } else {
+                for(i = 0; i < resp.messages.length; i++) {
+                    compileMsg(resp.messages[i], true);
+                }
+
+                if(scrollContainer != null) {
+                    var newScrollHeight = scrollContainer.scrollHeight;
+                    scrollContainer.scrollTop += (newScrollHeight - prevScrollHeight);
+                }
+            }
+
+            savedMessageFilter.hasMore = !!resp.has_more;
+            var nextCursor = parseInt(resp.next_cursor_message_id, 10);
+            if(!isNaN(nextCursor) && nextCursor > 0) {
+                savedMessageFilter.nextCursorId = nextCursor;
+            }
+
+            if(resp.messages.length === 0 && reset) {
+                $('#msg-search-status').text('No starred messages found.');
+            }
+            else {
+                $('#msg-search-status').text('Showing starred messages only.');
+            }
+
+            updateSearchToolbar();
+        },
+        error: function() {
+            showError('Failed loading starred messages.');
+        },
+        complete: function() {
+            savedMessageFilter.inProgress = false;
+        }
+    });
 }
 
 function loadSearchMessages(reset) {
@@ -1495,17 +1626,13 @@ function loadSearchMessages(reset) {
 }
 
 function goToMessage(messageId) {
-    if(messageSearch.inProgress || oldMsgQueryInProgress) {
+    if(messageSearch.inProgress || savedMessageFilter.inProgress || oldMsgQueryInProgress) {
         return;
     }
 
     // Exit search mode.
-    messageSearch.active = false;
-    messageSearch.query = '';
-    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
-    messageSearch.hasMore = false;
-    messageSearch.inProgress = false;
-    $('#msg-search-input').val('');
+    resetMessageSearch(true);
+    resetSavedMessagesFilter();
     updateSearchToolbar();
 
     // Arm anchor navigation so loadPrevMsgs will cascade until it finds this message.
