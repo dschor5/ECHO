@@ -374,10 +374,15 @@ function handleEventSourceNotification(event) {
     newMessageNotification($('#room-name-' + data.conversation_id).text(), data.notif_important > 0, false);
     
     if($('#feat-convo-list-order-enabled').length) {
+        var msgTime = data.last_msg_time || 0;
         if($('#room-' + data.conversation_id).length) {
-            $('#room-' + data.conversation_id).data('last-msg-time', Date.now());
+            if(msgTime > 0) {
+                $('#room-' + data.conversation_id).data('last-msg-time', msgTime);
+            }
         } else if($('#feat-convo-threads-enabled').length) {
-            $('#room-name-' + data.conversation_id).closest('#rooms > div').data('last-msg-time', Date.now());
+            if(msgTime > 0) {
+                $('#room-name-' + data.conversation_id).closest('#rooms > div').data('last-msg-time', msgTime);
+            }
         }
         sortRooms();
     }

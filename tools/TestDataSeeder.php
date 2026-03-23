@@ -24,7 +24,9 @@ class TestDataSeeder
     public static ?DateTimeImmutable $MISSION_END_DATE = null;
 
     private const MAIN_CHAT_ID = 1;
-    private const OWLT_SECONDS = 60;
+    private const SEED_DELAY_SECONDS = 10;
+
+    private static float $owltSeconds = self::SEED_DELAY_SECONDS;
 
     /** @var array<int, int> user_id => is_crew(0/1) */
     private static array $generatedUsers = array();
@@ -42,6 +44,7 @@ class TestDataSeeder
     {
         self::bootstrap();
         self::initDateRange();
+        self::initializeMissionDelay();
 
         echo "Clearing existing data...\n";
         self::clearData();
@@ -85,6 +88,31 @@ class TestDataSeeder
         }, $plan)));
 
         echo "Done.\n";
+    }
+
+    private static function initializeMissionDelay(): void
+    {
+        $missionDao = MissionDao::getInstance();
+        $delaySeconds = self::SEED_DELAY_SECONDS;
+
+        $delayConfig = array(
+            array(
+                'ts' => self::$MISSION_START_DATE->format('Y-m-d H:i:s'),
+                'eq' => (string)$delaySeconds,
+            ),
+        );
+
+        $updated = $missionDao->updateMissionConfig(array(
+            'delay_type' => 'manual',
+            'delay_config' => json_encode($delayConfig),
+        ));
+
+        if (!$updated) {
+            throw new RuntimeException('Failed to initialize mission delay config.');
+        }
+
+        self::$owltSeconds = (float)$delaySeconds;
+        echo "Initialized mission delay to {$delaySeconds} sec.\n";
     }
 
     /**
@@ -571,7 +599,7 @@ class TestDataSeeder
     private static function computeReceiveTimes(float $sentTs, bool $fromCrew): array
     {
         $sent = self::formatTs($sentTs);
-        $delayed = self::formatTs($sentTs + self::OWLT_SECONDS);
+        $delayed = self::formatTs($sentTs + self::$owltSeconds);
 
         if ($fromCrew) {
             return array(

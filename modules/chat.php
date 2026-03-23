@@ -1268,6 +1268,9 @@ class ChatModule extends DefaultModule
                             'num_messages'    => $numMsgs['num_new'],
                             'num_important'   => $numMsgs['num_important'],
                             'notif_important' => $numMsgs['notif_important'],
+                            'last_msg_time'   => strtotime(($this->user->is_crew)
+                                ? ($this->conversations[$convoId]->last_message_hab ?? $this->conversations[$convoId]->date_created)
+                                : ($this->conversations[$convoId]->last_message_mcc ?? $this->conversations[$convoId]->date_created)),
                         )
                     );
                 }
