@@ -916,6 +916,14 @@ var messageSearch = {
     inProgress: false,
 };
 
+// State for "Go to message" anchor navigation.
+var anchorNavigation = {
+    active: false,
+    targetMessageId: null,
+    attempts: 0,
+    maxAttempts: 50,
+};
+
 /**
  * Get a Date object representing the same moment but adjusted for the user's timezone.
  * This allows us to get the local date/time components.
@@ -1140,12 +1148,45 @@ function loadPrevMsgs() {
                     for(i = resp.messages.length-1; i >= 0; i--) {
                         compileMsg(resp.messages[i], true);
                     }
-                    scrollContainer.scrollTop = 100;
+                    if(!anchorNavigation.active) {
+                        scrollContainer.scrollTop = 100;
+                    }
                     hasMoreMessages = (resp.messages.length > 0);
                 }
                 else {
                     hasMoreMessages = false;
                 }
+
+                // Anchor navigation: cascade-load older pages until the target
+                // message appears in the DOM, then scroll to it.
+                if(anchorNavigation.active) {
+                    anchorNavigation.attempts++;
+                    var targetEl = document.querySelector('#msg-id-' + anchorNavigation.targetMessageId);
+                    if(targetEl != null) {
+                        // Found — center on it and briefly highlight.
+                        anchorNavigation.active = false;
+                        anchorNavigation.targetMessageId = null;
+                        anchorNavigation.attempts = 0;
+                        targetEl.scrollIntoView({block: 'center'});
+                        targetEl.classList.add('msg-search-anchor');
+                        setTimeout(function() { targetEl.classList.remove('msg-search-anchor'); }, 3000);
+                    } else if(hasMoreMessages && anchorNavigation.attempts < anchorNavigation.maxAttempts) {
+                        // Not found yet — load the next older batch.
+                        setTimeout(function() { loadPrevMsgs(); }, 50);
+                    } else {
+                        // History exhausted without finding the message.
+                        anchorNavigation.active = false;
+                        anchorNavigation.targetMessageId = null;
+                        anchorNavigation.attempts = 0;
+                        scrollToBottom();
+                    }
+                    if(!hasMoreMessages) {
+                        scrollContainer.style.padding = "0px";
+                        document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
+                    }
+                    return;
+                }
+
                 if(child == null) {
                     // On-load scroll to the bottom to the newest messages
                     scrollToBottom();
@@ -1458,17 +1499,7 @@ function goToMessage(messageId) {
         return;
     }
 
-    // Capture the target message's recv time before clearing search results
-    var recvTimeLocal = null;
-    var msgElement = document.querySelector('#msg-id-' + messageId);
-    if(msgElement != null) {
-        var timeEl = msgElement.querySelector('time');
-        if(timeEl != null) {
-            recvTimeLocal = timeEl.getAttribute('recv-local');
-        }
-    }
-
-    // Exit search mode
+    // Exit search mode.
     messageSearch.active = false;
     messageSearch.query = '';
     messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
@@ -1477,109 +1508,16 @@ function goToMessage(messageId) {
     $('#msg-search-input').val('');
     updateSearchToolbar();
 
+    // Arm anchor navigation so loadPrevMsgs will cascade until it finds this message.
+    anchorNavigation.active = true;
+    anchorNavigation.targetMessageId = messageId;
+    anchorNavigation.attempts = 0;
+
     clearMessageContainer();
-
-    if(recvTimeLocal == null || serverConnection.active == false) {
-        loadPrevMsgs();
-        return;
-    }
-
-    // Load the full conversation up to and including the target message's time,
-    // then load all remaining messages through the present time
-    oldMsgQueryInProgress = true;
-    ajaxRequest({
-        url: BASE_URL + '/ajax',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            action: 'chat',
-            subaction: 'prevMsgs',
-            conversation_id: $('#conversation_id').val(),
-            message_id: -1,
-            last_recv_time: recvTimeLocal,
-        },
-        success: function(resp) {
-            if(resp.success) {
-                var i;
-                for(i = resp.messages.length - 1; i >= 0; i--) {
-                    compileMsg(resp.messages[i], true);
-                }
-                hasMoreMessages = (resp.messages.length > 0);
-                
-                // Now load messages forward from the target time through the present
-                if(resp.messages.length > 0) {
-                    loadMessagesForwardToPresent(recvTimeLocal);
-                } else {
-                    hasMoreMessages = false;
-                    scrollToBottom();
-                    var scrollContainer = document.querySelector('#content');
-                    scrollContainer.style.padding = '0px';
-                    document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
-                }
-            } else {
-                hasMoreMessages = false;
-                loadPrevMsgs();
-            }
-        },
-        error: function() {
-            showError('Failed to load messages.');
-            loadPrevMsgs();
-        },
-        complete: function() {
-            oldMsgQueryInProgress = false;
-        }
-    });
+    loadPrevMsgs();
 }
 
-/**
- * Load all messages from a given time through the present (for "Go to message" feature).
- * This ensures the conversation is fully loaded up to now, so new SSE messages append naturally.
- * 
- * @param {string} fromRecvTimeLocal - The recv_time_local to load from
- */
-function loadMessagesForwardToPresent(fromRecvTimeLocal) {
-    if(serverConnection.active == false) {
-        return;
-    }
 
-    oldMsgQueryInProgress = true;
-    ajaxRequest({
-        url: BASE_URL + '/ajax',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            action: 'chat',
-            subaction: 'prevMsgs',
-            conversation_id: $('#conversation_id').val(),
-            message_id: -1,
-            last_recv_time: new Date().toISOString(),
-        },
-        success: function(resp) {
-            if(resp.success && resp.messages.length > 0) {
-                // Append these newer messages to the bottom
-                var i;
-                for(i = resp.messages.length - 1; i >= 0; i--) {
-                    compileMsg(resp.messages[i], false);
-                }
-                scrollToBottom();
-            } else {
-                // No more messages to load
-                hasMoreMessages = false;
-                scrollToBottom();
-                var scrollContainer = document.querySelector('#content');
-                scrollContainer.style.padding = '0px';
-                document.querySelector('#msg-container').append(document.querySelector('#msg-end').content.cloneNode(true));
-            }
-        },
-        error: function() {
-            // Silently fail - at least we have the messages up to the target time
-            scrollToBottom();
-        },
-        complete: function() {
-            oldMsgQueryInProgress = false;
-        }
-    });
-}
 
 /**
  * Show an error message. If not persistent, the error message
