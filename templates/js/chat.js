@@ -1384,6 +1384,9 @@ function loadSearchMessages(reset) {
     messageSearch.inProgress = true;
     $('#msg-search-status').text('Searching...');
 
+    var scrollContainer = document.querySelector('#content');
+    var prevScrollHeight = scrollContainer ? scrollContainer.scrollHeight : 0;
+
     ajaxRequest({
         url: BASE_URL + '/ajax',
         type: 'POST',
@@ -1417,6 +1420,12 @@ function loadSearchMessages(reset) {
                 // Prepend older results above existing ones
                 for(i = 0; i < resp.messages.length; i++) {
                     compileMsg(resp.messages[i], true);
+                }
+
+                // Preserve viewport position while older results are inserted above.
+                if(scrollContainer != null) {
+                    var newScrollHeight = scrollContainer.scrollHeight;
+                    scrollContainer.scrollTop += (newScrollHeight - prevScrollHeight);
                 }
             }
 
