@@ -317,6 +317,21 @@ class UsersDao extends Dao
         return ($this->database->query($queryStr) !== false);
     }
 
+    public function resetPassword(string $newPassword, bool $forceReset, int $userId) : bool
+    {
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qPassword = '\''.$this->database->prepareStatement($newPassword).'\'';
+        $tblUsers = $this->tableName('users');
+
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
+            'password='.$qPassword.', '. 
+            'is_password_reset='.($forceReset ? '1' : '0').', '.
+            'last_login=NULL '.
+            'WHERE user_id='.$qUserId;
+
+        return ($this->database->query($queryStr) !== false);
+    }
+
     /**
      * Update security-related fields for a user (failed attempts, lockout, etc.)
      *
