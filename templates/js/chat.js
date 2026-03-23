@@ -229,6 +229,17 @@ function handleEventSourceNewRoom(event) {
         }
 
         document.getElementById('rooms').appendChild(divRoom);
+        if(data.last_msg_time) {
+            $(divRoom).data('last-msg-time', data.last_msg_time);
+        }
+        sortRooms();
+    }
+    else {
+        // Update existing room with new last message time
+        if($('#feat-convo-list-order-enabled').length && data.last_msg_time) {
+            $('#room-' + data.convo_id).data('last-msg-time', data.last_msg_time);
+            sortRooms();
+        }
     }
 }
 
@@ -286,6 +297,11 @@ function handleEventSourceNewMessage(event) {
     {
         newMessageNotification(data.author, data.message_type == 'important');
     }
+
+    if($('#feat-convo-list-order-enabled').length) {
+        $('.room-selected').parent().data('last-msg-time', Date.now());
+        sortRooms();
+    }
 }
 
 function newMessageNotification(name, important=false, thisRoom=true, ack=false) {
@@ -329,6 +345,25 @@ function newMessageNotification(name, important=false, thisRoom=true, ack=false)
     }
 }
 
+/**
+ * Sort conversations in #rooms by last message time (most recent first),
+ * keeping the mission chat (conversation_id=1) pinned at the top.
+ * Thread order within each conversation is preserved since threads are
+ * children of their parent div#room-{id}.
+ */
+function sortRooms() {
+    if(!$('#feat-convo-list-order-enabled').length) return;
+    var rooms = $('#rooms > div[id^="room-"]').get();
+    rooms.sort(function(a, b) {
+        if(a.id === 'room-1' && b.id !== 'room-1') return -1;
+        if(b.id === 'room-1' && a.id !== 'room-1') return 1;
+        return (parseFloat($(b).data('last-msg-time')) || 0) - (parseFloat($(a).data('last-msg-time')) || 0);
+    });
+    $.each(rooms, function(i, el) {
+        $('#rooms').append(el);
+    });
+}
+
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
     if($('#feat-unread-msg-counts-enabled').length && $('#room-new-' + data.conversation_id).length) {
@@ -339,12 +374,17 @@ function handleEventSourceNotification(event) {
     newMessageNotification($('#room-name-' + data.conversation_id).text(), data.notif_important > 0, false);
     
     if($('#feat-convo-list-order-enabled').length) {
+        var msgTime = data.last_msg_time || 0;
         if($('#room-' + data.conversation_id).length) {
-            $('#room-' + data.conversation_id).insertAfter( $('.room-selected').parent() );
+            if(msgTime > 0) {
+                $('#room-' + data.conversation_id).data('last-msg-time', msgTime);
+            }
+        } else if($('#feat-convo-threads-enabled').length) {
+            if(msgTime > 0) {
+                $('#room-name-' + data.conversation_id).closest('#rooms > div').data('last-msg-time', msgTime);
+            }
         }
-        else if($('#feat-convo-threads-enabled').length) {
-            $('.room-thread').prepend($('#room-name-' + data.conversation_id).parent());
-        }
+        sortRooms();
     }
 }
 
@@ -435,12 +475,12 @@ function compileMsg(data, before){
         }
 
         if(data.search_match) {
-            var contextButton = document.createElement('button');
-            contextButton.setAttribute('type', 'button');
-            contextButton.setAttribute('class', 'msg-view-context-btn');
-            contextButton.setAttribute('onclick', 'viewMessageContext(' + data.message_id + ')');
-            contextButton.textContent = 'View context';
-            msgClone.querySelector('.msg-content').appendChild(contextButton);
+            var goToBtn = document.createElement('button');
+            goToBtn.setAttribute('type', 'button');
+            goToBtn.setAttribute('class', 'msg-view-context-btn');
+            goToBtn.setAttribute('onclick', 'goToMessage(' + data.message_id + ')');
+            goToBtn.textContent = 'Go to message';
+            msgClone.querySelector('.msg-content').appendChild(goToBtn);
         }
 
         if(messageSearch.active && messageSearch.query.length > 0) {
@@ -613,9 +653,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    if($('#feat-convo-list-order-enabled').length) {
-        $('#rooms').prepend($('.room-selected').parent())
-    }
+    sortRooms();
 
     if($('#feat-important-msgs-enabled').length) {
         $('#send-btn').css('width', '73px');
@@ -872,11 +910,18 @@ var hasMoreMessages = true;
 var oldestMsgRecv = null;
 var messageSearch = {
     active: false,
-    context: false,
     query: '',
     nextCursorId: Number.MAX_SAFE_INTEGER,
     hasMore: false,
     inProgress: false,
+};
+
+// State for "Go to message" anchor navigation.
+var anchorNavigation = {
+    active: false,
+    targetMessageId: null,
+    attempts: 0,
+    maxAttempts: 50,
 };
 
 /**
@@ -936,9 +981,9 @@ function getDayLabel(timestamp) {
         };
     }
     else {
-        // Format as readable date
-        var options = { year: 'numeric', month: 'short', day: 'numeric' };
-        var formattedDate = new Date(localDate.toUTCString()).toLocaleDateString('en-US', options);
+        // Format as readable date using UTC so the adjusted dayIdentifier/dayLabel stay in sync.
+        var options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
+        var formattedDate = localDate.toLocaleDateString('en-US', options);
         return {
             dayIdentifier: dayIdentifier,
             dayLabel: formattedDate
@@ -1027,10 +1072,6 @@ $(document).ready(function() {
         clearMessageSearch();
     });
 
-    $('#msg-search-back').on('click', function() {
-        reloadSearchResults();
-    });
-
     $('#msg-search-more').on('click', function() {
         loadSearchMessages(false);
     });
@@ -1047,6 +1088,10 @@ $(document).ready(function() {
     // Setup an event listener to poll for older messages.
     scrollContainer.addEventListener('scroll', function(event) {
         if(messageSearch.active) {
+            // Load more search results when scrolling up
+            if(!messageSearch.inProgress && scrollContainer.scrollTop < 300) {
+                loadSearchMessages(false);
+            }
             return;
         }
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
@@ -1103,12 +1148,45 @@ function loadPrevMsgs() {
                     for(i = resp.messages.length-1; i >= 0; i--) {
                         compileMsg(resp.messages[i], true);
                     }
-                    scrollContainer.scrollTop = 100;
+                    if(!anchorNavigation.active) {
+                        scrollContainer.scrollTop = 100;
+                    }
                     hasMoreMessages = (resp.messages.length > 0);
                 }
                 else {
                     hasMoreMessages = false;
                 }
+
+                // Anchor navigation: cascade-load older pages until the target
+                // message appears in the DOM, then scroll to it.
+                if(anchorNavigation.active) {
+                    anchorNavigation.attempts++;
+                    var targetEl = document.querySelector('#msg-id-' + anchorNavigation.targetMessageId);
+                    if(targetEl != null) {
+                        // Found — center on it and briefly highlight.
+                        anchorNavigation.active = false;
+                        anchorNavigation.targetMessageId = null;
+                        anchorNavigation.attempts = 0;
+                        targetEl.scrollIntoView({block: 'center'});
+                        targetEl.classList.add('msg-search-anchor');
+                        setTimeout(function() { targetEl.classList.remove('msg-search-anchor'); }, 3000);
+                    } else if(hasMoreMessages && anchorNavigation.attempts < anchorNavigation.maxAttempts) {
+                        // Not found yet — load the next older batch.
+                        setTimeout(function() { loadPrevMsgs(); }, 50);
+                    } else {
+                        // History exhausted without finding the message.
+                        anchorNavigation.active = false;
+                        anchorNavigation.targetMessageId = null;
+                        anchorNavigation.attempts = 0;
+                        scrollToBottom();
+                    }
+                    if(!hasMoreMessages) {
+                        scrollContainer.style.padding = "0px";
+                        document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
+                    }
+                    return;
+                }
+
                 if(child == null) {
                     // On-load scroll to the bottom to the newest messages
                     scrollToBottom();
@@ -1277,21 +1355,12 @@ function updateSearchToolbar() {
     if(!messageSearch.active) {
         $('#msg-search-status').text('');
         $('#msg-search-more').hide();
-        $('#msg-search-back').hide();
         return;
     }
 
-    if(messageSearch.context) {
-        $('#msg-search-status').text('Showing message context.');
-        $('#msg-search-back').show();
-        $('#msg-search-more').hide();
-    }
-    else {
-        $('#msg-search-back').hide();
-        $('#msg-search-more').toggle(messageSearch.hasMore);
-        if(messageSearch.query.length > 0) {
-            $('#msg-search-status').text('Search active: ' + messageSearch.query);
-        }
+    $('#msg-search-more').toggle(messageSearch.hasMore);
+    if(messageSearch.query.length > 0) {
+        $('#msg-search-status').text('Search active: ' + messageSearch.query);
     }
 }
 
@@ -1303,7 +1372,6 @@ function startMessageSearch() {
     }
 
     messageSearch.active = true;
-    messageSearch.context = false;
     messageSearch.query = query;
     messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
     messageSearch.hasMore = false;
@@ -1319,7 +1387,6 @@ function reloadSearchResults() {
     }
 
     messageSearch.active = true;
-    messageSearch.context = false;
     messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
     messageSearch.hasMore = false;
 
@@ -1329,7 +1396,6 @@ function reloadSearchResults() {
 
 function clearMessageSearch() {
     messageSearch.active = false;
-    messageSearch.context = false;
     messageSearch.query = '';
     messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
     messageSearch.hasMore = false;
@@ -1343,7 +1409,7 @@ function clearMessageSearch() {
 }
 
 function loadSearchMessages(reset) {
-    if(!messageSearch.active || messageSearch.context || messageSearch.inProgress) {
+    if(!messageSearch.active || messageSearch.inProgress) {
         return;
     }
 
@@ -1358,6 +1424,9 @@ function loadSearchMessages(reset) {
 
     messageSearch.inProgress = true;
     $('#msg-search-status').text('Searching...');
+
+    var scrollContainer = document.querySelector('#content');
+    var prevScrollHeight = scrollContainer ? scrollContainer.scrollHeight : 0;
 
     ajaxRequest({
         url: BASE_URL + '/ajax',
@@ -1382,11 +1451,25 @@ function loadSearchMessages(reset) {
             }
 
             var i;
-            for(i = 0; i < resp.messages.length; i++) {
-                compileMsg(resp.messages[i], false);
+            if(reset) {
+                // Chronological order: oldest at top, newest at bottom
+                for(i = resp.messages.length - 1; i >= 0; i--) {
+                    compileMsg(resp.messages[i], false);
+                }
+                scrollToBottom();
+            } else {
+                // Prepend older results above existing ones
+                for(i = 0; i < resp.messages.length; i++) {
+                    compileMsg(resp.messages[i], true);
+                }
+
+                // Preserve viewport position while older results are inserted above.
+                if(scrollContainer != null) {
+                    var newScrollHeight = scrollContainer.scrollHeight;
+                    scrollContainer.scrollTop += (newScrollHeight - prevScrollHeight);
+                }
             }
 
-            messageSearch.context = false;
             messageSearch.hasMore = !!resp.has_more;
             var nextCursor = parseInt(resp.next_cursor_message_id, 10);
             if(!isNaN(nextCursor) && nextCursor > 0) {
@@ -1411,62 +1494,30 @@ function loadSearchMessages(reset) {
     });
 }
 
-function viewMessageContext(messageId) {
-    if(messageSearch.inProgress) {
+function goToMessage(messageId) {
+    if(messageSearch.inProgress || oldMsgQueryInProgress) {
         return;
     }
 
-    messageSearch.active = true;
-    messageSearch.context = true;
-    messageSearch.inProgress = true;
+    // Exit search mode.
+    messageSearch.active = false;
+    messageSearch.query = '';
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+    messageSearch.inProgress = false;
+    $('#msg-search-input').val('');
     updateSearchToolbar();
-    $('#msg-search-status').text('Loading message context...');
 
-    ajaxRequest({
-        url: BASE_URL + '/ajax',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            action: 'chat',
-            subaction: 'msgContext',
-            conversation_id: $('#conversation_id').val(),
-            message_id: messageId,
-            before: 8,
-            after: 8,
-        },
-        success: function(resp) {
-            if(!resp.success) {
-                showError(resp.error || 'Failed to load message context.');
-                messageSearch.context = false;
-                updateSearchToolbar();
-                return;
-            }
+    // Arm anchor navigation so loadPrevMsgs will cascade until it finds this message.
+    anchorNavigation.active = true;
+    anchorNavigation.targetMessageId = messageId;
+    anchorNavigation.attempts = 0;
 
-            clearMessageContainer();
-
-            var i;
-            for(i = 0; i < resp.messages.length; i++) {
-                compileMsg(resp.messages[i], false);
-            }
-
-            var anchor = document.querySelector('#msg-id-' + messageId);
-            if(anchor != null) {
-                anchor.scrollIntoView({behavior: 'smooth', block: 'center'});
-            }
-
-            $('#msg-search-status').text('Context view loaded.');
-            updateSearchToolbar();
-        },
-        error: function() {
-            showError('Failed to load message context.');
-            messageSearch.context = false;
-            updateSearchToolbar();
-        },
-        complete: function() {
-            messageSearch.inProgress = false;
-        }
-    });
+    clearMessageContainer();
+    loadPrevMsgs();
 }
+
+
 
 /**
  * Show an error message. If not persistent, the error message

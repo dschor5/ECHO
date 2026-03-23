@@ -711,7 +711,7 @@ class MessagesDao extends Dao
         bool $isCrew,
         array $terms,
         int $cursorMsgId = PHP_INT_MAX,
-        int $numMsgs = 25
+        int $numMsgs = 100
     ) : array
     {
         $qConvoIds = implode(',', $convoIds);
@@ -751,6 +751,7 @@ class MessagesDao extends Dao
             $scanIterations++;
             $rowsRead = 0;
             $minMsgId = null;
+            $foundPageLimit = false;
 
             if(($result = $this->database->query($queryStr)) === false || $result->num_rows === 0)
             {
@@ -774,6 +775,7 @@ class MessagesDao extends Dao
                 $messages[$rowMsgId] = new Message($decryptedData);
                 if(count($messages) >= $numMsgs)
                 {
+                    $foundPageLimit = true;
                     break;
                 }
             }
@@ -786,7 +788,14 @@ class MessagesDao extends Dao
 
             $nextCursor = $minMsgId;
             $qCursorMsgId = '\''.$this->database->prepareStatement($nextCursor).'\'';
-            $hasMore = ($rowsRead === $scanBatch);
+            $hasMoreInCurrentBatch = $foundPageLimit && ($rowsRead < $result->num_rows);
+            $hasMoreBatches = ($result->num_rows === $scanBatch);
+            $hasMore = ($hasMoreInCurrentBatch || $hasMoreBatches);
+
+            if($foundPageLimit)
+            {
+                break;
+            }
 
             if(!$hasMore)
             {
@@ -980,7 +989,7 @@ class MessagesDao extends Dao
         $this->database->query('DELETE FROM `'.$tblConversations.'` WHERE parent_conversation_id IS NOT NULL');
 
         // Update date for date created and last message.
-        $this->database->query('UPDATE `'.$tblConversations.'` SET date_created=UTC_TIMESTAMP(3), last_message=UTC_TIMESTAMP(3)');
+        $this->database->query('UPDATE `'.$tblConversations.'` SET date_created=UTC_TIMESTAMP(3), last_message_mcc=UTC_TIMESTAMP(3), last_message_hab=UTC_TIMESTAMP(3)');
        
         $this->endTransaction();
     }

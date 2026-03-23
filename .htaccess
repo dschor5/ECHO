@@ -2,6 +2,7 @@ RewriteEngine On
 RewriteBase /
 
 RewriteRule \.git error
+RewriteRule ^tools(/|$) error
 RewriteRule config.inc.php error
 RewriteRule server.inc.php error
 RewriteRule mission.inc.php error
