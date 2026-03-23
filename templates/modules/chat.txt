@@ -32,6 +32,16 @@
 
     <div id="content">
 
+        <div id="msg-search">
+            <input type="text" id="msg-search-input" placeholder="Search this conversation">
+            <button type="button" id="msg-search-btn" class="msg-search-btn">Find</button>
+            <button type="button" id="msg-search-clear" class="msg-search-btn">Clear</button>
+            <button type="button" id="msg-search-back" class="msg-search-btn">Back</button>
+            <button type="button" id="msg-search-more" class="msg-search-btn">More</button>
+            <span id="msg-search-help" title='Use + for multiple terms. Use quotes for exact phrase. Example: mars+"air lock"+status'>?</span>
+            <div id="msg-search-status"></div>
+        </div>
+
         <div id="msg-error">
             <!-- Errors reported here via javascript. -->    
         </div>

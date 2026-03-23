@@ -674,6 +674,240 @@ class MessagesDao extends Dao
     }
 
     /**
+     * Check if a message text matches every search term.
+     *
+     * @param string $text
+     * @param array $terms
+     * @return bool
+     */
+    private function textMatchesTerms(string $text, array $terms) : bool
+    {
+        $textLower = strtolower($text);
+        foreach($terms as $term)
+        {
+            $needle = strtolower(trim($term));
+            if(strlen($needle) > 0 && strpos($textLower, $needle) === false)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Search messages in old history by checking decrypted text.
+     *
+     * @param array $convoIds
+     * @param int $userId
+     * @param bool $isCrew
+     * @param array $terms
+     * @param int $cursorMsgId
+     * @param int $numMsgs
+     * @return array
+     */
+    public function searchMessages(
+        array $convoIds,
+        int $userId,
+        bool $isCrew,
+        array $terms,
+        int $cursorMsgId = PHP_INT_MAX,
+        int $numMsgs = 25
+    ) : array
+    {
+        $qConvoIds = implode(',', $convoIds);
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qCursorMsgId = '\''.$this->database->prepareStatement($cursorMsgId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
+
+        $messages = array();
+        $scanBatch = max($numMsgs * 5, 100);
+        $scanBatch = min($scanBatch, 500);
+        $nextCursor = $cursorMsgId;
+        $hasMore = false;
+        $scanIterations = 0;
+
+        while(count($messages) < $numMsgs && $scanIterations < 25)
+        {
+            $queryStr = 'SELECT messages.*, '.
+                        'users.username, users.alias, users.is_active, '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
+                        'AND msg_saved.user_id='.$qUserId.' '.
+                    'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+                        'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
+                        'AND messages.message_id < '.$qCursorMsgId.' '.
+                        "AND messages.message_type IN ('text', 'important') ".
+                    'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+                    'LIMIT 0, '.$scanBatch;
+
+            $scanIterations++;
+            $rowsRead = 0;
+            $minMsgId = null;
+
+            if(($result = $this->database->query($queryStr)) === false || $result->num_rows === 0)
+            {
+                $hasMore = false;
+                break;
+            }
+
+            while(($rowData = $result->fetch_assoc()) != null)
+            {
+                $rowsRead++;
+                $rowMsgId = intval($rowData['message_id']);
+                $minMsgId = ($minMsgId == null) ? $rowMsgId : min($minMsgId, $rowMsgId);
+
+                $decryptedData = $this->decryptMessageData($rowData);
+                $text = trim($decryptedData['text'] ?? '');
+                if(!$this->textMatchesTerms($text, $terms))
+                {
+                    continue;
+                }
+
+                $messages[$rowMsgId] = new Message($decryptedData);
+                if(count($messages) >= $numMsgs)
+                {
+                    break;
+                }
+            }
+
+            if($minMsgId == null)
+            {
+                $hasMore = false;
+                break;
+            }
+
+            $nextCursor = $minMsgId;
+            $qCursorMsgId = '\''.$this->database->prepareStatement($nextCursor).'\'';
+            $hasMore = ($rowsRead === $scanBatch);
+
+            if(!$hasMore)
+            {
+                break;
+            }
+        }
+
+        return array(
+            'messages' => $messages,
+            'next_cursor' => $nextCursor,
+            'has_more' => $hasMore,
+        );
+    }
+
+    /**
+     * Get messages around a specific message id.
+     *
+     * @param array $convoIds
+     * @param int $userId
+     * @param bool $isCrew
+     * @param int $anchorMessageId
+     * @param int $before
+     * @param int $after
+     * @return array
+     */
+    public function getMessageContext(
+        array $convoIds,
+        int $userId,
+        bool $isCrew,
+        int $anchorMessageId,
+        int $before = 8,
+        int $after = 8
+    ) : array
+    {
+        $qConvoIds = implode(',', $convoIds);
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qAnchorId = '\''.$this->database->prepareStatement($anchorMessageId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
+
+        $baseSelect = 'SELECT messages.*, '.
+                          'users.username, users.alias, users.is_active, '.
+                          'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                          'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
+                      'FROM `'.$tblMessages.'` messages '.
+                      'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                      'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                      'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
+                          'AND msg_saved.user_id='.$qUserId.' '.
+                      'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+                          'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) ';
+
+        $anchorQuery = $baseSelect.
+                      'AND messages.message_id='.$qAnchorId.' LIMIT 1';
+
+        $anchorRow = null;
+        if(($anchorResult = $this->database->query($anchorQuery)) !== false && $anchorResult->num_rows === 1)
+        {
+            $anchorRow = $anchorResult->fetch_assoc();
+        }
+
+        if($anchorRow == null)
+        {
+            return array();
+        }
+
+        $anchorTime = '\''.$this->database->prepareStatement($anchorRow[$qRefTime]).'\'';
+        $anchorId = intval($anchorRow['message_id']);
+
+        $beforeQuery = $baseSelect.
+                      'AND (messages.'.$qRefTime.' < '.$anchorTime.' '.
+                           'OR (messages.'.$qRefTime.' = '.$anchorTime.' AND messages.message_id < '.$anchorId.')) '.
+                      'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+                      'LIMIT 0, '.intval($before);
+
+        $afterQuery = $baseSelect.
+                     'AND (messages.'.$qRefTime.' > '.$anchorTime.' '.
+                          'OR (messages.'.$qRefTime.' = '.$anchorTime.' AND messages.message_id > '.$anchorId.')) '.
+                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
+                     'LIMIT 0, '.intval($after);
+
+        $beforeMsgs = array();
+        if(($result = $this->database->query($beforeQuery)) !== false)
+        {
+            while(($rowData = $result->fetch_assoc()) != null)
+            {
+                $decryptedData = $this->decryptMessageData($rowData);
+                $beforeMsgs[$rowData['message_id']] = new Message($decryptedData);
+            }
+        }
+
+        $afterMsgs = array();
+        if(($result = $this->database->query($afterQuery)) !== false)
+        {
+            while(($rowData = $result->fetch_assoc()) != null)
+            {
+                $decryptedData = $this->decryptMessageData($rowData);
+                $afterMsgs[$rowData['message_id']] = new Message($decryptedData);
+            }
+        }
+
+        $anchorMessage = new Message($this->decryptMessageData($anchorRow));
+
+        $messages = array();
+        foreach(array_reverse($beforeMsgs, true) as $msgId => $msg)
+        {
+            $messages[$msgId] = $msg;
+        }
+        $messages[$anchorId] = $anchorMessage;
+        foreach($afterMsgs as $msgId => $msg)
+        {
+            $messages[$msgId] = $msg;
+        }
+
+        return $messages;
+    }
+
+    /**
      * Get new message notifications. These are the total number of new messages
      * on each conversation/thread and how many of those are flagged as important.
      *

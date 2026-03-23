@@ -75,6 +75,8 @@ class ChatModule extends DefaultModule
             'send'      => 'textMessage', 
             'upload'    => 'uploadFile',
             'prevMsgs'  => 'getPrevMessages',
+            'searchMsgs' => 'searchMessages',
+            'msgContext' => 'getMessageContext',
             'newThread' => 'createNewThread',
             'toggleSave' => 'toggleSaveMessage',
         );
@@ -339,6 +341,187 @@ class ChatModule extends DefaultModule
         $response['req'] = (count($messages) < $numMsgs) && ($msgId == PHP_INT_MAX);
 
         return $response; 
+    }
+
+    /**
+     * Parse a search query where + separates terms and quoted strings
+     * are treated as a single term.
+     *
+     * Example: one+"two words"+three
+     *
+     * @param string $query
+     * @return array
+     */
+    private function parseSearchTerms(string $query) : array
+    {
+        $terms = array();
+        $buffer = '';
+        $inQuote = false;
+
+        for($i = 0; $i < strlen($query); $i++)
+        {
+            $char = $query[$i];
+
+            if($char === '"')
+            {
+                $inQuote = !$inQuote;
+                continue;
+            }
+
+            if(!$inQuote && $char === '+')
+            {
+                $term = trim($buffer);
+                if(strlen($term) > 0)
+                {
+                    $terms[] = $term;
+                }
+                $buffer = '';
+                continue;
+            }
+
+            $buffer .= $char;
+        }
+
+        $term = trim($buffer);
+        if(strlen($term) > 0)
+        {
+            $terms[] = $term;
+        }
+
+        $terms = array_values(array_unique($terms));
+        return $terms;
+    }
+
+    /**
+     * Build list of conversation ids for searching history.
+     *
+     * @return array
+     */
+    private function getSearchConversationIds() : array
+    {
+        $mission = MissionConfig::getInstance();
+        $convoIds = array($this->currConversation->conversation_id);
+
+        if(!$mission->feat_convo_threads)
+        {
+            $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
+        }
+
+        return $convoIds;
+    }
+
+    /**
+     * Search previous text/important messages by keyword terms.
+     *
+     * @return array
+     */
+    protected function searchMessages() : array
+    {
+        $response = array('success' => false, 'messages' => array());
+
+        $query = trim($_POST['query'] ?? '');
+        if(strlen($query) === 0)
+        {
+            $response['error'] = 'Please enter one or more search terms.';
+            return $response;
+        }
+
+        if(strlen($query) > 250)
+        {
+            $response['error'] = 'Search query is too long.';
+            return $response;
+        }
+
+        $terms = $this->parseSearchTerms($query);
+        if(count($terms) === 0)
+        {
+            $response['error'] = 'Search query did not contain valid terms.';
+            return $response;
+        }
+
+        if(count($terms) > 10)
+        {
+            $response['error'] = 'Search supports up to 10 terms.';
+            return $response;
+        }
+
+        $cursorMsgId = PHP_INT_MAX;
+        if(isset($_POST['cursor_message_id']) &&
+           intval($_POST['cursor_message_id']) > 0 &&
+           intval($_POST['cursor_message_id']) < PHP_INT_MAX)
+        {
+            $cursorMsgId = intval($_POST['cursor_message_id']);
+        }
+
+        $numMsgs = intval($_POST['num_msgs'] ?? 25);
+        $numMsgs = max(1, min(50, $numMsgs));
+
+        $messagesDao = MessagesDao::getInstance();
+        $result = $messagesDao->searchMessages(
+            $this->getSearchConversationIds(),
+            $this->user->user_id,
+            $this->user->is_crew,
+            $terms,
+            $cursorMsgId,
+            $numMsgs
+        );
+
+        foreach($result['messages'] as $msg)
+        {
+            $msgData = $msg->compileArray($this->user, $this->currConversation->participants_both_sites);
+            $msgData['search_match'] = true;
+            $response['messages'][] = $msgData;
+        }
+
+        $response['success'] = true;
+        $response['has_more'] = $result['has_more'];
+        $response['next_cursor_message_id'] = $result['next_cursor'];
+
+        return $response;
+    }
+
+    /**
+     * Load messages around a given message id to view it in context.
+     *
+     * @return array
+     */
+    protected function getMessageContext() : array
+    {
+        $response = array('success' => false, 'messages' => array());
+
+        $messageId = intval($_POST['message_id'] ?? -1);
+        if($messageId <= 0)
+        {
+            $response['error'] = 'Invalid message id.';
+            return $response;
+        }
+
+        $before = intval($_POST['before'] ?? 8);
+        $after = intval($_POST['after'] ?? 8);
+        $before = max(0, min(30, $before));
+        $after = max(0, min(30, $after));
+
+        $messagesDao = MessagesDao::getInstance();
+        $messages = $messagesDao->getMessageContext(
+            $this->getSearchConversationIds(),
+            $this->user->user_id,
+            $this->user->is_crew,
+            $messageId,
+            $before,
+            $after
+        );
+
+        foreach($messages as $msg)
+        {
+            $msgData = $msg->compileArray($this->user, $this->currConversation->participants_both_sites);
+            $msgData['search_anchor'] = ($msg->message_id == $messageId);
+            $response['messages'][] = $msgData;
+        }
+
+        $response['success'] = true;
+        $response['anchor_message_id'] = $messageId;
+
+        return $response;
     }
 
     /**
