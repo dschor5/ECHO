@@ -34,13 +34,13 @@ class MissionDao extends Dao
      **/
     protected function __construct()
     {
-        parent::__construct('mission_config');
+        parent::__construct('mission_config', 'name');
     }
 
     /**
      * Read the mission configuration into an associative array.
      * 
-     * @return array Associative array[name] = array(type=>, value=>)
+     * @return array Associative array[name] = array(config_type=>, config_value=>)
      **/
     public function readMissionConfig() : array
     {

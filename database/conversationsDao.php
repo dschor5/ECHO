@@ -41,7 +41,26 @@ class ConversationsDao extends Dao
      **/
     protected function __construct()
     {
-        parent::__construct('conversations');
+        parent::__construct('conversations', 'conversation_id');
+    }
+
+    /**
+     * Override insert to generate encryption key for new conversations
+     *
+     * @param array $fields
+     * @param array $variables
+     * @return int|bool
+     */
+    public function insert(array $fields, array $variables = array())
+    {
+        // Generate encryption key if not provided
+        if (!isset($fields['encryption_key'])) {
+            $conversation = new Conversation(array());
+            $conversation->generateEncryptionKey();
+            $fields['encryption_key'] = $conversation->encryption_key;
+        }
+
+        return parent::insert($fields, $variables);
     }
 
     /**

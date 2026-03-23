@@ -89,13 +89,44 @@ class FileModule implements Module
             return;
         }
 
+        // Get conversation ID for encryption key
+        $messagesDao = MessagesDao::getInstance();
+        $message = $messagesDao->getLastMessage($fileId, $this->user->user_id);
+        if ($message === null) {
+            header("HTTP/1.1 404 Not Found");
+            return;
+        }
+
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversationResult = $conversationsDao->select('encryption_key', 'conversation_id = ' . $message->conversation_id);
+        if ($conversationResult === false || $conversationResult->num_rows === 0) {
+            header("HTTP/1.1 404 Not Found");
+            return;
+        }
+
+        $conversationData = $conversationResult->fetch_assoc();
+        $conversation = new Conversation($conversationData);
+        $encryptionKey = $conversation->getEncryptionKey();
+
         // Get file information to start the download process. 
         $filepath = $file->getServerPath();
         $mimeType = $file->mime_type;
         $origName = $file->original_name;
-        $filesize = $file->size;
         $templateType = $file->getTemplateType();
-        
+
+        // Decrypt file if encryption key exists
+        if ($encryptionKey !== null) {
+            $decryptedPath = $filepath . '.dec';
+            if (!Encryption::decryptFile($filepath, $decryptedPath, $encryptionKey)) {
+                Logger::error('Failed to decrypt file for download', ['file_id' => $fileId]);
+                header("HTTP/1.1 404 Not Found");
+                return;
+            }
+            $filepath = $decryptedPath;
+            $filesize = filesize($filepath);
+        } else {
+            $filesize = $file->size;
+        }
 
         // The download will use the original file name, however, the data is retrieved 
         // from the server location that uses a different name altogether.
@@ -116,6 +147,11 @@ class FileModule implements Module
             ob_end_clean();
         }
         readfile($filepath);
+
+        // Clean up decrypted file
+        if ($encryptionKey !== null && file_exists($filepath)) {
+            unlink($filepath);
+        }
     }
 
     /**

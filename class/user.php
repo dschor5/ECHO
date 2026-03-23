@@ -125,27 +125,30 @@ class User
 
     /**
      * Returns true if the given password matches the one in the database.
-     * 
-     * @param string $password Password entered by the user at login. 
+     * Supports both new Argon2id hashes and legacy SHA-256 hashes for migration.
+     *
+     * @param string $password Password entered by the user at login.
      * @return bool True if the password matches what's stored in the database.
      */
     public function isValidPassword(string $password): bool
     {
-        return (User::encryptPassword($password) == $this->password);
+        // Check if password hash is using new Argon2id format
+        if (password_get_info($this->password)['algo'] === PASSWORD_ARGON2ID) {
+            return password_verify($password, $this->password);
+        }
+
+        // Fallback to legacy SHA-256 verification for migration
+        return (hash('sha256', $password) === $this->password);
     }
 
     /**
-     * Encrypt a password.
+     * Encrypt a password using Argon2id.
      *
      * @param string $password
-     * @return string Encrypted password
+     * @return string Encrypted password hash
      */
     public static function encryptPassword(string $password) : string
     {
-<<<<<<< Updated upstream
-        // Select the appropriate hash funciton for your application. 
-        return hash('sha256', $password);
-=======
         // Use Argon2id for secure password hashing
         return password_hash($password, PASSWORD_ARGON2ID, [
             'memory_cost' => 65536,    // 64MB memory cost
@@ -296,7 +299,6 @@ class User
     public function unlockAccount(): void
     {
         $this->clearFailedLoginAttempts();
->>>>>>> Stashed changes
     }
 
     /**

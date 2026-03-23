@@ -313,36 +313,10 @@ class UsersDao extends Dao
             'session_id='.$qSessionId.', '. 
             'last_login=UTC_TIMESTAMP(3) '. 
             'WHERE user_id='.$qUserId;
-                
-        return ($this->database->query($queryStr) !== false);
-    }
-
-    public function resetPassword(string $newPassword, bool $forceReset, int $userId) : bool
-    {
-        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
-        $qPassword = '\''.$this->database->prepareStatement($newPassword).'\'';
-        $tblUsers = $this->tableName('users');
-
-        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
-            'password='.$qPassword.', '. 
-            'is_password_reset='.($forceReset ? '1' : '0').', '.
-            'last_login=NULL '.
-            'WHERE user_id='.$qUserId;
 
         return ($this->database->query($queryStr) !== false);
     }
 
-<<<<<<< Updated upstream
-    public function setActiveFlag(int $userId, bool $active) : bool 
-    {
-        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
-        $qActive = $active ? '1' : '0';
-        $tblUsers = $this->tableName('users');
-
-        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
-            'is_active='.$qActive.' '. 
-            'WHERE user_id='.$qUserId;
-=======
     /**
      * Update security-related fields for a user (failed attempts, lockout, etc.)
      *
@@ -379,7 +353,6 @@ class UsersDao extends Dao
         $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
             'is_active='.$qActive.' '. 
             'WHERE user_id='.$qUserId;
->>>>>>> Stashed changes
                 
         return ($this->database->query($queryStr) !== false);
     }

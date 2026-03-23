@@ -4,7 +4,7 @@
 $server = array(
    // Path to the directory containing the webiste. 
    // Must end with a '/' or '\' depending on the webserver OS.
-   'host_address' => './',
+   'host_address' => '/Users/dario/Sites/ECHO/',
 
    // Either 'http://' or 'https://'. 
    // Note: ECHO requires SSL certification (i.e., use HTTPS)
@@ -31,18 +31,18 @@ $server = array(
 
    // Site URL without http (e.g., 'echo.space', 
    // 'analog.space/echo', '127.0.0.1', or '127.0.0.1/ECHO')
-   'site_url' => '127.0.0.1',
+   'site_url' => '127.0.0.1/ECHO',
 
    // Master key for encrypting conversation keys (CHANGE THIS IN PRODUCTION!)
-   'encryption_master_key' => 'your_secure_master_key_here_32_chars_min',
+   'encryption_master_key' => 'DpPAW7IQFqScWrcuDsmlMkRnnpWVTEE1',
 );
 
 // MySQL database login info
 $database = array(
-   'db_host' => '127.0.0.1',
-   'db_user' => 'username',
-   'db_pass' => 'password',
-   'db_name' => 'delay',
+   'db_host' => 'localhost',
+   'db_user' => 'root',
+   'db_pass' => 'cheesecake',
+   'db_name' => 'db_echo',
    // Optional table prefix for multi-instance installs (e.g., 'echo_a_')
    // Leave blank for default single-instance tables.
    'table_prefix' => ''
@@ -52,6 +52,7 @@ $database = array(
 $admin = array(
    // Default password used when creating new accounts or resetting 
    // an account.
-   'default_password' => 'password',
+   'default_password' => '7w+20HAJjVUgFvYKDFV#',
 );
+
 ?>

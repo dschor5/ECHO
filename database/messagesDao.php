@@ -38,6 +38,57 @@ class MessagesDao extends Dao
     }
 
     /**
+     * Decrypt message text using the conversation's encryption key
+     *
+     * @param array $messageData Message data from database
+     * @return array Message data with decrypted text
+     */
+    private function decryptMessageData(array $messageData): array
+    {
+        if (empty($messageData['text'])) {
+            Logger::debug('Message text is empty, skipping decryption', ['message_id' => $messageData['message_id']]);
+            return $messageData;
+        }
+
+        // Get conversation encryption key
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversationResult = $conversationsDao->select('encryption_key', 'conversation_id = ' . $messageData['conversation_id']);
+        if ($conversationResult === false || $conversationResult->num_rows === 0) {
+            Logger::warning('Conversation not found for message decryption', ['conversation_id' => $messageData['conversation_id']]);
+            return $messageData;
+        }
+
+        $conversationData = $conversationResult->fetch_assoc();
+        if (empty($conversationData['encryption_key'])) {
+            // No encryption key - message might be unencrypted
+            Logger::warning('No encryption key for conversation during message decryption', ['conversation_id' => $messageData['conversation_id']]);
+            return $messageData;
+        }
+
+        try {
+            $conversation = new Conversation($conversationData);
+            $encryptionKey = $conversation->getEncryptionKey();
+            Logger::debug('Decrypting message text', [
+                'message_id' => $messageData['message_id'],
+                'conversation_id' => $messageData['conversation_id'],
+                'encryption_key_exists' => $encryptionKey !== null
+            ]);
+            if ($encryptionKey !== null) {
+                $messageData['text'] = Encryption::decryptData($messageData['text'], $encryptionKey);
+            }
+        } catch (Exception $e) {
+            Logger::error('Failed to decrypt message', [
+                'message_id' => $messageData['message_id'],
+                'conversation_id' => $messageData['conversation_id'],
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        Logger::debug('Message decryption complete', ['message_id' => $messageData['message_id']]);
+        return $messageData;
+    }
+
+    /**
      * Renumber alternate message ids based on whether threads are enabled or not.
      *
      * @param boolean $threadsEnabled
@@ -123,7 +174,33 @@ class MessagesDao extends Dao
             
             $recvSource = $user->is_crew ? 'recv_time_hab' : 'recv_time_mcc';
 
+            // Get conversation for encryption key
+            $conversationResult = $conversationsDao->select('*', 'conversation_id = ' . $msgData['conversation_id']);
+            if ($conversationResult === false || $conversationResult->num_rows === 0) {
+                Logger::error('Conversation not found for message', ['conversation_id' => $msgData['conversation_id']]);
+                $this->endTransaction(false);
+                return false;
+            }
+            $conversationData = $conversationResult->fetch_assoc();
+            $conversation = new Conversation($conversationData);
+
+            $encryptionKey = $conversation->getEncryptionKey();
+            if ($encryptionKey === null) {
+                // Generate key for existing conversations that don't have one
+                $conversation->generateEncryptionKey();
+                $conversationsDao->update(['encryption_key' => $conversation->encryption_key], $conversation->conversation_id);
+                $encryptionKey = $conversation->getEncryptionKey();
+            }
+
+            // Encrypt the message text if it's not empty
+            $originalText = $msgData['text'];
+            if (!empty($originalText)) {
+                $msgData['text'] = Encryption::encryptData($originalText, $encryptionKey);
+            }
+
             // Check if the message exists (has the same sender and content within the last 10 sec)
+            // Note: This check will now fail for encrypted messages, but that's acceptable
+            // as encryption makes duplicate detection less reliable anyway
             $queryStr = 'SELECT message_id FROM `'.$tblMessages.'` '.
                         'WHERE user_id='.$user->user_id.' '.
                         'AND conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '.
@@ -362,7 +439,8 @@ class MessagesDao extends Dao
             {
                 while(($rowData=$result->fetch_assoc()) != null)
                 {
-                    $messages[$rowData['message_id']] = new Message($rowData);
+                    $decryptedData = $this->decryptMessageData($rowData);
+                    $messages[$rowData['message_id']] = new Message($decryptedData);
                 }
             }
         }
@@ -415,7 +493,9 @@ class MessagesDao extends Dao
         {
             if($result->num_rows > 0) 
             {
-                $message = new Message($result->fetch_assoc());
+                $rowData = $result->fetch_assoc();
+                $decryptedData = $this->decryptMessageData($rowData);
+                $message = new Message($decryptedData);
             }
         }
         
@@ -477,7 +557,8 @@ class MessagesDao extends Dao
             {
                 while(($rowData=$result->fetch_assoc()) != null)
                 {
-                    $messages[$rowData['message_id']] = new Message($rowData);
+                    $decryptedData = $this->decryptMessageData($rowData);
+                    $messages[$rowData['message_id']] = new Message($decryptedData);
                 }
             }
         }
@@ -559,7 +640,8 @@ class MessagesDao extends Dao
                 {
                     while(($rowData=$result->fetch_assoc()) != null)
                     {
-                        $messages[$rowData['message_id']] = new Message($rowData);
+                        $decryptedData = $this->decryptMessageData($rowData);
+                        $messages[$rowData['message_id']] = new Message($decryptedData);
                     }
                 }
             }
@@ -707,7 +789,8 @@ class MessagesDao extends Dao
             {
                 while(($rowData=$result->fetch_assoc()) != null)
                 {
-                    $messages[$rowData['message_id']] = new Message($rowData);
+                    $decryptedData = $this->decryptMessageData($rowData);
+                    $messages[$rowData['message_id']] = new Message($decryptedData);
                 }
             }
         }

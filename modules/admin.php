@@ -664,11 +664,20 @@ class AdminModule extends DefaultModule
             if($userId == 0)
             {
                 global $admin;
+                $defaultPassword = $admin['default_password'];
+
+                // Validate default password complexity
+                $validation = User::validatePasswordComplexity($defaultPassword, $username);
+                if (!$validation['valid']) {
+                    $response['error'] = 'Default password does not meet complexity requirements: ' . implode(', ', $validation['errors']);
+                    return $response;
+                }
+
                 $fields['user_id'] = null;
-                $fields['password'] = User::encryptPassword($admin['default_password']);
+                $fields['password'] = User::encryptPassword($defaultPassword);
                 $fields['is_password_reset'] = 1;
                 $fields['is_active'] = 1;
-                
+
                 if(($userId = $usersDao->createNewUser($fields)) > 0)
                 {
                     $response = array('success'=>true, 'error'=>'');
@@ -909,10 +918,57 @@ class AdminModule extends DefaultModule
             }
         }
 
+        // Regenerate encryption keys for all conversations
+        $this->regenerateConversationEncryptionKeys();
+
         // Report status. 
-        Logger::info("Cleared mission data.");
+        Logger::info("Cleared mission data and regenerated encryption keys.");
 
         return array('success' => true);
+    }
+
+    /**
+     * Regenerate encryption keys for all conversations after data reset
+     * This ensures each conversation gets fresh encryption keys for security
+     *
+     * @return void
+     */
+    protected function regenerateConversationEncryptionKeys(): void
+    {
+        $conversationsDao = ConversationsDao::getInstance();
+        
+        // Get all conversations
+        $conversations = $conversationsDao->getConversations(null, true);
+        
+        if (empty($conversations)) {
+            Logger::info('No conversations found during key regeneration');
+            return;
+        }
+
+        $conversationsUpdated = 0;
+
+        foreach ($conversations as $convoId => $conversation) {
+            try {
+                // Generate a new encryption key
+                $conversation->generateEncryptionKey();
+                
+                // Update database
+                $conversationsDao->update(
+                    ['encryption_key' => $conversation->encryption_key],
+                    $convoId
+                );
+                
+                $conversationsUpdated++;
+            } catch (Exception $e) {
+                Logger::error('Failed to regenerate encryption key for conversation',
+                    ['conversation_id' => $convoId, 'error' => $e->getMessage()]);
+            }
+        }
+
+        if ($conversationsUpdated > 0) {
+            Logger::info('Encryption key regeneration complete', 
+                ['conversations_updated' => $conversationsUpdated]);
+        }
     }
 
     /**
@@ -1107,6 +1163,22 @@ class AdminModule extends DefaultModule
         return $ret;
     }
 
+    /**
+     * Create a backup archive of conversations and file attachments.
+     * 
+     * SECURITY NOTE: Archive files contain PLAIN TEXT (decrypted) messages.
+     * While messages are encrypted in the database, archived conversations are 
+     * exported as human-readable HTML files. This is by design - archives are 
+     * static exports meant for offline review and long-term storage.
+     * 
+     * Archive security considerations:
+     * - Archives should be stored securely (e.g., encrypted at rest on server)
+     * - Only administrators can create/access archives
+     * - Archive files should be treated as sensitive documents
+     * - If encryption at rest is needed, implement file-level encryption
+     * 
+     * @return array Response with success status and timing information
+     */
     protected function backupConversations() : array
     {
         $missionCfg = MissionConfig::getInstance();

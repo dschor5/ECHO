@@ -173,21 +173,32 @@ class Logger
     }
 
     /**
-     * Wrapper for error log. Note that it assumes it can write to the logs_dir. 
+     * Log a SECURITY level message. Always recorded for security events.
      *
-     * @param string $type Type of error. 
      * @param string $message Message to log.
      * @param array|null $context Optional array to encode with the msg.
-     * @global $config 
+     */
+    public static function security(string $message, ?array $context=null)
+    {
+        self::logMessage('SECURITY', $message, $context);
+    }
+
+    /**
+     * Wrapper for error_log. Note that it assumes it can write to the logs_dir. 
+     *
+     * @param string $type Type of log ('ERROR','WARNING','INFO','DEBUG','SECURITY').
+     * @param string $message Message to log.
+     * @param array|null $context Optional array to encode with the msg.
+     * @global $config
      * @global $server
      */
     private static function logMessage(string $type, string $message, ?array $context)
     {
         global $config;
         global $server;
-        
+
         // Format log entry
-        $dateUtc = new DateTime("now", new DateTimeZone('UTC'));
+        $dateUtc = new DateTime('now', new DateTimeZone('UTC'));
         $logEntry = $dateUtc->format(self::DATE_FORMAT).' ['.$type.'] '.$message;
 
         // If provided, JSON encode the $context array.
@@ -196,7 +207,7 @@ class Logger
             $logEntry .= ' '.json_encode($context);
         }
 
-        // If the file is writeable, then log the message. 
+        // If the file is writable, then log the message.
         $folder = $server['host_address'].$config['logs_dir'];
         if(is_writeable($folder))
         {

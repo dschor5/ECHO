@@ -21,7 +21,14 @@ function echoErrorHandler($errno, $errstr, $errfile, $errline)
 function echoExceptionHandler($exception)
 {
     global $server;
-    Logger::error('Main::compile(3)', array('exception'=>$exception));
+
+    Logger::error('Main::compile(3)', array(
+        'exception_message' => $exception->getMessage(),
+        'exception_code' => $exception->getCode(),
+        'exception_file' => $exception->getFile(),
+        'exception_line' => $exception->getLine(),
+        'exception_trace' => $exception->getTraceAsString(),
+    ));
 
     if (!headers_sent()) {
         header('Location: '.$server['http'].$server['site_url'].'/error');
@@ -64,6 +71,10 @@ try
         }
         exit;
     }
+
+    // Run initialization tasks on first application run
+    Initialization::init();
+
     $main = Main::getInstance()->compile();
 }
 catch (Exception $e) 
