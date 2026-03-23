@@ -973,9 +973,9 @@ function getDayLabel(timestamp) {
         };
     }
     else {
-        // Format as readable date
-        var options = { year: 'numeric', month: 'short', day: 'numeric' };
-        var formattedDate = new Date(localDate.toUTCString()).toLocaleDateString('en-US', options);
+        // Format as readable date using UTC so the adjusted dayIdentifier/dayLabel stay in sync.
+        var options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
+        var formattedDate = localDate.toLocaleDateString('en-US', options);
         return {
             dayIdentifier: dayIdentifier,
             dayLabel: formattedDate
