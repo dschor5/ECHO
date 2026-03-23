@@ -11,7 +11,7 @@ class UsersDao extends Dao
     /**
      * Singleton instance for UsersDao object.
      * @access private
-     * @var ConversationsDao
+     * @var UsersDao
      **/
     private static $instance = null;
 
@@ -19,7 +19,7 @@ class UsersDao extends Dao
      * Cache users retrieved from database into an associative array 
      * arranged by user id. 
      * @access private
-     * @var array 
+     * @var array<int, User>
      **/
     private static $cache = array();
 
@@ -332,6 +332,7 @@ class UsersDao extends Dao
         return ($this->database->query($queryStr) !== false);
     }
 
+<<<<<<< Updated upstream
     public function setActiveFlag(int $userId, bool $active) : bool 
     {
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
@@ -341,6 +342,44 @@ class UsersDao extends Dao
         $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
             'is_active='.$qActive.' '. 
             'WHERE user_id='.$qUserId;
+=======
+    /**
+     * Update security-related fields for a user (failed attempts, lockout, etc.)
+     *
+     * @param User $user User object with updated security fields
+     * @return bool True on success
+     */
+    public function updateSecurityInfo(User $user) : bool
+    {
+        $qUserId = '\''.$this->database->prepareStatement($user->user_id).'\'';
+        
+        $qFailedAttempts = '\''.$this->database->prepareStatement($user->failed_attempts).'\'';
+        
+        $qLockoutUntil = $user->lockout_until ? '\''.$this->database->prepareStatement($user->lockout_until).'\'' : 'NULL';
+        
+        $qLastFailedAttempt = $user->last_failed_attempt ? '\''.$this->database->prepareStatement($user->last_failed_attempt).'\'' : 'NULL';
+        
+        $tblUsers = $this->tableName('users');
+
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '.
+            'failed_attempts='.$qFailedAttempts.', '.
+            'lockout_until='.$qLockoutUntil.', '.
+            'last_failed_attempt='.$qLastFailedAttempt.' '.
+            'WHERE user_id='.$qUserId;
+
+        return ($this->database->query($queryStr) !== false);
+    }
+
+    public function setActiveFlag(int $userId, bool $active) : bool 
+    {
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qActive = $active ? '1' : '0';
+        $tblUsers = $this->tableName('users');
+
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
+            'is_active='.$qActive.' '. 
+            'WHERE user_id='.$qUserId;
+>>>>>>> Stashed changes
                 
         return ($this->database->query($queryStr) !== false);
     }
