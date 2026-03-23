@@ -35,6 +35,22 @@ $(document).ready(function(){
     }
 });
 
+function ajaxRequest(options) {
+    var token = $('meta[name="csrf-token"]').attr('content');
+    var defaults = {
+        dataType: 'json',
+        timeout: 20000,
+        error: function(jqXHR, textStatus, errorThrown) {
+            var detail = textStatus ? (' (' + textStatus + ')') : '';
+            showError('Request failed' + detail + '.');
+        }
+    };
+    if(token) {
+        defaults.headers = {'X-CSRF-Token': token};
+    }
+    return $.ajax($.extend(true, {}, defaults, options));
+}
+
 /**
  * Send AJAX text/important message to the server. 
  * 
@@ -57,7 +73,7 @@ function sendTextMessage(msgImportant) {
     $('#new-msg-text').attr('disabled', true);
 
     // Send AJAX request to save the message. 
-    $.ajax({
+    ajaxRequest({
         url:  BASE_URL + "/ajax",
         type: "POST",
         data: {
@@ -75,8 +91,10 @@ function sendTextMessage(msgImportant) {
                 {
                     simplemde.value("");
                 }
-                compileMsg(resp, false);
-                scrollToBottom();
+                if(!messageSearch.active) {
+                    compileMsg(resp, false);
+                    scrollToBottom();
+                }
             }
             else {
                 showError('Failed to send message (1).');
@@ -85,8 +103,10 @@ function sendTextMessage(msgImportant) {
         error: function(xhr, ajaxOptions, thrownError) {
             showError('Failed to send message (2).');
         },
+        complete: function() {
+            $('#new-msg-text').attr('disabled', false);
+        }
     });
-    $('#new-msg-text').attr('disabled', false);
     
 }
 
@@ -209,6 +229,17 @@ function handleEventSourceNewRoom(event) {
         }
 
         document.getElementById('rooms').appendChild(divRoom);
+        if(data.last_msg_time) {
+            $(divRoom).data('last-msg-time', data.last_msg_time);
+        }
+        sortRooms();
+    }
+    else {
+        // Update existing room with new last message time
+        if($('#feat-convo-list-order-enabled').length && data.last_msg_time) {
+            $('#room-' + data.convo_id).data('last-msg-time', data.last_msg_time);
+            sortRooms();
+        }
     }
 }
 
@@ -240,6 +271,15 @@ function handleEventSourceDelay(event) {
 
 function handleEventSourceNewMessage(event) {
     const data = JSON.parse(event.data);
+
+    if(messageSearch.active) {
+        if(data.send_notification == true)
+        {
+            newMessageNotification(data.author, data.message_type == 'important');
+        }
+        return;
+    }
+
     var scrollContainer = $("#content");
     var autoScroll = scrollContainer.prop("scrollHeight") - scrollContainer.prop("clientHeight") - scrollContainer.prop("scrollTop");
     
@@ -256,6 +296,11 @@ function handleEventSourceNewMessage(event) {
     if(data.send_notification == true)
     {
         newMessageNotification(data.author, data.message_type == 'important');
+    }
+
+    if($('#feat-convo-list-order-enabled').length) {
+        $('.room-selected').parent().data('last-msg-time', Date.now());
+        sortRooms();
     }
 }
 
@@ -300,6 +345,25 @@ function newMessageNotification(name, important=false, thisRoom=true, ack=false)
     }
 }
 
+/**
+ * Sort conversations in #rooms by last message time (most recent first),
+ * keeping the mission chat (conversation_id=1) pinned at the top.
+ * Thread order within each conversation is preserved since threads are
+ * children of their parent div#room-{id}.
+ */
+function sortRooms() {
+    if(!$('#feat-convo-list-order-enabled').length) return;
+    var rooms = $('#rooms > div[id^="room-"]').get();
+    rooms.sort(function(a, b) {
+        if(a.id === 'room-1' && b.id !== 'room-1') return -1;
+        if(b.id === 'room-1' && a.id !== 'room-1') return 1;
+        return (parseFloat($(b).data('last-msg-time')) || 0) - (parseFloat($(a).data('last-msg-time')) || 0);
+    });
+    $.each(rooms, function(i, el) {
+        $('#rooms').append(el);
+    });
+}
+
 function handleEventSourceNotification(event) {
     const data = JSON.parse(event.data);
     if($('#feat-unread-msg-counts-enabled').length && $('#room-new-' + data.conversation_id).length) {
@@ -310,12 +374,17 @@ function handleEventSourceNotification(event) {
     newMessageNotification($('#room-name-' + data.conversation_id).text(), data.notif_important > 0, false);
     
     if($('#feat-convo-list-order-enabled').length) {
+        var msgTime = data.last_msg_time || 0;
         if($('#room-' + data.conversation_id).length) {
-            $('#room-' + data.conversation_id).insertAfter( $('.room-selected').parent() );
+            if(msgTime > 0) {
+                $('#room-' + data.conversation_id).data('last-msg-time', msgTime);
+            }
+        } else if($('#feat-convo-threads-enabled').length) {
+            if(msgTime > 0) {
+                $('#room-name-' + data.conversation_id).closest('#rooms > div').data('last-msg-time', msgTime);
+            }
         }
-        else if($('#feat-convo-threads-enabled').length) {
-            $('.room-thread').prepend($('#room-name-' + data.conversation_id).parent());
-        }
+        sortRooms();
     }
 }
 
@@ -405,6 +474,23 @@ function compileMsg(data, before){
             msgClone.querySelector(".msg-content").appendChild(contentClone);
         }
 
+        if(data.search_match) {
+            var goToBtn = document.createElement('button');
+            goToBtn.setAttribute('type', 'button');
+            goToBtn.setAttribute('class', 'msg-view-context-btn');
+            goToBtn.setAttribute('onclick', 'goToMessage(' + data.message_id + ')');
+            goToBtn.textContent = 'Go to message';
+            msgClone.querySelector('.msg-content').appendChild(goToBtn);
+        }
+
+        if(messageSearch.active && messageSearch.query.length > 0) {
+            applySearchHighlight(msgClone.querySelector('.msg-content'), messageSearch.query);
+        }
+
+        if(data.search_anchor) {
+            msgClone.querySelector('.msg').classList.add('msg-search-anchor');
+        }
+
         msgTime = msgClone.querySelector("time");
         msgTime.setAttribute('status', data.delivered_status);
         msgTime.setAttribute('recv-local',   data.recv_time_local);
@@ -430,12 +516,13 @@ function compileMsg(data, before){
         msgClone.querySelector(".msg-delivery-status").setAttribute('id', 'status-msg-id-' + data.message_id);
 
         // Determine where to add the message within the DOM.
-        if(before) { 
+        if(before) {
             document.querySelector('#msg-container').prepend(msgClone);
         }
         else {
             document.querySelector('#msg-container').appendChild(msgClone);
         }
+        checkAndInsertDaySeparator();
         updateOutOfSeqWarning();
     }
     else
@@ -566,9 +653,7 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    if($('#feat-convo-list-order-enabled').length) {
-        $('#rooms').prepend($('.room-selected').parent())
-    }
+    sortRooms();
 
     if($('#feat-important-msgs-enabled').length) {
         $('#send-btn').css('width', '73px');
@@ -766,7 +851,7 @@ function uploadMedia(mediaType) {
     progressBar = $('#progress-' + mediaType)
     $('#progress-' + mediaType).progressbar('widget').show('highlight', 0);
 
-    $.ajax({
+    ajaxRequest({
         type: "POST",
         url:  BASE_URL + '/ajax',
         async: true,
@@ -796,7 +881,6 @@ function uploadMedia(mediaType) {
                 $('.dialog-response').show('highlight');
                 $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
             }
-            $(captionBox).attr('disabled', false);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             var errorMsg = 'status=' + ((textStatus == null) ? 'null' : textStatus) + ', ' + 
@@ -804,8 +888,10 @@ function uploadMedia(mediaType) {
             $('.dialog-response').text('Error uploading file (' + errorMsg + ')');
             $('.dialog-response').show('highlight');
             $('#progress-' + mediaType).progressbar('widget').hide('highlight', 0);
-            $(captionBox).attr('disabled', false);
         },
+        complete: function() {
+            $(captionBox).attr('disabled', false);
+        }
     });
 }
 
@@ -822,12 +908,192 @@ function progressHandling(event) {
 var oldMsgQueryInProgress = false;
 var hasMoreMessages = true;
 var oldestMsgRecv = null;
+var messageSearch = {
+    active: false,
+    query: '',
+    nextCursorId: Number.MAX_SAFE_INTEGER,
+    hasMore: false,
+    inProgress: false,
+};
+
+// State for "Go to message" anchor navigation.
+var anchorNavigation = {
+    active: false,
+    targetMessageId: null,
+    attempts: 0,
+    maxAttempts: 50,
+};
+
+/**
+ * Get a Date object representing the same moment but adjusted for the user's timezone.
+ * This allows us to get the local date/time components.
+ * 
+ * @param {string|Date} timestamp ISO format timestamp string or Date object
+ * @returns {Date} A Date object adjusted by the timezone offset
+ */
+function getLocalDate(timestamp) {
+    var date = new Date(timestamp);
+    var offset = (USER_IN_MCC) ? TZ_MCC_OFFSET : TZ_HAB_OFFSET;
+    var ts = date.getTime() + offset * 1000; // offset is in seconds, convert to milliseconds
+    
+    var localDate = new Date();
+    localDate.setTime(ts);
+    return localDate;
+}
+
+/**
+ * Get the day label for a given timestamp.
+ * Returns "Mission Day #" if within mission, otherwise returns the date.
+ * Uses the user's local timezone for day calculations.
+ * 
+ * @param {string|Date} timestamp ISO format timestamp string or Date object
+ * @returns {Object} Object with properties: {dayIdentifier, dayLabel}
+ */
+function getDayLabel(timestamp) {
+    var localDate = getLocalDate(timestamp);
+    var missionStart = getLocalDate($('#mission_start').val());
+    var missionEnd = getLocalDate($('#mission_end').val());
+    var habDayName = $('#hab_day_name').val() || 'Mission Day';
+    
+    // Create day identifier (YYYY-MM-DD in local timezone)
+    var dayIdentifier = localDate.getUTCFullYear() + '-' + 
+                       String(localDate.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                       String(localDate.getUTCDate()).padStart(2, '0');
+    
+    var missionStartDayIdentifier = missionStart.getUTCFullYear() + '-' + 
+                                    String(missionStart.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                                    String(missionStart.getUTCDate()).padStart(2, '0');
+    
+    var missionEndDayIdentifier = missionEnd.getUTCFullYear() + '-' + 
+                                  String(missionEnd.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                                  String(missionEnd.getUTCDate()).padStart(2, '0');
+    
+    // Compare as date strings (YYYY-MM-DD format sorts lexicographically)
+    if(dayIdentifier >= missionStartDayIdentifier && dayIdentifier <= missionEndDayIdentifier) {
+        // Create UTC dates from identifiers for day calculation
+        var localDay = new Date(dayIdentifier + 'T00:00:00Z');
+        var missionStartDay = new Date(missionStartDayIdentifier + 'T00:00:00Z');
+        var daysDiff = Math.floor((localDay - missionStartDay) / (1000 * 60 * 60 * 24));
+        
+        return {
+            dayIdentifier: dayIdentifier,
+            dayLabel: habDayName + ' ' + (daysDiff + 1)
+        };
+    }
+    else {
+        // Format as readable date using UTC so the adjusted dayIdentifier/dayLabel stay in sync.
+        var options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
+        var formattedDate = localDate.toLocaleDateString('en-US', options);
+        return {
+            dayIdentifier: dayIdentifier,
+            dayLabel: formattedDate
+        };
+    }
+}
+
+/**
+ * Insert a day separator before the given message element.
+ * 
+ * @param {HTMLElement} msgElement The message element
+ * @param {string} dayLabel The label for the day
+ */
+function insertDaySeparator(msgElement, dayLabel) {
+    var separator = document.createElement('div');
+    separator.className = 'msg-day-separator';
+    
+    var separatorText = document.createElement('div');
+    separatorText.className = 'msg-day-separator-text';
+    separatorText.textContent = dayLabel;
+    
+    separator.appendChild(separatorText);
+    msgElement.parentNode.insertBefore(separator, msgElement);
+}
+
+/**
+ * Rebuild all day separators based on current message order in the DOM.
+ */
+function refreshDaySeparators() {
+    var container = document.querySelector('#msg-container');
+    if(container == null) {
+        return;
+    }
+
+    container.querySelectorAll('.msg-day-separator').forEach(function(separator) {
+        separator.remove();
+    });
+
+    var prevDayIdentifier = null;
+    container.querySelectorAll('.msg').forEach(function(msgElement) {
+        var timeElement = msgElement.querySelector('time');
+        if(timeElement == null) {
+            return;
+        }
+
+        var dayInfo = getDayLabel(timeElement.getAttribute('recv-local'));
+        if(prevDayIdentifier == null || prevDayIdentifier !== dayInfo.dayIdentifier) {
+            insertDaySeparator(msgElement, dayInfo.dayLabel);
+        }
+        prevDayIdentifier = dayInfo.dayIdentifier;
+    });
+}
+
+/**
+ * Refresh day separators after message list changes.
+ */
+function checkAndInsertDaySeparator() {
+    refreshDaySeparators();
+}
+
+function mountSearchInHeader() {
+    var search = document.getElementById('msg-search');
+    var header = document.getElementById('header');
+    if(search == null || header == null) {
+        return;
+    }
+
+    var navBox = header.querySelector('div[style*="float: right"]');
+    if(navBox == null || navBox.parentNode == null) {
+        return;
+    }
+
+    search.classList.add('msg-search-header');
+    navBox.parentNode.insertBefore(search, navBox);
+}
 
 $(document).ready(function() {
+
+    mountSearchInHeader();
+
+    $('#msg-search-btn').on('click', function() {
+        startMessageSearch();
+    });
+
+    $('#msg-search-clear').on('click', function() {
+        clearMessageSearch();
+    });
+
+    $('#msg-search-more').on('click', function() {
+        loadSearchMessages(false);
+    });
+
+    $('#msg-search-input').on('keyup', function(event) {
+        if(event.keyCode === 13) {
+            startMessageSearch();
+        }
+    });
+
+    updateSearchToolbar();
     
     var scrollContainer = document.querySelector('#content');
     // Setup an event listener to poll for older messages.
     scrollContainer.addEventListener('scroll', function(event) {
+        if(messageSearch.active) {
+            // Load more search results when scrolling up
+            if(!messageSearch.inProgress && scrollContainer.scrollTop < 300) {
+                loadSearchMessages(false);
+            }
+            return;
+        }
         if(!oldMsgQueryInProgress && scrollContainer.scrollTop < 300) {
             loadPrevMsgs();
         }
@@ -843,6 +1109,10 @@ $(document).ready(function() {
  *  2) Loading older messages when the user scrolls up in the conversation. 
  */
 function loadPrevMsgs() {
+
+    if(messageSearch.active) {
+        return;
+    }
 
     // The 
     if(serverConnection.active == false) {
@@ -861,7 +1131,7 @@ function loadPrevMsgs() {
 
     if(hasMoreMessages) {
         oldMsgQueryInProgress = true;
-        $.ajax({
+        ajaxRequest({
             url:  BASE_URL + '/ajax',
             type: "POST",
             data: {
@@ -878,12 +1148,45 @@ function loadPrevMsgs() {
                     for(i = resp.messages.length-1; i >= 0; i--) {
                         compileMsg(resp.messages[i], true);
                     }
-                    scrollContainer.scrollTop = 100;
+                    if(!anchorNavigation.active) {
+                        scrollContainer.scrollTop = 100;
+                    }
                     hasMoreMessages = (resp.messages.length > 0);
                 }
                 else {
                     hasMoreMessages = false;
                 }
+
+                // Anchor navigation: cascade-load older pages until the target
+                // message appears in the DOM, then scroll to it.
+                if(anchorNavigation.active) {
+                    anchorNavigation.attempts++;
+                    var targetEl = document.querySelector('#msg-id-' + anchorNavigation.targetMessageId);
+                    if(targetEl != null) {
+                        // Found — center on it and briefly highlight.
+                        anchorNavigation.active = false;
+                        anchorNavigation.targetMessageId = null;
+                        anchorNavigation.attempts = 0;
+                        targetEl.scrollIntoView({block: 'center'});
+                        targetEl.classList.add('msg-search-anchor');
+                        setTimeout(function() { targetEl.classList.remove('msg-search-anchor'); }, 3000);
+                    } else if(hasMoreMessages && anchorNavigation.attempts < anchorNavigation.maxAttempts) {
+                        // Not found yet — load the next older batch.
+                        setTimeout(function() { loadPrevMsgs(); }, 50);
+                    } else {
+                        // History exhausted without finding the message.
+                        anchorNavigation.active = false;
+                        anchorNavigation.targetMessageId = null;
+                        anchorNavigation.attempts = 0;
+                        scrollToBottom();
+                    }
+                    if(!hasMoreMessages) {
+                        scrollContainer.style.padding = "0px";
+                        document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
+                    }
+                    return;
+                }
+
                 if(child == null) {
                     // On-load scroll to the bottom to the newest messages
                     scrollToBottom();
@@ -899,14 +1202,322 @@ function loadPrevMsgs() {
                     document.querySelector('#msg-container').prepend(document.querySelector('#msg-end').content.cloneNode(true));
                 }
 
-                oldMsgQueryInProgress = false;               
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 showError('Failed loading previous messages.');
             },
+            complete: function() {
+                oldMsgQueryInProgress = false;
+            }
         });
     }
 }
+
+function clearMessageContainer() {
+    $('#msg-container').empty();
+    oldestMsgRecv = null;
+    hasMoreMessages = true;
+}
+
+function parseSearchTermsClient(query) {
+    var terms = [];
+    var buffer = '';
+    var inQuote = false;
+    var i;
+
+    for(i = 0; i < query.length; i++) {
+        var ch = query.charAt(i);
+
+        if(ch === '"') {
+            inQuote = !inQuote;
+            continue;
+        }
+
+        if(!inQuote && ch === '+') {
+            var term = buffer.trim();
+            if(term.length > 0) {
+                terms.push(term);
+            }
+            buffer = '';
+            continue;
+        }
+
+        buffer += ch;
+    }
+
+    var finalTerm = buffer.trim();
+    if(finalTerm.length > 0) {
+        terms.push(finalTerm);
+    }
+
+    var dedup = [];
+    terms.forEach(function(term) {
+        if(dedup.indexOf(term) < 0) {
+            dedup.push(term);
+        }
+    });
+
+    dedup.sort(function(a, b) {
+        return b.length - a.length;
+    });
+
+    return dedup;
+}
+
+function escapeRegexLiteral(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildHighlightRegex(query) {
+    var terms = parseSearchTermsClient(query);
+    var patternParts = [];
+
+    terms.forEach(function(term) {
+        var clean = term.trim();
+        if(clean.length > 0) {
+            patternParts.push(escapeRegexLiteral(clean));
+        }
+    });
+
+    if(patternParts.length === 0) {
+        return null;
+    }
+
+    return new RegExp('(' + patternParts.join('|') + ')', 'ig');
+}
+
+function applySearchHighlight(container, query) {
+    if(!container || !query || query.length === 0) {
+        return;
+    }
+
+    var regex = buildHighlightRegex(query);
+    if(regex == null) {
+        return;
+    }
+
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+    var textNodes = [];
+    var node;
+
+    while((node = walker.nextNode())) {
+        if(!node.nodeValue || node.nodeValue.trim().length === 0) {
+            continue;
+        }
+
+        if(node.parentElement && (
+            node.parentElement.classList.contains('msg-search-hit') ||
+            node.parentElement.tagName === 'BUTTON' ||
+            node.parentElement.tagName === 'SCRIPT' ||
+            node.parentElement.tagName === 'STYLE'
+        )) {
+            continue;
+        }
+
+        textNodes.push(node);
+    }
+
+    textNodes.forEach(function(textNode) {
+        var text = textNode.nodeValue;
+        if(!regex.test(text)) {
+            regex.lastIndex = 0;
+            return;
+        }
+        regex.lastIndex = 0;
+
+        var frag = document.createDocumentFragment();
+        var lastIndex = 0;
+        var match;
+
+        while((match = regex.exec(text)) !== null) {
+            if(match.index > lastIndex) {
+                frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+            }
+
+            var mark = document.createElement('mark');
+            mark.setAttribute('class', 'msg-search-hit');
+            mark.textContent = match[0];
+            frag.appendChild(mark);
+
+            lastIndex = match.index + match[0].length;
+        }
+
+        if(lastIndex < text.length) {
+            frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+        }
+
+        textNode.parentNode.replaceChild(frag, textNode);
+        regex.lastIndex = 0;
+    });
+}
+
+function updateSearchToolbar() {
+    if(!messageSearch.active) {
+        $('#msg-search-status').text('');
+        $('#msg-search-more').hide();
+        return;
+    }
+
+    $('#msg-search-more').toggle(messageSearch.hasMore);
+    if(messageSearch.query.length > 0) {
+        $('#msg-search-status').text('Search active: ' + messageSearch.query);
+    }
+}
+
+function startMessageSearch() {
+    var query = ($('#msg-search-input').val() || '').trim();
+    if(query.length === 0) {
+        showError('Please enter a search keyword.');
+        return;
+    }
+
+    messageSearch.active = true;
+    messageSearch.query = query;
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+
+    clearMessageContainer();
+    loadSearchMessages(true);
+}
+
+function reloadSearchResults() {
+    if(messageSearch.query.length === 0) {
+        clearMessageSearch();
+        return;
+    }
+
+    messageSearch.active = true;
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+
+    clearMessageContainer();
+    loadSearchMessages(true);
+}
+
+function clearMessageSearch() {
+    messageSearch.active = false;
+    messageSearch.query = '';
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+    messageSearch.inProgress = false;
+
+    $('#msg-search-input').val('');
+    updateSearchToolbar();
+
+    clearMessageContainer();
+    loadPrevMsgs();
+}
+
+function loadSearchMessages(reset) {
+    if(!messageSearch.active || messageSearch.inProgress) {
+        return;
+    }
+
+    if(!reset && !messageSearch.hasMore) {
+        return;
+    }
+
+    if(serverConnection.active == false) {
+        showError('Could not search older messages.');
+        return;
+    }
+
+    messageSearch.inProgress = true;
+    $('#msg-search-status').text('Searching...');
+
+    var scrollContainer = document.querySelector('#content');
+    var prevScrollHeight = scrollContainer ? scrollContainer.scrollHeight : 0;
+
+    ajaxRequest({
+        url: BASE_URL + '/ajax',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'chat',
+            subaction: 'searchMsgs',
+            conversation_id: $('#conversation_id').val(),
+            query: messageSearch.query,
+            cursor_message_id: reset ? -1 : messageSearch.nextCursorId,
+            num_msgs: 25,
+        },
+        success: function(resp) {
+            if(!resp.success) {
+                showError(resp.error || 'Search failed.');
+                return;
+            }
+
+            if(reset) {
+                clearMessageContainer();
+            }
+
+            var i;
+            if(reset) {
+                // Chronological order: oldest at top, newest at bottom
+                for(i = resp.messages.length - 1; i >= 0; i--) {
+                    compileMsg(resp.messages[i], false);
+                }
+                scrollToBottom();
+            } else {
+                // Prepend older results above existing ones
+                for(i = 0; i < resp.messages.length; i++) {
+                    compileMsg(resp.messages[i], true);
+                }
+
+                // Preserve viewport position while older results are inserted above.
+                if(scrollContainer != null) {
+                    var newScrollHeight = scrollContainer.scrollHeight;
+                    scrollContainer.scrollTop += (newScrollHeight - prevScrollHeight);
+                }
+            }
+
+            messageSearch.hasMore = !!resp.has_more;
+            var nextCursor = parseInt(resp.next_cursor_message_id, 10);
+            if(!isNaN(nextCursor) && nextCursor > 0) {
+                messageSearch.nextCursorId = nextCursor;
+            }
+
+            if(resp.messages.length === 0 && reset) {
+                $('#msg-search-status').text('No matching messages found.');
+            }
+            else {
+                $('#msg-search-status').text('Showing matching messages only.');
+            }
+
+            updateSearchToolbar();
+        },
+        error: function() {
+            showError('Failed to run message search.');
+        },
+        complete: function() {
+            messageSearch.inProgress = false;
+        }
+    });
+}
+
+function goToMessage(messageId) {
+    if(messageSearch.inProgress || oldMsgQueryInProgress) {
+        return;
+    }
+
+    // Exit search mode.
+    messageSearch.active = false;
+    messageSearch.query = '';
+    messageSearch.nextCursorId = Number.MAX_SAFE_INTEGER;
+    messageSearch.hasMore = false;
+    messageSearch.inProgress = false;
+    $('#msg-search-input').val('');
+    updateSearchToolbar();
+
+    // Arm anchor navigation so loadPrevMsgs will cascade until it finds this message.
+    anchorNavigation.active = true;
+    anchorNavigation.targetMessageId = messageId;
+    anchorNavigation.attempts = 0;
+
+    clearMessageContainer();
+    loadPrevMsgs();
+}
+
+
 
 /**
  * Show an error message. If not persistent, the error message
@@ -916,11 +1527,38 @@ function loadPrevMsgs() {
  * @param {boolean} persistent 
  */
 function showError(msg, persistent=false) {
-    
+    // Avoid duplicating the same error message on screen.
+    var existingErrors = document.querySelectorAll('#msg-error .msg-error-text');
+    for(var i = 0; i < existingErrors.length; i++) {
+        var existing = existingErrors[i];
+        if(existing.dataset.msg === msg && existing.dataset.persistent === (persistent ? '1' : '0')) {
+            var count = parseInt(existing.dataset.count || '1', 10) + 1;
+            existing.dataset.count = count;
+            existing.innerHTML = '<strong>ERROR:</strong> ' + msg + ' (x' + count + ')';
+
+            if(persistent) {
+                $(existing).stop(true, true).show();
+            }
+            else {
+                $(existing).stop(true, true).fadeIn('slow', function() {
+                    $(this).delay(5000).fadeOut('slow', function() {
+                        // Reset count after the message fades out.
+                        existing.dataset.count = '1';
+                        existing.innerHTML = '<strong>ERROR:</strong> ' + msg;
+                    });
+                });
+            }
+            return existing.id;
+        }
+    }
+
     var newErrorId = 'msg-error-' + $('.msg-error-text').length + 1;
     var newError = document.createElement('div');
     newError.setAttribute('class', 'msg-error-text');
     newError.setAttribute('id', newErrorId);
+    newError.dataset.msg = msg;
+    newError.dataset.persistent = persistent ? '1' : '0';
+    newError.dataset.count = '1';
     newError.innerHTML = '<strong>ERROR:</strong> ' + msg;
     document.getElementById('msg-error').appendChild(newError);
 
@@ -932,7 +1570,11 @@ function showError(msg, persistent=false) {
     }
     else {
         $('#' + newErrorId).fadeIn('slow', function() {
-            $(this).delay(5000).fadeOut('slow');
+            $(this).delay(5000).fadeOut('slow', function() {
+                // Reset count after the message fades out.
+                newError.dataset.count = '1';
+                newError.innerHTML = '<strong>ERROR:</strong> ' + msg;
+            });
         });
     }
 

@@ -13,6 +13,13 @@ abstract class Dao
      * @var Database
      */
     protected $database; 
+    
+    /**
+     * Optional table prefix for multi-instance installs.
+     * @access protected
+     * @var string
+     */
+    protected $tablePrefix;
 
     /**
      * Name of table represented by this DAO.
@@ -23,10 +30,10 @@ abstract class Dao
 
     /**
      * Name of primary id for the table.
-     * @access private
+     * @access protected
      * @var string
      */
-    private $id;
+    protected $idName;
 
     /**
      * Search for any of these keyrods. 
@@ -58,8 +65,32 @@ abstract class Dao
     protected function __construct(string $name, ?string $id=null)
     {
         $this->database = Database::getInstance();
-        $this->name     = $name;
-        $this->id       = $id;
+        global $database;
+        $this->tablePrefix = isset($database['table_prefix']) ? $database['table_prefix'] : '';
+        $this->name     = $this->tablePrefix.$name;
+        $this->idName   = $id;
+    }
+
+    /**
+     * Return a table name with prefix (no backticks).
+     * 
+     * @param string $name Base table name
+     * @return string Prefixed table name
+     */
+    protected function tableName(string $name): string
+    {
+        return $this->tablePrefix.$name;
+    }
+
+    /**
+     * Return a table name wrapped in backticks with prefix applied.
+     * 
+     * @param string $name Base table name
+     * @return string Backticked, prefixed table name
+     */
+    protected function table(string $name): string
+    {
+        return '`'.$this->tablePrefix.$name.'`';
     }
 
     /**
@@ -133,7 +164,7 @@ abstract class Dao
         // Integer where clause means select by primary id. 
         if (intval($where) > 0)
         {
-            $query .= " where `{$this->id}` = '$where'";
+            $query .= " where `{$this->idName}` = '$where'";
         }
         // Otherwise, if where clause is not a wildcard, assume it is a well 
         // constructed database statement.
@@ -336,11 +367,10 @@ abstract class Dao
      * @param array $fields Associative array of fields to update in the database. 
      * @param string $where Clause used to select which rows to update in the table.
      *                      If an int is provided, then treat it as the unique id
-     *                      to drop. Otherwise, assume it is the WHERE clause.
-     *                      Default to '*' which would select all rows.
+     *                      to update. Otherwise, assume it is the WHERE clause.
      * @return mysqli_result|bool Result from query or bool if not keeping results.
      */
-    public function update(array $fields, string $where = '*')
+    public function update(array $fields, string $where)
     {
         // Build update query 
         $query = "update `{$this->name}` set ";
@@ -364,7 +394,7 @@ abstract class Dao
         // Apply where clause. 
         if (intval($where) > 0)
         {
-            $query .= " where `{$this->id}` = '$where'";
+            $query .= " where `{$this->idName}` = '$where'";
         }
         else if ($where != '*')
         {

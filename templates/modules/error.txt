@@ -5,4 +5,5 @@
     <div id="form-contents">
         <p style="text-align: center;">You have reached the edge of the universe. Click <a href="%http%%site_url%">here</a> to get back home.</p>
     </div>
+    %error_debug%
 </div>

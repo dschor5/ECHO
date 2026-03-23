@@ -41,7 +41,26 @@ class ConversationsDao extends Dao
      **/
     protected function __construct()
     {
-        parent::__construct('conversations');
+        parent::__construct('conversations', 'conversation_id');
+    }
+
+    /**
+     * Override insert to generate encryption key for new conversations
+     *
+     * @param array $fields
+     * @param array $variables
+     * @return int|bool
+     */
+    public function insert(array $fields, array $variables = array())
+    {
+        // Generate encryption key if not provided
+        if (!isset($fields['encryption_key'])) {
+            $conversation = new Conversation(array());
+            $conversation->generateEncryptionKey();
+            $fields['encryption_key'] = $conversation->encryption_key;
+        }
+
+        return parent::insert($fields, $variables);
     }
 
     /**
@@ -88,13 +107,16 @@ class ConversationsDao extends Dao
     public function getConversations($userId = null, bool $includePrivate = true)
     {
         $qWhere = array();
+        $tblConversations = $this->tableName('conversations');
+        $tblParticipants = $this->tableName('participants');
+        $tblUsers = $this->tableName('users');
 
         // Additional clause if userId is provided.
         if($userId != null)
         {
             $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
             $qWhere[]  = 'conversations.conversation_id IN ( '.
-                            'SELECT participants.conversation_id FROM participants '.
+                            'SELECT participants.conversation_id FROM `'.$tblParticipants.'` participants '.
                             'WHERE participants.user_id='.$qUserId.' ) ';
         }
 
@@ -115,9 +137,9 @@ class ConversationsDao extends Dao
                     'GROUP_CONCAT( users.is_crew) AS participants_is_crew, '.
                     'GROUP_CONCAT( users.is_active) AS participants_is_active, '.
                     'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
-                    'FROM conversations '.
-                    'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
-                    'JOIN users ON users.user_id=participants.user_id '.
+                    'FROM `'.$tblConversations.'` conversations '.
+                    'JOIN `'.$tblParticipants.'` participants ON conversations.conversation_id = participants.conversation_id '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=participants.user_id '.
                     $qWhere.
                     'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
 
@@ -219,6 +241,9 @@ class ConversationsDao extends Dao
         $qConvoIds = implode(',',$convoIds);
 
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $tblConversations = $this->tableName('conversations');
+        $tblParticipants = $this->tableName('participants');
+        $tblUsers = $this->tableName('users');
 
         $queryStr = 'SELECT conversations.*, '.
             'GROUP_CONCAT( participants.user_id) AS participants_id, '.
@@ -227,12 +252,12 @@ class ConversationsDao extends Dao
             'GROUP_CONCAT( users.is_crew) AS participants_is_crew, '.
             'GROUP_CONCAT( users.is_active) AS participants_is_active, '.
             'COUNT(DISTINCT users.is_crew) AS participants_both_sites '.
-            'FROM conversations '.
-            'JOIN participants ON conversations.conversation_id = participants.conversation_id '.
-            'JOIN users ON users.user_id=participants.user_id '.
+            'FROM `'.$tblConversations.'` conversations '.
+            'JOIN `'.$tblParticipants.'` participants ON conversations.conversation_id = participants.conversation_id '.
+            'JOIN `'.$tblUsers.'` users ON users.user_id=participants.user_id '.
             'WHERE conversations.conversation_id NOT IN ('.$qConvoIds.') '. 
                 'AND conversations.conversation_id IN ( '.
-                    'SELECT participants.conversation_id FROM participants '.
+                    'SELECT participants.conversation_id FROM `'.$tblParticipants.'` participants '.
                     'WHERE participants.user_id='.$qUserId.' ) '.
             'GROUP BY conversations.conversation_id ORDER BY conversations.conversation_id';
         
@@ -276,11 +301,13 @@ class ConversationsDao extends Dao
     public function convoUpdated(int $convoId) : bool 
     {
         $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+        $tblConversations = $this->tableName('conversations');
+        $tblMessages = $this->tableName('messages');
 
-        $queryStr = 'UPDATE conversations c
+        $queryStr = 'UPDATE `'.$tblConversations.'` c
             LEFT JOIN (
                 SELECT conversation_id, MAX(recv_time_mcc) AS last_mcc, MAX(recv_time_hab) AS last_hab
-                FROM messages
+                FROM `'.$tblMessages.'` messages
                 GROUP BY conversation_id
             ) m ON c.conversation_id = m.conversation_id
             SET 

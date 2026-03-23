@@ -34,13 +34,13 @@ class MissionDao extends Dao
      **/
     protected function __construct()
     {
-        parent::__construct('mission_config');
+        parent::__construct('mission_config', 'name');
     }
 
     /**
      * Read the mission configuration into an associative array.
      * 
-     * @return array Associative array[name] = array(type=>, value=>)
+     * @return array Associative array[name] = array(config_type=>, config_value=>)
      **/
     public function readMissionConfig() : array
     {
@@ -70,9 +70,11 @@ class MissionDao extends Dao
      **/
     public function updateMissionConfig(array $data) : bool
     {
+        $tblMissionConfig = $this->tableName('mission_config');
+
         // Use case statements to update multiple fields in the table
         // in a single query. 
-        $queryStr = 'UPDATE mission_config SET value = ( CASE ';
+        $queryStr = 'UPDATE `'.$tblMissionConfig.'` SET config_value = ( CASE ';
         $qIn = array();
         foreach($data as $name => $value) 
         {

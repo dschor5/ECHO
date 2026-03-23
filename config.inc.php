@@ -6,13 +6,25 @@ ini_set('display_errors', '1');
 require_once('server.inc.php');
 
 $config = array();
-$config['echo_version'] = '4.6';
+$config['echo_version'] = '5.0RC1';
 $config['templates_dir'] = 'templates';
 $config['modules_dir'] = 'modules';
 $config['uploads_dir'] = 'uploads';
 $config['logs_dir'] = 'logs';
 $config['log_file'] = 'analog.log';
 $config['delay_mars_file'] = 'mars_distance_echo.txt';
+// Base table names used by ECHO (without prefix)
+$config['table_list'] = array(
+    'users',
+    'conversations',
+    'participants',
+    'messages',
+    'msg_status',
+    'msg_saved',
+    'msg_files',
+    'mission_config',
+    'mission_archives',
+);
 
 // Extension => Mime Type
 $config['uploads_allowed'] = array(
@@ -113,6 +125,8 @@ require_once('modules/debug.php');
 
 // Include classes
 require_once('class/log.php');
+require_once('class/initialization.php');
+require_once('class/encryption.php');
 require_once('class/delay.php');
 require_once('class/time.php');
 require_once('class/serverFile.php');

@@ -59,9 +59,11 @@ class ParticipantsDao extends Dao
         if(!isset(self::$cache[$convoId]))
         {
             $qConvoId = '\''.$this->database->prepareStatement($convoId).'\'';
+            $tblParticipants = $this->tableName('participants');
+            $tblUsers = $this->tableName('users');
 
             $queryStr = 'SELECT participants.user_id, users.is_crew '.
-                        'FROM participants, users '.
+                        'FROM `'.$tblParticipants.'` participants, `'.$tblUsers.'` users '.
                         'WHERE users.user_id=participants.user_id '. 
                             'AND participants.conversation_id='.$qConvoId;
             
@@ -90,10 +92,13 @@ class ParticipantsDao extends Dao
      **/
     public function getConvosWithSingleParticipant() : array
     {
+        $tblParticipants = $this->tableName('participants');
+        $tblConversations = $this->tableName('conversations');
+
         // Query to get all conversations that excludes conversation_id=1 (mission chat) and its threads.
         $queryStr = 'SELECT participants.conversation_id, COUNT(participants.user_id) AS active_participants '.
-                    'FROM participants '. 
-                    'JOIN conversations ON participants.conversation_id=conversations.conversation_id '.
+                    'FROM `'.$tblParticipants.'` participants '. 
+                    'JOIN `'.$tblConversations.'` conversations ON participants.conversation_id=conversations.conversation_id '.
                     'WHERE conversations.conversation_id != 1 AND '. 
                         '(conversations.parent_conversation_id IS NULL OR conversations.parent_conversation_id != 1) '.
                     'GROUP BY participants.conversation_id HAVING active_participants = 1';

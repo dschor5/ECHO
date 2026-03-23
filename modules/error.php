@@ -29,14 +29,29 @@ class ErrorModule extends DefaultModule
     protected function showError() : string
     {
         $this->addTemplates('common.css', 'settings.css');
+
         $username = ($this->user == null) ? 'n/a' : $this->user->username;
-        Logger::warning('error:compileHtml user='.$username.
-            ', GET='.json_encode($_GET).
-            ', POST='.json_encode($_POST). 
-            ', SERVER_REQUEST_URI='.json_encode($_SERVER['REQUEST_URI']). 
-            ', SERVER_REDIRECT_URL='.json_encode($_SERVER['REDIRECT_URL']));
-        return Main::loadTemplate('error.txt');
-    }    
+        $debug = 'GET=' . json_encode($_GET) . '\n' .
+                 'POST=' . json_encode($_POST) . '\n' .
+                 'REQUEST_URI=' . ($_SERVER['REQUEST_URI'] ?? '') . '\n' .
+                 'REDIRECT_URL=' . ($_SERVER['REDIRECT_URL'] ?? '');
+
+        // Always log the request details.
+        Logger::warning('error:compileHtml user=' . $username . ', ' . $debug);
+
+        $debugHtml = '';
+        if ($this->user != null && $this->user->is_admin)
+        {
+            $adminText = "Admin error details:\n" . $debug;
+            Logger::error('error:compileHtml-admin user=' . $username . ', ' . $debug);
+            $debugHtml = '<div class="error-debug">' .
+                         '<strong>DEBUG INFO (admin):</strong><pre>' .
+                         htmlspecialchars($adminText) .
+                         '</pre></div>';
+        }
+
+        return Main::loadTemplate('error.txt', array('/%error_debug%/' => $debugHtml));
+    }
 }
 
 

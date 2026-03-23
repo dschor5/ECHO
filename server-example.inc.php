@@ -32,6 +32,9 @@ $server = array(
    // Site URL without http (e.g., 'echo.space', 
    // 'analog.space/echo', '127.0.0.1', or '127.0.0.1/ECHO')
    'site_url' => '127.0.0.1',
+
+   // Master key for encrypting conversation keys (CHANGE THIS IN PRODUCTION!)
+   'encryption_master_key' => 'your_secure_master_key_here_32_chars_min',
 );
 
 // MySQL database login info
@@ -39,7 +42,10 @@ $database = array(
    'db_host' => '127.0.0.1',
    'db_user' => 'username',
    'db_pass' => 'password',
-   'db_name' => 'delay'
+   'db_name' => 'delay',
+   // Optional table prefix for multi-instance installs (e.g., 'echo_a_')
+   // Leave blank for default single-instance tables.
+   'table_prefix' => ''
 );
 
 // Other administrative settings. 
@@ -49,4 +55,3 @@ $admin = array(
    'default_password' => 'password',
 );
 ?>
-

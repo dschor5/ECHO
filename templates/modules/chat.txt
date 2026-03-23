@@ -32,6 +32,15 @@
 
     <div id="content">
 
+        <div id="msg-search">
+            <input type="text" id="msg-search-input" placeholder="Search this conversation">
+            <button type="button" id="msg-search-btn" class="msg-search-btn">Find</button>
+            <button type="button" id="msg-search-clear" class="msg-search-btn">Clear</button>
+            <button type="button" id="msg-search-more" class="msg-search-btn">More</button>
+            <span id="msg-search-help" title='Use + for multiple terms. Use quotes for exact phrase. Example: mars+"air lock"+status'>?</span>
+            <div id="msg-search-status"></div>
+        </div>
+
         <div id="msg-error">
             <!-- Errors reported here via javascript. -->    
         </div>
@@ -98,6 +107,9 @@
     <div id="new-msg">
         <textarea id="new-msg-text" name="newmsg-text" placeholder="Enter Message" onkeyup="detectShiftEnter(event)"></textarea>
         <input type="hidden" id="conversation_id" name="conversation_id" value="%convo_id%">
+        <input type="hidden" id="mission_start" value="%mission_start%">
+        <input type="hidden" id="mission_end" value="%mission_end%">
+        <input type="hidden" id="hab_day_name" value="%hab_day_name%">
         <button type="button" class="new-msg-btn" id="video-btn" onclick="openMediaModal('video')" title="Record and send video messages">&#128249;</button>
         <button type="button" class="new-msg-btn" id="audio-btn" onclick="openMediaModal('audio')" title="Record and send audio messages">&#127908;</button>
         <button type="button" class="new-msg-btn" id="file-btn" onclick="openFileModal()" title="Send attachments">&#128206;</button>

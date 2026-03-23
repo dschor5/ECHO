@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'en' }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ site.title }}</title>
+    <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-title">
+        <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="sidebar" aria-label="Section navigation">
+        <ul class="nav">
+          {% for section in site.data.navigation %}
+            {% assign is_active = false %}
+            {% if page.section == section.id %}
+              {% assign is_active = true %}
+            {% elsif section.url != '/' and page.url contains section.url %}
+              {% assign is_active = true %}
+            {% endif %}
+            <li class="nav-item{% if is_active %} active{% endif %}">
+              <a href="{{ section.url | relative_url }}">{{ section.title }}</a>
+              {% if is_active and section.children %}
+                <ul class="nav-children">
+                  {% for child in section.children %}
+                    {% assign child_active = false %}
+                    {% if page.url == child.url %}
+                      {% assign child_active = true %}
+                    {% endif %}
+                    <li class="nav-child{% if child_active %} active{% endif %}">
+                      <a href="{{ child.url | relative_url }}">{{ child.title }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+
+      <main class="content">
+        {{ content }}
+      </main>
+    </div>
+  </body>
+</html>

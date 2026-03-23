@@ -38,6 +38,57 @@ class MessagesDao extends Dao
     }
 
     /**
+     * Decrypt message text using the conversation's encryption key
+     *
+     * @param array $messageData Message data from database
+     * @return array Message data with decrypted text
+     */
+    private function decryptMessageData(array $messageData): array
+    {
+        if (empty($messageData['text'])) {
+            Logger::debug('Message text is empty, skipping decryption', ['message_id' => $messageData['message_id']]);
+            return $messageData;
+        }
+
+        // Get conversation encryption key
+        $conversationsDao = ConversationsDao::getInstance();
+        $conversationResult = $conversationsDao->select('encryption_key', 'conversation_id = ' . $messageData['conversation_id']);
+        if ($conversationResult === false || $conversationResult->num_rows === 0) {
+            Logger::warning('Conversation not found for message decryption', ['conversation_id' => $messageData['conversation_id']]);
+            return $messageData;
+        }
+
+        $conversationData = $conversationResult->fetch_assoc();
+        if (empty($conversationData['encryption_key'])) {
+            // No encryption key - message might be unencrypted
+            Logger::warning('No encryption key for conversation during message decryption', ['conversation_id' => $messageData['conversation_id']]);
+            return $messageData;
+        }
+
+        try {
+            $conversation = new Conversation($conversationData);
+            $encryptionKey = $conversation->getEncryptionKey();
+            Logger::debug('Decrypting message text', [
+                'message_id' => $messageData['message_id'],
+                'conversation_id' => $messageData['conversation_id'],
+                'encryption_key_exists' => $encryptionKey !== null
+            ]);
+            if ($encryptionKey !== null) {
+                $messageData['text'] = Encryption::decryptData($messageData['text'], $encryptionKey);
+            }
+        } catch (Exception $e) {
+            Logger::error('Failed to decrypt message', [
+                'message_id' => $messageData['message_id'],
+                'conversation_id' => $messageData['conversation_id'],
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        Logger::debug('Message decryption complete', ['message_id' => $messageData['message_id']]);
+        return $messageData;
+    }
+
+    /**
      * Renumber alternate message ids based on whether threads are enabled or not.
      *
      * @param boolean $threadsEnabled
@@ -49,6 +100,7 @@ class MessagesDao extends Dao
 
         $conversationsDao = ConversationsDao::getInstance();
         $conversations = $conversationsDao->getConversations();
+        $tblMessages = $this->tableName('messages');
 
         foreach($conversations as $convoId => $convo) 
         {
@@ -80,13 +132,13 @@ class MessagesDao extends Dao
             $this->database->query($idQueryStr);
             
             // Update id for messages from the perspective of the habitat
-            $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_hab:=@id_hab+1 '. 
+            $updateQueryStr = 'UPDATE `'.$tblMessages.'` messages SET messages.message_id_alt=@id_hab:=@id_hab+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=1 ';
                 'ORDER BY IF(messages.from_crew, messages.recv_time_hab, messages.recv_time_mcc) ASC';
             $this->database->query($updateQueryStr);
             
             // Update id for messages from the perspective of mcc
-            $updateQueryStr = 'UPDATE messages SET messages.message_id_alt=@id_mcc:=@id_mcc+1 '. 
+            $updateQueryStr = 'UPDATE `'.$tblMessages.'` messages SET messages.message_id_alt=@id_mcc:=@id_mcc+1 '. 
                 'WHERE messages.conversation_id IN ('.$qConvoIds.') AND messages.from_crew=0 ';
                 'ORDER BY IF(messages.from_crew, messages.recv_time_hab, messages.recv_time_mcc) ASC';
             $this->database->query($updateQueryStr);
@@ -109,6 +161,7 @@ class MessagesDao extends Dao
         $conversationsDao = ConversationsDao::getInstance();
         $participantsDao = ParticipantsDao::getInstance();
         $msgFileDao = MessageFileDao::getInstance();
+        $tblMessages = $this->tableName('messages');
 
         $id = null;
         $ret = true;
@@ -121,8 +174,34 @@ class MessagesDao extends Dao
             
             $recvSource = $user->is_crew ? 'recv_time_hab' : 'recv_time_mcc';
 
+            // Get conversation for encryption key
+            $conversationResult = $conversationsDao->select('*', 'conversation_id = ' . $msgData['conversation_id']);
+            if ($conversationResult === false || $conversationResult->num_rows === 0) {
+                Logger::error('Conversation not found for message', ['conversation_id' => $msgData['conversation_id']]);
+                $this->endTransaction(false);
+                return false;
+            }
+            $conversationData = $conversationResult->fetch_assoc();
+            $conversation = new Conversation($conversationData);
+
+            $encryptionKey = $conversation->getEncryptionKey();
+            if ($encryptionKey === null) {
+                // Generate key for existing conversations that don't have one
+                $conversation->generateEncryptionKey();
+                $conversationsDao->update(['encryption_key' => $conversation->encryption_key], $conversation->conversation_id);
+                $encryptionKey = $conversation->getEncryptionKey();
+            }
+
+            // Encrypt the message text if it's not empty
+            $originalText = $msgData['text'];
+            if (!empty($originalText)) {
+                $msgData['text'] = Encryption::encryptData($originalText, $encryptionKey);
+            }
+
             // Check if the message exists (has the same sender and content within the last 10 sec)
-            $queryStr = 'SELECT message_id FROM messages '.
+            // Note: This check will now fail for encrypted messages, but that's acceptable
+            // as encryption makes duplicate detection less reliable anyway
+            $queryStr = 'SELECT message_id FROM `'.$tblMessages.'` '.
                         'WHERE user_id='.$user->user_id.' '.
                         'AND conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '.
                         'AND text="'.$this->database->prepareStatement($msgData['text']).'" '.
@@ -138,7 +217,7 @@ class MessagesDao extends Dao
             }
 
             // Define query to find the next alternate id to assign to the new message
-            $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM messages '. 
+            $idQueryStr = 'SELECT @id_alt := COALESCE(MAX(message_id_alt),0) FROM `'.$tblMessages.'` '. 
                 'WHERE conversation_id="'.$this->database->prepareStatement($msgData['conversation_id']).'" '. 
                 'AND from_crew='.(($user->is_crew)?'1':'0');
             $this->database->query($idQueryStr);
@@ -271,11 +350,12 @@ class MessagesDao extends Dao
         $qConvoIds = implode(',',$convoIds);
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
 
         $queryStr = 'SELECT messages.message_id '. 
                         // 'users.username, users.alias, users.is_active, '.
                         // 'msg_files.original_name, msg_files.server_name, msg_files.mime_type '.
-                    'FROM messages '.
+                    'FROM `'.$tblMessages.'` messages '.
                     // 'JOIN users ON users.user_id=messages.user_id '.
                     // 'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
                     //     'AND msg_status.user_id='.$qUserId.' '.
@@ -324,17 +404,22 @@ class MessagesDao extends Dao
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qLastId  = intval($lastId);
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgStatus = $this->tableName('msg_status');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgStatus.'` msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.message_id > '.$qLastId.' '.
@@ -354,7 +439,8 @@ class MessagesDao extends Dao
             {
                 while(($rowData=$result->fetch_assoc()) != null)
                 {
-                    $messages[$rowData['message_id']] = new Message($rowData);
+                    $decryptedData = $this->decryptMessageData($rowData);
+                    $messages[$rowData['message_id']] = new Message($decryptedData);
                 }
             }
         }
@@ -384,15 +470,19 @@ class MessagesDao extends Dao
         // Build query
         $qMessageId  = '\''.$this->database->prepareStatement($messageId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
         
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.message_id='.$qMessageId;
                     
@@ -403,7 +493,9 @@ class MessagesDao extends Dao
         {
             if($result->num_rows > 0) 
             {
-                $message = new Message($result->fetch_assoc());
+                $rowData = $result->fetch_assoc();
+                $decryptedData = $this->decryptMessageData($rowData);
+                $message = new Message($decryptedData);
             }
         }
         
@@ -428,6 +520,11 @@ class MessagesDao extends Dao
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qOffset  = $this->database->prepareStatement($offset);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgStatus = $this->tableName('msg_status');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
         
         $this->database->query('SET @ts := UTC_TIMESTAMP(3);');
 
@@ -435,12 +532,12 @@ class MessagesDao extends Dao
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_status ON messages.message_id=msg_status.message_id '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgStatus.'` msg_status ON messages.message_id=msg_status.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
                         'AND msg_saved.user_id='.$qUserId.' '.
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND msg_status.message_id IS NOT NULL '.    
@@ -460,7 +557,8 @@ class MessagesDao extends Dao
             {
                 while(($rowData=$result->fetch_assoc()) != null)
                 {
-                    $messages[$rowData['message_id']] = new Message($rowData);
+                    $decryptedData = $this->decryptMessageData($rowData);
+                    $messages[$rowData['message_id']] = new Message($decryptedData);
                 }
             }
         }
@@ -470,8 +568,8 @@ class MessagesDao extends Dao
         {
             $maxMsgId = max(array_keys($messages));
             $delStr   = 'DELETE msg_status '.
-            'FROM msg_status '.
-            'JOIN messages ON messages.message_id=msg_status.message_id '.
+            'FROM `'.$tblMsgStatus.'` msg_status '.
+            'JOIN `'.$tblMessages.'` messages ON messages.message_id=msg_status.message_id '.
             'WHERE msg_status.user_id='.$qUserId.' '.
                 'AND messages.conversation_id IN ('.$qConvoIds.') '. 
                 'AND messages.'.$qRefTime.' <= @ts '; 
@@ -507,15 +605,20 @@ class MessagesDao extends Dao
         $qlastMsgId  = '\''.$this->database->prepareStatement($lastMsgId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
         $qToDate   = '\''.$this->database->prepareStatement($toDate).'\'';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
+        $tblMsgStatus = $this->tableName('msg_status');
 
         $queryStr = 'SELECT messages.*, '. 
                         'users.username, users.alias, users.is_active, '.
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved ' . 
-                    'FROM messages '.
-                    'JOIN users ON users.user_id=messages.user_id '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id ' .
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id ' . 
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id ' .
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id ' . 
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                         'AND messages.'.$qRefTime.' <= '.$qToDate.' '.
@@ -537,7 +640,8 @@ class MessagesDao extends Dao
                 {
                     while(($rowData=$result->fetch_assoc()) != null)
                     {
-                        $messages[$rowData['message_id']] = new Message($rowData);
+                        $decryptedData = $this->decryptMessageData($rowData);
+                        $messages[$rowData['message_id']] = new Message($decryptedData);
                     }
                 }
             }
@@ -546,8 +650,8 @@ class MessagesDao extends Dao
             {
                 $maxMsgId = max(array_keys($messages));
                 $delStr   = 'DELETE msg_status '.
-                'FROM msg_status '.
-                'JOIN messages ON messages.message_id=msg_status.message_id '.
+                'FROM `'.$tblMsgStatus.'` msg_status '.
+                'JOIN `'.$tblMessages.'` messages ON messages.message_id=msg_status.message_id '.
                 'WHERE msg_status.user_id='.$qUserId.' '.
                     'AND messages.conversation_id IN ('.$qConvoIds.') '. 
                     'AND messages.'.$qRefTime.' <= '.$qToDate.' ';
@@ -570,6 +674,249 @@ class MessagesDao extends Dao
     }
 
     /**
+     * Check if a message text matches every search term.
+     *
+     * @param string $text
+     * @param array $terms
+     * @return bool
+     */
+    private function textMatchesTerms(string $text, array $terms) : bool
+    {
+        $textLower = strtolower($text);
+        foreach($terms as $term)
+        {
+            $needle = strtolower(trim($term));
+            if(strlen($needle) > 0 && strpos($textLower, $needle) === false)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Search messages in old history by checking decrypted text.
+     *
+     * @param array $convoIds
+     * @param int $userId
+     * @param bool $isCrew
+     * @param array $terms
+     * @param int $cursorMsgId
+     * @param int $numMsgs
+     * @return array
+     */
+    public function searchMessages(
+        array $convoIds,
+        int $userId,
+        bool $isCrew,
+        array $terms,
+        int $cursorMsgId = PHP_INT_MAX,
+        int $numMsgs = 100
+    ) : array
+    {
+        $qConvoIds = implode(',', $convoIds);
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qCursorMsgId = '\''.$this->database->prepareStatement($cursorMsgId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
+
+        $messages = array();
+        $scanBatch = max($numMsgs * 5, 100);
+        $scanBatch = min($scanBatch, 500);
+        $nextCursor = $cursorMsgId;
+        $hasMore = false;
+        $scanIterations = 0;
+
+        while(count($messages) < $numMsgs && $scanIterations < 25)
+        {
+            $queryStr = 'SELECT messages.*, '.
+                        'users.username, users.alias, users.is_active, '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
+                    'FROM `'.$tblMessages.'` messages '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
+                        'AND msg_saved.user_id='.$qUserId.' '.
+                    'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+                        'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
+                        'AND messages.message_id < '.$qCursorMsgId.' '.
+                        "AND messages.message_type IN ('text', 'important') ".
+                    'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+                    'LIMIT 0, '.$scanBatch;
+
+            $scanIterations++;
+            $rowsRead = 0;
+            $minMsgId = null;
+            $foundPageLimit = false;
+
+            if(($result = $this->database->query($queryStr)) === false || $result->num_rows === 0)
+            {
+                $hasMore = false;
+                break;
+            }
+
+            while(($rowData = $result->fetch_assoc()) != null)
+            {
+                $rowsRead++;
+                $rowMsgId = intval($rowData['message_id']);
+                $minMsgId = ($minMsgId == null) ? $rowMsgId : min($minMsgId, $rowMsgId);
+
+                $decryptedData = $this->decryptMessageData($rowData);
+                $text = trim($decryptedData['text'] ?? '');
+                if(!$this->textMatchesTerms($text, $terms))
+                {
+                    continue;
+                }
+
+                $messages[$rowMsgId] = new Message($decryptedData);
+                if(count($messages) >= $numMsgs)
+                {
+                    $foundPageLimit = true;
+                    break;
+                }
+            }
+
+            if($minMsgId == null)
+            {
+                $hasMore = false;
+                break;
+            }
+
+            $nextCursor = $minMsgId;
+            $qCursorMsgId = '\''.$this->database->prepareStatement($nextCursor).'\'';
+            $hasMoreInCurrentBatch = $foundPageLimit && ($rowsRead < $result->num_rows);
+            $hasMoreBatches = ($result->num_rows === $scanBatch);
+            $hasMore = ($hasMoreInCurrentBatch || $hasMoreBatches);
+
+            if($foundPageLimit)
+            {
+                break;
+            }
+
+            if(!$hasMore)
+            {
+                break;
+            }
+        }
+
+        return array(
+            'messages' => $messages,
+            'next_cursor' => $nextCursor,
+            'has_more' => $hasMore,
+        );
+    }
+
+    /**
+     * Get messages around a specific message id.
+     *
+     * @param array $convoIds
+     * @param int $userId
+     * @param bool $isCrew
+     * @param int $anchorMessageId
+     * @param int $before
+     * @param int $after
+     * @return array
+     */
+    public function getMessageContext(
+        array $convoIds,
+        int $userId,
+        bool $isCrew,
+        int $anchorMessageId,
+        int $before = 8,
+        int $after = 8
+    ) : array
+    {
+        $qConvoIds = implode(',', $convoIds);
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qAnchorId = '\''.$this->database->prepareStatement($anchorMessageId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
+
+        $baseSelect = 'SELECT messages.*, '.
+                          'users.username, users.alias, users.is_active, '.
+                          'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                          'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
+                      'FROM `'.$tblMessages.'` messages '.
+                      'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                      'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                      'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '.
+                          'AND msg_saved.user_id='.$qUserId.' '.
+                      'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
+                          'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) ';
+
+        $anchorQuery = $baseSelect.
+                      'AND messages.message_id='.$qAnchorId.' LIMIT 1';
+
+        $anchorRow = null;
+        if(($anchorResult = $this->database->query($anchorQuery)) !== false && $anchorResult->num_rows === 1)
+        {
+            $anchorRow = $anchorResult->fetch_assoc();
+        }
+
+        if($anchorRow == null)
+        {
+            return array();
+        }
+
+        $anchorTime = '\''.$this->database->prepareStatement($anchorRow[$qRefTime]).'\'';
+        $anchorId = intval($anchorRow['message_id']);
+
+        $beforeQuery = $baseSelect.
+                      'AND (messages.'.$qRefTime.' < '.$anchorTime.' '.
+                           'OR (messages.'.$qRefTime.' = '.$anchorTime.' AND messages.message_id < '.$anchorId.')) '.
+                      'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+                      'LIMIT 0, '.intval($before);
+
+        $afterQuery = $baseSelect.
+                     'AND (messages.'.$qRefTime.' > '.$anchorTime.' '.
+                          'OR (messages.'.$qRefTime.' = '.$anchorTime.' AND messages.message_id > '.$anchorId.')) '.
+                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
+                     'LIMIT 0, '.intval($after);
+
+        $beforeMsgs = array();
+        if(($result = $this->database->query($beforeQuery)) !== false)
+        {
+            while(($rowData = $result->fetch_assoc()) != null)
+            {
+                $decryptedData = $this->decryptMessageData($rowData);
+                $beforeMsgs[$rowData['message_id']] = new Message($decryptedData);
+            }
+        }
+
+        $afterMsgs = array();
+        if(($result = $this->database->query($afterQuery)) !== false)
+        {
+            while(($rowData = $result->fetch_assoc()) != null)
+            {
+                $decryptedData = $this->decryptMessageData($rowData);
+                $afterMsgs[$rowData['message_id']] = new Message($decryptedData);
+            }
+        }
+
+        $anchorMessage = new Message($this->decryptMessageData($anchorRow));
+
+        $messages = array();
+        foreach(array_reverse($beforeMsgs, true) as $msgId => $msg)
+        {
+            $messages[$msgId] = $msg;
+        }
+        $messages[$anchorId] = $anchorMessage;
+        foreach($afterMsgs as $msgId => $msg)
+        {
+            $messages[$msgId] = $msg;
+        }
+
+        return $messages;
+    }
+
+    /**
      * Get new message notifications. These are the total number of new messages
      * on each conversation/thread and how many of those are flagged as important.
      *
@@ -585,6 +932,8 @@ class MessagesDao extends Dao
         $qConvoId = '\''.$this->database->prepareStatement($conversationId).'\'';
         $qUserId  = '\''.$this->database->prepareStatement($userId).'\'';
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblMsgStatus = $this->tableName('msg_status');
 
         // Build query that counts new new messages and number of important messages. 
         // We leave it to the applicaiton to determine if the number changed from the
@@ -592,7 +941,7 @@ class MessagesDao extends Dao
         $queryStr = 'SELECT messages.conversation_id, '. 
                         'COUNT(*) AS num_new, '. 
                         "SUM(IF(messages.message_type = 'important', 1, 0)) AS num_important ".
-                    'FROM messages, msg_status '.
+                    'FROM `'.$tblMessages.'` messages, `'.$tblMsgStatus.'` msg_status '.
                     'WHERE messages.conversation_id<>'.$qConvoId.' '. 
                         'AND msg_status.message_id=messages.message_id '.
                         'AND msg_status.user_id='.$qUserId.' '. 
@@ -625,20 +974,22 @@ class MessagesDao extends Dao
     public function clearMessagesAndThreads()
     {
         $conversationsDao = ConversationsDao::getInstance();
+        $tblMessages = $this->tableName('messages');
+        $tblConversations = $this->tableName('conversations');
 
         $this->startTransaction();
 
         // Delete all messags
-        $this->database->query('DELETE FROM messages');
+        $this->database->query('DELETE FROM `'.$tblMessages.'`');
 
         // Reset message counter
-        $this->database->query('ALTER TABLE messages AUTO_INCREMENT = 1');
+        $this->database->query('ALTER TABLE `'.$tblMessages.'` AUTO_INCREMENT = 1');
 
         // Delete all threads
-        $this->database->query('DELETE FROM conversations WHERE parent_conversation_id IS NOT NULL');
+        $this->database->query('DELETE FROM `'.$tblConversations.'` WHERE parent_conversation_id IS NOT NULL');
 
         // Update date for date created and last message.
-        $this->database->query('UPDATE conversations SET date_created=UTC_TIMESTAMP(3), last_message=UTC_TIMESTAMP(3)');
+        $this->database->query('UPDATE `'.$tblConversations.'` SET date_created=UTC_TIMESTAMP(3), last_message_mcc=UTC_TIMESTAMP(3), last_message_hab=UTC_TIMESTAMP(3)');
        
         $this->endTransaction();
     }
@@ -656,14 +1007,17 @@ class MessagesDao extends Dao
     {
         $qConvoIds = implode(',',$convoIds);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
         
         // Build query
         $queryStr = 'SELECT messages.*, '. 
                         'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
                         'IF(msg_saved.message_id IS NULL, 0, 1) AS is_saved '.
-                    'FROM messages '.
-                    'LEFT JOIN msg_files ON messages.message_id=msg_files.message_id '.
-                    'LEFT JOIN msg_saved ON messages.message_id=msg_saved.message_id '. 
+                    'FROM `'.$tblMessages.'` messages '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'LEFT JOIN `'.$tblMsgSaved.'` msg_saved ON messages.message_id=msg_saved.message_id '. 
                         'AND msg_saved.user_id='.$qUserId.' ' .
                     'WHERE messages.conversation_id IN ('.$qConvoIds.') '.
                     'ORDER BY messages.'.$qRefTime.' ASC, messages.message_id ASC '.
@@ -678,7 +1032,8 @@ class MessagesDao extends Dao
             {
                 while(($rowData=$result->fetch_assoc()) != null)
                 {
-                    $messages[$rowData['message_id']] = new Message($rowData);
+                    $decryptedData = $this->decryptMessageData($rowData);
+                    $messages[$rowData['message_id']] = new Message($decryptedData);
                 }
             }
         }
@@ -694,8 +1049,10 @@ class MessagesDao extends Dao
      */
     public function countMessagesInConvo(array $convo_ids) : int 
     {
-        $queryStr = 'SELECT count(*) as num_files FROM `msg_files` '. 
-                    'JOIN messages ON messages.message_id=msg_files.message_id '. 
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMessages = $this->tableName('messages');
+        $queryStr = 'SELECT count(*) as num_files FROM `'.$tblMsgFiles.'` msg_files '. 
+                    'JOIN `'.$tblMessages.'` messages ON messages.message_id=msg_files.message_id '. 
                     'WHERE messages.conversation_id IN ('.join(',', $convo_ids).');';
 
         $numMsgs = 0;

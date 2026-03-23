@@ -75,6 +75,8 @@ class ChatModule extends DefaultModule
             'send'      => 'textMessage', 
             'upload'    => 'uploadFile',
             'prevMsgs'  => 'getPrevMessages',
+            'searchMsgs' => 'searchMessages',
+            'msgContext' => 'getMessageContext',
             'newThread' => 'createNewThread',
             'toggleSave' => 'toggleSaveMessage',
         );
@@ -342,6 +344,187 @@ class ChatModule extends DefaultModule
     }
 
     /**
+     * Parse a search query where + separates terms and quoted strings
+     * are treated as a single term.
+     *
+     * Example: one+"two words"+three
+     *
+     * @param string $query
+     * @return array
+     */
+    private function parseSearchTerms(string $query) : array
+    {
+        $terms = array();
+        $buffer = '';
+        $inQuote = false;
+
+        for($i = 0; $i < strlen($query); $i++)
+        {
+            $char = $query[$i];
+
+            if($char === '"')
+            {
+                $inQuote = !$inQuote;
+                continue;
+            }
+
+            if(!$inQuote && $char === '+')
+            {
+                $term = trim($buffer);
+                if(strlen($term) > 0)
+                {
+                    $terms[] = $term;
+                }
+                $buffer = '';
+                continue;
+            }
+
+            $buffer .= $char;
+        }
+
+        $term = trim($buffer);
+        if(strlen($term) > 0)
+        {
+            $terms[] = $term;
+        }
+
+        $terms = array_values(array_unique($terms));
+        return $terms;
+    }
+
+    /**
+     * Build list of conversation ids for searching history.
+     *
+     * @return array
+     */
+    private function getSearchConversationIds() : array
+    {
+        $mission = MissionConfig::getInstance();
+        $convoIds = array($this->currConversation->conversation_id);
+
+        if(!$mission->feat_convo_threads)
+        {
+            $convoIds = array_merge($convoIds, $this->currConversation->thread_ids);
+        }
+
+        return $convoIds;
+    }
+
+    /**
+     * Search previous text/important messages by keyword terms.
+     *
+     * @return array
+     */
+    protected function searchMessages() : array
+    {
+        $response = array('success' => false, 'messages' => array());
+
+        $query = trim($_POST['query'] ?? '');
+        if(strlen($query) === 0)
+        {
+            $response['error'] = 'Please enter one or more search terms.';
+            return $response;
+        }
+
+        if(strlen($query) > 250)
+        {
+            $response['error'] = 'Search query is too long.';
+            return $response;
+        }
+
+        $terms = $this->parseSearchTerms($query);
+        if(count($terms) === 0)
+        {
+            $response['error'] = 'Search query did not contain valid terms.';
+            return $response;
+        }
+
+        if(count($terms) > 10)
+        {
+            $response['error'] = 'Search supports up to 10 terms.';
+            return $response;
+        }
+
+        $cursorMsgId = PHP_INT_MAX;
+        if(isset($_POST['cursor_message_id']) &&
+           intval($_POST['cursor_message_id']) > 0 &&
+           intval($_POST['cursor_message_id']) < PHP_INT_MAX)
+        {
+            $cursorMsgId = intval($_POST['cursor_message_id']);
+        }
+
+        $numMsgs = intval($_POST['num_msgs'] ?? 25);
+        $numMsgs = max(1, min(50, $numMsgs));
+
+        $messagesDao = MessagesDao::getInstance();
+        $result = $messagesDao->searchMessages(
+            $this->getSearchConversationIds(),
+            $this->user->user_id,
+            $this->user->is_crew,
+            $terms,
+            $cursorMsgId,
+            $numMsgs
+        );
+
+        foreach($result['messages'] as $msg)
+        {
+            $msgData = $msg->compileArray($this->user, $this->currConversation->participants_both_sites);
+            $msgData['search_match'] = true;
+            $response['messages'][] = $msgData;
+        }
+
+        $response['success'] = true;
+        $response['has_more'] = $result['has_more'];
+        $response['next_cursor_message_id'] = $result['next_cursor'];
+
+        return $response;
+    }
+
+    /**
+     * Load messages around a given message id to view it in context.
+     *
+     * @return array
+     */
+    protected function getMessageContext() : array
+    {
+        $response = array('success' => false, 'messages' => array());
+
+        $messageId = intval($_POST['message_id'] ?? -1);
+        if($messageId <= 0)
+        {
+            $response['error'] = 'Invalid message id.';
+            return $response;
+        }
+
+        $before = intval($_POST['before'] ?? 8);
+        $after = intval($_POST['after'] ?? 8);
+        $before = max(0, min(30, $before));
+        $after = max(0, min(30, $after));
+
+        $messagesDao = MessagesDao::getInstance();
+        $messages = $messagesDao->getMessageContext(
+            $this->getSearchConversationIds(),
+            $this->user->user_id,
+            $this->user->is_crew,
+            $messageId,
+            $before,
+            $after
+        );
+
+        foreach($messages as $msg)
+        {
+            $msgData = $msg->compileArray($this->user, $this->currConversation->participants_both_sites);
+            $msgData['search_anchor'] = ($msg->message_id == $messageId);
+            $response['messages'][] = $msgData;
+        }
+
+        $response['success'] = true;
+        $response['anchor_message_id'] = $messageId;
+
+        return $response;
+    }
+
+    /**
      * Response for asynchronous javascript POST request 
      * to upload a file (sent as a new message).
      * 
@@ -493,6 +676,22 @@ class ChatModule extends DefaultModule
         }
         else
         {
+            // Encrypt the uploaded file
+            $encryptionKey = $this->currConversation->getEncryptionKey();
+            if ($encryptionKey !== null) {
+                $encryptedPath = $fullPath . '.enc';
+                if (Encryption::encryptFile($fullPath, $encryptedPath, $encryptionKey)) {
+                    // Replace original file with encrypted version
+                    unlink($fullPath);
+                    rename($encryptedPath, $fullPath);
+                } else {
+                    Logger::error('Failed to encrypt uploaded file', ['file' => $fullPath]);
+                    $result['error'] = 'Error encrypting file.';
+                    unlink($fullPath);
+                    return $result;
+                }
+            }
+
             // If all the previous checks passed and we successfully moved the 
             // file to the uploads directory, then the last step is to add the 
             // information to the database. 
@@ -713,15 +912,19 @@ class ChatModule extends DefaultModule
         // Initialize conversations menu
         foreach($this->conversations as $convoId => $convo)
         {
-            if($convo->parent_conversation_id == null && $convo->countActiveParticipants() > 1)
+            if($convo->parent_conversation_id == null && $convo->countActiveParticipants() >= 1)
             {
                 $roomSelected = $this->currConversation->conversation_id == $convoId;
                 
+                $lastMsgStr = ($this->user->is_crew)
+                    ? ($convo->last_message_hab ?? $convo->date_created)
+                    : ($convo->last_message_mcc ?? $convo->date_created);
                 $this->sendRoom(
                     $convoId, 
                     $convo->getName($this->user->user_id),
                     $roomSelected || $this->currConversation->parent_conversation_id == $convoId,
                     $roomSelected,
+                    $lastMsgStr ? strtotime($lastMsgStr) : 0,
                 );
 
                 $mission = MissionConfig::getInstance();
@@ -742,15 +945,16 @@ class ChatModule extends DefaultModule
         }
     }
 
-    private function sendRoom(int $convoId, string $name, bool $current=false, bool $selected=false)
+    private function sendRoom(int $convoId, string $name, bool $current=false, bool $selected=false, int $lastMsgTime=0)
     {
         $this->sendEventStream(
             'room', 
             array(
-                'convo_id' => $convoId,
-                'convo_name' => htmlspecialchars($name),
-                'convo_current' => $current,
-                'convo_selected' => $selected
+                'convo_id'       => $convoId,
+                'convo_name'     => htmlspecialchars($name),
+                'convo_current'  => $current,
+                'convo_selected' => $selected,
+                'last_msg_time'  => $lastMsgTime
             )
         );
     }
@@ -797,7 +1001,10 @@ class ChatModule extends DefaultModule
 
                 if($convo->parent_conversation_id == null)
                 {
-                    $this->sendRoom($convo->conversation_id, $convo->getName($this->user->user_id));
+                    $lastMsgStr = ($this->user->is_crew)
+                        ? ($convo->last_message_hab ?? $convo->date_created)
+                        : ($convo->last_message_mcc ?? $convo->date_created);
+                    $this->sendRoom($convo->conversation_id, $convo->getName($this->user->user_id), false, false, $lastMsgStr ? strtotime($lastMsgStr) : 0);
                 }
                 // If it does not have a parent, then send it even if it does not belong to the active convo.
                 else
@@ -1061,6 +1268,9 @@ class ChatModule extends DefaultModule
                             'num_messages'    => $numMsgs['num_new'],
                             'num_important'   => $numMsgs['num_important'],
                             'notif_important' => $numMsgs['notif_important'],
+                            'last_msg_time'   => strtotime(($this->user->is_crew)
+                                ? ($this->conversations[$convoId]->last_message_hab ?? $this->conversations[$convoId]->date_created)
+                                : ($this->conversations[$convoId]->last_message_mcc ?? $this->conversations[$convoId]->date_created)),
                         )
                     );
                 }
@@ -1140,6 +1350,8 @@ class ChatModule extends DefaultModule
                   '/%delay_src%/'          => $this->user->is_crew ? $mission->hab_name : $mission->mcc_name,
                   '/%convo_id%/'           => $this->currConversation->conversation_id,
                   '/%hab_day_name%/'       => $mission->hab_day_name,
+                  '/%mission_start%/'      => DelayTime::convertTsForJs(date(DelayTime::DATE_FORMAT, DelayTime::getStartTimeUTC())),
+                  '/%mission_end%/'        => DelayTime::convertTsForJs(date(DelayTime::DATE_FORMAT, DelayTime::getEndTimeUTC())),
                   '/%max_upload_size%/'    => ServerFile::getHumanReadableSize(ServerFile::getMaxUploadSize()),
                   '/%max_upload_size_bytes%/' => ServerFile::getMaxUploadSize(),
                   '/%allowed_file_types%/' => implode(', ', $config['uploads_allowed']),

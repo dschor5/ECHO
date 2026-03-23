@@ -104,17 +104,34 @@ class Message
     private $file;
 
     /**
+     * Encryption key for decrypting message text.
+     * @access private
+     * @var string|null
+     */
+    private $encryptionKey;
+
+    /**
+     * Flag to track if text has been decrypted.
+     * @access private
+     * @var bool
+     */
+    private $textDecrypted;
+
+    /**
      * Message Constructor. If the message contains an attachment, this will
      * also build the FileUpload object.
      *
-     * @param array $data Row from 'messages' database table. 
+     * @param array $data Row from 'messages' database table.
+     * @param string|null $encryptionKey Raw binary encryption key for decryption.
      */
-    public function __construct(array $data)
+    public function __construct(array $data, ?string $encryptionKey = null)
     {
         $this->data = $data;
         $this->file = null;
+        $this->encryptionKey = $encryptionKey;
+        $this->textDecrypted = false;
 
-        // If the message contains an attachment, load teh corresponding fields. 
+        // If the message contains an attachment, load the corresponding fields. 
         if($this->data['message_type'] != self::TEXT && 
            $this->data['message_type'] != self::IMPORTANT)
         {
@@ -142,6 +159,21 @@ class Message
         if(array_key_exists($name, $this->data)) 
         {
             $result = $this->data[$name];
+            
+            // Decrypt text on first access
+            if ($name === 'text' && !$this->textDecrypted && $this->encryptionKey !== null && !empty($result)) {
+                try {
+                    $result = Encryption::decryptData($result, $this->encryptionKey);
+                    $this->data[$name] = $result; // Cache decrypted text
+                    $this->textDecrypted = true;
+                } catch (Exception $e) {
+                    Logger::error('Failed to decrypt message text', [
+                        'message_id' => $this->data['message_id'] ?? 'unknown',
+                        'error' => $e->getMessage()
+                    ]);
+                    // Keep encrypted text as fallback
+                }
+            }
         }
         else
         {

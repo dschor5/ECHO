@@ -11,9 +11,48 @@ function echoErrorHandler($errno, $errstr, $errfile, $errline)
     global $server;
     Logger::error('Main::compile(2)', 
         array('errno'=>$errno, 'errstr'=>$errstr, 'errfile'=>$errfile, 'errline'=>$errline));
-    header('Location: '.$server['http'].$server['site_url'].'/error');
+
+    if (!headers_sent()) {
+        header('Location: '.$server['http'].$server['site_url'].'/error');
+    }
+    return false;
 }
+
+function echoExceptionHandler($exception)
+{
+    global $server;
+
+    Logger::error('Main::compile(3)', array(
+        'exception_message' => $exception->getMessage(),
+        'exception_code' => $exception->getCode(),
+        'exception_file' => $exception->getFile(),
+        'exception_line' => $exception->getLine(),
+        'exception_trace' => $exception->getTraceAsString(),
+    ));
+
+    if (!headers_sent()) {
+        header('Location: '.$server['http'].$server['site_url'].'/error');
+    }
+    exit;
+}
+
+function echoShutdownHandler()
+{
+    $error = error_get_last();
+    if ($error && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE))) {
+        global $server;
+        Logger::error('Main::compile(4)', array('shutdown_error'=>$error));
+
+        if (!headers_sent()) {
+            header('Location: '.$server['http'].$server['site_url'].'/error');
+        }
+        exit;
+    }
+}
+
 set_error_handler("echoErrorHandler");
+set_exception_handler("echoExceptionHandler");
+register_shutdown_function("echoShutdownHandler");
 
 try
 {
@@ -32,13 +71,26 @@ try
         }
         exit;
     }
+
+    // Run initialization tasks on first application run
+    Initialization::init();
+
     $main = Main::getInstance()->compile();
 }
 catch (Exception $e) 
 {
-    var_dump($e);
-    Logger::error("Main::compile(1)".$e, array($e));
-    //header('Location: '.$server['http'].$server['site_url'].'/error');
+    Logger::error("Main::compile(1)", array(
+        'exception_message' => $e->getMessage(),
+        'exception_code' => $e->getCode(),
+        'exception_file' => $e->getFile(),
+        'exception_line' => $e->getLine(),
+        'exception_trace' => $e->getTraceAsString()
+    ));
+
+    if (!headers_sent()) {
+        header('Location: '.$server['http'].$server['site_url'].'/error');
+    }
+    exit;
 }
 
 /**
@@ -117,17 +169,31 @@ class Main
     public function compile() 
     {
         global $config;
-        $validModules = $this->getValidModulesForUser($this->user);
+        $validModules = $this->getValidModulesForUser();
 
         // Select current module. 
         $moduleName = 'home';
-        if(isset($_POST['action']) && in_array($_POST['action'], $validModules))
+
+        if(isset($_POST['action']))
         {
-            $moduleName = $_POST['action'];
+            $action = $_POST['action'];
         }
-        else if(isset($_GET['action']) && in_array($_GET['action'], $validModules))
+        else if(isset($_GET['action']))
         {
-            $moduleName = $_GET['action'];
+            $action = $_GET['action'];
+        }
+        else
+        {
+            $action = '';
+        }
+        
+        if(!empty($action) && in_array($action, $validModules))
+        {
+            $moduleName = $action;
+        }
+        else if(!empty($action))
+        {
+            $moduleName = 'error';
         }
         
         // Load module

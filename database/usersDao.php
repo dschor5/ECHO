@@ -11,7 +11,7 @@ class UsersDao extends Dao
     /**
      * Singleton instance for UsersDao object.
      * @access private
-     * @var ConversationsDao
+     * @var UsersDao
      **/
     private static $instance = null;
 
@@ -19,7 +19,7 @@ class UsersDao extends Dao
      * Cache users retrieved from database into an associative array 
      * arranged by user id. 
      * @access private
-     * @var array 
+     * @var array<int, User>
      **/
     private static $cache = array();
 
@@ -59,6 +59,8 @@ class UsersDao extends Dao
         // Sanitize value
         $id = intval($id);
         $user = null;
+        $tblUsers = $this->tableName('users');
+        $tblParticipants = $this->tableName('participants');
 
         // Send cache User if available.
         if(isset(self::$cache[$id]))
@@ -69,9 +71,9 @@ class UsersDao extends Dao
         {
             // Query database.
             $queryStr = 'SELECT users.*, ('. 
-                            'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
+                            'SELECT GROUP_CONCAT(participants.conversation_id) FROM `'.$tblParticipants.'` participants '. 
                             'WHERE participants.user_id=users.user_id) AS conversations '. 
-                        'FROM users WHERE users.user_id='.$id;
+                        'FROM `'.$tblUsers.'` users WHERE users.user_id='.$id;
 
             if (($result = $this->database->query($queryStr)) !== false)
             {
@@ -96,6 +98,8 @@ class UsersDao extends Dao
     public function getByUsername(string $username, ?string $session_id=null)
     {
         $user = null;
+        $tblUsers = $this->tableName('users');
+        $tblParticipants = $this->tableName('participants');
 
         // Check if the user is already in the cache.
         foreach(self::$cache as $userId => $cachedUser)
@@ -113,9 +117,9 @@ class UsersDao extends Dao
             $qUsername = '\''.$this->database->prepareStatement($username).'\'';
 
             $queryStr = 'SELECT users.*, ('. 
-                            'SELECT GROUP_CONCAT(participants.conversation_id) FROM participants '. 
+                            'SELECT GROUP_CONCAT(participants.conversation_id) FROM `'.$tblParticipants.'` participants '. 
                             'WHERE participants.user_id=users.user_id) AS conversations '. 
-                        'FROM users WHERE users.username='.$qUsername;
+                        'FROM `'.$tblUsers.'` users WHERE users.username='.$qUsername;
             
             // If provided, the session id must also match for the query to succeed. 
             if($session_id != null)
@@ -303,12 +307,13 @@ class UsersDao extends Dao
     {
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
         $qSessionId = '\''.$this->database->prepareStatement($sessionId).'\'';
+        $tblUsers = $this->tableName('users');
 
-        $queryStr = 'UPDATE users SET '. 
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
             'session_id='.$qSessionId.', '. 
             'last_login=UTC_TIMESTAMP(3) '. 
             'WHERE user_id='.$qUserId;
-                
+
         return ($this->database->query($queryStr) !== false);
     }
 
@@ -316,11 +321,39 @@ class UsersDao extends Dao
     {
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
         $qPassword = '\''.$this->database->prepareStatement($newPassword).'\'';
+        $tblUsers = $this->tableName('users');
 
-        $queryStr = 'UPDATE users SET '. 
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
             'password='.$qPassword.', '. 
             'is_password_reset='.($forceReset ? '1' : '0').', '.
             'last_login=NULL '.
+            'WHERE user_id='.$qUserId;
+
+        return ($this->database->query($queryStr) !== false);
+    }
+
+    /**
+     * Update security-related fields for a user (failed attempts, lockout, etc.)
+     *
+     * @param User $user User object with updated security fields
+     * @return bool True on success
+     */
+    public function updateSecurityInfo(User $user) : bool
+    {
+        $qUserId = '\''.$this->database->prepareStatement($user->user_id).'\'';
+        
+        $qFailedAttempts = '\''.$this->database->prepareStatement($user->failed_attempts).'\'';
+        
+        $qLockoutUntil = $user->lockout_until ? '\''.$this->database->prepareStatement($user->lockout_until).'\'' : 'NULL';
+        
+        $qLastFailedAttempt = $user->last_failed_attempt ? '\''.$this->database->prepareStatement($user->last_failed_attempt).'\'' : 'NULL';
+        
+        $tblUsers = $this->tableName('users');
+
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '.
+            'failed_attempts='.$qFailedAttempts.', '.
+            'lockout_until='.$qLockoutUntil.', '.
+            'last_failed_attempt='.$qLastFailedAttempt.' '.
             'WHERE user_id='.$qUserId;
 
         return ($this->database->query($queryStr) !== false);
@@ -330,8 +363,9 @@ class UsersDao extends Dao
     {
         $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
         $qActive = $active ? '1' : '0';
+        $tblUsers = $this->tableName('users');
 
-        $queryStr = 'UPDATE users SET '. 
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
             'is_active='.$qActive.' '. 
             'WHERE user_id='.$qUserId;
                 

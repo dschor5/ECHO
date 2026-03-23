@@ -200,15 +200,118 @@
     padding: 10px;
     overflow-y: scroll;
     overflow-x: hidden;
-    padding-top: 80px;
+    padding-top: 0px;
+}
+
+#msg-search {
+    position: fixed;
+    top: 5px;
+    right: 190px;
+    z-index: 5;
+    background: transparent;
+    border: 0px;
+    border-radius: 0px;
+    padding: 0px;
+    margin: 0px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    max-width: 750px;
+    box-shadow: none;
+}
+
+#msg-search-input {
+    height: 28px;
+    width: auto;
+    flex: 0 0 150px;
+    min-width: 150px;
+    border-radius: 4px;
+    border: 1px solid var(--border-dark);
+    padding: 0 8px;
+    box-sizing: border-box;
+    background: var(--background-light);
+    color: #000;
+    transition: flex-basis 0.2s ease;
+}
+
+#msg-search:focus-within #msg-search-input {
+    flex-basis: 460px;
+}
+
+.msg-search-btn {
+    position: static;
+    width: auto;
+    height: 28px;
+    margin-left: 0px;
+    padding: 0 8px;
+    font-size: 11px;
+    line-height: 1;
+    vertical-align: top;
+    border-radius: 4px;
+    border: 1px solid #CCC;
+    color: #CCC;
+    background-color: rgb(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+.msg-search-btn:hover {
+    color: #000;
+    background-color: rgb(255, 255, 255, 0.5);
+}
+
+#msg-search-more {
+    display: none;
+}
+
+#msg-search-status {
+    display: none;
+}
+
+#msg-search-help {
+    display: inline-block;
+    margin-left: 2px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border: 1px solid #aaa;
+    border-radius: 50%;
+    color: #f0f0f0;
+    font-size: 11px;
+    cursor: help;
+    vertical-align: middle;
+}
+
+.msg-search-hit {
+    background: #fce15d;
+    color: #111;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+.msg-view-context-btn {
+    margin-top: 6px;
+    font-size: 11px;
+    border: 1px solid #9a9a9a;
+    border-radius: 4px;
+    background: #efefef;
+    color: #222;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+
+.msg-search-anchor {
+    border-color: #f7b500;
+    box-shadow: 0 0 0 2px rgba(247, 181, 0, 0.35);
 }
 
 #msg-error {
-    position: fixed;
-    top: 40px;
-    left: calc(253px + 22px);
-    right: 33px;
-    z-index: 2;
+    position: sticky;
+    top: 0px;
+    left: auto;
+    right: auto;
+    z-index: 3;
     border: 0px;
 }
 
@@ -606,5 +709,31 @@
 .msg-content blockquote {
     border-left: 2px solid #CCC;
     padding-left: 10px;
+}
+
+.msg-day-separator {
+    clear: both;
+    width: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    gap: 10px;
+}
+
+.msg-day-separator::before,
+.msg-day-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #999;
+}
+
+.msg-day-separator-text {
+    color: #666;
+    font-size: 12px;
+    white-space: nowrap;
+    padding: 0 10px;
+    font-weight: bold;
 }
 

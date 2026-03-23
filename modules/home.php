@@ -209,29 +209,88 @@ class HomeModule extends DefaultModule
     protected function login() : array
     {
         global $config;
-        $response = array('login' => false);
+        $response = array('login' => false, 'error' => '');
 
         // Check that the username and password were submitted.
         if(isset($_POST['uname']) && isset($_POST['upass']))
         {
-            // Get the user by that name. 
+            // Get the user by that name.
             $usersDao = UsersDao::getInstance();
             $user = $usersDao->getByUsername($_POST['uname']);
 
-            // Check if the password provided matches what the user account.
-            if($user != null && $user->isValidPassword($_POST['upass']))
+            if($user != null)
             {
-                // If so, crease a new session and update the database.
-                $this->user = $user;
-                $sessionId = $user->createNewSession();
+                // Check if account is locked
+                if ($user->isAccountLocked()) {
+                    $remainingSeconds = $user->getLockoutRemainingSeconds();
+                    $remainingMinutes = ceil($remainingSeconds / 60);
+                    $response['error'] = "Account is temporarily locked due to too many failed login attempts. Try again in {$remainingMinutes} minutes.";
 
-                Logger::info('User '.$user->username.' logged in from '.$_SERVER['REMOTE_ADDR'].'.');
-   
-                if ($usersDao->updateLoginInfo($sessionId, $this->user->user_id) !== false)
-                {
-                    Main::setSiteCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
-                    $response['login'] = true;
+                    Logger::security('Login attempt on locked account', [
+                        'username' => $user->username,
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+                        'lockout_remaining' => $remainingSeconds
+                    ]);
+                    return $response;
                 }
+
+                // Check if the password provided matches what the user account.
+                if($user->isValidPassword($_POST['upass']))
+                {
+                    // Successful login - clear failed attempts
+                    $user->clearFailedLoginAttempts();
+                    $usersDao->updateSecurityInfo($user);
+
+                    // Create a new session and update the database.
+                    $this->user = $user;
+                    $sessionId = $user->createNewSession();
+
+                    Logger::info('User '.$user->username.' logged in from '.$_SERVER['REMOTE_ADDR'].'.');
+
+                    if ($usersDao->updateLoginInfo($sessionId, $this->user->user_id) !== false)
+                    {
+                        Main::setSiteCookie(array('sessionId'=>$sessionId,'username'=>$_POST['uname']));
+                        $response['login'] = true;
+                    }
+                }
+                else
+                {
+                    // Failed login - record the attempt
+                    $wasLocked = $user->recordFailedLogin();
+                    $usersDao->updateSecurityInfo($user);
+
+                    if ($wasLocked) {
+                        $response['error'] = 'Account locked due to too many failed login attempts. Contact an administrator.';
+                    Logger::security('Account locked due to failed login attempts: ' . $user->username, [
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+                        'attempts' => $user->failed_attempts
+                    ]);
+                    } else {
+                        $attemptsLeft = 5 - (int)$user->failed_attempts;
+                        $response['error'] = 'Invalid username or password.';
+                        if ($attemptsLeft > 0 && $attemptsLeft <= 3) {
+                            $response['error'] .= " {$attemptsLeft} attempts remaining before account lockout.";
+                        }
+                    Logger::security('Failed login attempt', [
+                        'username' => $user->username,
+                        'ip' => $_SERVER['REMOTE_ADDR'],
+                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+                        'attempts' => $user->failed_attempts
+                    ]);
+                    }
+                }
+            }
+            else
+            {
+                // Username not found - still log this for security monitoring
+                $response['error'] = 'Invalid username or password.';
+                Logger::security('Login attempt with invalid username', [
+                    'attempted_username' => $_POST['uname'],
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
+                ]);
             }
         }
 
