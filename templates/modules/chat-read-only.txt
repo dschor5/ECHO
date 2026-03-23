@@ -36,8 +36,7 @@
             <input type="text" id="msg-search-input" placeholder="Search this conversation">
             <button type="button" id="msg-search-btn" class="msg-search-btn">Find</button>
             <button type="button" id="msg-search-clear" class="msg-search-btn">Clear</button>
-            <button type="button" id="msg-search-more" class="msg-search-btn">More</button>
-            <span id="msg-search-help" title='Use + for multiple terms. Use quotes for exact phrase. Example: mars+"air lock"+status'>?</span>
+            <span id="msg-search-help" title='You can either filter starred messages or search for messages within this conversation. Use + for multiple terms and quotes for exact phrases. Example: mars+"air lock"+status'>?</span>
             <div id="msg-search-status"></div>
         </div>
 

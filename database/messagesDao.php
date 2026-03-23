@@ -811,6 +811,82 @@ class MessagesDao extends Dao
     }
 
     /**
+     * Get saved/starred messages in the provided conversations.
+     *
+     * @param array $convoIds
+     * @param int $userId
+     * @param bool $isCrew
+     * @param int $cursorMsgId
+     * @param int $numMsgs
+     * @return array
+     */
+    public function getSavedMessages(
+        array $convoIds,
+        int $userId,
+        bool $isCrew,
+        int $cursorMsgId = PHP_INT_MAX,
+        int $numMsgs = 25
+    ) : array
+    {
+        $qConvoIds = implode(',', $convoIds);
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qCursorMsgId = '\''.$this->database->prepareStatement($cursorMsgId).'\'';
+        $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $tblMessages = $this->tableName('messages');
+        $tblUsers = $this->tableName('users');
+        $tblMsgFiles = $this->tableName('msg_files');
+        $tblMsgSaved = $this->tableName('msg_saved');
+
+        $messages = array();
+        $hasMore = false;
+        $nextCursor = $cursorMsgId;
+        $queryLimit = max(1, intval($numMsgs)) + 1;
+
+        $queryStr = 'SELECT messages.*, '.
+                        'users.username, users.alias, users.is_active, '.
+                        'msg_files.original_name, msg_files.server_name, msg_files.mime_type, '.
+                        '1 AS is_saved '.
+                    'FROM `'.$tblMsgSaved.'` msg_saved '.
+                    'JOIN `'.$tblMessages.'` messages ON messages.message_id=msg_saved.message_id '.
+                    'JOIN `'.$tblUsers.'` users ON users.user_id=messages.user_id '.
+                    'LEFT JOIN `'.$tblMsgFiles.'` msg_files ON messages.message_id=msg_files.message_id '.
+                    'WHERE msg_saved.user_id='.$qUserId.' '.
+                        'AND messages.conversation_id IN ('.$qConvoIds.') '.
+                        'AND messages.'.$qRefTime.' <= UTC_TIMESTAMP(3) '.
+                        'AND messages.message_id < '.$qCursorMsgId.' '.
+                    'ORDER BY messages.'.$qRefTime.' DESC, messages.message_id DESC '.
+                    'LIMIT 0, '.$queryLimit;
+
+        if(($result = $this->database->query($queryStr)) !== false)
+        {
+            $count = 0;
+            while(($rowData = $result->fetch_assoc()) != null)
+            {
+                $rowMsgId = intval($rowData['message_id']);
+
+                if($count < $numMsgs)
+                {
+                    $decryptedData = $this->decryptMessageData($rowData);
+                    $messages[$rowMsgId] = new Message($decryptedData);
+                    $nextCursor = $rowMsgId;
+                    $count++;
+                }
+                else
+                {
+                    $hasMore = true;
+                    break;
+                }
+            }
+        }
+
+        return array(
+            'messages' => $messages,
+            'next_cursor' => $nextCursor,
+            'has_more' => $hasMore,
+        );
+    }
+
+    /**
      * Get messages around a specific message id.
      *
      * @param array $convoIds
@@ -1007,6 +1083,7 @@ class MessagesDao extends Dao
     {
         $qConvoIds = implode(',',$convoIds);
         $qRefTime = $isCrew ? 'recv_time_hab' : 'recv_time_mcc';
+        $qUserId = '-1';
         $tblMessages = $this->tableName('messages');
         $tblMsgFiles = $this->tableName('msg_files');
         $tblMsgSaved = $this->tableName('msg_saved');

@@ -76,6 +76,7 @@ class ChatModule extends DefaultModule
             'upload'    => 'uploadFile',
             'prevMsgs'  => 'getPrevMessages',
             'searchMsgs' => 'searchMessages',
+            'savedMsgs' => 'getSavedMessages',
             'msgContext' => 'getMessageContext',
             'newThread' => 'createNewThread',
             'toggleSave' => 'toggleSaveMessage',
@@ -462,6 +463,49 @@ class ChatModule extends DefaultModule
             $this->user->user_id,
             $this->user->is_crew,
             $terms,
+            $cursorMsgId,
+            $numMsgs
+        );
+
+        foreach($result['messages'] as $msg)
+        {
+            $msgData = $msg->compileArray($this->user, $this->currConversation->participants_both_sites);
+            $msgData['search_match'] = true;
+            $response['messages'][] = $msgData;
+        }
+
+        $response['success'] = true;
+        $response['has_more'] = $result['has_more'];
+        $response['next_cursor_message_id'] = $result['next_cursor'];
+
+        return $response;
+    }
+
+    /**
+     * Load saved/starred messages in this conversation.
+     *
+     * @return array
+     */
+    protected function getSavedMessages() : array
+    {
+        $response = array('success' => false, 'messages' => array());
+
+        $cursorMsgId = PHP_INT_MAX;
+        if(isset($_POST['cursor_message_id']) &&
+           intval($_POST['cursor_message_id']) > 0 &&
+           intval($_POST['cursor_message_id']) < PHP_INT_MAX)
+        {
+            $cursorMsgId = intval($_POST['cursor_message_id']);
+        }
+
+        $numMsgs = intval($_POST['num_msgs'] ?? 25);
+        $numMsgs = max(1, min(50, $numMsgs));
+
+        $messagesDao = MessagesDao::getInstance();
+        $result = $messagesDao->getSavedMessages(
+            $this->getSearchConversationIds(),
+            $this->user->user_id,
+            $this->user->is_crew,
             $cursorMsgId,
             $numMsgs
         );
