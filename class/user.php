@@ -44,28 +44,6 @@ class User
     private $preferenceArray;
 
     /**
-     * Login attempts
-     * @access private
-     * @var int
-     */
-    private $failed_attempts;
-
-    /**
-     * Lockout until timestamp. 
-     * @access private
-     * @var timestamp
-     */
-    private $lockout_until;
-
-    /**
-     * Last failed attempt timestamp. 
-     * @access private 
-     * @var timestamp
-     */
-    private $last_failed_attempt;
-
-
-    /**
      * User constructor. 
      * 
      * Appends object data with the field conversations (array) containing
@@ -254,12 +232,12 @@ class User
      */
     public function isAccountLocked(): bool
     {
-        if ($this->lockout_until === null) {
+        if (!isset($this->data['lockout_until']) || $this->data['lockout_until'] === null) {
             return false;
         }
 
         $now = new DateTime();
-        $lockoutTime = new DateTime($this->lockout_until);
+        $lockoutTime = new DateTime($this->data['lockout_until']);
 
         return $now < $lockoutTime;
     }
@@ -276,7 +254,7 @@ class User
         }
 
         $now = new DateTime();
-        $lockoutTime = new DateTime($this->lockout_until);
+        $lockoutTime = new DateTime($this->data['lockout_until']);
 
         return $lockoutTime->getTimestamp() - $now->getTimestamp();
     }
@@ -288,15 +266,16 @@ class User
      */
     public function recordFailedLogin(): bool
     {
-        $this->failed_attempts = (int)$this->failed_attempts + 1;
-        $this->last_failed_attempt = date('Y-m-d H:i:s.v');
+        $currentAttempts = isset($this->data['failed_attempts']) ? (int)$this->data['failed_attempts'] : 0;
+        $this->data['failed_attempts'] = $currentAttempts + 1;
+        $this->data['last_failed_attempt'] = date('Y-m-d H:i:s.v');
 
         // Lockout thresholds: 5 attempts = 5min, 10 attempts = 30min, 15+ attempts = 2hr
         $lockoutTimes = [5 => 300, 10 => 1800, 15 => 7200]; // seconds
 
         foreach ($lockoutTimes as $attempts => $lockoutSeconds) {
-            if ($this->failed_attempts >= $attempts) {
-                $this->lockout_until = date('Y-m-d H:i:s.v', strtotime("+{$lockoutSeconds} seconds"));
+            if ($this->data['failed_attempts'] >= $attempts) {
+                $this->data['lockout_until'] = date('Y-m-d H:i:s.v', strtotime("+{$lockoutSeconds} seconds"));
                 return true;
             }
         }
@@ -309,9 +288,9 @@ class User
      */
     public function clearFailedLoginAttempts(): void
     {
-        $this->failed_attempts = 0;
-        $this->lockout_until = null;
-        $this->last_failed_attempt = null;
+        $this->data['failed_attempts'] = 0;
+        $this->data['lockout_until'] = null;
+        $this->data['last_failed_attempt'] = null;
     }
 
     /**

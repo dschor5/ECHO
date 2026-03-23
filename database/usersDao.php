@@ -11,7 +11,7 @@ class UsersDao extends Dao
     /**
      * Singleton instance for UsersDao object.
      * @access private
-     * @var ConversationsDao
+     * @var UsersDao
      **/
     private static $instance = null;
 
@@ -19,7 +19,7 @@ class UsersDao extends Dao
      * Cache users retrieved from database into an associative array 
      * arranged by user id. 
      * @access private
-     * @var array 
+     * @var array<int, User>
      **/
     private static $cache = array();
 
@@ -317,6 +317,21 @@ class UsersDao extends Dao
         return ($this->database->query($queryStr) !== false);
     }
 
+    public function resetPassword(string $newPassword, bool $forceReset, int $userId) : bool
+    {
+        $qUserId = '\''.$this->database->prepareStatement($userId).'\'';
+        $qPassword = '\''.$this->database->prepareStatement($newPassword).'\'';
+        $tblUsers = $this->tableName('users');
+
+        $queryStr = 'UPDATE `'.$tblUsers.'` SET '. 
+            'password='.$qPassword.', '. 
+            'is_password_reset='.($forceReset ? '1' : '0').', '.
+            'last_login=NULL '.
+            'WHERE user_id='.$qUserId;
+
+        return ($this->database->query($queryStr) !== false);
+    }
+
     /**
      * Update security-related fields for a user (failed attempts, lockout, etc.)
      *
@@ -339,8 +354,6 @@ class UsersDao extends Dao
             'failed_attempts='.$qFailedAttempts.', '.
             'lockout_until='.$qLockoutUntil.', '.
             'last_failed_attempt='.$qLastFailedAttempt.' '.
-            'WHERE user_id='.$qUserId;
-            'last_login=NULL '.
             'WHERE user_id='.$qUserId;
 
         return ($this->database->query($queryStr) !== false);
