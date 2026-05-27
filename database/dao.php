@@ -127,7 +127,7 @@ abstract class Dao
         // If the id (int) is provided, then delete that row only. 
         if (intval($id) > 0)
         {
-            $query .= " where `{$this->id}` = '$id'";
+            $query .= " where `{$this->idName}` = '$id'";
         }
         // Otherwise, assume it is a WHERE clause to apply in the operation. 
         else if ($id != '*')
