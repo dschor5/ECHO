@@ -749,7 +749,7 @@ class ChatModule extends DefaultModule
                 'from_crew'       => ($this->user->is_crew) ? '1' : '0',
                 'conversation_id' => $this->currConversation->conversation_id,
                 'text'            => $msgText,
-                'type'            => $fileType,
+                'message_type'    => $fileType,
             );
             
             // Create entry for the msg_files table. 
